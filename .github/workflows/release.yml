@@ -1,12 +1,13 @@
-name: Create GitHub Release
+name: Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*-zh-cn'
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
@@ -14,6 +15,45 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Verify release source
+        run: |
+          echo "Release ref: ${GITHUB_REF}"
+          echo "Release sha: ${GITHUB_SHA}"
+          grep -n "package-lock.json" Dockerfile Dockerfile.baseline && exit 1 || true
+
+      - name: Set release variables
+        id: vars
+        run: |
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "image=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.version }}
+            ${{ steps.vars.outputs.image }}:latest
 
       - name: Extract changelog
         id: changelog
@@ -42,18 +82,19 @@ jobs:
           ## Docker image
 
           \`\`\`bash
-          docker pull fnsys/dockhand:${GITHUB_REF_NAME}
+          docker pull ${{ steps.vars.outputs.image }}:${GITHUB_REF_NAME}
           \`\`\`
 
-          Also available as \`fnsys/dockhand:latest\`
+          Also available as \`${{ steps.vars.outputs.image }}:latest\`
 
-          [View on Docker Hub](https://hub.docker.com/r/fnsys/dockhand)
+          [View on GitHub Packages](https://github.com/${GITHUB_REPOSITORY}/pkgs/container/${GITHUB_REPOSITORY#*/})
           EOF
 
           sed -i 's/^          //' /tmp/release-body.md
 
-      - name: Create release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: /tmp/release-body.md
           generate_release_notes: false
+          make_latest: true

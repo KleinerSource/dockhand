@@ -76,8 +76,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && cp "$(dpkg -L libnss-wrapper | grep 'libnss_wrapper\.so$')" /usr/local/lib/libnss_wrapper.so
 
 # Copy package files and install dependencies (--ignore-scripts blocks malicious postinstall hooks)
-COPY package.json package-lock.json ./
-RUN MAKEFLAGS="-j$(nproc)" npm ci --ignore-scripts \
+COPY package.json ./
+RUN MAKEFLAGS="-j$(nproc)" npm install --ignore-scripts \
     && MAKEFLAGS="-j$(nproc)" npm rebuild better-sqlite3 argon2
 
 # Copy source code and build
@@ -88,7 +88,7 @@ RUN npm run build
 # Preserve better-sqlite3 native addon (no prebuilds exist for Node 24 ABI 137)
 RUN cp -r node_modules/better-sqlite3/build /tmp/better-sqlite3-build \
     && rm -rf node_modules \
-    && npm ci --omit=dev --ignore-scripts \
+    && npm install --omit=dev --ignore-scripts \
     && cp -r /tmp/better-sqlite3-build node_modules/better-sqlite3/build \
     && rm -rf node_modules/@types /tmp/better-sqlite3-build
 
