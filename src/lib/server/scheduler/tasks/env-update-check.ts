@@ -28,7 +28,13 @@ import {
 	removeTempImage,
 	tagImage,
 } from '../../docker';
-import { sendEventNotification } from '../../notifications';
+import {
+	createNotificationPayload,
+	createNotificationPayloadForLocale,
+	getNotificationLocale,
+	sendEventNotification,
+	translateNotification
+} from '../../notifications';
 import { getScannerSettings, scanImage, type VulnerabilitySeverity } from '../../scanner';
 import { parseImageNameAndTag, shouldBlockUpdate, combineScanSummaries, isSystemContainer } from './update-utils';
 import { isUpdateDisabledByLabel } from '../../container-labels';
@@ -382,23 +388,57 @@ export async function runEnvUpdateCheckJob(
 			await log(`Failed: ${failCount}`);
 
 			// Send notifications
+			const notificationLocale = await getNotificationLocale();
 			if (blockedCount > 0) {
-				await sendEventNotification('auto_update_blocked', {
-					title: `${blockedCount} update(s) blocked in ${env.name}`,
-					message: blockedContainers.map(c => `- ${c.name}: ${c.reason}`).join('\n'),
-					type: 'warning'
-				}, environmentId);
+				await sendEventNotification('auto_update_blocked', createNotificationPayloadForLocale(
+					notificationLocale,
+					'batchUpdate.blockedTitle',
+					'batchUpdate.blockedMessage',
+					{
+						count: blockedCount,
+						environment: env.name,
+						containers: blockedContainers.map(c => `- ${c.name}: ${c.reason}`).join('\n')
+					},
+					'warning'
+				), environmentId);
 			}
 
-			const notificationMessage = successCount > 0
-				? `Updated ${successCount} container(s) in ${env.name}:\n${updatedContainers.map(c => `- ${c}`).join('\n')}${blockedCount > 0 ? `\n\nBlocked (${blockedCount}):\n${blockedContainers.map(c => `- ${c.name}`).join('\n')}` : ''}${failCount > 0 ? `\n\nFailed (${failCount}):\n${failedContainers.map(c => `- ${c}`).join('\n')}` : ''}`
-				: blockedCount > 0 ? `All updates blocked in ${env.name}` : `Update failed for all containers in ${env.name}`;
+			const blockedSection = blockedCount > 0
+				? translateNotification('batchUpdate.blockedSection', {
+					count: blockedCount,
+					containers: blockedContainers.map(c => `- ${c.name}`).join('\n')
+				}, notificationLocale)
+				: '';
+			const failedSection = failCount > 0
+				? translateNotification('batchUpdate.failedSection', {
+					count: failCount,
+					containers: failedContainers.map(c => `- ${c}`).join('\n')
+				}, notificationLocale)
+				: '';
+			const batchTitleKey = successCount > 0
+				? 'batchUpdate.successTitle'
+				: blockedCount > 0
+					? 'batchUpdate.blockedOnlyTitle'
+					: 'batchUpdate.failedTitle';
+			const batchMessageKey = successCount > 0
+				? 'batchUpdate.successMessage'
+				: blockedCount > 0
+					? 'batchUpdate.allBlockedMessage'
+					: 'batchUpdate.allFailedMessage';
 
-			await sendEventNotification('batch_update_success', {
-				title: successCount > 0 ? `Containers updated in ${env.name}` : blockedCount > 0 ? `Updates blocked in ${env.name}` : `Container updates failed in ${env.name}`,
-				message: notificationMessage,
-				type: successCount > 0 && failCount === 0 && blockedCount === 0 ? 'success' : successCount > 0 ? 'warning' : 'error'
-			}, environmentId);
+			await sendEventNotification('batch_update_success', createNotificationPayloadForLocale(
+				notificationLocale,
+				batchTitleKey,
+				batchMessageKey,
+				{
+					environment: env.name,
+					successCount,
+					updatedContainers: updatedContainers.map(c => `- ${c}`).join('\n'),
+					blockedSection,
+					failedSection
+				},
+				successCount > 0 && failCount === 0 && blockedCount === 0 ? 'success' : successCount > 0 ? 'warning' : 'error'
+			), environmentId);
 
 			// Blocked/failed containers stay in pending table (successfully updated ones were removed)
 
@@ -431,11 +471,12 @@ export async function runEnvUpdateCheckJob(
 			await log('Check-only mode - sending notification about available updates');
 			// Pending updates already added as we discovered them
 
-			await sendEventNotification('updates_detected', {
-				title: `Container updates available in ${env.name}`,
-				message: `${updatesAvailable.length} update(s) available:\n${updateList}`,
-				type: 'info'
-			}, environmentId);
+			await sendEventNotification('updates_detected', await createNotificationPayload(
+				'updatesDetected.title',
+				'updatesDetected.message',
+				{ environment: env.name, count: updatesAvailable.length, updates: updateList },
+				'info'
+			), environmentId);
 
 			await updateScheduleExecution(execution.id, {
 				status: 'success',

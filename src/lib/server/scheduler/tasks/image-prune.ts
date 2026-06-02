@@ -14,7 +14,7 @@ import {
 	appendScheduleExecutionLog
 } from '../../db';
 import { pruneImages } from '../../docker';
-import { sendEventNotification } from '../../notifications';
+import { createNotificationPayload, sendEventNotification } from '../../notifications';
 
 /**
  * System job ID for image prune (starts at 100 to avoid conflicts with other system jobs)
@@ -123,11 +123,12 @@ export async function runImagePrune(
 
 		// Send success notification only when something was actually cleaned up
 		if (imagesRemoved > 0) {
-			await sendEventNotification('image_prune_success', {
-				title: `Image prune completed — ${env.name}`,
-				message: `${imagesRemoved} unused images removed, ${formatBytes(spaceReclaimed)} disk space reclaimed`,
-				type: 'success'
-			}, envId);
+			await sendEventNotification('image_prune_success', await createNotificationPayload(
+				'imagePrune.successTitle',
+				'imagePrune.successMessage',
+				{ environment: env.name, count: imagesRemoved, space: formatBytes(spaceReclaimed) },
+				'success'
+			), envId);
 		}
 
 	} catch (error: any) {
@@ -141,10 +142,11 @@ export async function runImagePrune(
 		});
 
 		// Send failure notification
-		await sendEventNotification('image_prune_failed', {
-			title: `Image prune failed — ${env.name}`,
-			message: `Failed to prune images: ${error.message}`,
-			type: 'error'
-		}, envId);
+		await sendEventNotification('image_prune_failed', await createNotificationPayload(
+			'imagePrune.failedTitle',
+			'imagePrune.failedMessage',
+			{ environment: env.name, error: error.message },
+			'error'
+		), envId);
 	}
 }

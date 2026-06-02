@@ -4663,6 +4663,110 @@
 		"searchPlaceholder": "Search icons...",
 		"empty": "No icons found"
 	},
+	"notifications": {
+		"delivery": {
+			"meta": {
+				"sentByDockhand": "Sent by Dockhand",
+				"environment": "Environment"
+			},
+			"test": {
+				"title": "Dockhand test notification",
+				"message": "This is a test notification from Dockhand. If you receive this, your notification settings are configured correctly."
+			},
+			"errors": {
+				"unknownType": "Unknown notification type"
+			},
+			"environment": {
+				"onlineTitle": "Environment online",
+				"onlineMessage": "Environment \"{environment}\" is now reachable",
+				"offlineTitle": "Environment offline",
+				"offlineMessage": "Environment \"{environment}\" is unreachable",
+				"offlineMessageWithError": "Environment \"{environment}\" is unreachable: {error}"
+			},
+			"container": {
+				"titles": {
+					"start": "Container started",
+					"stop": "Container stopped",
+					"restart": "Container restarted",
+					"die": "Container exited",
+					"kill": "Container killed",
+					"oom": "Container out of memory",
+					"healthy": "Container healthy",
+					"unhealthy": "Container unhealthy",
+					"pull": "Container image pulled"
+				},
+				"actions": {
+					"start": "started",
+					"stop": "stopped",
+					"restart": "restarted",
+					"die": "exited",
+					"kill": "was killed",
+					"oom": "ran out of memory",
+					"healthy": "became healthy",
+					"unhealthy": "became unhealthy",
+					"pull": "pulled an image"
+				},
+				"message": "Container \"{container}\" {action}{imageSuffix}",
+				"imageSuffix": " ({image})"
+			},
+			"disk": {
+				"absoluteTitle": "High Docker disk usage",
+				"absoluteMessage": "Environment \"{environment}\" is using {used} of Docker disk space (threshold: {threshold} GB)",
+				"percentageTitle": "Disk space warning",
+				"percentageMessage": "Environment \"{environment}\" Docker disk usage is at {percent}% ({used} used)"
+			},
+			"license": {
+				"expiringTitle": "License expiring soon",
+				"expiringMessage": "Your {licenseType} license expires in {days} day(s) ({date}). Contact support to renew."
+			},
+			"vulnerability": {
+				"criticalTitle": "Critical vulnerabilities found",
+				"criticalMessage": "Image \"{image}\" has {count} critical vulnerabilities ({total} total)",
+				"highTitle": "High severity vulnerabilities found",
+				"highMessage": "Image \"{image}\" has {count} high severity vulnerabilities ({total} total)",
+				"anyTitle": "Vulnerabilities found",
+				"anyMessage": "Image \"{image}\" has {total} vulnerabilities (medium: {medium}, low: {low})"
+			},
+			"autoUpdate": {
+				"blockedTitle": "Auto-update blocked",
+				"blockedMessage": "Container \"{container}\" update blocked: {reason}",
+				"successTitle": "Container auto-updated",
+				"successMessage": "Container \"{container}\" was updated to a new image version",
+				"failedTitle": "Auto-update failed",
+				"failedMessage": "Container \"{container}\" auto-update failed: {error}"
+			},
+			"gitSync": {
+				"skippedTitle": "Git sync skipped",
+				"skippedMessage": "Stack \"{stack}\" sync skipped: no changes detected",
+				"successTitle": "Git stack deployed",
+				"successMessage": "Stack \"{stack}\" was synced and deployed successfully",
+				"failedTitle": "Git sync failed",
+				"failedMessage": "Stack \"{stack}\" sync failed: {error}"
+			},
+			"batchUpdate": {
+				"blockedTitle": "{count} update(s) blocked in {environment}",
+				"blockedMessage": "{containers}",
+				"successTitle": "Containers updated in {environment}",
+				"blockedOnlyTitle": "Updates blocked in {environment}",
+				"failedTitle": "Container updates failed in {environment}",
+				"successMessage": "Updated {successCount} container(s) in {environment}:\n{updatedContainers}{blockedSection}{failedSection}",
+				"allBlockedMessage": "All updates blocked in {environment}",
+				"allFailedMessage": "Update failed for all containers in {environment}",
+				"blockedSection": "\n\nBlocked ({count}):\n{containers}",
+				"failedSection": "\n\nFailed ({count}):\n{containers}"
+			},
+			"updatesDetected": {
+				"title": "Container updates available in {environment}",
+				"message": "{count} update(s) available:\n{updates}"
+			},
+			"imagePrune": {
+				"successTitle": "Image prune completed - {environment}",
+				"successMessage": "{count} unused images removed, {space} disk space reclaimed",
+				"failedTitle": "Image prune failed - {environment}",
+				"failedMessage": "Failed to prune images: {error}"
+			}
+		}
+	},
 	"ui": {
 		"dialog": {
 			"close": "Close"

@@ -8,7 +8,7 @@
 import { db, hawserTokens, environments, eq, and } from './db/drizzle.js';
 import { logContainerEvent, type ContainerEventAction } from './db.js';
 import { containerEventEmitter } from './event-collector.js';
-import { sendEnvironmentNotification } from './notifications.js';
+import { createContainerEventNotificationPayload, sendEnvironmentNotification } from './notifications.js';
 import { isNotifyDisabledByLabel } from './container-labels.js';
 import { pushMetric } from './metrics-store.js';
 import { secureGetRandomValues, secureRandomUUID } from './crypto-fallback.js';
@@ -195,7 +195,6 @@ export async function handleEdgeContainerEvent(
 		// Check dockhand.notify label before sending notification
 		// Docker includes container labels in actorAttributes
 		if (!isNotifyDisabledByLabel(event.actorAttributes)) {
-			const actionLabel = event.action.charAt(0).toUpperCase() + event.action.slice(1);
 			const containerLabel = event.containerName || event.containerId.substring(0, 12);
 			const notificationType =
 				event.action === 'die' || event.action === 'kill' || event.action === 'oom'
@@ -206,11 +205,17 @@ export async function handleEdgeContainerEvent(
 							? 'success'
 							: 'info';
 
-			await sendEnvironmentNotification(environmentId, event.action as ContainerEventAction, {
-				title: `Container ${actionLabel}`,
-				message: `Container "${containerLabel}" ${event.action}${event.image ? ` (${event.image})` : ''}`,
-				type: notificationType as 'success' | 'error' | 'warning' | 'info'
-			}, event.image);
+			await sendEnvironmentNotification(
+				environmentId,
+				event.action as ContainerEventAction,
+				await createContainerEventNotificationPayload(
+					event.action,
+					containerLabel,
+					event.image,
+					notificationType as 'success' | 'error' | 'warning' | 'info'
+				),
+				event.image
+			);
 		}
 	} catch (error) {
 		const errorMsg = error instanceof Error ? error.message : String(error);

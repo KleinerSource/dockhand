@@ -15,7 +15,7 @@ import {
 	getNegotiatedApiVersion
 } from './docker';
 import { getEnvironment, getEnvSetting, getSetting } from './db';
-import { sendEventNotification } from './notifications';
+import { createNotificationPayload, sendEventNotification } from './notifications';
 import {
 	getHostDockerSocket,
 	getHostDataDir,
@@ -48,29 +48,32 @@ export async function sendVulnerabilityNotifications(
 	// Send notifications based on severity (most severe first)
 	// Note: Users can subscribe to specific severity levels, so we send all applicable
 	if (summary.critical > 0) {
-		await sendEventNotification('vulnerability_critical', {
-			title: 'Critical vulnerabilities found',
-			message: `Image "${imageName}" has ${summary.critical} critical vulnerabilities (${totalVulns} total)`,
-			type: 'error'
-		}, envId);
+		await sendEventNotification('vulnerability_critical', await createNotificationPayload(
+			'vulnerability.criticalTitle',
+			'vulnerability.criticalMessage',
+			{ image: imageName, count: summary.critical, total: totalVulns },
+			'error'
+		), envId);
 	}
 
 	if (summary.high > 0) {
-		await sendEventNotification('vulnerability_high', {
-			title: 'High severity vulnerabilities found',
-			message: `Image "${imageName}" has ${summary.high} high severity vulnerabilities (${totalVulns} total)`,
-			type: 'warning'
-		}, envId);
+		await sendEventNotification('vulnerability_high', await createNotificationPayload(
+			'vulnerability.highTitle',
+			'vulnerability.highMessage',
+			{ image: imageName, count: summary.high, total: totalVulns },
+			'warning'
+		), envId);
 	}
 
 	// Only send 'any' notification if there are medium/low/negligible but no critical/high
 	// This prevents notification spam for users who only want to know about lesser severities
 	if (summary.critical === 0 && summary.high === 0 && totalVulns > 0) {
-		await sendEventNotification('vulnerability_any', {
-			title: 'Vulnerabilities found',
-			message: `Image "${imageName}" has ${totalVulns} vulnerabilities (medium: ${summary.medium}, low: ${summary.low})`,
-			type: 'info'
-		}, envId);
+		await sendEventNotification('vulnerability_any', await createNotificationPayload(
+			'vulnerability.anyTitle',
+			'vulnerability.anyMessage',
+			{ image: imageName, total: totalVulns, medium: summary.medium, low: summary.low },
+			'info'
+		), envId);
 	}
 }
 

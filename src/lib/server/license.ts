@@ -1,7 +1,12 @@
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { getSetting, setSetting } from './db';
-import { sendEventNotification } from './notifications';
+import {
+	createNotificationPayloadForLocale,
+	getNotificationLocale,
+	sendEventNotification
+} from './notifications';
+import { getIntlLocale } from '$lib/i18n';
 
 // RSA Public Key for license verification
 // This key can only VERIFY signatures, not create them
@@ -239,11 +244,18 @@ export async function checkLicenseExpiry(): Promise<void> {
 			const licenseTypeName = status.payload.type === 'enterprise' ? 'Enterprise' : 'SMB';
 			console.log(`[License] ${licenseTypeName} license expiring in ${daysUntilExpiry} days`);
 
-			await sendEventNotification('license_expiring', {
-				title: 'License expiring soon',
-				message: `Your ${licenseTypeName} license expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'} (${expiryDate.toLocaleDateString()}). Contact support to renew.`,
-				type: 'warning'
-			});
+			const notificationLocale = await getNotificationLocale();
+			await sendEventNotification('license_expiring', createNotificationPayloadForLocale(
+				notificationLocale,
+				'license.expiringTitle',
+				'license.expiringMessage',
+				{
+					licenseType: licenseTypeName,
+					days: daysUntilExpiry,
+					date: expiryDate.toLocaleDateString(getIntlLocale(notificationLocale))
+				},
+				'warning'
+			));
 
 			lastLicenseExpiryNotification = Date.now();
 		}

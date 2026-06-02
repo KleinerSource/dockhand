@@ -23,7 +23,12 @@ import {
 	logContainerEvent,
 	type ContainerEventAction
 } from './db';
-import { sendEnvironmentNotification, sendEventNotification } from './notifications';
+import {
+	createContainerEventNotificationPayload,
+	createNotificationPayload,
+	sendEnvironmentNotification,
+	sendEventNotification
+} from './notifications';
 import { isNotifyDisabledByLabel } from './container-labels';
 import { rssBeforeOp, rssAfterOp } from './rss-tracker';
 import { pushMetric } from './metrics-store';
@@ -217,19 +222,21 @@ function handleEnvStatus(msg: GoMessage): void {
 
 	// Send notifications for status changes
 	if (msg.online) {
-		sendEventNotification('environment_online', {
-			title: 'Environment online',
-			message: `Environment "${envName}" is now reachable`,
-			type: 'success'
-		}, msg.envId).catch((err) => {
+		createNotificationPayload(
+			'environment.onlineTitle',
+			'environment.onlineMessage',
+			{ environment: envName },
+			'success'
+		).then((payload) => sendEventNotification('environment_online', payload, msg.envId)).catch((err) => {
 			console.error('[SubprocessManager] Failed to send online notification:', err instanceof Error ? err.message : String(err));
 		});
 	} else {
-		sendEventNotification('environment_offline', {
-			title: 'Environment offline',
-			message: `Environment "${envName}" is unreachable${msg.error ? `: ${msg.error}` : ''}`,
-			type: 'error'
-		}, msg.envId).catch((err) => {
+		createNotificationPayload(
+			'environment.offlineTitle',
+			msg.error ? 'environment.offlineMessageWithError' : 'environment.offlineMessage',
+			{ environment: envName, error: msg.error || '' },
+			'error'
+		).then((payload) => sendEventNotification('environment_offline', payload, msg.envId)).catch((err) => {
 			console.error('[SubprocessManager] Failed to send offline notification:', err instanceof Error ? err.message : String(err));
 		});
 	}
@@ -289,9 +296,6 @@ async function handleContainerEvent(msg: GoMessage): Promise<void> {
 
 	// Check dockhand.notify label — Docker includes container labels in event Actor.Attributes
 	if (!isNotifyDisabledByLabel(event.Actor?.Attributes)) {
-		const actionLabel = action.startsWith('health_status')
-			? action.includes('unhealthy') ? 'Unhealthy' : 'Healthy'
-			: action.charAt(0).toUpperCase() + action.slice(1);
 		const containerLabel = containerName || containerId.substring(0, 12);
 		const notificationType =
 			action === 'die' || action === 'kill' || action === 'oom' || action.includes('unhealthy')
@@ -302,11 +306,9 @@ async function handleContainerEvent(msg: GoMessage): Promise<void> {
 						? 'success'
 						: 'info';
 
-		sendEnvironmentNotification(msg.envId, action, {
-			title: `Container ${actionLabel}`,
-			message: `Container "${containerLabel}" ${action}${image ? ` (${image})` : ''}`,
-			type: notificationType
-		}, image).catch(() => {});
+		createContainerEventNotificationPayload(action, containerLabel, image, notificationType)
+			.then((payload) => sendEnvironmentNotification(msg.envId, action, payload, image))
+			.catch(() => {});
 	}
 	rssAfterOp('events_notif', notifBefore);
 	rssAfterOp('events', before);
@@ -339,11 +341,12 @@ async function handleDiskUsage(msg: GoMessage): Promise<void> {
 		if (diskWarningMode === 'absolute') {
 			const thresholdGb = (await getEnvSetting('disk_warning_threshold_gb', msg.envId)) ?? 50;
 			if (totalUsed > thresholdGb * GB) {
-				await sendEventNotification('disk_space_warning', {
-					title: 'High Docker disk usage',
-					message: `Environment "${envName}" is using ${formatSize(totalUsed)} of Docker disk space (threshold: ${thresholdGb} GB)`,
-					type: 'warning'
-				}, msg.envId);
+				await sendEventNotification('disk_space_warning', await createNotificationPayload(
+					'disk.absoluteTitle',
+					'disk.absoluteMessage',
+					{ environment: envName, used: formatSize(totalUsed), threshold: thresholdGb },
+					'warning'
+				), msg.envId);
 				lastDiskWarning.set(msg.envId, Date.now());
 			}
 		} else {
@@ -364,11 +367,12 @@ async function handleDiskUsage(msg: GoMessage): Promise<void> {
 			const threshold = (await getEnvSetting('disk_warning_threshold', msg.envId)) || 80;
 			if (diskPercentUsed >= threshold) {
 				console.log(`[SubprocessManager] Docker disk usage for ${envName}: ${diskPercentUsed.toFixed(1)}% (threshold: ${threshold}%)`);
-				await sendEventNotification('disk_space_warning', {
-					title: 'Disk space warning',
-					message: `Environment "${envName}" Docker disk usage is at ${diskPercentUsed.toFixed(1)}% (${formatSize(totalUsed)} used)`,
-					type: 'warning'
-				}, msg.envId);
+				await sendEventNotification('disk_space_warning', await createNotificationPayload(
+					'disk.percentageTitle',
+					'disk.percentageMessage',
+					{ environment: envName, percent: diskPercentUsed.toFixed(1), used: formatSize(totalUsed) },
+					'warning'
+				), msg.envId);
 				lastDiskWarning.set(msg.envId, Date.now());
 			}
 		}

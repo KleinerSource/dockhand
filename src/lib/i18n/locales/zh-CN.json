@@ -4663,6 +4663,110 @@
 		"searchPlaceholder": "搜索图标...",
 		"empty": "未找到图标"
 	},
+	"notifications": {
+		"delivery": {
+			"meta": {
+				"sentByDockhand": "由 Dockhand 发送",
+				"environment": "环境"
+			},
+			"test": {
+				"title": "Dockhand 测试通知",
+				"message": "这是一条来自 Dockhand 的测试通知。如果你收到了它，说明通知设置已正确配置。"
+			},
+			"errors": {
+				"unknownType": "未知通知类型"
+			},
+			"environment": {
+				"onlineTitle": "环境已上线",
+				"onlineMessage": "环境“{environment}”现在可以访问",
+				"offlineTitle": "环境已离线",
+				"offlineMessage": "环境“{environment}”无法访问",
+				"offlineMessageWithError": "环境“{environment}”无法访问：{error}"
+			},
+			"container": {
+				"titles": {
+					"start": "容器已启动",
+					"stop": "容器已停止",
+					"restart": "容器已重启",
+					"die": "容器已退出",
+					"kill": "容器已被终止",
+					"oom": "容器内存不足",
+					"healthy": "容器健康",
+					"unhealthy": "容器不健康",
+					"pull": "容器镜像已拉取"
+				},
+				"actions": {
+					"start": "已启动",
+					"stop": "已停止",
+					"restart": "已重启",
+					"die": "已退出",
+					"kill": "已被终止",
+					"oom": "内存不足",
+					"healthy": "变为健康",
+					"unhealthy": "变为不健康",
+					"pull": "已拉取镜像"
+				},
+				"message": "容器“{container}”{action}{imageSuffix}",
+				"imageSuffix": "（{image}）"
+			},
+			"disk": {
+				"absoluteTitle": "Docker 磁盘使用量过高",
+				"absoluteMessage": "环境“{environment}”正在使用 {used} Docker 磁盘空间（阈值：{threshold} GB）",
+				"percentageTitle": "磁盘空间告警",
+				"percentageMessage": "环境“{environment}”的 Docker 磁盘使用率为 {percent}%（已使用 {used}）"
+			},
+			"license": {
+				"expiringTitle": "许可证即将到期",
+				"expiringMessage": "你的 {licenseType} 许可证将在 {days} 天后到期（{date}）。请联系支持团队续期。"
+			},
+			"vulnerability": {
+				"criticalTitle": "发现严重漏洞",
+				"criticalMessage": "镜像“{image}”存在 {count} 个严重漏洞（共 {total} 个）",
+				"highTitle": "发现高危漏洞",
+				"highMessage": "镜像“{image}”存在 {count} 个高危漏洞（共 {total} 个）",
+				"anyTitle": "发现漏洞",
+				"anyMessage": "镜像“{image}”存在 {total} 个漏洞（中危：{medium}，低危：{low}）"
+			},
+			"autoUpdate": {
+				"blockedTitle": "自动更新已阻止",
+				"blockedMessage": "容器“{container}”更新已阻止：{reason}",
+				"successTitle": "容器已自动更新",
+				"successMessage": "容器“{container}”已更新到新的镜像版本",
+				"failedTitle": "自动更新失败",
+				"failedMessage": "容器“{container}”自动更新失败：{error}"
+			},
+			"gitSync": {
+				"skippedTitle": "Git 同步已跳过",
+				"skippedMessage": "堆栈“{stack}”同步已跳过：未检测到变更",
+				"successTitle": "Git 堆栈已部署",
+				"successMessage": "堆栈“{stack}”已同步并成功部署",
+				"failedTitle": "Git 同步失败",
+				"failedMessage": "堆栈“{stack}”同步失败：{error}"
+			},
+			"batchUpdate": {
+				"blockedTitle": "{environment} 中有 {count} 个更新被阻止",
+				"blockedMessage": "{containers}",
+				"successTitle": "{environment} 中的容器已更新",
+				"blockedOnlyTitle": "{environment} 中的更新已阻止",
+				"failedTitle": "{environment} 中的容器更新失败",
+				"successMessage": "{environment} 中已更新 {successCount} 个容器：\n{updatedContainers}{blockedSection}{failedSection}",
+				"allBlockedMessage": "{environment} 中的所有更新都已被阻止",
+				"allFailedMessage": "{environment} 中所有容器更新均失败",
+				"blockedSection": "\n\n已阻止（{count}）：\n{containers}",
+				"failedSection": "\n\n失败（{count}）：\n{containers}"
+			},
+			"updatesDetected": {
+				"title": "{environment} 中有可用容器更新",
+				"message": "发现 {count} 个可用更新：\n{updates}"
+			},
+			"imagePrune": {
+				"successTitle": "镜像清理已完成 - {environment}",
+				"successMessage": "已移除 {count} 个未使用镜像，回收 {space} 磁盘空间",
+				"failedTitle": "镜像清理失败 - {environment}",
+				"failedMessage": "清理镜像失败：{error}"
+			}
+		}
+	},
 	"ui": {
 		"dialog": {
 			"close": "关闭"

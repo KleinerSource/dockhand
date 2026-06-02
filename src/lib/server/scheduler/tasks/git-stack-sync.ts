@@ -11,7 +11,7 @@ import {
 	appendScheduleExecutionLog
 } from '../../db';
 import { deployGitStack } from '../../git';
-import { sendEventNotification } from '../../notifications';
+import { createNotificationPayload, sendEventNotification } from '../../notifications';
 
 /**
  * Execute a git stack sync.
@@ -56,20 +56,22 @@ export async function runGitStackSync(
 				log(`No changes detected for stack: ${stackName}, skipping redeploy`);
 
 				// Send notification for skipped sync
-				await sendEventNotification('git_sync_skipped', {
-					title: 'Git sync skipped',
-					message: `Stack "${stackName}" sync skipped: no changes detected`,
-					type: 'info'
-				}, envId);
+				await sendEventNotification('git_sync_skipped', await createNotificationPayload(
+					'gitSync.skippedTitle',
+					'gitSync.skippedMessage',
+					{ stack: stackName },
+					'info'
+				), envId);
 			} else {
 				log(`Successfully deployed stack: ${stackName}`);
 
 				// Send notification for successful sync
-				await sendEventNotification('git_sync_success', {
-					title: 'Git stack deployed',
-					message: `Stack "${stackName}" was synced and deployed successfully`,
-					type: 'success'
-				}, envId);
+				await sendEventNotification('git_sync_success', await createNotificationPayload(
+					'gitSync.successTitle',
+					'gitSync.successMessage',
+					{ stack: stackName },
+					'success'
+				), envId);
 			}
 			if (result.output) log(result.output);
 
@@ -93,10 +95,11 @@ export async function runGitStackSync(
 
 		// Send notification for failed sync
 		const envId = environmentId ?? undefined;
-		await sendEventNotification('git_sync_failed', {
-			title: 'Git sync failed',
-			message: `Stack "${stackName}" sync failed: ${error.message}`,
-			type: 'error'
-		}, envId);
+		await sendEventNotification('git_sync_failed', await createNotificationPayload(
+			'gitSync.failedTitle',
+			'gitSync.failedMessage',
+			{ stack: stackName, error: error.message },
+			'error'
+		), envId);
 	}
 }

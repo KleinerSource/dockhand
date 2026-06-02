@@ -3,6 +3,7 @@ import {
 	getEnabledNotificationSettings,
 	getEnabledEnvironmentNotifications,
 	getEnvironment,
+	getSetting,
 	type NotificationSettingData,
 	type SmtpConfig,
 	type AppriseConfig,
@@ -10,6 +11,7 @@ import {
 } from './db';
 
 import { escapeTelegramMarkdown, parseTelegramUrl, buildGotifyUrl, parseWorkflowsUrl, buildWorkflowsHttpUrl } from '$lib/utils/notification-parsers';
+import { DEFAULT_LOCALE, normalizeLocale, translate, type Locale, type TranslationParams } from '$lib/i18n';
 
 /** Drain a response body to release the underlying socket/TLS connection. */
 async function drainResponse(response: Response): Promise<void> {
@@ -24,6 +26,7 @@ export interface NotificationPayload {
 	type?: 'info' | 'success' | 'warning' | 'error';
 	environmentId?: number;
 	environmentName?: string;
+	locale?: Locale;
 }
 
 // Result type for functions that can return detailed errors
@@ -32,9 +35,79 @@ export interface NotificationResult {
 	error?: string;
 }
 
+export async function getNotificationLocale(): Promise<Locale> {
+	try {
+		return normalizeLocale(await getSetting('language'));
+	} catch {
+		return DEFAULT_LOCALE;
+	}
+}
+
+export function translateNotification(key: string, params?: TranslationParams, locale: Locale = DEFAULT_LOCALE): string {
+	return translate(`notifications.delivery.${key}`, params, locale);
+}
+
+export function createNotificationPayloadForLocale(
+	locale: Locale,
+	titleKey: string,
+	messageKey: string,
+	params: TranslationParams = {},
+	type: NotificationPayload['type'] = 'info'
+): NotificationPayload {
+	return {
+		title: translateNotification(titleKey, params, locale),
+		message: translateNotification(messageKey, params, locale),
+		type,
+		locale
+	};
+}
+
+export async function createNotificationPayload(
+	titleKey: string,
+	messageKey: string,
+	params: TranslationParams = {},
+	type: NotificationPayload['type'] = 'info'
+): Promise<NotificationPayload> {
+	return createNotificationPayloadForLocale(
+		await getNotificationLocale(),
+		titleKey,
+		messageKey,
+		params,
+		type
+	);
+}
+
+export async function createContainerEventNotificationPayload(
+	action: string,
+	containerName: string,
+	image: string | null | undefined,
+	type: NotificationPayload['type']
+): Promise<NotificationPayload> {
+	const locale = await getNotificationLocale();
+	const normalizedAction = action.startsWith('health_status')
+		? action.includes('unhealthy') ? 'unhealthy' : 'healthy'
+		: action;
+	const actionText = translateNotification(`container.actions.${normalizedAction}`, undefined, locale);
+	const imageSuffix = image
+		? translateNotification('container.imageSuffix', { image }, locale)
+		: '';
+
+	return {
+		title: translateNotification(`container.titles.${normalizedAction}`, undefined, locale),
+		message: translateNotification('container.message', {
+			container: containerName,
+			action: actionText,
+			imageSuffix
+		}, locale),
+		type,
+		locale
+	};
+}
+
 // Send notification via SMTP
 async function sendSmtpNotification(config: SmtpConfig, payload: NotificationPayload): Promise<NotificationResult> {
 	try {
+		const locale = payload.locale ?? await getNotificationLocale();
 		const transporter = nodemailer.createTransport({
 			host: config.host,
 			port: config.port,
@@ -58,7 +131,7 @@ async function sendSmtpNotification(config: SmtpConfig, payload: NotificationPay
 				<h2 style="margin: 0 0 10px 0;">${payload.title}${envBadge}</h2>
 				<p style="margin: 0; white-space: pre-wrap;">${payload.message}</p>
 				<hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-				<p style="margin: 0; font-size: 12px; color: #666;">Sent by Dockhand</p>
+				<p style="margin: 0; font-size: 12px; color: #666;">${translateNotification('meta.sentByDockhand', undefined, locale)}</p>
 			</div>
 		`;
 
@@ -149,6 +222,7 @@ async function sendToAppriseUrl(url: string, payload: NotificationPayload): Prom
 async function sendDiscord(appriseUrl: string, payload: NotificationPayload): Promise<NotificationResult> {
 	// discord://webhook_id/webhook_token or discords://...
 	const url = appriseUrl.replace(/^discords?:\/\//, 'https://discord.com/api/webhooks/');
+	const locale = payload.locale ?? await getNotificationLocale();
 	const titleWithEnv = payload.environmentName ? `${payload.title} [${payload.environmentName}]` : payload.title;
 
 	try {
@@ -161,7 +235,7 @@ async function sendDiscord(appriseUrl: string, payload: NotificationPayload): Pr
 					description: payload.message,
 					color: payload.type === 'error' ? 0xff0000 : payload.type === 'warning' ? 0xffaa00 : payload.type === 'success' ? 0x00ff00 : 0x0099ff,
 					...(payload.environmentName && {
-						footer: { text: `Environment: ${payload.environmentName}` }
+						footer: { text: `${translateNotification('meta.environment', undefined, locale)}: ${payload.environmentName}` }
 					})
 				}]
 			})
@@ -578,11 +652,12 @@ export async function sendNotification(payload: NotificationPayload): Promise<{ 
 
 // Test a specific notification setting
 export async function testNotification(setting: NotificationSettingData): Promise<NotificationResult> {
-	const payload: NotificationPayload = {
-		title: 'Dockhand Test Notification',
-		message: 'This is a test notification from Dockhand. If you receive this, your notification settings are configured correctly.',
-		type: 'info'
-	};
+	const payload = await createNotificationPayload(
+		'test.title',
+		'test.message',
+		{},
+		'info'
+	);
 
 	if (setting.type === 'smtp') {
 		return await sendSmtpNotification(setting.config as SmtpConfig, payload);
@@ -590,7 +665,10 @@ export async function testNotification(setting: NotificationSettingData): Promis
 		return await sendAppriseNotification(setting.config as AppriseConfig, payload);
 	}
 
-	return { success: false, error: 'Unknown notification type' };
+	return {
+		success: false,
+		error: translateNotification('errors.unknownType', undefined, payload.locale ?? await getNotificationLocale())
+	};
 }
 
 // Map Docker action to notification event type

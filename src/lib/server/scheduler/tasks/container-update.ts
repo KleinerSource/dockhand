@@ -36,7 +36,7 @@ import {
 	recreateContainerFromInspect
 } from '../../docker';
 import { getScannerSettings, scanImage, type ScanResult, type VulnerabilitySeverity } from '../../scanner';
-import { sendEventNotification } from '../../notifications';
+import { createNotificationPayload, sendEventNotification } from '../../notifications';
 import { parseImageNameAndTag, shouldBlockUpdate, combineScanSummaries, isSystemContainer } from './update-utils';
 import { isUpdateDisabledByLabel } from '../../container-labels';
 
@@ -518,11 +518,12 @@ export async function runContainerUpdate(
 							)
 						});
 
-						await sendEventNotification('auto_update_blocked', {
-							title: 'Auto-update blocked',
-							message: `Container "${containerName}" update blocked: ${scanOutcome.reason}`,
-							type: 'warning'
-						}, envId);
+						await sendEventNotification('auto_update_blocked', await createNotificationPayload(
+							'autoUpdate.blockedTitle',
+							'autoUpdate.blockedMessage',
+							{ container: containerName, reason: scanOutcome.reason || '' },
+							'warning'
+						), envId);
 
 						return;
 					}
@@ -601,11 +602,12 @@ export async function runContainerUpdate(
 				)
 			});
 
-			await sendEventNotification('auto_update_success', {
-				title: 'Container auto-updated',
-				message: `Container "${containerName}" was updated to a new image version`,
-				type: 'success'
-			}, envId);
+			await sendEventNotification('auto_update_success', await createNotificationPayload(
+				'autoUpdate.successTitle',
+				'autoUpdate.successMessage',
+				{ container: containerName },
+				'success'
+			), envId);
 		} else {
 			throw new Error(result.error || 'Failed to recreate container');
 		}
@@ -619,11 +621,12 @@ export async function runContainerUpdate(
 			errorMessage: error.message
 		});
 
-		await sendEventNotification('auto_update_failed', {
-			title: 'Auto-update failed',
-			message: `Container "${containerName}" auto-update failed: ${error.message}`,
-			type: 'error'
-		}, envId);
+		await sendEventNotification('auto_update_failed', await createNotificationPayload(
+			'autoUpdate.failedTitle',
+			'autoUpdate.failedMessage',
+			{ container: containerName, error: error.message },
+			'error'
+		), envId);
 	}
 }
 
