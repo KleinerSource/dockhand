@@ -964,11 +964,37 @@
 	}
 
 	function getScheduleKindLabel(type: string): string {
-		return $t(`schedules.types.${type}`);
+		switch (type) {
+			case 'container_update':
+				return $t('schedules.types.container_update');
+			case 'git_stack_sync':
+				return $t('schedules.types.git_stack_sync');
+			case 'env_update_check':
+				return $t('schedules.types.env_update_check');
+			case 'image_prune':
+				return $t('schedules.types.image_prune');
+			case 'system_cleanup':
+				return $t('schedules.types.system_cleanup');
+			default:
+				return type;
+		}
 	}
 
 	function getScheduleStatusLabel(status: string): string {
-		return $t(`schedules.status.${status}`);
+		switch (status) {
+			case 'queued':
+				return $t('schedules.status.queued');
+			case 'running':
+				return $t('schedules.status.running');
+			case 'success':
+				return $t('schedules.status.success');
+			case 'failed':
+				return $t('schedules.status.failed');
+			case 'skipped':
+				return $t('schedules.status.skipped');
+			default:
+				return status;
+		}
 	}
 
 	function getExecutionTypeLabel(type: ScheduleExecution['scheduleType']): string {
