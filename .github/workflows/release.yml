@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*-zh-cn'
+      - 'v*'
 
 permissions:
   contents: write
