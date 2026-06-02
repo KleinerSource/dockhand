@@ -1186,12 +1186,12 @@
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to pull Grype image');
+				throw new Error(translate('settings.environments.modal.scanner.errors.pullGrypeImage'));
 			}
 
 			const result = await readJobResponse(response);
 			if (result.success === false) {
-				throw new Error(result.error as string || 'Pull failed');
+				throw new Error(result.error as string || translate('settings.environments.modal.scanner.errors.pullFailed'));
 			}
 
 			// Refresh scanner status after pull
@@ -1218,12 +1218,12 @@
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to pull Trivy image');
+				throw new Error(translate('settings.environments.modal.scanner.errors.pullTrivyImage'));
 			}
 
 			const result = await readJobResponse(response);
 			if (result.success === false) {
-				throw new Error(result.error as string || 'Pull failed');
+				throw new Error(result.error as string || translate('settings.environments.modal.scanner.errors.pullFailed'));
 			}
 
 			// Refresh scanner status after pull

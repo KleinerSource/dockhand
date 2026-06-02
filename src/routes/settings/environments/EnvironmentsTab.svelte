@@ -232,7 +232,7 @@
 					const response = await fetch(`/api/environments/${env.id}/test`, { method: 'POST' });
 					testResults[env.id] = await response.json();
 				} catch {
-					testResults[env.id] = { success: false, error: 'Connection failed' };
+					testResults[env.id] = { success: false, error: translate('settings.environments.list.connectionFailed') };
 				} finally {
 					testingEnvs.delete(env.id);
 					testingEnvs = new Set(testingEnvs);

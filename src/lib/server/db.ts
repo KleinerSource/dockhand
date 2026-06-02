@@ -3369,7 +3369,7 @@ export type ContainerEventAction =
 	| 'create' | 'start' | 'stop' | 'die' | 'kill' | 'restart'
 	| 'pause' | 'unpause' | 'destroy' | 'rename' | 'update'
 	| 'attach' | 'detach' | 'exec_create' | 'exec_start' | 'exec_die'
-	| 'health_status' | 'oom';
+	| 'health_status' | 'health_status: healthy' | 'health_status: unhealthy' | 'oom';
 
 export interface ContainerEventData {
 	id: number;
@@ -3514,7 +3514,24 @@ export async function getContainerEvents(filters: ContainerEventFilters = {}): P
 	}
 
 	if (filters.actions && filters.actions.length > 0) {
-		conditions.push(inArray(containerEvents.action, filters.actions));
+		const actionConditions: any[] = [];
+		const exactActions = filters.actions.filter(action => action !== 'health_status');
+
+		if (exactActions.length > 0) {
+			actionConditions.push(inArray(containerEvents.action, exactActions));
+		}
+		if (filters.actions.includes('health_status')) {
+			actionConditions.push(or(
+				eq(containerEvents.action, 'health_status'),
+				like(containerEvents.action, 'health_status:%')
+			));
+		}
+
+		if (actionConditions.length === 1) {
+			conditions.push(actionConditions[0]);
+		} else if (actionConditions.length > 1) {
+			conditions.push(or(...actionConditions));
+		}
 	}
 
 	if (filters.fromDate) {

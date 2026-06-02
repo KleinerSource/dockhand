@@ -2,8 +2,9 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ChevronDown, ChevronRight, CheckCircle2, XCircle, Loader2 } from 'lucide-svelte';
 	import type { StepType } from '$lib/utils/update-steps';
-	import { getStepIcon, getStepLabel, getStepColor } from '$lib/utils/update-steps';
+	import { getStepIcon, getStepColor } from '$lib/utils/update-steps';
 	import ScannerSeverityPills from '$lib/components/ScannerSeverityPills.svelte';
+	import { t } from '$lib/i18n';
 
 	interface ScannerResult {
 		scanner: 'grype' | 'trivy';
@@ -42,7 +43,7 @@
 	}: Props = $props();
 
 	const StepIcon = $derived(getStepIcon(status));
-	const stepLabel = $derived(getStepLabel(status));
+	const stepLabel = $derived($t(`updateSteps.${status}`));
 	const colorClass = $derived(getStepColor(status));
 	const hasToggle = $derived(onToggleLogs !== undefined);
 </script>
@@ -83,7 +84,7 @@
 				class="h-6 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/50"
 				onclick={onForceUpdate}
 			>
-				Update anyway
+				{$t('containers.batchUpdate.updateAnyway')}
 			</Button>
 		{/if}
 	{/if}
@@ -94,7 +95,7 @@
 			type="button"
 			onclick={onToggleLogs}
 			class="p-1 hover:bg-muted rounded cursor-pointer"
-			title={showLogs ? 'Hide logs' : 'Show logs'}
+			title={showLogs ? $t('containers.batchUpdate.hideLogs') : $t('containers.batchUpdate.showLogs')}
 		>
 			{#if showLogs}
 				<ChevronDown class="w-4 h-4 text-muted-foreground" />

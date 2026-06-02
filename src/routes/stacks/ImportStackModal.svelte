@@ -405,7 +405,7 @@
 					{#if isRemoteEnv}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilesPrefix')} <span class="font-medium">Dockhand host</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFilesSuffix', { environment: envName })}</span>
+							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilesPrefix')} <span class="font-medium">{$t('stacks.import.dockhandHost')}</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFilesSuffix', { environment: envName })}</span>
 						</div>
 					{/if}
 					<div class="flex items-start gap-2.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2.5">
@@ -505,7 +505,7 @@
 					{#if isRemoteEnv}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilePrefix')} <span class="font-medium">Dockhand host</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFileSuffix', { environment: envName })}</span>
+							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilePrefix')} <span class="font-medium">{$t('stacks.import.dockhandHost')}</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFileSuffix', { environment: envName })}</span>
 						</div>
 					{/if}
 					<div class="flex items-start gap-2.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2.5">

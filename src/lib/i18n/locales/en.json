@@ -123,6 +123,7 @@
 			"modified": "Modified",
 			"name": "Name",
 			"netIo": "Net I/O",
+			"network": "Network",
 			"networks": "Networks",
 			"nextRun": "Next run",
 			"osArch": "OS/Arch",
@@ -161,7 +162,8 @@
 			"user": "User",
 			"users": "Users",
 			"version": "Version",
-			"volumes": "Volumes"
+			"volumes": "Volumes",
+			"dependencies": "Dependencies"
 		},
 		"counts": {
 			"of": "{count} of {total}"
@@ -177,6 +179,13 @@
 		"errors": {
 			"unknown": "Unknown error occurred"
 		}
+	},
+	"passwordStrength": {
+		"tooShort": "Too short",
+		"weak": "Weak",
+		"fair": "Fair",
+		"good": "Good",
+		"strong": "Strong"
 	},
 	"filters": {
 		"allTime": "All time",
@@ -301,6 +310,8 @@
 			"containers": "Containers",
 			"volumes": "Volumes",
 			"buildCache": "Build cache",
+			"events": "Events",
+			"eventsTodayTotal": "{today} today / {total} total",
 			"recentEvents": "Recent events",
 			"topContainersByCpu": "Top containers by CPU",
 			"noRunningContainers": "No running containers",
@@ -487,7 +498,8 @@
 		},
 		"errors": {
 			"startFailed": "Failed to start pull",
-			"pullFailed": "Failed to pull image"
+			"pullFailed": "Failed to pull image",
+			"failedToDeleteImage": "Failed to delete image"
 		}
 	},
 	"imagePush": {
@@ -625,6 +637,7 @@
 			"ended": "Stream ended",
 			"startFailed": "Failed to start streaming",
 			"connectionError": "Connection error",
+			"connectionFailedRetry": "Connection failed. Click to retry.",
 			"reconnecting": "Reconnecting ({attempt}/{total})...",
 			"connectingToStream": "Connecting to log stream...",
 			"clickToReconnect": "Click to reconnect"
@@ -740,6 +753,11 @@
 			}
 		}
 	},
+	"dockerEvents": {
+		"connectionLostReconnecting": "Connection lost. Reconnecting ({current}/{total})...",
+		"connectionFailedRefresh": "Connection failed. Refresh the page to retry.",
+		"failedToConnect": "Failed to connect"
+	},
 	"containers": {
 		"page": {
 			"pageTitle": "Containers - Dockhand",
@@ -764,6 +782,23 @@
 			"healthy": "Healthy",
 			"unhealthy": "Unhealthy",
 			"starting": "Starting"
+		},
+		"validation": {
+			"nameRequired": "Container name is required",
+			"imageRequired": "Image name is required"
+		},
+		"uptime": {
+			"lessThanSecond": "less than a second",
+			"aboutMinute": "about a minute",
+			"aboutHour": "about an hour",
+			"seconds": "{count} seconds",
+			"minutes": "{count} minutes",
+			"hours": "{count} hours",
+			"days": "{count} days",
+			"weeks": "{count} weeks",
+			"months": "{count} months",
+			"years": "{count} years",
+			"ago": "{value} ago"
 		},
 		"actions": {
 			"checkUpdates": "Check for updates",
@@ -875,7 +910,23 @@
 			"viewGitHubInstructions": "View update instructions on GitHub",
 			"enableAutomatic": "Enable automatic image updates",
 			"vulnerabilityCriteria": "Vulnerability criteria",
-			"blockByVulnerabilityCriteria": "Block auto-updates if new image has vulnerabilities matching this criteria"
+			"blockByVulnerabilityCriteria": "Block auto-updates if new image has vulnerabilities matching this criteria",
+			"schedule": {
+				"enabledLabel": "On",
+				"enabledTooltip": "Auto-update enabled",
+				"cronLabel": "Cron",
+				"dailyAt": "Daily at {time}",
+				"weeklyAt": "Every {day} at {time}",
+				"days": {
+					"sunday": "Sun",
+					"monday": "Mon",
+					"tuesday": "Tue",
+					"wednesday": "Wed",
+					"thursday": "Thu",
+					"friday": "Fri",
+					"saturday": "Sat"
+				}
+			}
 		},
 		"batchUpdate": {
 			"title": "Updating containers",
@@ -889,8 +940,16 @@
 			"hideLogs": "Hide logs",
 			"showLogs": "Show logs",
 			"vulnerabilitiesFound": "{count} vulnerabilities found",
+			"imageCached": "Image cached (registry version matches local)",
+			"updating": "Updating...",
+			"moreVulnerabilities": "...and {count} more",
 			"columns": {
 				"fixed": "Fixed"
+			},
+			"errors": {
+				"startUpdateFailed": "Failed to start update",
+				"updateFailed": "Failed to update",
+				"forceUpdateFailed": "Force update failed"
 			}
 		},
 		"create": {
@@ -926,6 +985,12 @@
 			"toasts": {
 				"renamed": "Container renamed successfully!",
 				"updated": "Container updated successfully!"
+			},
+			"status": {
+				"renaming": "Renaming container...",
+				"updating": "Updating container...",
+				"savingAutoUpdate": "Saving auto-update settings...",
+				"autoUpdateSaved": "Auto-update settings saved!"
 			},
 			"errors": {
 				"fetchContainer": "Failed to fetch container: {status}",
@@ -1036,7 +1101,10 @@
 			},
 			"errors": {
 				"connectNetwork": "Failed to connect to network",
-				"disconnectNetwork": "Failed to disconnect from network"
+				"disconnectNetwork": "Failed to disconnect from network",
+				"fetchContainerDetails": "Failed to fetch container details",
+				"loadContainerDetails": "Failed to load container details",
+				"fetchProcesses": "Failed to fetch processes"
 			}
 		},
 		"settings": {
@@ -1161,12 +1229,25 @@
 				"count": "Count",
 				"specific": "Specific"
 			},
+			"volumeModes": {
+				"readWriteShort": "RW",
+				"readOnlyShort": "RO"
+			},
+			"validation": {
+				"invalidIpv4": "Invalid IPv4 address",
+				"invalidIpv6": "Invalid IPv6 address",
+				"invalidMac": "Invalid MAC address (e.g., 02:42:ac:11:00:02)"
+			},
 			"actions": {
 				"addDevice": "Add device",
 				"addUlimit": "Add ulimit"
 			}
 		},
 		"fileBrowser": {
+			"modal": {
+				"title": "Browse files - {name}",
+				"description": "Browse, upload, and download files from the container filesystem."
+			},
 			"actions": {
 				"newFile": "New file",
 				"newDirectory": "New directory",
@@ -1240,6 +1321,7 @@
 			}
 		},
 		"toasts": {
+			"loadFailed": "Failed to load containers",
 			"failedUpdateChecksSummary": "{prefix} ({count} failed to check)",
 			"allUpToDate": "All containers are up to date",
 			"updatesAvailable": "{count} update(s) available",
@@ -1751,6 +1833,7 @@
 		"description": "Search for pages and actions",
 		"placeholder": "Search...",
 		"noResults": "No results found.",
+		"localEnvironment": "Local",
 		"groups": {
 			"navigation": "Navigation",
 			"enterprise": "Enterprise",
@@ -2575,6 +2658,10 @@
 				"name": "Name",
 				"namePlaceholder": "My notification channel",
 				"type": "Type",
+				"typeLabels": {
+					"smtp": "SMTP (Email)",
+					"apprise": "Apprise (Webhooks)"
+				},
 				"status": "Status",
 				"enabled": "Enabled",
 				"disabled": "Disabled",
@@ -2679,6 +2766,8 @@
 				"portMappings": "Port mappings",
 				"volumeMappings": "Volume mappings",
 				"addRow": "Add",
+				"envKeyPlaceholder": "Variable name",
+				"labelKeyPlaceholder": "Label key",
 				"valuePlaceholder": "value",
 				"hostPort": "Host port",
 				"containerPort": "Container port",
@@ -2698,6 +2787,10 @@
 					"always": "Always",
 					"on-failure": "On failure",
 					"unless-stopped": "Unless stopped"
+				},
+				"volumeModes": {
+					"readWriteShort": "RW",
+					"readOnlyShort": "RO"
 				},
 				"validation": {
 					"nameRequired": "Name is required",
@@ -2803,7 +2896,15 @@
 			"errors": {
 				"fetchFailed": "Failed to fetch license info",
 				"activateFailed": "Failed to activate license",
-				"deactivateFailed": "Failed to deactivate license"
+				"deactivateFailed": "Failed to deactivate license",
+				"invalidFormat": "Invalid license format",
+				"invalidSignature": "Invalid license signature",
+				"expired": "License has expired",
+				"hostMismatch": "License is not valid for this host ({host})",
+				"nameMismatch": "License name mismatch. Expected \"{expected}\", got \"{actual}\"",
+				"validationFailed": "License validation failed: {error}",
+				"permissionDenied": "Permission denied",
+				"authenticationRequired": "Authentication required"
 			},
 			"toasts": {
 				"activated": "License activated successfully",
@@ -2982,7 +3083,12 @@
 					"pulling": "Pulling",
 					"update": "Update",
 					"checking": "Checking",
-					"check": "Check"
+					"check": "Check",
+					"errors": {
+						"pullGrypeImage": "Failed to pull Grype image",
+						"pullTrivyImage": "Failed to pull Trivy image",
+						"pullFailed": "Pull failed"
+					}
 				},
 				"notifications": {
 					"title": "Notification channels",
@@ -3172,6 +3278,10 @@
 			}
 		},
 		"git": {
+			"tabs": {
+				"repositories": "Repositories",
+				"credentials": "Credentials"
+			},
 			"auth": {
 				"sshKey": "SSH Key",
 				"password": "Password",
@@ -3305,6 +3415,7 @@
 			}
 		},
 		"about": {
+			"title": "About",
 			"dockhandLogo": "Dockhand Logo",
 			"version": "Version {version}",
 			"checkingForUpdates": "Checking for updates...",
@@ -3331,6 +3442,9 @@
 			"privacyTitle": "Privacy policy",
 			"failedToFetchLicense": "Failed to fetch license",
 			"failedToFetchPrivacy": "Failed to fetch privacy policy",
+			"editions": {
+				"community": "Community"
+			},
 			"selfUpdate": {
 				"updateDockhand": "Update Dockhand",
 				"updatingDockhand": "Updating Dockhand",
@@ -3356,6 +3470,10 @@
 				"connectionLost": "Connection lost: {error}",
 				"updaterExited": "Updater exited with code {code}",
 				"backOnline": "Dockhand is back online",
+				"errors": {
+					"checkFailed": "Failed to check for updates",
+					"couldNotInspectCurrentImage": "Could not inspect current image"
+				},
 				"steps": {
 					"pulling_image": "Pulling new image",
 					"building_config": "Building container config",
@@ -3450,7 +3568,9 @@
 			"rename": "Rename",
 			"update": "Update",
 			"oom": "Out of memory",
-			"health_status": "Health status"
+			"health_status": "Health status",
+			"health_status_healthy": "Healthy",
+			"health_status_unhealthy": "Unhealthy"
 		}
 	},
 	"audit": {
@@ -3472,6 +3592,11 @@
 		"loadingMore": "Loading more...",
 		"endOfResults": "End of results ({count} entries)",
 		"failedToFetch": "Failed to fetch audit logs",
+		"stream": {
+			"connectionLostReconnecting": "Connection lost. Reconnecting ({current}/{total})...",
+			"connectionFailedRefresh": "Connection failed. Refresh the page to retry.",
+			"failedToConnect": "Failed to connect"
+		},
 		"actions": {
 			"create": "Create",
 			"update": "Update",
@@ -3777,6 +3902,7 @@
 			"runningContainers": "Running containers:",
 			"composeFile": "Compose file",
 			"envFile": "Env file",
+			"newStack": "New stack",
 			"enterStackNameAbove": "Enter stack name above",
 			"notSpecified": "Not specified",
 			"noComposeSelected": "No compose file selected",
@@ -4000,6 +4126,7 @@
 			"serviceCountOne": "{count} service",
 			"serviceCountMany": "{count} services",
 			"runningCount": "{count} running",
+			"dockhandHost": "Dockhand host",
 			"remoteFilesPrefix": "These compose files are on the",
 			"remoteFilePrefix": "This compose file is on the",
 			"remoteFilesMiddle": "not on {environment}.",
@@ -4182,6 +4309,37 @@
 			"gitSync": "Git sync",
 			"pruneUnusedImages": "Prune unused images"
 		},
+		"display": {
+			"names": {
+				"containerUpdate": "Update container: {name}",
+				"gitStackSync": "Git sync: {name}",
+				"envUpdateCheck": "Update environment: {name}",
+				"imagePrune": "Prune images: {name}"
+			},
+			"descriptions": {
+				"checkUpdatesNotifyOnly": "Check containers for updates (notify only)",
+				"pruneAllUnusedImages": "Prune all unused images",
+				"pruneDanglingImages": "Prune dangling images only"
+			},
+			"system": {
+				"scheduleExecutionCleanup": {
+					"name": "Schedule execution cleanup",
+					"description": "Removes execution logs older than {days} days"
+				},
+				"containerEventCleanup": {
+					"name": "Container event cleanup",
+					"description": "Removes container events older than {days} days"
+				},
+				"volumeHelperCleanup": {
+					"name": "Volume helper cleanup",
+					"description": "Cleans up temporary volume browser containers"
+				},
+				"scannerCacheCleanup": {
+					"name": "Scanner cache cleanup",
+					"description": "Removes scanner vulnerability database cache to reclaim disk space"
+				}
+			}
+		},
 		"status": {
 			"queued": "Queued",
 			"running": "Running",
@@ -4229,11 +4387,28 @@
 	},
 	"batchOperation": {
 		"runningCloseConfirm": "Operation is still running. Cancel and close?",
+		"processingItems": "Processing {count} {entity}...",
+		"preparingItems": "Preparing to {operation} {count} {entity}...",
+		"completedSummary": "Completed: {success} succeeded",
+		"failedSuffix": ", {count} failed",
+		"cancelledSuffix": ", {count} cancelled",
 		"succeeded": "Succeeded",
 		"failed": "Failed",
 		"cancelled": "Cancelled",
 		"pending": "Pending",
-		"cancel": "Cancel"
+		"done": "Done",
+		"cancel": "Cancel",
+		"operations": {
+			"remove": "remove",
+			"start": "start",
+			"stop": "stop",
+			"restart": "restart",
+			"down": "down",
+			"removing": "removing",
+			"starting": "starting",
+			"stopping": "stopping",
+			"restarting": "restarting"
+		}
 	},
 	"updateSteps": {
 		"pulling": "Pulling image",
@@ -4326,6 +4501,15 @@
 			"title": "Sidebar",
 			"description": "Displays the mobile sidebar.",
 			"toggle": "Toggle sidebar"
+		},
+		"emptyState": {
+			"noEnvironment": {
+				"selectedTitle": "No environment selected",
+				"selectedDescription": "Select a Docker environment from the dropdown to get started",
+				"configuredTitle": "No environment configured",
+				"configuredDescription": "Add a Docker environment in Settings to get started",
+				"goToSettings": "Go to Settings"
+			}
 		},
 		"errorDialog": {
 			"copyError": "Copy error",

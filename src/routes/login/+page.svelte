@@ -51,12 +51,12 @@
 		try {
 			const response = await fetch('/api/auth/providers');
 			const data = await response.json();
-			providers = data.providers || [{ id: 'local', name: 'Local', type: 'local' }];
+			providers = data.providers || [{ id: 'local', name: $t('settings.auth.users.list.providerLocal'), type: 'local' }];
 			// Set default to first credential provider or first provider
 			const defaultProvider = data.defaultProvider || 'local';
 			selectedProvider = credentialProviders.find(p => p.id === defaultProvider)?.id || credentialProviders[0]?.id || 'local';
 		} catch {
-			providers = [{ id: 'local', name: 'Local', type: 'local' }];
+			providers = [{ id: 'local', name: $t('settings.auth.users.list.providerLocal'), type: 'local' }];
 		} finally {
 			loadingProviders = false;
 		}

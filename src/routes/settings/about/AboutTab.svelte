@@ -119,73 +119,9 @@
 	const BUILD_COMMIT = __BUILD_COMMIT__ ?? null;
 	const BUILD_BRANCH = __BUILD_BRANCH__ ?? null;
 
-	const TAGLINES = [
-		"Simplify. Deploy. Smile.",
-		"Less typing. More shipping.",
-		"Taming containers so you don't have to wrestle whales.",
-		"Docker management, minus the sea monsters.",
-		"Because wrangling containers shouldn't feel like open-heart surgery.",
-		"One interface to rule your containers (and your sanity).",
-		"CLI fatigue is real. We treat it.",
-		"Automate, orchestrate, hydrate — we handle the first two.",
-		"Turning docker ps into pure bliss.",
-		"Your API deserves better than bash therapy.",
-		"Where DevOps takes a deep breath.",
-		"Zero friction. Just containers.",
-		"Simplify. Deploy. Smile.",
-		"Because even the whale needs a handler.",
-		"From chaos to compose — elegantly.",
-		"No sea-sickness. Just smooth shipping.",
-		"Your Docker daemon's spirit guide.",
-		"Stop speaking whale. Start managing Docker like a human.",
-		"Because docker ps shouldn't be a lifestyle.",
-		"Your containers deserve better than shell scripts and stress.",
-		"We make your Docker behave — no magic flags required.",
-		"From jumbled YAMLs to zen-like order.",
-		"When your containers listen the first time.",
-		"Control the chaos, skip the CLI yoga.",
-		"Docker wrangling for the rest of us.",
-		"Making containers civilized since version 1.0.",
-		"Less whale-wrestling, more shipping.",
-		"Calm seas for every deployment.",
-		"No drama, just Docker.",
-		"Docker management, distilled.",
-		"Smooth orchestration. Zero overhead.",
-		"Build. Ship. Chill.",
-		"Think less. Deploy faster.",
-		"Total control — no keyboard acrobatics.",
-		"Because you've got better things to grep for.",
-		"No more container existential crises.",
-		"CLI fatigue? We prescribe automation.",
-		"One app to outsmart your bash history.",
-		"Making Docker less dockery since forever.",
-		"Because Docker shouldn't require a PhD in bash.",
-		"Your containers. Less chaos, more chill.",
-		"Stop copy-pasting the same docker ps | grep again.",
-		"Finally, a Docker UI that doesn't feel like punishment.",
-		"We speak fluent container, so you don't have to.",
-		"Bringing dignity back to Docker management.",
-		"For when you love Docker but hate Docker.",
-		"Automation for humans who still like buttons.",
-		"Taming your containers without taming your spirit.",
-		"No more whales in your workflow.",
-		"Keeping your containers in line since this morning.",
-		"Because every DevOps deserves a day off.",
-		"Serious about containers. Not about suffering.",
-		"Work smarter, not docker-harder.",
-		"Made for people who break prod responsibly.",
-		"Turning Docker discipline into an art form.",
-		"Your shortcut to shipping sanity.",
-		"Zero friction. Infinite containers.",
-		"Less yak-shaving, more image-pulling.",
-		"Because scripts age like milk.",
-		"CLI acrobatics are so 2020.",
-		"Containers behave. Developers rejoice.",
-		"Finally, a tool that respects your time and your terminal."
-	];
 	const localizedTaglines = $derived.by(() => {
 		const items = translateStringArray('settings.about.taglines', $locale);
-		return items.length > 0 ? items : TAGLINES;
+		return items.length > 0 ? items : [$t('settings.about.title')];
 	});
 
 	interface SystemInfo {
@@ -287,6 +223,15 @@
 	let updateCheckError = $state<string | null>(null);
 	let showSelfUpdateDialog = $state(false);
 
+	function getSelfUpdateErrorMessage(error: string): string {
+		switch (error) {
+			case 'Could not inspect current image':
+				return $t('settings.about.selfUpdate.errors.couldNotInspectCurrentImage');
+			default:
+				return error;
+		}
+	}
+
 	async function checkForUpdates() {
 		checkingUpdate = true;
 		updateCheckDone = false;
@@ -297,7 +242,7 @@
 		try {
 			const response = await fetch('/api/self-update/check');
 			if (!response.ok) {
-				updateCheckError = 'Failed to check for updates';
+				updateCheckError = $t('settings.about.selfUpdate.errors.checkFailed');
 				return;
 			}
 
@@ -305,7 +250,7 @@
 
 			if (data.error && !data.updateAvailable) {
 				// Not in Docker or other non-critical issue
-				updateCheckError = data.error;
+				updateCheckError = getSelfUpdateErrorMessage(data.error);
 				return;
 			}
 
@@ -745,7 +690,7 @@
 											SMB
 										</span>
 									{:else}
-										<span>Community</span>
+										<span>{$t('settings.about.editions.community')}</span>
 									{/if}
 									{#if $licenseStore.isLicensed && $licenseStore.licensedTo}
 										<span class="text-muted-foreground/50">|</span>

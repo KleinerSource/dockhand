@@ -38,11 +38,47 @@
 	let licenseFormError = $state('');
 	let licenseFormSaving = $state(false);
 
+	function getLicenseErrorMessage(error?: string | null): string {
+		if (!error) return '';
+		if (error === 'Invalid license format') return translate('settings.license.errors.invalidFormat');
+		if (error === 'Invalid license signature') return translate('settings.license.errors.invalidSignature');
+		if (error === 'License has expired') return translate('settings.license.errors.expired');
+		if (error === 'Name and key are required') return translate('settings.license.validation.nameKeyRequired');
+		if (error === 'Failed to get license status') return translate('settings.license.errors.fetchFailed');
+		if (error === 'Failed to activate license') return translate('settings.license.errors.activateFailed');
+		if (error === 'Permission denied') return translate('settings.license.errors.permissionDenied');
+		if (error === 'Authentication required') return translate('settings.license.errors.authenticationRequired');
+
+		const hostMatch = error.match(/^License is not valid for this host \((.+)\)$/);
+		if (hostMatch) {
+			return translate('settings.license.errors.hostMismatch', { host: hostMatch[1] });
+		}
+
+		const nameMatch = error.match(/^License name mismatch\. Expected "(.+)", got "(.+)"$/);
+		if (nameMatch) {
+			return translate('settings.license.errors.nameMismatch', {
+				expected: nameMatch[1],
+				actual: nameMatch[2]
+			});
+		}
+
+		const validationMatch = error.match(/^License validation failed: (.+)$/);
+		if (validationMatch) {
+			return translate('settings.license.errors.validationFailed', { error: validationMatch[1] });
+		}
+
+		return error;
+	}
+
 	async function fetchLicenseInfo() {
 		licenseLoading = true;
 		try {
 			const response = await fetch('/api/license');
-			licenseInfo = await response.json();
+			const result = await response.json();
+			licenseInfo = {
+				...result,
+				error: getLicenseErrorMessage(result.error)
+			};
 		} catch (error) {
 			console.error('Failed to fetch license info:', error);
 			licenseInfo = { valid: false, active: false, error: translate('settings.license.errors.fetchFailed') };
@@ -73,7 +109,7 @@
 			const result = await response.json();
 
 			if (!response.ok || result.error) {
-				licenseFormError = result.error || translate('settings.license.errors.activateFailed');
+				licenseFormError = getLicenseErrorMessage(result.error) || translate('settings.license.errors.activateFailed');
 				return;
 			}
 

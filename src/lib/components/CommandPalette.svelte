@@ -113,7 +113,7 @@
 					state: c.State,
 					image: c.Image,
 					envId: c.environmentId || 0,
-					envName: c.environmentName || 'Local'
+					envName: c.environmentName || $t('commandPalette.localEnvironment')
 				}));
 			}
 		} catch (e) {

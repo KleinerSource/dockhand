@@ -427,11 +427,24 @@
 	}
 
 	function getActionLabel(action: string): string {
-		return $t(`activity.actions.${action}`);
+		return $t(`activity.actions.${getActionLabelKey(action)}`);
+	}
+
+	function getActionLabelKey(action: string): string {
+		if (action.startsWith('health_status')) {
+			if (action.includes('unhealthy')) return 'health_status_unhealthy';
+			if (action.includes('healthy')) return 'health_status_healthy';
+			return 'health_status';
+		}
+		return action;
+	}
+
+	function getBaseAction(action: string): string {
+		return action.startsWith('health_status') ? 'health_status' : action;
 	}
 
 	function getActionIcon(action: string) {
-		switch (action) {
+		switch (getBaseAction(action)) {
 			case 'create': return Plus;
 			case 'start': return Play;
 			case 'stop': return Square;
@@ -450,7 +463,7 @@
 	}
 
 	function getActionColor(action: string): string {
-		switch (action) {
+		switch (getBaseAction(action)) {
 			case 'create':
 			case 'start':
 			case 'unpause':
@@ -837,7 +850,7 @@
 				{:else if column.id === 'container'}
 					<div class="flex items-center gap-1 truncate text-xs">
 						<Box class="w-3 h-3 text-muted-foreground shrink-0" />
-						<span class="truncate" title={event.containerName || event.containerId || 'Unknown'}>
+						<span class="truncate" title={event.containerName || event.containerId || $t('common.states.unknown')}>
 							{event.containerName || (event.containerId ? event.containerId.slice(0, 12) : $t('common.states.unknown'))}
 						</span>
 					</div>

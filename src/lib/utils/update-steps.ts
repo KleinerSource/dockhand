@@ -70,38 +70,6 @@ export function getStepIcon(step: StepType): ComponentType {
 	}
 }
 
-// Get human-readable label for a step
-export function getStepLabel(step: StepType): string {
-	switch (step) {
-		case 'pulling':
-			return 'Pulling image';
-		case 'scanning':
-			return 'Scanning for vulnerabilities';
-		case 'stopping':
-			return 'Stopping';
-		case 'removing':
-			return 'Removing';
-		case 'creating':
-			return 'Creating';
-		case 'starting':
-			return 'Starting';
-		case 'done':
-			return 'Done';
-		case 'updated':
-			return 'Updated';
-		case 'failed':
-			return 'Failed';
-		case 'blocked':
-			return 'Blocked by vulnerabilities';
-		case 'checked':
-			return 'Checked';
-		case 'skipped':
-			return 'Up-to-date';
-		default:
-			return step;
-	}
-}
-
 // Get color classes for a step
 export function getStepColor(step: StepType): string {
 	switch (step) {
@@ -122,25 +90,16 @@ export function getStepColor(step: StepType): string {
 	}
 }
 
-// Vulnerability criteria labels
-export const vulnerabilityCriteriaLabels: Record<VulnerabilityCriteria, string> = {
-	never: 'Never block',
-	any: 'Any vulnerability',
-	critical_high: 'Critical or high',
-	critical: 'Critical only',
-	more_than_current: 'More than current image'
-};
-
-// Vulnerability criteria icons with colors and titles
+// Vulnerability criteria icons with colors
 export const vulnerabilityCriteriaIcons: Record<
 	VulnerabilityCriteria,
-	{ component: ComponentType; class: string; title: string }
+	{ component: ComponentType; class: string }
 > = {
-	never: { component: ShieldOff, class: 'w-3.5 h-3.5 text-muted-foreground', title: 'No vulnerability blocking' },
-	any: { component: ShieldAlert, class: 'w-3.5 h-3.5 text-amber-500', title: 'Block on any vulnerability' },
-	critical_high: { component: ShieldX, class: 'w-3.5 h-3.5 text-orange-500', title: 'Block on critical or high' },
-	critical: { component: ShieldX, class: 'w-3.5 h-3.5 text-red-500', title: 'Block on critical only' },
-	more_than_current: { component: Shield, class: 'w-3.5 h-3.5 text-blue-500', title: 'Block if more than current' }
+	never: { component: ShieldOff, class: 'w-3.5 h-3.5 text-muted-foreground' },
+	any: { component: ShieldAlert, class: 'w-3.5 h-3.5 text-amber-500' },
+	critical_high: { component: ShieldX, class: 'w-3.5 h-3.5 text-orange-500' },
+	critical: { component: ShieldX, class: 'w-3.5 h-3.5 text-red-500' },
+	more_than_current: { component: Shield, class: 'w-3.5 h-3.5 text-blue-500' }
 };
 
 // Get badge variant based on criteria severity

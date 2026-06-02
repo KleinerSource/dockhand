@@ -312,7 +312,7 @@
 					<Label>{$t('settings.notifications.modal.type')}</Label>
 					{#if isEditing}
 						<Badge variant="secondary" class="h-9 flex items-center justify-center">
-							{formType === 'smtp' ? 'SMTP (Email)' : 'Apprise (Webhooks)'}
+							{formType === 'smtp' ? $t('settings.notifications.modal.typeLabels.smtp') : $t('settings.notifications.modal.typeLabels.apprise')}
 						</Badge>
 					{:else}
 						<Select.Root
@@ -323,18 +323,18 @@
 							<Select.Trigger class="w-full">
 								<span class="flex items-center gap-2">
 									{#if formType === 'smtp'}
-										<Mail class="w-4 h-4" />SMTP (Email)
+										<Mail class="w-4 h-4" />{$t('settings.notifications.modal.typeLabels.smtp')}
 									{:else}
-										<Zap class="w-4 h-4" />Apprise (Webhooks)
+										<Zap class="w-4 h-4" />{$t('settings.notifications.modal.typeLabels.apprise')}
 									{/if}
 								</span>
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="smtp">
-									<span class="flex items-center gap-2"><Mail class="w-4 h-4" />SMTP (Email)</span>
+									<span class="flex items-center gap-2"><Mail class="w-4 h-4" />{$t('settings.notifications.modal.typeLabels.smtp')}</span>
 								</Select.Item>
 								<Select.Item value="apprise">
-									<span class="flex items-center gap-2"><Zap class="w-4 h-4" />Apprise (Webhooks)</span>
+									<span class="flex items-center gap-2"><Zap class="w-4 h-4" />{$t('settings.notifications.modal.typeLabels.apprise')}</span>
 								</Select.Item>
 							</Select.Content>
 						</Select.Root>

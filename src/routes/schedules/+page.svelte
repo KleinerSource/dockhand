@@ -55,6 +55,7 @@
 	import { vulnerabilityCriteriaIcons } from '$lib/utils/update-steps';
 	import type { VulnerabilityCriteria } from '$lib/server/db';
 	import cronstrue from 'cronstrue';
+	import 'cronstrue/locales/zh_CN';
 	import { getIntlLocale, locale, t } from '$lib/i18n';
 
 	// Scanner result per scanner
@@ -184,6 +185,8 @@
 		vulnerabilityCriteria?: string | null;
 		// Env update check specific fields
 		autoUpdate?: boolean;
+		// Image prune specific fields
+		pruneMode?: 'all' | 'dangling';
 	}
 
 	// State
@@ -269,6 +272,8 @@
 			filtered = filtered.filter(s =>
 				s.name.toLowerCase().includes(query) ||
 				s.entityName.toLowerCase().includes(query) ||
+				getScheduleDisplayName(s).toLowerCase().includes(query) ||
+				getScheduleDisplayDescription(s).toLowerCase().includes(query) ||
 				(s.environmentName?.toLowerCase().includes(query) ?? false)
 			);
 		}
@@ -298,6 +303,111 @@
 	// Get unique key for a schedule
 	function getScheduleKey(schedule: Schedule): string {
 		return schedule.type + '-' + schedule.id;
+	}
+
+	function getScheduleDisplayName(schedule: Schedule): string {
+		const name = schedule.entityName || schedule.name;
+
+		switch (schedule.type) {
+			case 'container_update':
+				return $t('schedules.display.names.containerUpdate', { name });
+			case 'git_stack_sync':
+				return $t('schedules.display.names.gitStackSync', { name });
+			case 'env_update_check':
+				return $t('schedules.display.names.envUpdateCheck', { name });
+			case 'image_prune':
+				return $t('schedules.display.names.imagePrune', { name });
+			case 'system_cleanup':
+				return getSystemScheduleDisplayName(schedule.id, schedule.name);
+			default:
+				return schedule.name;
+		}
+	}
+
+	function getScheduleDisplayDescription(schedule: Schedule): string {
+		switch (schedule.type) {
+			case 'container_update':
+				return schedule.envHasScanning
+					? $t('schedules.descriptions.checkScanAutoUpdate')
+					: $t('schedules.descriptions.checkAutoUpdate');
+			case 'git_stack_sync':
+				return $t('schedules.descriptions.gitSync');
+			case 'env_update_check':
+				if (schedule.autoUpdate && schedule.envHasScanning) {
+					return $t('schedules.descriptions.checkScanAutoUpdate');
+				}
+				if (schedule.autoUpdate) {
+					return $t('schedules.descriptions.checkAutoUpdate');
+				}
+				return $t('schedules.display.descriptions.checkUpdatesNotifyOnly');
+			case 'image_prune':
+				return getImagePruneDescription(schedule);
+			case 'system_cleanup':
+				return getSystemScheduleDisplayDescription(schedule.id, schedule.description);
+			default:
+				return schedule.description || $t('schedules.systemJob');
+		}
+	}
+
+	function getCronstrueLocale(): string {
+		return $locale === 'zh-CN' ? 'zh_CN' : 'en';
+	}
+
+	function getScheduleTypeLabel(scheduleType: string): string {
+		switch (scheduleType) {
+			case 'daily':
+				return $t('cron.daily');
+			case 'weekly':
+				return $t('cron.weekly');
+			case 'custom':
+				return $t('cron.custom');
+			default:
+				return scheduleType;
+		}
+	}
+
+	function getImagePruneDescription(schedule: Schedule): string {
+		const pruneMode = schedule.pruneMode || (schedule.description?.toLowerCase().includes('dangling') ? 'dangling' : 'all');
+		return pruneMode === 'dangling'
+			? $t('schedules.display.descriptions.pruneDanglingImages')
+			: $t('schedules.display.descriptions.pruneAllUnusedImages');
+	}
+
+	function getSystemScheduleDisplayName(id: number, fallback: string): string {
+		switch (id) {
+			case 1:
+				return $t('schedules.display.system.scheduleExecutionCleanup.name');
+			case 2:
+				return $t('schedules.display.system.containerEventCleanup.name');
+			case 3:
+				return $t('schedules.display.system.volumeHelperCleanup.name');
+			case 4:
+				return $t('schedules.display.system.scannerCacheCleanup.name');
+			default:
+				return fallback;
+		}
+	}
+
+	function getSystemScheduleDisplayDescription(id: number, fallback?: string): string {
+		const days = getRetentionDays(fallback);
+
+		switch (id) {
+			case 1:
+				return $t('schedules.display.system.scheduleExecutionCleanup.description', { days: days ?? 0 });
+			case 2:
+				return $t('schedules.display.system.containerEventCleanup.description', { days: days ?? 0 });
+			case 3:
+				return $t('schedules.display.system.volumeHelperCleanup.description');
+			case 4:
+				return $t('schedules.display.system.scannerCacheCleanup.description');
+			default:
+				return fallback || $t('schedules.systemJob');
+		}
+	}
+
+	function getRetentionDays(description?: string): number | null {
+		const match = description?.match(/(\d+)\s+days/i);
+		return match ? parseInt(match[1], 10) : null;
 	}
 
 	function connectToStream() {
@@ -582,7 +692,7 @@
 				const data = await res.json();
 				throw new Error(data.error || $t('schedules.failedToTrigger'));
 			}
-			toast.success($t('schedules.triggeredToast', { name: schedule.name }));
+			toast.success($t('schedules.triggeredToast', { name: getScheduleDisplayName(schedule) }));
 
 			// Refresh schedules from REST after a short delay to show running status
 			// This doesn't disrupt the SSE stream but ensures spinner appears quickly
@@ -873,6 +983,8 @@
 				return $t('schedules.environmentUpdate');
 			case 'git_stack_sync':
 				return $t('schedules.gitStackSync');
+			case 'image_prune':
+				return $t('schedules.types.image_prune');
 			default:
 				return $t('schedules.systemJob');
 		}
@@ -1166,7 +1278,7 @@
 					{/if}
 					<div class="min-w-0">
 						<div class="font-medium flex items-center gap-2 truncate">
-							<span class="truncate">{schedule.name}</span>
+							<span class="truncate">{getScheduleDisplayName(schedule)}</span>
 							{#if schedule.isSystem}
 								<Badge variant="outline" class="text-xs shrink-0">{$t('schedules.systemBadge')}</Badge>
 							{/if}
@@ -1195,11 +1307,11 @@
 										<IconComponent class={icon.class} />
 									</span>
 								{/if}
-								<span class="truncate">{schedule.description || $t('schedules.types.env_update_check')}</span>
+								<span class="truncate">{getScheduleDisplayDescription(schedule)}</span>
 							{:else if schedule.type === 'image_prune'}
-								<span class="truncate">{schedule.description || $t('schedules.descriptions.pruneUnusedImages')}</span>
+								<span class="truncate">{getScheduleDisplayDescription(schedule)}</span>
 							{:else}
-								<span class="truncate">{schedule.description || $t('schedules.systemJob')}</span>
+								<span class="truncate">{getScheduleDisplayDescription(schedule)}</span>
 							{/if}
 						</div>
 					</div>
@@ -1220,19 +1332,18 @@
 						{#if schedule.cronExpression}
 							{(() => {
 								try {
-									if ($locale !== 'en') return schedule.cronExpression;
 									const is12Hour = $appSettings.timeFormat === '12h';
 									return cronstrue.toString(schedule.cronExpression, {
 										use24HourTimeFormat: !is12Hour,
 										throwExceptionOnParseError: true,
-										locale: 'en'
+										locale: getCronstrueLocale()
 									});
 								} catch {
 									return schedule.cronExpression;
 								}
 							})()}
 						{:else}
-							{schedule.scheduleType}
+							{getScheduleTypeLabel(schedule.scheduleType)}
 						{/if}
 					</span>
 				</div>
@@ -1341,9 +1452,9 @@
 							open={confirmDeleteId === scheduleKey}
 							action={$t('common.actions.remove')}
 							itemType={$t('schedules.scheduleItemType')}
-							itemName={schedule.entityName}
+							itemName={getScheduleDisplayName(schedule)}
 							title={$t('schedules.removeSchedule')}
-							onConfirm={() => deleteSchedule(schedule.type, schedule.id, schedule.entityName)}
+							onConfirm={() => deleteSchedule(schedule.type, schedule.id, getScheduleDisplayName(schedule))}
 							onOpenChange={(open) => confirmDeleteId = open ? scheduleKey : null}
 						>
 							{#snippet children({ open })}

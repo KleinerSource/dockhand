@@ -33,7 +33,7 @@
 	let { events, limit = 8, onclick }: Props = $props();
 
 	function getActionIcon(action: string): Component {
-		switch (action) {
+		switch (getBaseAction(action)) {
 			case 'create': return Plus;
 			case 'start': return Play;
 			case 'stop': return Square;
@@ -52,7 +52,7 @@
 	}
 
 	function getActionColor(action: string): string {
-		switch (action) {
+		switch (getBaseAction(action)) {
 			case 'create':
 			case 'start':
 			case 'unpause':
@@ -92,8 +92,22 @@
 	}
 
 	function getActionLabel(action: string): string {
-		const label = $t(`activity.actions.${action}`);
-		return label === `activity.actions.${action}` ? action : label;
+		const key = `activity.actions.${getActionLabelKey(action)}`;
+		const label = $t(key);
+		return label === key ? action : label;
+	}
+
+	function getActionLabelKey(action: string): string {
+		if (action.startsWith('health_status')) {
+			if (action.includes('unhealthy')) return 'health_status_unhealthy';
+			if (action.includes('healthy')) return 'health_status_healthy';
+			return 'health_status';
+		}
+		return action;
+	}
+
+	function getBaseAction(action: string): string {
+		return action.startsWith('health_status') ? 'health_status' : action;
 	}
 </script>
 

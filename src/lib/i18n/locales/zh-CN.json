@@ -123,6 +123,7 @@
 			"modified": "修改时间",
 			"name": "名称",
 			"netIo": "网络 I/O",
+			"network": "网络",
 			"networks": "网络",
 			"nextRun": "下次运行",
 			"osArch": "系统/架构",
@@ -161,7 +162,8 @@
 			"user": "用户",
 			"users": "用户",
 			"version": "版本",
-			"volumes": "卷"
+			"volumes": "卷",
+			"dependencies": "依赖"
 		},
 		"counts": {
 			"of": "{count} / {total}"
@@ -177,6 +179,13 @@
 		"errors": {
 			"unknown": "发生未知错误"
 		}
+	},
+	"passwordStrength": {
+		"tooShort": "太短",
+		"weak": "弱",
+		"fair": "一般",
+		"good": "良好",
+		"strong": "强"
 	},
 	"filters": {
 		"allTime": "全部时间",
@@ -301,6 +310,8 @@
 			"containers": "容器",
 			"volumes": "卷",
 			"buildCache": "构建缓存",
+			"events": "事件",
+			"eventsTodayTotal": "今日 {today} / 总计 {total}",
 			"recentEvents": "最近事件",
 			"topContainersByCpu": "CPU 占用最高的容器",
 			"noRunningContainers": "暂无运行中容器",
@@ -487,7 +498,8 @@
 		},
 		"errors": {
 			"startFailed": "启动拉取失败",
-			"pullFailed": "拉取镜像失败"
+			"pullFailed": "拉取镜像失败",
+			"failedToDeleteImage": "删除镜像失败"
 		}
 	},
 	"imagePush": {
@@ -625,6 +637,7 @@
 			"ended": "日志流已结束",
 			"startFailed": "启动日志流失败",
 			"connectionError": "连接错误",
+			"connectionFailedRetry": "连接失败。点击重试。",
 			"reconnecting": "正在重新连接（{attempt}/{total}）...",
 			"connectingToStream": "正在连接日志流...",
 			"clickToReconnect": "点击重新连接"
@@ -740,6 +753,11 @@
 			}
 		}
 	},
+	"dockerEvents": {
+		"connectionLostReconnecting": "连接中断。正在重新连接（{current}/{total}）...",
+		"connectionFailedRefresh": "连接失败。请刷新页面重试。",
+		"failedToConnect": "连接失败"
+	},
 	"containers": {
 		"page": {
 			"pageTitle": "容器 - Dockhand",
@@ -764,6 +782,23 @@
 			"healthy": "健康",
 			"unhealthy": "不健康",
 			"starting": "启动中"
+		},
+		"validation": {
+			"nameRequired": "容器名称为必填项",
+			"imageRequired": "镜像名称为必填项"
+		},
+		"uptime": {
+			"lessThanSecond": "不到 1 秒",
+			"aboutMinute": "约 1 分钟",
+			"aboutHour": "约 1 小时",
+			"seconds": "{count} 秒",
+			"minutes": "{count} 分钟",
+			"hours": "{count} 小时",
+			"days": "{count} 天",
+			"weeks": "{count} 周",
+			"months": "{count} 个月",
+			"years": "{count} 年",
+			"ago": "{value}前"
 		},
 		"actions": {
 			"checkUpdates": "检查更新",
@@ -875,7 +910,23 @@
 			"viewGitHubInstructions": "查看 GitHub 上的更新说明",
 			"enableAutomatic": "启用镜像自动更新",
 			"vulnerabilityCriteria": "漏洞条件",
-			"blockByVulnerabilityCriteria": "如果新镜像存在匹配此条件的漏洞，则阻止自动更新"
+			"blockByVulnerabilityCriteria": "如果新镜像存在匹配此条件的漏洞，则阻止自动更新",
+			"schedule": {
+				"enabledLabel": "开",
+				"enabledTooltip": "已启用自动更新",
+				"cronLabel": "Cron",
+				"dailyAt": "每天 {time}",
+				"weeklyAt": "每周{day} {time}",
+				"days": {
+					"sunday": "日",
+					"monday": "一",
+					"tuesday": "二",
+					"wednesday": "三",
+					"thursday": "四",
+					"friday": "五",
+					"saturday": "六"
+				}
+			}
 		},
 		"batchUpdate": {
 			"title": "正在更新容器",
@@ -889,8 +940,16 @@
 			"hideLogs": "隐藏日志",
 			"showLogs": "显示日志",
 			"vulnerabilitiesFound": "发现 {count} 个漏洞",
+			"imageCached": "镜像已缓存（镜像仓库版本与本地一致）",
+			"updating": "正在更新...",
+			"moreVulnerabilities": "...另有 {count} 个",
 			"columns": {
 				"fixed": "修复版本"
+			},
+			"errors": {
+				"startUpdateFailed": "启动更新失败",
+				"updateFailed": "更新失败",
+				"forceUpdateFailed": "强制更新失败"
 			}
 		},
 		"create": {
@@ -926,6 +985,12 @@
 			"toasts": {
 				"renamed": "容器已重命名！",
 				"updated": "容器已更新！"
+			},
+			"status": {
+				"renaming": "正在重命名容器...",
+				"updating": "正在更新容器...",
+				"savingAutoUpdate": "正在保存自动更新设置...",
+				"autoUpdateSaved": "自动更新设置已保存！"
 			},
 			"errors": {
 				"fetchContainer": "获取容器失败：{status}",
@@ -1036,7 +1101,10 @@
 			},
 			"errors": {
 				"connectNetwork": "连接到网络失败",
-				"disconnectNetwork": "从网络断开失败"
+				"disconnectNetwork": "从网络断开失败",
+				"fetchContainerDetails": "获取容器详情失败",
+				"loadContainerDetails": "加载容器详情失败",
+				"fetchProcesses": "获取进程失败"
 			}
 		},
 		"settings": {
@@ -1161,12 +1229,25 @@
 				"count": "数量",
 				"specific": "指定"
 			},
+			"volumeModes": {
+				"readWriteShort": "读写",
+				"readOnlyShort": "只读"
+			},
+			"validation": {
+				"invalidIpv4": "IPv4 地址无效",
+				"invalidIpv6": "IPv6 地址无效",
+				"invalidMac": "MAC 地址无效（例如：02:42:ac:11:00:02）"
+			},
 			"actions": {
 				"addDevice": "添加设备",
 				"addUlimit": "添加 ulimit"
 			}
 		},
 		"fileBrowser": {
+			"modal": {
+				"title": "浏览文件 - {name}",
+				"description": "浏览、上传和下载容器文件系统中的文件。"
+			},
 			"actions": {
 				"newFile": "新建文件",
 				"newDirectory": "新建目录",
@@ -1240,6 +1321,7 @@
 			}
 		},
 		"toasts": {
+			"loadFailed": "加载容器失败",
 			"failedUpdateChecksSummary": "{prefix}（{count} 个检查失败）",
 			"allUpToDate": "所有容器均为最新",
 			"updatesAvailable": "有 {count} 个可用更新",
@@ -1751,6 +1833,7 @@
 		"description": "搜索页面和操作",
 		"placeholder": "搜索...",
 		"noResults": "未找到结果。",
+		"localEnvironment": "本地",
 		"groups": {
 			"navigation": "导航",
 			"enterprise": "企业版",
@@ -2575,6 +2658,10 @@
 				"name": "名称",
 				"namePlaceholder": "我的通知渠道",
 				"type": "类型",
+				"typeLabels": {
+					"smtp": "SMTP（邮件）",
+					"apprise": "Apprise（Webhook）"
+				},
 				"status": "状态",
 				"enabled": "已启用",
 				"disabled": "已禁用",
@@ -2679,6 +2766,8 @@
 				"portMappings": "端口映射",
 				"volumeMappings": "卷映射",
 				"addRow": "添加",
+				"envKeyPlaceholder": "变量名",
+				"labelKeyPlaceholder": "标签键",
 				"valuePlaceholder": "值",
 				"hostPort": "主机端口",
 				"containerPort": "容器端口",
@@ -2695,9 +2784,13 @@
 				},
 				"restartOptions": {
 					"no": "无",
-					"always": "Always",
-					"on-failure": "On failure",
-					"unless-stopped": "Unless stopped"
+					"always": "始终",
+					"on-failure": "失败时",
+					"unless-stopped": "除非手动停止"
+				},
+				"volumeModes": {
+					"readWriteShort": "读写",
+					"readOnlyShort": "只读"
 				},
 				"validation": {
 					"nameRequired": "名称为必填项",
@@ -2803,7 +2896,15 @@
 			"errors": {
 				"fetchFailed": "获取许可证信息失败",
 				"activateFailed": "激活许可证失败",
-				"deactivateFailed": "停用许可证失败"
+				"deactivateFailed": "停用许可证失败",
+				"invalidFormat": "许可证格式无效",
+				"invalidSignature": "许可证签名无效",
+				"expired": "许可证已过期",
+				"hostMismatch": "许可证不适用于当前主机（{host}）",
+				"nameMismatch": "许可证名称不匹配。应为“{expected}”，实际为“{actual}”",
+				"validationFailed": "许可证验证失败：{error}",
+				"permissionDenied": "没有权限",
+				"authenticationRequired": "需要登录"
 			},
 			"toasts": {
 				"activated": "许可证已成功激活",
@@ -2982,7 +3083,12 @@
 					"pulling": "正在拉取",
 					"update": "更新",
 					"checking": "正在检查",
-					"check": "检查"
+					"check": "检查",
+					"errors": {
+						"pullGrypeImage": "拉取 Grype 镜像失败",
+						"pullTrivyImage": "拉取 Trivy 镜像失败",
+						"pullFailed": "拉取失败"
+					}
 				},
 				"notifications": {
 					"title": "通知渠道",
@@ -3172,6 +3278,10 @@
 			}
 		},
 		"git": {
+			"tabs": {
+				"repositories": "仓库",
+				"credentials": "凭据"
+			},
 			"auth": {
 				"sshKey": "SSH 密钥",
 				"password": "密码",
@@ -3305,6 +3415,7 @@
 			}
 		},
 		"about": {
+			"title": "关于",
 			"dockhandLogo": "Dockhand 标志",
 			"version": "版本 {version}",
 			"checkingForUpdates": "正在检查更新...",
@@ -3331,6 +3442,9 @@
 			"privacyTitle": "隐私政策",
 			"failedToFetchLicense": "获取许可证失败",
 			"failedToFetchPrivacy": "获取隐私政策失败",
+			"editions": {
+				"community": "社区版"
+			},
 			"selfUpdate": {
 				"updateDockhand": "更新 Dockhand",
 				"updatingDockhand": "正在更新 Dockhand",
@@ -3356,6 +3470,10 @@
 				"connectionLost": "连接中断：{error}",
 				"updaterExited": "更新器退出，代码 {code}",
 				"backOnline": "Dockhand 已恢复在线",
+				"errors": {
+					"checkFailed": "检查更新失败",
+					"couldNotInspectCurrentImage": "无法检查当前镜像"
+				},
 				"steps": {
 					"pulling_image": "正在拉取新镜像",
 					"building_config": "正在构建容器配置",
@@ -3450,7 +3568,9 @@
 			"rename": "重命名",
 			"update": "更新",
 			"oom": "内存不足",
-			"health_status": "健康状态"
+			"health_status": "健康状态",
+			"health_status_healthy": "健康",
+			"health_status_unhealthy": "不健康"
 		}
 	},
 	"audit": {
@@ -3472,6 +3592,11 @@
 		"loadingMore": "正在加载更多...",
 		"endOfResults": "已到结果末尾（{count} 条记录）",
 		"failedToFetch": "获取审计日志失败",
+		"stream": {
+			"connectionLostReconnecting": "连接中断。正在重新连接（{current}/{total}）...",
+			"connectionFailedRefresh": "连接失败。请刷新页面重试。",
+			"failedToConnect": "连接失败"
+		},
 		"actions": {
 			"create": "创建",
 			"update": "更新",
@@ -3777,6 +3902,7 @@
 			"runningContainers": "运行中的容器：",
 			"composeFile": "Compose 文件",
 			"envFile": "Env 文件",
+			"newStack": "新堆栈",
 			"enterStackNameAbove": "请先在上方输入堆栈名称",
 			"notSpecified": "未指定",
 			"noComposeSelected": "尚未选择 Compose 文件",
@@ -4000,6 +4126,7 @@
 			"serviceCountOne": "{count} 个服务",
 			"serviceCountMany": "{count} 个服务",
 			"runningCount": "{count} 个运行中",
+			"dockhandHost": "Dockhand 主机",
 			"remoteFilesPrefix": "这些 Compose 文件位于",
 			"remoteFilePrefix": "此 Compose 文件位于",
 			"remoteFilesMiddle": "不在 {environment} 上。",
@@ -4182,6 +4309,37 @@
 			"gitSync": "Git 同步",
 			"pruneUnusedImages": "清理未使用镜像"
 		},
+		"display": {
+			"names": {
+				"containerUpdate": "更新容器：{name}",
+				"gitStackSync": "Git 同步：{name}",
+				"envUpdateCheck": "更新环境：{name}",
+				"imagePrune": "清理镜像：{name}"
+			},
+			"descriptions": {
+				"checkUpdatesNotifyOnly": "检查容器更新（仅通知）",
+				"pruneAllUnusedImages": "清理所有未使用镜像",
+				"pruneDanglingImages": "仅清理悬空镜像"
+			},
+			"system": {
+				"scheduleExecutionCleanup": {
+					"name": "调度执行记录清理",
+					"description": "移除超过 {days} 天的执行日志"
+				},
+				"containerEventCleanup": {
+					"name": "容器事件清理",
+					"description": "移除超过 {days} 天的容器事件"
+				},
+				"volumeHelperCleanup": {
+					"name": "卷浏览辅助容器清理",
+					"description": "清理用于浏览卷内容的临时容器"
+				},
+				"scannerCacheCleanup": {
+					"name": "扫描器缓存清理",
+					"description": "移除扫描器漏洞数据库缓存以回收磁盘空间"
+				}
+			}
+		},
 		"status": {
 			"queued": "排队中",
 			"running": "运行中",
@@ -4229,11 +4387,28 @@
 	},
 	"batchOperation": {
 		"runningCloseConfirm": "操作仍在运行。要取消并关闭吗？",
+		"processingItems": "正在处理 {count} 个{entity}...",
+		"preparingItems": "准备{operation} {count} 个{entity}...",
+		"completedSummary": "已完成：{success} 个成功",
+		"failedSuffix": "，{count} 个失败",
+		"cancelledSuffix": "，{count} 个已取消",
 		"succeeded": "成功",
 		"failed": "失败",
 		"cancelled": "已取消",
 		"pending": "待处理",
-		"cancel": "取消"
+		"done": "完成",
+		"cancel": "取消",
+		"operations": {
+			"remove": "移除",
+			"start": "启动",
+			"stop": "停止",
+			"restart": "重启",
+			"down": "下线",
+			"removing": "正在移除",
+			"starting": "正在启动",
+			"stopping": "正在停止",
+			"restarting": "正在重启"
+		}
 	},
 	"updateSteps": {
 		"pulling": "正在拉取镜像",
@@ -4326,6 +4501,15 @@
 			"title": "侧边栏",
 			"description": "显示移动端侧边栏。",
 			"toggle": "切换侧边栏"
+		},
+		"emptyState": {
+			"noEnvironment": {
+				"selectedTitle": "未选择环境",
+				"selectedDescription": "从下拉菜单选择一个 Docker 环境即可开始",
+				"configuredTitle": "尚未配置环境",
+				"configuredDescription": "在设置中添加 Docker 环境即可开始",
+				"goToSettings": "前往设置"
+			}
 		},
 		"errorDialog": {
 			"copyError": "复制错误",

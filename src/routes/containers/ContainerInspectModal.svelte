@@ -333,11 +333,11 @@
 			const envId = $currentEnvironment?.id ?? null;
 			const response = await fetch(appendEnvParam(`/api/containers/${containerId}/inspect`, envId));
 			if (!response.ok) {
-				throw new Error('Failed to fetch container details');
+				throw new Error(translate('containers.inspect.errors.fetchContainerDetails'));
 			}
 			containerData = await response.json();
 		} catch (err: any) {
-			error = err.message || 'Failed to load container details';
+			error = err.message || translate('containers.inspect.errors.loadContainerDetails');
 			console.error('Failed to fetch container inspect:', err);
 		} finally {
 			loading = false;
@@ -399,10 +399,10 @@
 					processesError = data.error;
 				}
 			} else {
-				processesError = 'Failed to fetch processes';
+				processesError = translate('containers.inspect.errors.fetchProcesses');
 			}
 		} catch (err: any) {
-			processesError = err.message || 'Failed to fetch processes';
+			processesError = err.message || translate('containers.inspect.errors.fetchProcesses');
 		} finally {
 			processesLoading = false;
 		}

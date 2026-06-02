@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import { translate } from '$lib/i18n';
 
 export interface AuditLogEntry {
 	id: number;
@@ -87,12 +88,15 @@ export function connectAuditSSE() {
 			// Attempt reconnection
 			if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
 				reconnectAttempts++;
-				auditSseError.set(`Connection lost. Reconnecting (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+				auditSseError.set(translate('audit.stream.connectionLostReconnecting', {
+					current: reconnectAttempts,
+					total: MAX_RECONNECT_ATTEMPTS
+				}));
 				reconnectTimeout = setTimeout(() => {
 					connectAuditSSE();
 				}, RECONNECT_DELAY);
 			} else {
-				auditSseError.set('Connection failed. Refresh the page to retry.');
+				auditSseError.set(translate('audit.stream.connectionFailedRefresh'));
 			}
 		});
 
@@ -102,7 +106,7 @@ export function connectAuditSSE() {
 
 	} catch (error: any) {
 		console.error('Failed to create Audit EventSource:', error);
-		auditSseError.set(error.message || 'Failed to connect');
+		auditSseError.set(error.message || translate('audit.stream.failedToConnect'));
 		auditSseConnected.set(false);
 	}
 }

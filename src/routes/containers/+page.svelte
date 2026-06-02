@@ -1234,10 +1234,43 @@
 		// Extract uptime from status like "Up 2 hours" or "Exited (0) 3 days ago"
 		if (!status) return '-';
 		const upMatch = status.match(/Up\s+(.+?)(?:\s+\(|$)/i);
-		if (upMatch) return upMatch[1].trim();
-		const exitMatch = status.match(/Exited.+?(\d+\s+\w+)\s+ago/i);
-		if (exitMatch) return exitMatch[1] + ' ago';
+		if (upMatch) return formatDockerDuration(upMatch[1].trim());
+		const exitMatch = status.match(/Exited\s+\([^)]+\)\s+(.+?)\s+ago/i);
+		if (exitMatch) return $t('containers.uptime.ago', { value: formatDockerDuration(exitMatch[1].trim()) });
 		return '-';
+	}
+
+	function formatDockerDuration(timeStr: string): string {
+		const str = timeStr.toLowerCase();
+
+		if (str.includes('less than a second')) return $t('containers.uptime.lessThanSecond');
+		if (str.includes('about a minute')) return $t('containers.uptime.aboutMinute');
+		if (str.includes('about an hour')) return $t('containers.uptime.aboutHour');
+
+		const match = str.match(/(\d+)\s*(second|minute|hour|day|week|month|year)/);
+		if (!match) return timeStr;
+
+		const count = parseInt(match[1], 10);
+		const unit = match[2] as 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+		switch (unit) {
+			case 'second':
+				return $t('containers.uptime.seconds', { count });
+			case 'minute':
+				return $t('containers.uptime.minutes', { count });
+			case 'hour':
+				return $t('containers.uptime.hours', { count });
+			case 'day':
+				return $t('containers.uptime.days', { count });
+			case 'week':
+				return $t('containers.uptime.weeks', { count });
+			case 'month':
+				return $t('containers.uptime.months', { count });
+			case 'year':
+				return $t('containers.uptime.years', { count });
+			default:
+				return timeStr;
+		}
 	}
 
 	let copiedCommand = $state<string | null>(null);
@@ -1974,7 +2007,7 @@
 									{@const icon = vulnerabilityCriteriaIcons[criteria]}
 									{#if icon}
 										{@const IconComponent = icon.component}
-										<span class="cursor-default" title={icon.title}>
+										<span class="cursor-default" title={$t(`vulnerabilityCriteria.titles.${criteria}`)}>
 											<IconComponent class={icon.class} />
 										</span>
 									{/if}

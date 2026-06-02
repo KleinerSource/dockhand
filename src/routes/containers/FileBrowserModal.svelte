@@ -3,6 +3,7 @@
 	import { FolderOpen } from 'lucide-svelte';
 	import FileBrowserPanel from './FileBrowserPanel.svelte';
 	import { canAccess } from '$lib/stores/auth';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -26,10 +27,10 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<FolderOpen class="w-5 h-5" />
-				<span>Browse files - {containerName}</span>
+				<span>{$t('containers.fileBrowser.modal.title', { name: containerName })}</span>
 			</Dialog.Title>
 			<Dialog.Description>
-				Browse, upload, and download files from the container filesystem.
+				{$t('containers.fileBrowser.modal.description')}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex-1 overflow-hidden border rounded-lg">

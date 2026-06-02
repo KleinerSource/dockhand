@@ -652,7 +652,7 @@
 	}
 
 	// Display title
-	const displayName = $derived(mode === 'edit' ? stackName : (newStackName || 'New stack'));
+	const displayName = $derived(mode === 'edit' ? stackName : (newStackName || $t('stacks.modal.newStack')));
 
 	onMount(() => {
 		// Load saved editor theme, or fall back to app theme / system preference

@@ -928,9 +928,9 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 			eventSource.addEventListener('error', (event: Event) => {
 				try {
 					const data = JSON.parse((event as MessageEvent).data);
-					connectionError = data.error || 'Connection error';
+					connectionError = data.error || translate('logs.stream.connectionError');
 				} catch {
-					connectionError = 'Connection error';
+					connectionError = translate('logs.stream.connectionError');
 				}
 				handleStreamError();
 			});
@@ -1130,9 +1130,9 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 			eventSource.addEventListener('error', (event: Event) => {
 				try {
 					const data = JSON.parse((event as MessageEvent).data);
-					connectionError = data.error || 'Connection error';
+					connectionError = data.error || translate('logs.stream.connectionError');
 				} catch {
-					connectionError = 'Connection error';
+					connectionError = translate('logs.stream.connectionError');
 				}
 				handleStreamError();
 			});
@@ -1215,7 +1215,7 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 				}
 			}, RECONNECT_DELAY);
 		} else {
-			connectionError = 'Connection failed. Click to retry.';
+			connectionError = translate('logs.stream.connectionFailedRetry');
 		}
 	}
 
@@ -2128,7 +2128,7 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 								title={$t('logs.tooltips.toggleWordWrap')}
 							>
 								<WrapText class="w-3 h-3" />
-								<span>Wrap</span>
+								<span>{$t('logs.controls.wrap')}</span>
 							</button>
 							<button
 								onclick={() => { showTimestamps = !showTimestamps; localStorage.setItem('dockhand-log-timestamps', String(showTimestamps)); }}

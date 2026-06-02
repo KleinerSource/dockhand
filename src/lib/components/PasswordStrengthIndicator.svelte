@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
+
 	interface Props {
 		password: string;
 	}
@@ -24,11 +26,11 @@
 	});
 
 	const strengthLabel = $derived(
-		strength === 0 ? 'Too short' :
-		strength === 1 ? 'Weak' :
-		strength === 2 ? 'Fair' :
-		strength === 3 ? 'Good' :
-		'Strong'
+		strength === 0 ? $t('passwordStrength.tooShort') :
+		strength === 1 ? $t('passwordStrength.weak') :
+		strength === 2 ? $t('passwordStrength.fair') :
+		strength === 3 ? $t('passwordStrength.good') :
+		$t('passwordStrength.strong')
 	);
 
 	const strengthColor = $derived(

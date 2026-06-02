@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { currentEnvironment, environments } from './environment';
+import { translate } from '$lib/i18n';
 
 export interface DockerEvent {
 	type: 'container' | 'image' | 'volume' | 'network';
@@ -142,13 +143,16 @@ export function connectSSE(envId?: number | null) {
 			// Attempt reconnection
 			if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
 				reconnectAttempts++;
-				sseError.set(`Connection lost. Reconnecting (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+				sseError.set(translate('dockerEvents.connectionLostReconnecting', {
+					current: reconnectAttempts,
+					total: MAX_RECONNECT_ATTEMPTS
+				}));
 				reconnectTimeout = setTimeout(() => {
 					const env = get(currentEnvironment);
 					connectSSE(env?.id);
 				}, RECONNECT_DELAY);
 			} else {
-				sseError.set('Connection failed. Refresh the page to retry.');
+				sseError.set(translate('dockerEvents.connectionFailedRefresh'));
 			}
 		});
 
@@ -158,7 +162,7 @@ export function connectSSE(envId?: number | null) {
 
 	} catch (error: any) {
 		console.error('Failed to create EventSource:', error);
-		sseError.set(error.message || 'Failed to connect');
+		sseError.set(error.message || translate('dockerEvents.failedToConnect'));
 		sseConnected.set(false);
 	}
 }

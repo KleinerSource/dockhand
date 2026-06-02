@@ -7,14 +7,6 @@
 	import { formatBytes } from '$lib/utils/format';
 	import { t } from '$lib/i18n';
 
-	const progressText: Record<string, string> = {
-		remove: 'removing',
-		start: 'starting',
-		stop: 'stopping',
-		restart: 'restarting',
-		down: 'stopping'
-	};
-
 	// Local type definitions (matching server types)
 	type ItemStatus = 'pending' | 'processing' | 'success' | 'error' | 'cancelled';
 
@@ -208,6 +200,70 @@
 		onClose();
 		onComplete();
 	}
+
+	function getEntityTypeLabel(): string {
+		switch (entityType) {
+			case 'containers':
+				return $t('common.labels.containers');
+			case 'images':
+				return $t('common.labels.images');
+			case 'volumes':
+				return $t('common.labels.volumes');
+			case 'networks':
+				return $t('common.labels.networks');
+			case 'stacks':
+				return $t('common.labels.stacks');
+			default:
+				return entityType;
+		}
+	}
+
+	function getOperationLabel(): string {
+		switch (operation) {
+			case 'remove':
+				return $t('batchOperation.operations.remove');
+			case 'start':
+				return $t('batchOperation.operations.start');
+			case 'stop':
+				return $t('batchOperation.operations.stop');
+			case 'restart':
+				return $t('batchOperation.operations.restart');
+			case 'down':
+				return $t('batchOperation.operations.down');
+			default:
+				return operation;
+		}
+	}
+
+	function getProcessingLabel(): string {
+		switch (operation) {
+			case 'remove':
+				return $t('batchOperation.operations.removing');
+			case 'start':
+				return $t('batchOperation.operations.starting');
+			case 'stop':
+			case 'down':
+				return $t('batchOperation.operations.stopping');
+			case 'restart':
+				return $t('batchOperation.operations.restarting');
+			default:
+				return operation;
+		}
+	}
+
+	function getCompleteDescription(): string {
+		let description = $t('batchOperation.completedSummary', { success: successCount });
+		if (failCount > 0) {
+			description += $t('batchOperation.failedSuffix', { count: failCount });
+		}
+		if (cancelledCount > 0) {
+			description += $t('batchOperation.cancelledSuffix', { count: cancelledCount });
+		}
+		if (totalSize && successCount > 0) {
+			description += ` (${formatBytes(totalSize)})`;
+		}
+		return description;
+	}
 </script>
 
 <Dialog.Root bind:open onOpenChange={(isOpen) => !isOpen && handleClose()}>
@@ -216,11 +272,11 @@
 			<Dialog.Title>{title}</Dialog.Title>
 			<Dialog.Description>
 				{#if isRunning}
-					Processing {items.length} {entityType}...
+					{$t('batchOperation.processingItems', { count: items.length, entity: getEntityTypeLabel() })}
 				{:else if isComplete}
-					Completed: {successCount} succeeded{#if failCount > 0}, {failCount} failed{/if}{#if cancelledCount > 0}, {cancelledCount} cancelled{/if}{#if totalSize && successCount > 0} ({formatBytes(totalSize)}){/if}
+					{getCompleteDescription()}
 				{:else}
-					Preparing to {operation} {items.length} {entityType}...
+					{$t('batchOperation.preparingItems', { operation: getOperationLabel(), count: items.length, entity: getEntityTypeLabel() })}
 				{/if}
 			</Dialog.Description>
 		</Dialog.Header>
@@ -261,15 +317,15 @@
 						<!-- Status text -->
 						<span class="text-xs text-muted-foreground flex-shrink-0">
 							{#if item.status === 'pending'}
-								pending
+								{$t('batchOperation.pending')}
 							{:else if item.status === 'processing'}
-								{progressText[operation] ?? operation}...
+								{getProcessingLabel()}...
 							{:else if item.status === 'success'}
-								done
+								{$t('batchOperation.done')}
 							{:else if item.status === 'error'}
-								<span class="text-red-500">failed</span>
+								<span class="text-red-500">{$t('batchOperation.failed')}</span>
 							{:else if item.status === 'cancelled'}
-								<span class="text-amber-500">cancelled</span>
+								<span class="text-amber-500">{$t('batchOperation.cancelled')}</span>
 							{/if}
 						</span>
 					</div>
@@ -305,11 +361,11 @@
 			</div>
 			{#if isRunning}
 				<Button variant="outline" size="sm" onclick={handleCancel}>
-					Cancel
+					{$t('batchOperation.cancel')}
 				</Button>
 			{:else}
 				<Button size="sm" onclick={handleOk}>
-					OK
+					{$t('common.actions.ok')}
 				</Button>
 			{/if}
 		</div>

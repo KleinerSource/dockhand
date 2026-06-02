@@ -350,12 +350,12 @@
 
 		let hasErrors = false;
 		if (!name.trim()) {
-			errors.name = 'Container name is required';
+			errors.name = translate('containers.validation.nameRequired');
 			hasErrors = true;
 		}
 
 		if (!image.trim()) {
-			errors.image = 'Image name is required';
+			errors.image = translate('containers.validation.imageRequired');
 			hasErrors = true;
 		}
 

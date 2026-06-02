@@ -11,7 +11,7 @@
 	import PullTab from '$lib/components/PullTab.svelte';
 	import ScanTab from '$lib/components/ScanTab.svelte';
 	import type { ScanResult } from '$lib/components/ScanTab.svelte';
-	import { t } from '$lib/i18n';
+	import { t, translate } from '$lib/i18n';
 
 	interface Registry {
 		id: number;
@@ -193,7 +193,7 @@
 			const response = await fetch(deleteUrl, { method: 'DELETE' });
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
-				throw new Error(data.error || 'Failed to delete image');
+				throw new Error(data.error || translate('imagePull.errors.failedToDeleteImage'));
 			}
 
 			// Close modal after successful delete

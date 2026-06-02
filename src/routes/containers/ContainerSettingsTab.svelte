@@ -30,10 +30,10 @@
 	];
 
 	// Mode options for volumes
-	const volumeModeOptions = [
-		{ value: 'rw', label: 'RW' },
-		{ value: 'ro', label: 'RO' }
-	];
+	const volumeModeOptions = $derived([
+		{ value: 'rw', label: $t('containers.settings.volumeModes.readWriteShort') },
+		{ value: 'ro', label: $t('containers.settings.volumeModes.readOnlyShort') }
+	]);
 
 	const commonCapabilities = [
 		'SYS_ADMIN', 'SYS_PTRACE', 'SYS_RAWIO', 'NET_ADMIN', 'NET_RAW', 'IPC_LOCK',
@@ -241,17 +241,17 @@
 
 	function validateIpv4(value: string): string | null {
 		if (!value) return null;
-		return ipv4Regex.test(value) ? null : 'Invalid IPv4 address';
+		return ipv4Regex.test(value) ? null : $t('containers.settings.validation.invalidIpv4');
 	}
 
 	function validateIpv6(value: string): string | null {
 		if (!value) return null;
-		return ipv6Regex.test(value) ? null : 'Invalid IPv6 address';
+		return ipv6Regex.test(value) ? null : $t('containers.settings.validation.invalidIpv6');
 	}
 
 	function validateMac(value: string): string | null {
 		if (!value) return null;
-		return macRegex.test(value) ? null : 'Invalid MAC address (e.g., 02:42:ac:11:00:02)';
+		return macRegex.test(value) ? null : $t('containers.settings.validation.invalidMac');
 	}
 
 	// Auto-expand networks that have config

@@ -4,6 +4,7 @@
 	import { Server, Settings } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { environments } from '$lib/stores/environment';
+	import { t } from '$lib/i18n';
 
 	const hasEnvironments = $derived($environments.length > 0);
 </script>
@@ -11,18 +12,18 @@
 {#if hasEnvironments}
 	<EmptyState
 		icon={Server}
-		title="No environment selected"
-		description="Select a Docker environment from the dropdown to get started"
+		title={$t('ui.emptyState.noEnvironment.selectedTitle')}
+		description={$t('ui.emptyState.noEnvironment.selectedDescription')}
 	/>
 {:else}
 	<EmptyState
 		icon={Server}
-		title="No environment configured"
-		description="Add a Docker environment in Settings to get started"
+		title={$t('ui.emptyState.noEnvironment.configuredTitle')}
+		description={$t('ui.emptyState.noEnvironment.configuredDescription')}
 	>
 		<Button variant="secondary" onclick={() => goto('/settings?tab=environments')}>
 			<Settings class="w-4 h-4" />
-			Go to Settings
+			{$t('ui.emptyState.noEnvironment.goToSettings')}
 		</Button>
 	</EmptyState>
 {/if}

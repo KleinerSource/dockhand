@@ -917,7 +917,7 @@
 						onclick={() => toggleSort(column.sortField ?? column.id)}
 						class="flex items-center gap-1 hover:text-foreground transition-colors w-full"
 					>
-						{column.label}
+						{column.labelKey ? $t(column.labelKey) : column.label}
 						{#if sortState?.field === (column.sortField ?? column.id)}
 							{#if sortState.direction === 'asc'}
 								<ArrowUp class="w-3 h-3" />
@@ -929,7 +929,7 @@
 						{/if}
 					</button>
 				{:else if column.id !== 'expand' && column.id !== 'actions'}
-					{column.label}
+					{column.labelKey ? $t(column.labelKey) : column.label}
 				{/if}
 			{/snippet}
 			{#snippet cell(column, group, rowState)}

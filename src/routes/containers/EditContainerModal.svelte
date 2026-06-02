@@ -791,12 +791,12 @@
 
 		let hasErrors = false;
 		if (!name.trim()) {
-			errors.name = 'Container name is required';
+			errors.name = translate('containers.validation.nameRequired');
 			hasErrors = true;
 		}
 
 		if (!image.trim()) {
-			errors.image = 'Image name is required';
+			errors.image = translate('containers.validation.imageRequired');
 			hasErrors = true;
 		}
 
@@ -820,7 +820,7 @@
 		try {
 			// If only name changed, use the rename endpoint
 			if (hasOnlyNameChanged()) {
-				statusMessage = 'Renaming container...';
+				statusMessage = translate('containers.edit.status.renaming');
 
 				const response = await fetch(appendEnvParam(
 					`/api/containers/${containerId}/rename`,
@@ -855,7 +855,7 @@
 
 			// Full update required - recreate container
 			if (containerConfigChanged) {
-				statusMessage = 'Updating container...';
+				statusMessage = translate('containers.edit.status.updating');
 
 				const ports: Record<string, { HostIp?: string; HostPort: string }> = {};
 				portMappings
@@ -999,11 +999,11 @@
 
 			if (autoUpdateChanged) {
 				if (!containerConfigChanged) {
-					statusMessage = 'Saving auto-update settings...';
+					statusMessage = translate('containers.edit.status.savingAutoUpdate');
 				}
 				await saveAutoUpdateSettings(name.trim());
 				if (!containerConfigChanged) {
-					statusMessage = 'Auto-update settings saved!';
+					statusMessage = translate('containers.edit.status.autoUpdateSaved');
 				}
 			}
 

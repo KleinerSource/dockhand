@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { FolderGit2, Key } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 	import GitCredentialsTab from './GitCredentialsTab.svelte';
 	import GitRepositoriesTab from './GitRepositoriesTab.svelte';
 
@@ -17,14 +18,14 @@
 			class="px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 {gitSubTab === 'repositories' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
 		>
 			<FolderGit2 class="w-4 h-4" />
-			Repositories
+			{$t('settings.git.tabs.repositories')}
 		</a>
 		<a
 			href="/settings?tab=git&subtab=credentials"
 			class="px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-1.5 {gitSubTab === 'credentials' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
 		>
 			<Key class="w-4 h-4" />
-			Credentials
+			{$t('settings.git.tabs.credentials')}
 		</a>
 	</div>
 

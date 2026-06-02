@@ -3,8 +3,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Calendar, CalendarDays, Clock } from 'lucide-svelte';
 	import { appSettings } from '$lib/stores/settings';
-	import { t } from '$lib/i18n';
+	import { locale, t } from '$lib/i18n';
 	import cronstrue from 'cronstrue';
+	import 'cronstrue/locales/zh_CN';
 
 	// Reactive time format from settings
 	let is12Hour = $derived($appSettings.timeFormat === '12h');
@@ -149,6 +150,10 @@
 		return parts.every((part) => cronFieldPattern.test(part));
 	}
 
+	function getCronstrueLocale(): string {
+		return $locale === 'zh-CN' ? 'zh_CN' : 'en';
+	}
+
 	// Human-readable description using cronstrue
 	let humanReadable = $derived(() => {
 		if (!value) return '';
@@ -165,7 +170,7 @@
 			const description = cronstrue.toString(value, {
 				use24HourTimeFormat: !is12Hour,
 				throwExceptionOnParseError: true,
-				locale: 'en' // You can add user locale preference here if needed
+				locale: getCronstrueLocale()
 			});
 			return description;
 		} catch (error) {

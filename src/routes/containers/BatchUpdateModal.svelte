@@ -120,9 +120,9 @@
 		// Clarify potentially confusing Docker messages
 		let status = entry.status;
 		if (status.toLowerCase().includes('image is up to date')) {
-			status = 'Image cached (registry version matches local)';
+			status = translate('containers.batchUpdate.imageCached');
 		} else if (status.toLowerCase().includes('status: image is up to date')) {
-			status = 'Image cached (registry version matches local)';
+			status = translate('containers.batchUpdate.imageCached');
 		}
 
 		if (entry.id && entry.progress) {
@@ -160,7 +160,7 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.error || 'Failed to start update');
+				throw new Error(data.error || translate('containers.batchUpdate.errors.startUpdateFailed'));
 			}
 
 			const { jobId } = await response.json();
@@ -279,7 +279,7 @@
 						onComplete({ success: successIds, failed: failedIds, blocked: blockedIds });
 					} else if (data.type === 'error') {
 						status = 'error';
-						errorMessage = data.error || 'Unknown error occurred';
+						errorMessage = data.error || translate('common.errors.unknown');
 					}
 				} catch (e) {
 					console.error('Failed to process job line:', e);
@@ -288,7 +288,7 @@
 		} catch (error: any) {
 			console.error('Failed to update containers:', error);
 			status = 'error';
-			errorMessage = error.message || 'Failed to update';
+			errorMessage = error.message || translate('containers.batchUpdate.errors.updateFailed');
 		}
 	}
 
@@ -361,7 +361,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.error || 'Failed to start update');
+				throw new Error(data.error || translate('containers.batchUpdate.errors.startUpdateFailed'));
 			}
 
 			const { jobId } = await response.json();
@@ -402,7 +402,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 		} catch (error: any) {
 			console.error('Failed to force update container:', error);
 			item.step = 'failed';
-			item.error = error.message || 'Force update failed';
+			item.error = error.message || translate('containers.batchUpdate.errors.forceUpdateFailed');
 			progress = [...progress];
 		} finally {
 			forceUpdating = new Set([...forceUpdating].filter(id => id !== containerId));
@@ -634,7 +634,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 											</table>
 											{#if item.vulnerabilities.length > 50}
 												<div class="text-muted-foreground mt-1">
-													...and {item.vulnerabilities.length - 50} more
+													{$t('containers.batchUpdate.moreVulnerabilities', { count: item.vulnerabilities.length - 50 })}
 												</div>
 											{/if}
 										</div>
@@ -671,11 +671,11 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 			{#if status === 'updating'}
 				<Button variant="outline" disabled>
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-					Updating...
+					{$t('containers.batchUpdate.updating')}
 				</Button>
 			{:else}
 				<Button variant="outline" onclick={handleClose}>
-					Close
+					{$t('common.actions.close')}
 				</Button>
 			{/if}
 		</Dialog.Footer>

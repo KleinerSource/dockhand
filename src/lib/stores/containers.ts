@@ -4,6 +4,7 @@ import type { ContainerInfo, ContainerStats } from '$lib/types';
 import { appendEnvParam, clearStaleEnvironment, environments } from '$lib/stores/environment';
 import { appSettings } from '$lib/stores/settings';
 import { toast } from 'svelte-sonner';
+import { translate } from '$lib/i18n';
 
 export interface AutoUpdateSetting {
 	enabled: boolean;
@@ -63,10 +64,17 @@ function createContainerStore() {
 		scheduleType: string,
 		cronExpression: string
 	): { label: string; tooltip: string } {
-		if (!cronExpression) return { label: 'on', tooltip: 'Auto-update enabled' };
+		if (!cronExpression) {
+			return {
+				label: translate('containers.autoUpdate.schedule.enabledLabel'),
+				tooltip: translate('containers.autoUpdate.schedule.enabledTooltip')
+			};
+		}
 
 		const parts = cronExpression.split(' ');
-		if (parts.length < 5) return { label: 'cron', tooltip: cronExpression };
+		if (parts.length < 5) {
+			return { label: translate('containers.autoUpdate.schedule.cronLabel'), tooltip: cronExpression };
+		}
 
 		const [min, hr, , , dow] = parts;
 		const hourNum = parseInt(hr);
@@ -83,19 +91,23 @@ function createContainerStore() {
 		}
 
 		if (scheduleType === 'daily' || dow === '*') {
-			return { label: 'daily', tooltip: `Daily at ${timeStr}` };
-		}
-
-		if (scheduleType === 'weekly') {
-			const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-			const dayName = days[parseInt(dow)] || dow;
 			return {
-				label: dayName,
-				tooltip: `Every ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parseInt(dow)] || dow} at ${timeStr}`
+				label: translate('cron.daily'),
+				tooltip: translate('containers.autoUpdate.schedule.dailyAt', { time: timeStr })
 			};
 		}
 
-		return { label: 'cron', tooltip: cronExpression };
+		if (scheduleType === 'weekly') {
+			const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+			const dayKey = days[parseInt(dow)];
+			const dayName = dayKey ? translate(`cron.days.${dayKey}`) : dow;
+			return {
+				label: dayKey ? translate(`containers.autoUpdate.schedule.days.${dayKey}`) : dow,
+				tooltip: translate('containers.autoUpdate.schedule.weeklyAt', { day: dayName, time: timeStr })
+			};
+		}
+
+		return { label: translate('containers.autoUpdate.schedule.cronLabel'), tooltip: cronExpression };
 	}
 
 	async function checkScannerSettings(envId: number | null) {
@@ -191,7 +203,7 @@ function createContainerStore() {
 					environments.refresh();
 					return;
 				}
-				toast.error('Failed to load containers');
+				toast.error(translate('containers.toasts.loadFailed'));
 				return;
 			}
 			const data: ContainerInfo[] = await response.json();
@@ -201,7 +213,7 @@ function createContainerStore() {
 			await fetchAutoUpdateSettings(envId);
 		} catch (error) {
 			console.error('Failed to fetch containers:', error);
-			toast.error('Failed to load containers');
+			toast.error(translate('containers.toasts.loadFailed'));
 		} finally {
 			patch({ loading: false });
 			fetchingContainers = false;
