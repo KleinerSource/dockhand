@@ -75,6 +75,7 @@
 	import ContainerInspectModal from './ContainerInspectModal.svelte';
 	import FileBrowserModal from './FileBrowserModal.svelte';
 	import BatchUpdateModal from './BatchUpdateModal.svelte';
+	import BatchAutoUpdateModal from './BatchAutoUpdateModal.svelte';
 	import BatchOperationModal from '$lib/components/BatchOperationModal.svelte';
 	import type { ContainerInfo } from '$lib/types';
 	import { EmptyState, NoEnvironment } from '$lib/components/ui/empty-state';
@@ -316,6 +317,7 @@
 	let batchOpOperation = $state('');
 	let batchOpItems = $state<Array<{ id: string; name: string }>>([]);
 	let batchOpOptions = $state<Record<string, any>>({});
+	let showBatchAutoUpdateModal = $state(false);
 
 	// Set of container IDs with updates available (for O(1) lookup)
 	const containersWithUpdatesSet = $derived(new Set(batchUpdateContainerIds));
@@ -368,6 +370,11 @@
 	}
 
 	function handleBatchOpComplete() {
+		selectedContainers = new Set();
+		containerStore.refreshContainers(envId);
+	}
+
+	function handleBatchAutoUpdateComplete() {
 		selectedContainers = new Set();
 		containerStore.refreshContainers(envId);
 	}
@@ -874,6 +881,7 @@
 	const selectedRunning = $derived(selectedNonSystem.filter(c => c.state === 'running'));
 	const selectedStopped = $derived(selectedNonSystem.filter(c => c.state !== 'running' && c.state !== 'paused'));
 	const selectedPaused = $derived(selectedNonSystem.filter(c => c.state === 'paused'));
+	const selectedAutoUpdateTargets = $derived(selectedNonSystem.map(c => ({ id: c.id, name: c.name })));
 
 	// Thin wrappers — delegate to persistent store
 	function fetchContainers() {
@@ -1686,6 +1694,18 @@
 				{/snippet}
 			</ConfirmPopover>
 			{/if}
+			{#if selectedAutoUpdateTargets.length > 0 && $canAccess('schedules', 'edit')}
+				<button
+					type="button"
+					class="inline-flex items-center gap-1 px-1.5 py-0 rounded border border-border hover:text-emerald-600 hover:border-emerald-500/40 hover:shadow transition-all cursor-pointer {bulkActionInProgress ? 'opacity-50' : ''}"
+					onclick={() => showBatchAutoUpdateModal = true}
+					disabled={bulkActionInProgress}
+					title={$t('containers.actions.configureAutoUpdateCount', { count: selectedAutoUpdateTargets.length })}
+				>
+					<RefreshCw class="w-3 h-3" />
+					{$t('containers.actions.autoUpdateCount', { count: selectedAutoUpdateTargets.length })}
+				</button>
+			{/if}
 			{#if selectedNonSystem.length > 0 && $canAccess('containers', 'remove')}
 			<ConfirmPopover
 				open={confirmBulkRemove}
@@ -2460,6 +2480,16 @@
 	vulnerabilityCriteria={envHasScanning ? envVulnerabilityCriteria : 'never'}
 	onClose={handleBatchUpdateClose}
 	onComplete={handleBatchUpdateComplete}
+/>
+
+<BatchAutoUpdateModal
+	bind:open={showBatchAutoUpdateModal}
+	containers={selectedAutoUpdateTargets}
+	{envId}
+	envHasScanning={envHasScanning}
+	defaultVulnerabilityCriteria={envVulnerabilityCriteria}
+	onClose={() => (showBatchAutoUpdateModal = false)}
+	onComplete={handleBatchAutoUpdateComplete}
 />
 
 <BatchOperationModal

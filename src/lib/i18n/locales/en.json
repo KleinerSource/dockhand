@@ -851,6 +851,8 @@
 			"remove": "Remove",
 			"removeCount": "Remove {count}",
 			"delete": "Delete",
+			"autoUpdateCount": "Auto-update {count}",
+			"configureAutoUpdateCount": "Configure auto-update for {count} container(s)",
 			"updateSelectedToLatest": "Update selected containers to latest image",
 			"updateCount": "Update {count}",
 			"updateAvailableClick": "Update available - click to update",
@@ -961,6 +963,21 @@
 					"saturday": "Sat"
 				}
 			}
+		},
+		"batchAutoUpdate": {
+			"title": "Configure auto-update",
+			"description": "Apply auto-update settings to {count} selected container(s).",
+			"modeLabel": "Auto-update status",
+			"enableAutomatic": "When enabled, images update automatically on the configured schedule.",
+			"disableAutomatic": "When disabled, existing auto-update schedules are removed for these containers.",
+			"scheduleLabel": "Update time",
+			"selectedContainers": "Selected containers",
+			"empty": "No configurable containers",
+			"save": "Save settings",
+			"saving": "Saving...",
+			"enabledToast": "Enabled auto-update for {count} container(s)",
+			"disabledToast": "Disabled auto-update for {count} container(s)",
+			"saveFailed": "Failed to save batch auto-update settings"
 		},
 		"batchUpdate": {
 			"title": "Updating containers",
