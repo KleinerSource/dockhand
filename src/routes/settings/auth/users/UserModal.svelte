@@ -11,6 +11,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import { focusFirstInput } from '$lib/utils';
 	import PasswordStrengthIndicator from '$lib/components/PasswordStrengthIndicator.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	export interface LocalUser {
 		id: number;
@@ -93,14 +94,14 @@
 				method: 'DELETE'
 			});
 			if (response.ok) {
-				toast.success('MFA disabled for user');
+				toast.success(translate('settings.auth.users.modal.toasts.mfaDisabled'));
 				user.mfaEnabled = false;
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to disable MFA');
+				toast.error(data.error || translate('settings.auth.users.modal.toasts.disableMfaFailed'));
 			}
 		} catch {
-			toast.error('Failed to disable MFA');
+			toast.error(translate('settings.auth.users.modal.toasts.disableMfaFailed'));
 		} finally {
 			mfaDisabling = false;
 		}
@@ -138,7 +139,7 @@
 			}
 		} catch (error) {
 			console.error('Failed to fetch user roles:', error);
-			toast.error('Failed to fetch user roles');
+			toast.error(translate('settings.auth.users.modal.toasts.fetchRolesFailed'));
 		}
 	}
 
@@ -174,7 +175,7 @@
 			}
 		} catch (error) {
 			console.error('Failed to sync user roles:', error);
-			toast.error('Failed to sync user roles');
+			toast.error(translate('settings.auth.users.modal.toasts.syncRolesFailed'));
 		}
 	}
 
@@ -191,17 +192,17 @@
 		let hasErrors = false;
 
 		if (!formUsername.trim()) {
-			formErrors.username = 'Username is required';
+			formErrors.username = translate('settings.auth.users.modal.validation.usernameRequired');
 			hasErrors = true;
 		}
 
 		if (!formPassword.trim()) {
-			formErrors.password = 'Password is required';
+			formErrors.password = translate('settings.auth.users.modal.validation.passwordRequired');
 			hasErrors = true;
 		}
 
 		if (formPassword !== formPasswordRepeat) {
-			formErrors.passwordRepeat = 'Passwords do not match';
+			formErrors.passwordRepeat = translate('settings.auth.users.modal.validation.passwordsMismatch');
 			hasErrors = true;
 		}
 
@@ -232,15 +233,15 @@
 
 				open = false;
 				onSaved();
-				toast.success('User created');
+				toast.success(translate('settings.auth.users.modal.toasts.created'));
 			} else {
 				const data = await response.json();
-				formError = data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to create user');
+				formError = data.details ? `${data.error}: ${data.details}` : (data.error || translate('settings.auth.users.modal.errors.createFailed'));
 				toast.error(formError);
 			}
 		} catch {
-			formError = 'Failed to create user';
-			toast.error('Failed to create user');
+			formError = translate('settings.auth.users.modal.errors.createFailed');
+			toast.error(translate('settings.auth.users.modal.errors.createFailed'));
 		} finally {
 			formSaving = false;
 		}
@@ -251,12 +252,12 @@
 		let hasErrors = false;
 
 		if (!user || !formUsername.trim()) {
-			formErrors.username = 'Username is required';
+			formErrors.username = translate('settings.auth.users.modal.validation.usernameRequired');
 			hasErrors = true;
 		}
 
 		if (formPassword.trim() && formPassword !== formPasswordRepeat) {
-			formErrors.passwordRepeat = 'Passwords do not match';
+			formErrors.passwordRepeat = translate('settings.auth.users.modal.validation.passwordsMismatch');
 			hasErrors = true;
 		}
 
@@ -285,15 +286,15 @@
 				await syncUserRoles(user!.id);
 				open = false;
 				onSaved();
-				toast.success('User updated');
+				toast.success(translate('settings.auth.users.modal.toasts.updated'));
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to update user';
+				formError = data.error || translate('settings.auth.users.modal.errors.updateFailed');
 				toast.error(formError);
 			}
 		} catch {
-			formError = 'Failed to update user';
-			toast.error('Failed to update user');
+			formError = translate('settings.auth.users.modal.errors.updateFailed');
+			toast.error(translate('settings.auth.users.modal.errors.updateFailed'));
 		} finally {
 			formSaving = false;
 		}
@@ -329,10 +330,10 @@
 			<Dialog.Title class="flex items-center gap-2">
 				{#if isEditing}
 					<Pencil class="w-5 h-5" />
-					Edit user
+					{$t('settings.auth.users.modal.titleEdit')}
 				{:else}
 					<UserPlus class="w-5 h-5" />
-					Add user
+					{$t('settings.auth.users.modal.titleAdd')}
 				{/if}
 			</Dialog.Title>
 		</Dialog.Header>
@@ -348,7 +349,7 @@
 				<div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
 					<ShieldCheck class="w-4 h-4 text-yellow-600 flex-shrink-0" />
 					<p class="text-sm text-yellow-700 dark:text-yellow-500">
-						SSO user - profile synced from identity provider
+						{$t('settings.auth.users.modal.ssoNotice')}
 					</p>
 				</div>
 			{/if}
@@ -357,11 +358,11 @@
 			<div class="space-y-4">
 				<h3 class="text-sm font-medium flex items-center gap-2 text-muted-foreground">
 					<User class="w-4 h-4" />
-					User details
+					{$t('settings.auth.users.modal.userDetails')}
 				</h3>
 				<div class="grid grid-cols-2 gap-4">
 					<div class="space-y-2">
-						<Label>Username {#if !isEditing}<span class="text-destructive">*</span>{/if}</Label>
+						<Label>{$t('settings.auth.users.modal.username')} {#if !isEditing}<span class="text-destructive">*</span>{/if}</Label>
 						<Input
 							bind:value={formUsername}
 							placeholder={isEditing ? 'admin' : 'johndoe'}
@@ -375,7 +376,7 @@
 						{/if}
 					</div>
 					<div class="space-y-2">
-						<Label>Email</Label>
+						<Label>{$t('settings.auth.users.modal.email')}</Label>
 						<Input
 							type="email"
 							bind:value={formEmail}
@@ -386,7 +387,7 @@
 					</div>
 				</div>
 				<div class="space-y-2">
-					<Label>Display name</Label>
+					<Label>{$t('settings.auth.users.modal.displayName')}</Label>
 					<Input
 						bind:value={formDisplayName}
 						placeholder={isEditing ? 'Administrator' : 'John Doe'}
@@ -401,19 +402,19 @@
 				<div class="space-y-4">
 					<h3 class="text-sm font-medium flex items-center gap-2 text-muted-foreground">
 						<KeyRound class="w-4 h-4" />
-						Password
+						{$t('settings.auth.users.modal.passwordSection')}
 					</h3>
 					<div class="grid grid-cols-2 gap-4">
 						<div class="space-y-2">
 							{#if isEditing}
-								<Label>New password <span class="text-muted-foreground text-xs">(leave blank to keep current)</span></Label>
+								<Label>{$t('settings.auth.users.modal.newPassword')} <span class="text-muted-foreground text-xs">{$t('settings.auth.users.modal.keepPasswordHint')}</span></Label>
 							{:else}
-								<Label>Password <span class="text-destructive">*</span></Label>
+								<Label>{$t('settings.auth.users.modal.password')} <span class="text-destructive">*</span></Label>
 							{/if}
 							<Input
 								type="password"
 								bind:value={formPassword}
-								placeholder={isEditing ? 'Enter new password' : 'Enter password'}
+								placeholder={isEditing ? $t('settings.auth.users.modal.enterNewPassword') : $t('settings.auth.users.modal.enterPassword')}
 								autocomplete="new-password"
 								class={formErrors.password ? 'border-destructive focus-visible:ring-destructive' : ''}
 								oninput={() => formErrors.password = undefined}
@@ -425,14 +426,14 @@
 						</div>
 						<div class="space-y-2">
 							{#if isEditing}
-								<Label>Confirm password</Label>
+								<Label>{$t('settings.auth.users.modal.confirmPassword')}</Label>
 							{:else}
-								<Label>Confirm password <span class="text-destructive">*</span></Label>
+								<Label>{$t('settings.auth.users.modal.confirmPassword')} <span class="text-destructive">*</span></Label>
 							{/if}
 							<Input
 								type="password"
 								bind:value={formPasswordRepeat}
-								placeholder={isEditing ? 'Repeat new password' : 'Repeat password'}
+								placeholder={isEditing ? $t('settings.auth.users.modal.repeatNewPassword') : $t('settings.auth.users.modal.repeatPassword')}
 								autocomplete="new-password"
 								class={formErrors.passwordRepeat ? 'border-destructive focus-visible:ring-destructive' : ''}
 								oninput={() => formErrors.passwordRepeat = undefined}
@@ -450,16 +451,16 @@
 				<div class="space-y-3">
 					<h3 class="text-sm font-medium flex items-center gap-2 text-muted-foreground">
 						<Smartphone class="w-4 h-4" />
-						Two-factor authentication
+						{$t('settings.auth.users.modal.mfa.title')}
 					</h3>
 					<div class="flex items-center justify-between p-3 border rounded-lg">
 						<div>
-							<p class="text-sm font-medium">MFA status</p>
+							<p class="text-sm font-medium">{$t('settings.auth.users.modal.mfa.status')}</p>
 							<p class="text-xs text-muted-foreground">
 								{#if user.mfaEnabled}
-									User has MFA configured
+									{$t('settings.auth.users.modal.mfa.configured')}
 								{:else}
-									User has not configured MFA
+									{$t('settings.auth.users.modal.mfa.notConfigured')}
 								{/if}
 							</p>
 						</div>
@@ -478,8 +479,8 @@
 				{@const customRoles = roles.filter(r => !r.isSystem)}
 				<div class="space-y-3">
 					<div>
-						<Label class="text-sm">Roles</Label>
-						<p class="text-xs text-muted-foreground">Assign roles to this user. Environment scope is configured on the role itself.</p>
+						<Label class="text-sm">{$t('settings.auth.users.modal.roles.title')}</Label>
+						<p class="text-xs text-muted-foreground">{$t('settings.auth.users.modal.roles.description')}</p>
 					</div>
 
 					<div class="border rounded-lg divide-y max-h-[240px] overflow-y-auto">
@@ -488,7 +489,7 @@
 							<div class="p-3 bg-muted/30">
 								<p class="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
 									<Shield class="w-3.5 h-3.5" />
-									System roles
+									{$t('settings.auth.users.modal.roles.systemRoles')}
 								</p>
 								<div class="grid grid-cols-3 gap-2">
 									{#each systemRoles as role}
@@ -516,7 +517,7 @@
 							<div class="p-3">
 								<p class="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
 									<Globe class="w-3.5 h-3.5" />
-									Custom roles
+									{$t('settings.auth.users.modal.roles.customRoles')}
 								</p>
 								<div class="grid grid-cols-2 gap-2">
 									{#each customRoles as role}
@@ -539,9 +540,9 @@
 												<span class="text-2xs opacity-70 flex items-center gap-1">
 													{#if isGlobal}
 														<Globe class="w-2.5 h-2.5" />
-														All environments
+														{$t('settings.auth.users.modal.roles.allEnvironments')}
 													{:else}
-														{envCount} environment{envCount !== 1 ? 's' : ''}
+														{$t(envCount === 1 ? 'settings.auth.users.modal.roles.environmentCountOne' : 'settings.auth.users.modal.roles.environmentCountMany', { count: envCount })}
 													{/if}
 												</span>
 											</div>
@@ -553,7 +554,7 @@
 
 						{#if roles.length === 0}
 							<div class="p-4 text-center text-sm text-muted-foreground">
-								No roles defined yet
+								{$t('settings.auth.users.modal.roles.noRoles')}
 							</div>
 						{/if}
 					</div>
@@ -561,35 +562,35 @@
 			{:else}
 				<div class="space-y-1">
 					<p class="text-xs text-muted-foreground">
-						All users have full access to all environments.
+						{$t('settings.auth.users.modal.roles.fullAccess')}
 					</p>
 					<p class="text-xs text-muted-foreground flex items-center gap-1">
 						<Crown class="w-3 h-3 text-amber-500" />
-						Upgrade to Enterprise for role-based access control.
+						{$t('settings.auth.users.modal.roles.upgrade')}
 					</p>
 				</div>
 			{/if}
 		</div>
 		<Dialog.Footer class="mt-4">
 			{#if isEditing}
-				<Button variant="outline" type="button" onclick={handleClose}>Cancel</Button>
+				<Button variant="outline" type="button" onclick={handleClose}>{$t('settings.auth.users.modal.cancel')}</Button>
 				<Button type="submit" disabled={formSaving}>
 					{#if formSaving}
 						<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
 					{:else}
 						<Check class="w-4 h-4" />
 					{/if}
-					Save
+					{$t('settings.auth.users.modal.save')}
 				</Button>
 			{:else}
-				<Button variant="outline" type="button" onclick={handleClose}>Cancel</Button>
+				<Button variant="outline" type="button" onclick={handleClose}>{$t('settings.auth.users.modal.cancel')}</Button>
 				<Button type="submit" disabled={formSaving}>
 					{#if formSaving}
 						<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
 					{:else}
 						<UserPlus class="w-4 h-4" />
 					{/if}
-					Create user
+					{$t('settings.auth.users.modal.createUser')}
 				</Button>
 			{/if}
 		</Dialog.Footer>

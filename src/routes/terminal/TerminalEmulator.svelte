@@ -3,6 +3,7 @@
 	import { RefreshCw, Copy, Trash2, Type } from 'lucide-svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import * as Select from '$lib/components/ui/select';
+	import { t, translate } from '$lib/i18n';
 
 	// Dynamic imports for browser-only xterm
 	let Terminal: any;
@@ -156,8 +157,8 @@
 			wsUrl += `&envId=${envId}`;
 		}
 
-		terminal.writeln(`\x1b[90mConnecting to ${containerName}...\x1b[0m`);
-		terminal.writeln(`\x1b[90mShell: ${shell}, User: ${user || 'default'}\x1b[0m`);
+		terminal.writeln(`\x1b[90m${translate('terminal.connectingTo', { name: containerName })}\x1b[0m`);
+		terminal.writeln(`\x1b[90m${translate('terminal.shell')}: ${shell}, ${translate('terminal.user')}: ${user || translate('terminal.defaultUser')}\x1b[0m`);
 		terminal.writeln('');
 
 		ws = new WebSocket(wsUrl);
@@ -181,9 +182,9 @@
 					terminal?.write(msg.data);
 				} else if (msg.type === 'error') {
 					error = msg.message;
-					terminal?.writeln(`\x1b[31mError: ${msg.message}\x1b[0m`);
+					terminal?.writeln(`\x1b[31m${translate('terminal.errorPrefix')}: ${msg.message}\x1b[0m`);
 				} else if (msg.type === 'exit') {
-					terminal?.writeln('\x1b[90m\r\nSession ended.\x1b[0m');
+					terminal?.writeln(`\x1b[90m\r\n${translate('terminal.sessionEnded')}\x1b[0m`);
 					connected = false;
 				}
 			} catch (e) {
@@ -192,13 +193,13 @@
 		};
 
 		ws.onerror = () => {
-			error = 'Connection error';
-			terminal?.writeln('\x1b[31mConnection error\x1b[0m');
+			error = translate('terminal.connectionError');
+			terminal?.writeln(`\x1b[31m${translate('terminal.connectionError')}\x1b[0m`);
 		};
 
 		ws.onclose = () => {
 			connected = false;
-			terminal?.writeln('\x1b[90mDisconnected.\x1b[0m');
+			terminal?.writeln(`\x1b[90m${translate('terminal.disconnectedLine')}\x1b[0m`);
 		};
 	}
 
@@ -208,7 +209,7 @@
 			ws = null;
 		}
 		connected = false;
-		terminal?.writeln('\x1b[90m\r\nReconnecting...\x1b[0m');
+		terminal?.writeln(`\x1b[90m\r\n${translate('terminal.reconnecting')}\x1b[0m`);
 		connect();
 	}
 
@@ -266,15 +267,15 @@
 	<!-- Header bar -->
 	<div class="flex items-center justify-between px-3 py-1.5 border-b border-zinc-800 bg-zinc-900/50 shrink-0">
 		<div class="flex items-center gap-2">
-			<span class="text-xs text-zinc-400">Terminal:</span>
+			<span class="text-xs text-zinc-400">{$t('terminal.terminal')}:</span>
 			<span class="text-xs text-zinc-200 font-medium">{containerName}</span>
 			{#if connected}
 				<span class="inline-flex items-center gap-1 text-xs text-green-500">
 					<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-					Connected
+					{$t('terminal.connected')}
 				</span>
 			{:else}
-				<span class="text-xs text-zinc-500">Disconnected</span>
+				<span class="text-xs text-zinc-500">{$t('terminal.disconnected')}</span>
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
@@ -297,7 +298,7 @@
 			<button
 				onclick={clearTerminal}
 				class="p-1 rounded hover:bg-zinc-800 transition-colors"
-				title="Clear terminal (Ctrl+L)"
+				title={$t('terminal.clearCtrl')}
 			>
 				<Trash2 class="w-3 h-3 text-zinc-500 hover:text-zinc-300" />
 			</button>
@@ -305,7 +306,7 @@
 			<button
 				onclick={copyOutput}
 				class="p-1 rounded hover:bg-zinc-800 transition-colors"
-				title="Copy output"
+				title={$t('terminal.copyOutput')}
 			>
 				<Copy class="w-3 h-3 text-zinc-500 hover:text-zinc-300" />
 			</button>
@@ -314,7 +315,7 @@
 				<button
 					onclick={reconnect}
 					class="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-amber-500/20 ring-1 ring-amber-500/50 text-amber-400 hover:bg-amber-500/30 transition-colors"
-					title="Reconnect"
+					title={$t('terminal.reconnect')}
 				>
 					<RefreshCw class="w-3 h-3" />
 				</button>

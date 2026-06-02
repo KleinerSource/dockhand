@@ -3,6 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Calendar, CalendarDays, Clock } from 'lucide-svelte';
 	import { appSettings } from '$lib/stores/settings';
+	import { t } from '$lib/i18n';
 	import cronstrue from 'cronstrue';
 
 	// Reactive time format from settings
@@ -155,7 +156,7 @@
 
 		// Validate first
 		if (!isValidCron(value)) {
-			return 'Invalid';
+			return $t('cron.invalid');
 		}
 
 		try {
@@ -168,7 +169,7 @@
 			});
 			return description;
 		} catch (error) {
-			return 'Invalid';
+			return $t('cron.invalid');
 		}
 	});
 
@@ -190,13 +191,13 @@
 	];
 
 	const daysOfWeek = [
-		{ value: '1', label: 'Monday' },
-		{ value: '2', label: 'Tuesday' },
-		{ value: '3', label: 'Wednesday' },
-		{ value: '4', label: 'Thursday' },
-		{ value: '5', label: 'Friday' },
-		{ value: '6', label: 'Saturday' },
-		{ value: '0', label: 'Sunday' }
+		{ value: '1', labelKey: 'cron.days.monday' },
+		{ value: '2', labelKey: 'cron.days.tuesday' },
+		{ value: '3', labelKey: 'cron.days.wednesday' },
+		{ value: '4', labelKey: 'cron.days.thursday' },
+		{ value: '5', labelKey: 'cron.days.friday' },
+		{ value: '6', labelKey: 'cron.days.saturday' },
+		{ value: '0', labelKey: 'cron.days.sunday' }
 	];
 </script>
 
@@ -207,13 +208,13 @@
 			<div class="flex items-center gap-2">
 				{#if scheduleType === 'daily'}
 					<Calendar class="w-4 h-4" />
-					<span>Daily</span>
+					<span>{$t('cron.daily')}</span>
 				{:else if scheduleType === 'weekly'}
 					<CalendarDays class="w-4 h-4" />
-					<span>Weekly</span>
+					<span>{$t('cron.weekly')}</span>
 				{:else}
 					<Clock class="w-4 h-4" />
-					<span>Custom</span>
+					<span>{$t('cron.custom')}</span>
 				{/if}
 			</div>
 		</Select.Trigger>
@@ -221,19 +222,19 @@
 			<Select.Item value="daily">
 				<div class="flex items-center gap-2">
 					<Calendar class="w-4 h-4" />
-					<span>Daily</span>
+					<span>{$t('cron.daily')}</span>
 				</div>
 			</Select.Item>
 			<Select.Item value="weekly">
 				<div class="flex items-center gap-2">
 					<CalendarDays class="w-4 h-4" />
-					<span>Weekly</span>
+					<span>{$t('cron.weekly')}</span>
 				</div>
 			</Select.Item>
 			<Select.Item value="custom">
 				<div class="flex items-center gap-2">
 					<Clock class="w-4 h-4" />
-					<span>Custom</span>
+					<span>{$t('cron.custom')}</span>
 				</div>
 			</Select.Item>
 		</Select.Content>
@@ -241,7 +242,7 @@
 
 	{#if scheduleType === 'daily' || scheduleType === 'weekly'}
 		<!-- Time Selectors -->
-		<span class="text-sm text-muted-foreground">at</span>
+		<span class="text-sm text-muted-foreground">{$t('cron.at')}</span>
 		<Select.Root type="single" value={hour} onValueChange={handleHourChange} {disabled}>
 			<Select.Trigger class="w-[100px] h-9">
 				<span>{hours.find((h: { value: string; label: string }) => h.value === hour)?.label || hour}</span>
@@ -264,14 +265,14 @@
 		</Select.Root>
 
 		{#if scheduleType === 'weekly'}
-			<span class="text-sm text-muted-foreground">on</span>
+			<span class="text-sm text-muted-foreground">{$t('cron.on')}</span>
 			<Select.Root type="single" value={dayOfWeek} onValueChange={handleDayOfWeekChange} {disabled}>
 				<Select.Trigger class="w-[110px] h-9">
-					<span>{daysOfWeek.find(d => d.value === dayOfWeek)?.label || dayOfWeek}</span>
+					<span>{$t(daysOfWeek.find(d => d.value === dayOfWeek)?.labelKey ?? 'cron.days.monday')}</span>
 				</Select.Trigger>
 				<Select.Content>
 					{#each daysOfWeek as d}
-						<Select.Item value={d.value} label={d.label} />
+						<Select.Item value={d.value} label={$t(d.labelKey)} />
 					{/each}
 				</Select.Content>
 			</Select.Root>
@@ -280,7 +281,7 @@
 	{:else}
 		<!-- Custom cron input -->
 		{@const readable = humanReadable()}
-		{@const isInvalid = readable === 'Invalid'}
+		{@const isInvalid = readable === $t('cron.invalid')}
 		<Input
 			value={value}
 			oninput={handleCustomCronInput}
@@ -295,7 +296,7 @@
 <div class="min-h-[20px] mt-1">
 	{#if value}
 		{@const readable = humanReadable()}
-		{@const isInvalid = readable === 'Invalid'}
+		{@const isInvalid = readable === $t('cron.invalid')}
 		<p class="text-xs {isInvalid ? 'text-destructive' : 'text-muted-foreground'}">
 			{readable}
 		</p>

@@ -22,6 +22,7 @@
 	import type { Snippet } from 'svelte';
 	import { appSettings } from '$lib/stores/settings';
 	import { watchJob } from '$lib/utils/sse-fetch';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		stackId: number;
@@ -71,6 +72,31 @@
 		return 'text-muted-foreground';
 	}
 
+	function getStepLabel(status: string): string {
+		switch (status) {
+			case 'connecting':
+				return translate('stacks.gitDeploy.steps.connecting');
+			case 'cloning':
+				return translate('stacks.gitDeploy.steps.cloning');
+			case 'fetching':
+				return translate('stacks.gitDeploy.steps.fetching');
+			case 'reading':
+				return translate('stacks.gitDeploy.steps.reading');
+			case 'env':
+				return translate('stacks.gitDeploy.steps.env');
+			case 'secrets':
+				return translate('stacks.gitDeploy.steps.secrets');
+			case 'deploying':
+				return translate('stacks.gitDeploy.steps.deploying');
+			case 'complete':
+				return translate('common.states.completed');
+			case 'error':
+				return translate('common.labels.error');
+			default:
+				return status;
+		}
+	}
+
 	async function startDeploy() {
 		steps = [];
 		currentStep = null;
@@ -85,7 +111,7 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.error || 'Failed to start deployment');
+				throw new Error(data.error || translate('stacks.gitDeploy.errors.startFailed'));
 			}
 
 			const { jobId } = await response.json();
@@ -100,7 +126,7 @@
 						onComplete?.();
 					} else if (data.status === 'error') {
 						overallStatus = 'error';
-						errorMessage = data.error || 'Unknown error occurred';
+						errorMessage = data.error || translate('common.errors.unknown');
 						currentStep = data;
 						steps = [...steps, data];
 					} else {
@@ -119,7 +145,7 @@
 		} catch (error: any) {
 			console.error('Failed to deploy git stack:', error);
 			overallStatus = 'error';
-			errorMessage = error.message || 'Failed to deploy';
+			errorMessage = error.message || translate('stacks.gitDeploy.errors.deployFailed');
 		}
 	}
 
@@ -154,7 +180,7 @@
 
 	async function copyLogs() {
 		const lines = steps.map(s => s.message || s.status);
-		if (errorMessage) lines.push(`Error: ${errorMessage}`);
+		if (errorMessage) lines.push(`${translate('common.labels.error')}: ${errorMessage}`);
 		await navigator.clipboard.writeText(lines.join('\n'));
 		copied = true;
 		setTimeout(() => { copied = false; }, 2000);
@@ -193,18 +219,18 @@
 				{:else}
 					<Rocket class="w-5 h-5 text-violet-500 shrink-0" />
 				{/if}
-				<span class="text-base font-semibold">Git deploy</span>
+				<span class="text-base font-semibold">{$t('stacks.gitDeploy.title')}</span>
 				<code class="text-sm font-normal bg-muted px-1.5 py-0.5 rounded ml-1 truncate">{stackName}</code>
 				{#if overallStatus === 'complete'}
-					<Badge variant="outline" class="ml-auto shrink-0 text-green-600 border-green-600/30">Complete</Badge>
+					<Badge variant="outline" class="ml-auto shrink-0 text-green-600 border-green-600/30">{$t('stacks.gitDeploy.complete')}</Badge>
 				{:else if overallStatus === 'error'}
-					<Badge variant="outline" class="ml-auto shrink-0 text-red-600 border-red-600/30">Failed</Badge>
+					<Badge variant="outline" class="ml-auto shrink-0 text-red-600 border-red-600/30">{$t('stacks.gitDeploy.failed')}</Badge>
 				{:else if isDeploying}
 					<Badge variant="secondary" class="ml-auto shrink-0 tabular-nums text-xs">
 						{#if currentStep?.step && currentStep?.totalSteps}
 							{currentStep.step}/{currentStep.totalSteps}
 						{:else}
-							Deploying...
+							{$t('stacks.gitDeploy.deploying')}
 						{/if}
 					</Badge>
 				{/if}
@@ -222,17 +248,17 @@
 				<div class="flex items-start gap-3 py-2 px-2">
 					<AlertTriangle class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
 					<div class="space-y-1">
-						<p class="font-medium">Sync from git?</p>
+						<p class="font-medium">{$t('stacks.gitDeploy.confirmTitle')}</p>
 						<p class="text-sm text-muted-foreground">
-							This will pull the latest changes for <strong class="text-foreground">{stackName}</strong>.
-							Containers will only restart if the configuration changed.
+							{$t('stacks.gitDeploy.confirmPrefix')} <strong class="text-foreground">{stackName}</strong>.
+							{$t('stacks.gitDeploy.confirmSuffix')}
 						</p>
 					</div>
 				</div>
 			{:else if steps.length === 0 && isDeploying}
 				<div class="flex items-center gap-3 text-muted-foreground py-2 px-2">
 					<Loader2 class="w-4 h-4 animate-spin shrink-0" />
-					<span class="text-sm">Initializing...</span>
+					<span class="text-sm">{$t('stacks.gitDeploy.initializing')}</span>
 				</div>
 			{:else}
 				<div class="space-y-0.5">
@@ -244,7 +270,7 @@
 								class="w-4 h-4 shrink-0 {getStepColor(step.status, isCurrentStep)} {isCurrentStep && step.status !== 'complete' && step.status !== 'error' ? 'animate-spin' : ''}"
 							/>
 							<span class="{getStepColor(step.status, isCurrentStep)}">
-								{step.message || step.status}
+								{step.message || getStepLabel(step.status)}
 							</span>
 						</div>
 					{/each}
@@ -266,15 +292,15 @@
 			<!-- Left: copy / cancel -->
 			<div>
 				{#if overallStatus === 'confirming'}
-					<Button variant="outline" onclick={handleCancelConfirm}>Cancel</Button>
+					<Button variant="outline" onclick={handleCancelConfirm}>{$t('common.actions.cancel')}</Button>
 				{:else if steps.length > 0}
 					<Button variant="outline" size="sm" onclick={copyLogs} class="gap-1.5">
 						{#if copied}
 							<Check class="w-3.5 h-3.5" />
-							Copied!
+							{$t('stacks.gitDeploy.copied')}
 						{:else}
 							<Copy class="w-3.5 h-3.5" />
-							Copy logs
+							{$t('stacks.gitDeploy.copyLogs')}
 						{/if}
 					</Button>
 				{/if}
@@ -285,7 +311,7 @@
 				{#if overallStatus === 'confirming'}
 					<Button onclick={handleConfirmDeploy}>
 						<Rocket class="w-4 h-4" />
-						Deploy
+						{$t('common.actions.deploy')}
 					</Button>
 				{:else}
 					<Button
@@ -295,9 +321,9 @@
 					>
 						{#if isDeploying}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Deploying...
+							{$t('stacks.gitDeploy.deploying')}
 						{:else}
-							Close
+							{$t('common.actions.close')}
 						{/if}
 					</Button>
 				{/if}

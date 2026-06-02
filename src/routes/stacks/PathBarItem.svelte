@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Copy, Check, XCircle, FolderOpen, FolderSync } from 'lucide-svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		label: string;
@@ -22,7 +23,7 @@
 		onCopy,
 		onBrowse,
 		onChangeLocation,
-		defaultText = 'Default location',
+		defaultText = '',
 		isSuggested = false,
 		copied = null,
 		sourceHint
@@ -56,12 +57,12 @@
 		class="flex-1 min-w-0 truncate font-mono h-6 leading-6 {!path || isSuggested ? 'text-zinc-400 dark:text-zinc-500 italic' : ''}"
 		title={displayPath.full}
 	>
-		{displayPath.truncated || defaultText}
+		{displayPath.truncated || defaultText || $t('stacks.pathBar.defaultLocation')}
 	</code>
 	<button
 		onclick={onBrowse}
 		class="p-1 rounded transition-colors shrink-0 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-		title={`Browse for ${label.toLowerCase()}`}
+		title={translate('stacks.pathBar.browseFor', { label })}
 	>
 		<FolderOpen class="w-3.5 h-3.5" />
 	</button>
@@ -69,7 +70,7 @@
 		<button
 			onclick={onChangeLocation}
 			class="p-1 rounded transition-colors shrink-0 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-			title="Change location"
+			title={$t('stacks.pathBar.changeLocation')}
 		>
 			<FolderSync class="w-3.5 h-3.5" />
 		</button>
@@ -77,7 +78,7 @@
 	<button
 		onclick={onCopy}
 		class="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors shrink-0 {!path ? 'opacity-40 cursor-not-allowed' : ''}"
-		title="Copy path"
+		title={$t('stacks.pathBar.copyPath')}
 		disabled={!path}
 	>
 		{#if copied === 'error'}
@@ -85,7 +86,7 @@
 				<Tooltip.Trigger>
 					<XCircle class="w-3.5 h-3.5 text-red-500" />
 				</Tooltip.Trigger>
-				<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+				<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
 			</Tooltip.Root>
 		{:else if copied === 'ok'}
 			<Check class="w-3.5 h-3.5 text-green-500" />

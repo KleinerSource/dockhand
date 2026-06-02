@@ -1,0 +1,4420 @@
+{
+	"meta": {
+		"appTitle": "Dockhand - Docker Management",
+		"loginTitle": "Login - Dockhand"
+	},
+	"language": {
+		"label": "Language",
+		"description": "Display language used throughout the app",
+		"english": "English",
+		"simplifiedChinese": "Simplified Chinese",
+		"updated": "Language updated"
+	},
+	"common": {
+		"actions": {
+			"add": "Add",
+			"apply": "Apply",
+			"back": "Back",
+			"cancel": "Cancel",
+			"clear": "Clear",
+			"close": "Close",
+			"collapse": "Collapse",
+			"confirm": "Confirm",
+			"copy": "Copy",
+			"create": "Create",
+			"delete": "Delete",
+			"done": "Done",
+			"deploy": "Deploy",
+			"disable": "Disable",
+			"download": "Download",
+			"edit": "Edit",
+			"enable": "Enable",
+			"expand": "Expand",
+			"export": "Export",
+			"import": "Import",
+			"inspect": "Inspect",
+			"open": "Open",
+			"ok": "OK",
+			"refresh": "Refresh",
+			"remove": "Remove",
+			"reset": "Reset",
+			"restart": "Restart",
+			"retry": "Retry",
+			"run": "Run",
+			"save": "Save",
+			"search": "Search",
+			"select": "Select",
+			"start": "Start",
+			"stop": "Stop",
+			"update": "Update",
+			"upload": "Upload",
+			"verify": "Verify",
+			"view": "View"
+		},
+		"states": {
+			"active": "Active",
+			"cancelled": "cancelled",
+			"completed": "Completed",
+			"connecting": "Connecting",
+			"disabled": "Disabled",
+			"enabled": "Enabled",
+			"failed": "failed",
+			"loading": "Loading...",
+			"never": "Never",
+			"offline": "Offline",
+			"off": "Off",
+			"pending": "Pending",
+			"running": "Running",
+			"skipped": "Skipped",
+			"stopped": "Stopped",
+			"succeeded": "Succeeded",
+			"unknown": "Unknown",
+			"upToDate": "Up-to-date"
+		},
+		"labels": {
+			"actions": "Actions",
+			"admin": "Admin",
+			"api": "API",
+			"attributes": "Attributes",
+			"auditLog": "Audit log",
+			"autoUpdate": "Auto-update",
+			"changes": "Changes",
+			"command": "Command",
+			"commit": "Commit",
+			"connection": "Connection",
+			"container": "Container",
+			"containerId": "Container ID",
+			"containerName": "Container name",
+			"containers": "Containers",
+			"cpu": "CPU",
+			"created": "Created",
+			"database": "Database",
+			"dashboard": "Dashboard",
+			"description": "Description",
+			"details": "Details",
+			"diskIo": "Disk I/O",
+			"driver": "Driver",
+			"duration": "Duration",
+			"edition": "Edition",
+			"entity": "Entity",
+			"entityId": "Entity ID",
+			"entityName": "Entity name",
+			"entityType": "Entity type",
+			"environment": "Environment",
+			"environments": "Environments",
+			"error": "Error",
+			"events": "Events",
+			"exit": "Exit",
+			"gateway": "Gateway",
+			"health": "Health",
+			"host": "Host",
+			"id": "ID",
+			"image": "Image",
+			"images": "Images",
+			"ip": "IP",
+			"ipAddress": "IP address",
+			"license": "License",
+			"licensedTo": "Licensed to",
+			"labels": "Labels",
+			"lastRun": "Last run",
+			"location": "Location",
+			"logs": "Logs",
+			"memory": "Memory",
+			"modified": "Modified",
+			"name": "Name",
+			"netIo": "Net I/O",
+			"networks": "Networks",
+			"nextRun": "Next run",
+			"osArch": "OS/Arch",
+			"package": "Package",
+			"ports": "Ports",
+			"progress": "Progress",
+			"privacy": "Privacy",
+			"registry": "Registry",
+			"registries": "Registries",
+			"releaseNotes": "Release notes",
+			"restarts": "Restarts",
+			"runtime": "Runtime",
+			"schedule": "Schedule",
+			"schedules": "Schedules",
+			"schema": "Schema",
+			"scope": "Scope",
+			"settings": "Settings",
+			"shell": "Shell",
+			"size": "Size",
+			"source": "Source",
+			"stack": "Stack",
+			"stacks": "Stacks",
+			"state": "State",
+			"status": "Status",
+			"subnet": "Subnet",
+			"tag": "Tag",
+			"tags": "Tags",
+			"terms": "Terms",
+			"timestamp": "Timestamp",
+			"trigger": "Trigger",
+			"updated": "Updated",
+			"updates": "Updates",
+			"uptime": "Uptime",
+			"usedBy": "Used by",
+			"userAgent": "User agent",
+			"user": "User",
+			"users": "Users",
+			"version": "Version",
+			"volumes": "Volumes"
+		},
+		"counts": {
+			"of": "{count} of {total}"
+		},
+		"liveUpdates": {
+			"active": "Live updates active - grid will auto-refresh",
+			"connecting": "Connecting to live updates..."
+		},
+		"selection": {
+			"selectAll": "Select all",
+			"deselectAll": "Deselect all"
+		},
+		"errors": {
+			"unknown": "Unknown error occurred"
+		}
+	},
+	"filters": {
+		"allTime": "All time",
+		"custom": "Custom",
+		"customRange": "Custom range...",
+		"from": "From",
+		"to": "To",
+		"clear": "Clear",
+		"today": "Today",
+		"yesterday": "Yesterday",
+		"last7days": "Last 7 days",
+		"last30days": "Last 30 days",
+		"thisMonth": "This month",
+		"lastMonth": "Last month",
+		"clearAllFilters": "Clear all filters"
+	},
+	"relativeTime": {
+		"today": "today",
+		"yesterday": "yesterday",
+		"daysAgo": "{count} days ago",
+		"weeksAgo": "{count} weeks ago",
+		"monthsAgo": "{count} months ago",
+		"yearsAgo": "{count} years ago"
+	},
+	"navigation": {
+		"dashboard": "Dashboard",
+		"containers": "Containers",
+		"logs": "Logs",
+		"shell": "Shell",
+		"stacks": "Stacks",
+		"images": "Images",
+		"volumes": "Volumes",
+		"networks": "Networks",
+		"registry": "Registry",
+		"activity": "Activity",
+		"schedules": "Schedules",
+		"auditLog": "Audit log",
+		"settings": "Settings",
+		"profile": "Profile",
+		"signOut": "Sign out",
+		"viewProfile": "View profile",
+		"collapseSidebar": "Collapse sidebar",
+		"expandSidebar": "Expand sidebar"
+	},
+	"dashboard": {
+		"pageTitle": "Dashboard - Dockhand",
+		"environments": "Environments",
+		"allLabels": "All",
+		"searchEnvironments": "Search environments...",
+		"resultCount": "{count} of {total}",
+		"addEnvironment": "Add environment",
+		"lockTiles": "Lock tiles",
+		"unlockTiles": "Unlock tiles",
+		"layoutOptions": "Layout options",
+		"refresh": "Refresh",
+		"loadingEnvironments": "Loading environments...",
+		"noEnvironments": "No environments configured",
+		"noEnvironmentsDescription": "Add an environment to start managing your Docker hosts",
+		"goToSettings": "Go to Settings",
+		"noMatchingEnvironments": "No matching environments",
+		"noMatchingEnvironmentsDescription": "No environments match the selected label filters",
+		"clearFilters": "Clear filters",
+		"unknownHost": "Unknown host",
+		"connections": {
+			"socket": "Socket",
+			"direct": "Direct",
+			"standard": "Standard",
+			"edge": "Edge",
+			"edgeConnection": "Edge connection",
+			"all": "All connections",
+			"plural": "connections",
+			"socketTitle": "Unix socket connection",
+			"directTitle": "Direct Docker connection",
+			"standardTitle": "Hawser agent (standard mode)",
+			"edgeTitle": "Hawser agent (edge mode)"
+		},
+		"layouts": {
+			"compact": "Compact",
+			"standard": "Standard",
+			"detailed": "Detailed",
+			"full": "Full",
+			"list": "List"
+		},
+		"statusTitles": {
+			"autoUpdateEnabled": "Auto-update enabled",
+			"updateCheckEnabled": "Update check enabled (notify only)",
+			"vulnerabilityScanningEnabled": "Vulnerability scanning enabled",
+			"activityCollectionEnabled": "Activity collection enabled",
+			"metricsCollectionEnabled": "Metrics collection enabled",
+			"editEnvironmentSettings": "Edit environment settings",
+			"offline": "Offline"
+		},
+		"stream": {
+			"connectionTimedOut": "Connection timed out",
+			"connectionFailed": "Connection failed",
+			"connectionFailedRefresh": "Connection failed - click refresh to retry",
+			"dockerNotAccessible": "Docker not accessible",
+			"connectionLost": "Connection lost",
+			"liveUpdatesReconnected": "Live updates reconnected",
+			"liveUpdatesDisconnected": "Live updates disconnected, reconnecting...",
+			"liveUpdatesFailed": "Live updates failed - refresh page to retry"
+		},
+		"stats": {
+			"total": "Total",
+			"running": "Running",
+			"stopped": "Stopped",
+			"paused": "Paused",
+			"restarting": "Restarting",
+			"unhealthy": "Unhealthy",
+			"pendingUpdates": "Pending updates",
+			"runningContainers": "Running containers",
+			"stoppedContainers": "Stopped containers",
+			"pausedContainers": "Paused containers",
+			"restartingContainers": "Restarting containers",
+			"unhealthyContainers": "Unhealthy containers",
+			"totalContainers": "Total containers",
+			"unhealthyCount": "{count} unhealthy",
+			"restartingCount": "{count} restarting",
+			"cpuMemoryHistory": "CPU & Memory history",
+			"diskUsage": "Disk usage",
+			"images": "Images",
+			"containers": "Containers",
+			"volumes": "Volumes",
+			"buildCache": "Build cache",
+			"recentEvents": "Recent events",
+			"topContainersByCpu": "Top containers by CPU",
+			"noRunningContainers": "No running containers",
+			"metricsCollectionDisabled": "Metrics collection disabled",
+			"noMetricsAvailable": "No metrics available",
+			"allContainersHealthy": "All containers healthy",
+			"connecting": "Connecting...",
+			"connectingToEnvironment": "Connecting to environment...",
+			"environmentOffline": "Environment offline"
+		}
+	},
+	"alerts": {
+		"title": "Alerts",
+		"empty": "No alerts configured",
+		"comingSoon": "Alert configuration coming soon"
+	},
+	"terminal": {
+		"pageTitle": "Terminal - Dockhand",
+		"shell": "Shell",
+		"user": "User",
+		"terminal": "Terminal",
+		"removeUser": "Remove user",
+		"addUserPlaceholder": "Add user... (Enter)",
+		"selectContainer": "Select a container to open shell",
+		"detectingShells": "Detecting available shells...",
+		"noShell": "No shell available in this container",
+		"noShellDescription": "This container may not have a shell installed.",
+		"disconnected": "Disconnected",
+		"connecting": "Connecting...",
+		"loading": "Loading terminal...",
+		"copyOutput": "Copy output",
+		"clear": "Clear (Cmd+L)",
+		"clearCtrl": "Clear terminal (Ctrl+L)",
+		"reconnect": "Reconnect",
+		"close": "Close terminal",
+		"searchRunningContainers": "Search running containers...",
+		"noRunningContainers": "No running containers",
+		"noMatches": "No matches found",
+		"connected": "Connected",
+		"disconnect": "Disconnect",
+		"select": "Select",
+		"unavailable": "unavailable",
+		"distrolessHint": "Containers built from scratch or distroless images often don't include shells.",
+		"connectingTo": "Connecting to {name}...",
+		"sessionContext": "Shell: {shell}, User: {user}",
+		"defaultUser": "default",
+		"errorPrefix": "Error",
+		"errorWithMessage": "Error: {message}",
+		"sessionEnded": "Session ended.",
+		"connectionError": "Connection error",
+		"disconnectedLine": "Disconnected.",
+		"reconnecting": "Reconnecting..."
+	},
+	"images": {
+		"pageTitle": "Images - Dockhand",
+		"title": "Images",
+		"searchPlaceholder": "Search images...",
+		"untagged": "<untagged>",
+		"usageFilters": {
+			"all": "All",
+			"inUse": "In use",
+			"someUnused": "Some unused",
+			"unused": "Unused"
+		},
+		"actions": {
+			"prune": "Prune",
+			"pruneUnused": "Prune unused",
+			"pull": "Pull",
+			"tag": "Tag"
+		},
+		"confirm": {
+			"danglingImages": "dangling images",
+			"allUnusedImages": "all unused images",
+			"pruneDanglingTitle": "Prune dangling images",
+			"pruneUnusedTitle": "Prune unused images"
+		},
+		"tooltips": {
+			"pruneDangling": "Remove untagged intermediate layers (dangling images)",
+			"pruneUnused": "Remove all images not used by any container, including tagged images",
+			"someTagsUnused": "Some tags are unused",
+			"runContainer": "Run container",
+			"scanForVulnerabilities": "Scan for vulnerabilities",
+			"pushToRegistry": "Push to registry",
+			"copied": "Copied!",
+			"copyFullId": "Click to copy full ID",
+			"viewContainersUsingImage": "View containers using this image",
+			"viewLayers": "View layers",
+			"exportAs": "Export image as {format}",
+			"tagImage": "Tag image"
+		},
+		"selection": {
+			"selected": "{count} selected"
+		},
+		"empty": {
+			"title": "No images found",
+			"description": "Pull an image from a registry to get started"
+		},
+		"usage": {
+			"containers": "{count} container(s)"
+		},
+		"batch": {
+			"removingImages": "Removing {count} image(s)"
+		},
+		"toasts": {
+			"exporting": "Exporting {image}...",
+			"exportFailed": "Failed to export {image}",
+			"loadFailed": "Failed to load images",
+			"prunedImages": "Pruned {count} image(s), freed {size}",
+			"noDanglingImages": "No dangling images to prune",
+			"pruneFailed": "Failed to prune images",
+			"noUnusedImages": "No unused images to prune",
+			"pruneUnusedFailed": "Failed to prune unused images",
+			"deleteFailedGeneric": "Failed to delete image",
+			"deleteFailed": "Failed to delete {image}",
+			"deleted": "Deleted {image}",
+			"taggedAs": "Tagged as {tag}",
+			"tagFailed": "Failed to tag image"
+		},
+		"tagDialog": {
+			"title": "Tag image",
+			"descriptionPrefix": "Add a new tag to ",
+			"repositoryName": "Repository name",
+			"repositoryPlaceholder": "e.g., myregistry/myimage",
+			"tagPlaceholder": "e.g., latest, v1.0.0",
+			"tagging": "Tagging..."
+		},
+		"layers": {
+			"modalTitle": "Image layers:",
+			"fetchFailed": "Failed to fetch image history",
+			"loadFailed": "Failed to load image history",
+			"noCommand": "No command",
+			"empty": "No layer history found",
+			"totalLayers": "Total layers",
+			"totalSize": "Total size",
+			"stackTitle": "Layer stack (bottom to top) - click to expand",
+			"sizeLarge": "Large",
+			"sizeNormal": "Normal",
+			"comment": "Comment"
+		}
+	},
+	"imagePull": {
+		"modalTitle": "Pull image",
+		"modalTitleWithScan": "Pull & scan image",
+		"steps": {
+			"configure": "Configure",
+			"pull": "Pull",
+			"scan": "Scan"
+		},
+		"imageName": "Image name",
+		"dockerHubPublic": "Docker Hub (public)",
+		"placeholders": {
+			"dockerHub": "nginx:latest or library/nginx:1.25",
+			"privateRegistry": "myimage:latest"
+		},
+		"imageFormatPrefix": "Format:",
+		"imageFormatOr": "or",
+		"fullReference": "Full image reference",
+		"processing": "Processing",
+		"removing": "Removing...",
+		"removeImage": "Remove image",
+		"keepImage": "Keep image",
+		"upToDate": "Image is up to date",
+		"idle": "Enter an image name to start pulling",
+		"layersProgress": "{completed} / {total} layers",
+		"downloaded": "Downloaded: {downloaded} / {total}",
+		"table": {
+			"layerId": "Layer ID"
+		},
+		"status": {
+			"initializing": "Initializing...",
+			"pulling": "Pulling...",
+			"complete": "Complete!",
+			"pullingLayers": "Pulling layers...",
+			"pullCompleted": "Pull completed!"
+		},
+		"output": {
+			"starting": "Starting pull for {image}",
+			"completedIn": "Pull completed in {duration}",
+			"title": "Output ({count} lines)",
+			"labels": {
+				"pull": "pull",
+				"layer": "layer"
+			}
+		},
+		"errors": {
+			"startFailed": "Failed to start pull",
+			"pullFailed": "Failed to pull image"
+		}
+	},
+	"imagePush": {
+		"modalTitle": "Push to registry",
+		"steps": {
+			"configure": "Configure",
+			"push": "Push"
+		},
+		"sourceImage": "Source image",
+		"targetRegistry": "Target registry",
+		"noTargetRegistries": "No target registries available. Add a private registry in Settings.",
+		"imageNameTag": "Image name/tag",
+		"willPushAs": "Will be pushed as:",
+		"retryPush": "Retry push",
+		"readyToPush": "Ready to push to",
+		"status": {
+			"findingImage": "Finding image...",
+			"pushedSuccessfully": "Image pushed successfully!",
+			"complete": "Push complete!",
+			"failed": "Push failed"
+		},
+		"errors": {
+			"imageNotFound": "Could not find image to push",
+			"pushFailed": "Failed to push image",
+			"pushFailedShort": "Push failed"
+		},
+		"output": {
+			"starting": "Starting push to {registry}...",
+			"complete": "Push complete!",
+			"tagging": "Tagging image for target registry...",
+			"pushingLayers": "Pushing layers...",
+			"labels": {
+				"push": "push"
+			}
+		}
+	},
+	"imageScan": {
+		"title": "Vulnerability scan",
+		"retryScan": "Retry scan",
+		"startScan": "Start scan",
+		"scanImagePrefix": "Scan",
+		"scanImageSuffix": "for vulnerabilities",
+		"vulnerabilityCount": "{count} vulnerabilities",
+		"status": {
+			"scanning": "Scanning...",
+			"starting": "Starting vulnerability scan...",
+			"ready": "Ready to scan",
+			"scanningForVulnerabilities": "Scanning for vulnerabilities...",
+			"vulnerabilitiesFound": "Vulnerabilities found",
+			"someVulnerabilitiesFound": "Some vulnerabilities found",
+			"noVulnerabilities": "No vulnerabilities!",
+			"failed": "Scan failed"
+		},
+		"tabs": {
+			"output": "Output",
+			"results": "Scan results"
+		},
+		"output": {
+			"starting": "Starting vulnerability scan for {image}",
+			"labels": {
+				"scan": "scan"
+			}
+		},
+		"exports": {
+			"markdown": "Markdown report (.md)",
+			"csv": "CSV spreadsheet (.csv)",
+			"json": "JSON data (.json)"
+		},
+		"report": {
+			"title": "Vulnerability Scan Report",
+			"scanner": "Scanner",
+			"cveId": "CVE ID",
+			"severity": "Severity",
+			"package": "Package",
+			"installedVersion": "Installed Version",
+			"fixedVersion": "Fixed Version",
+			"description": "Description",
+			"link": "Link",
+			"summary": "Summary",
+			"total": "Total",
+			"vulnerabilityCount": "{count} vulnerabilities",
+			"installed": "Installed",
+			"fixedIn": "Fixed in",
+			"noVulnerabilitiesFound": "No vulnerabilities found",
+			"noFixAvailable": "No fix available",
+			"reference": "Reference",
+			"generatedByDockhand": "Report generated by Dockhand"
+		}
+	},
+	"scanResults": {
+		"empty": "No scan results available",
+		"noVulnerabilities": "No vulnerabilities",
+		"total": "{count} total",
+		"columns": {
+			"cveId": "CVE ID",
+			"severity": "Severity",
+			"installed": "Installed",
+			"fixedIn": "Fixed in"
+		}
+	},
+	"logs": {
+		"pageTitle": "Logs - Dockhand",
+		"title": "Logs",
+		"searchContainers": "Search containers...",
+		"filterContainers": "Filter containers...",
+		"allContainers": "All containers",
+		"layout": {
+			"single": "Single",
+			"multi": "Multi",
+			"grouped": "Grouped"
+		},
+		"empty": {
+			"noLogs": "No logs available",
+			"noContainers": "No containers found",
+			"selectContainer": "Select a container to view logs",
+			"selectContainerFromList": "Select a container from the list",
+			"selectContainersForMergedLogs": "Select containers from the list to view merged logs"
+		},
+		"selection": {
+			"current": "current",
+			"selectAllContainers": "Select all",
+			"selected": "{count} selected",
+			"containerCount": "{count} container(s)"
+		},
+		"merge": {
+			"mergeSelected": "Merge {count} containers"
+		},
+		"stream": {
+			"live": "Live",
+			"connectedTooltip": "Connected - live streaming",
+			"paused": "Paused",
+			"pausedTooltip": "Streaming paused",
+			"pause": "Pause",
+			"stream": "Stream",
+			"ended": "Stream ended",
+			"startFailed": "Failed to start streaming",
+			"connectionError": "Connection error",
+			"reconnecting": "Reconnecting ({attempt}/{total})...",
+			"connectingToStream": "Connecting to log stream...",
+			"clickToReconnect": "Click to reconnect"
+		},
+		"tooltips": {
+			"pauseStreaming": "Pause live streaming",
+			"resumeStreaming": "Resume live streaming",
+			"toggleAutoRefresh": "Toggle auto-refresh",
+			"toggleAutoScroll": "Toggle auto-scroll",
+			"toggleWordWrap": "Toggle word wrap",
+			"tailLines": "Number of log lines to load",
+			"hideTimestamps": "Hide timestamps",
+			"showTimestamps": "Show timestamps",
+			"hideContainerName": "Hide container name prefix",
+			"showContainerName": "Show container name prefix",
+			"hideLineNumbers": "Hide line numbers",
+			"showLineNumbers": "Show line numbers",
+			"showAllLines": "Show all lines (filter mode active)",
+			"hideNonMatchingLines": "Hide non-matching lines",
+			"searchLogs": "Search logs",
+			"copyLogs": "Copy logs",
+			"downloadLogs": "Download logs",
+			"clearLogs": "Clear logs",
+			"refreshLogs": "Refresh logs",
+			"closeLogs": "Close logs",
+			"selectForMerge": "Select for merged logs",
+			"terminalBelow": "Terminal below",
+			"terminalOnSide": "Terminal on side"
+		},
+		"tail": {
+			"all": "All",
+			"allLines": "All lines",
+			"lines": "{count} lines"
+		},
+		"timeRange": {
+			"activeTooltip": "Log time range: {range}",
+			"tooltip": "Filter logs by time range",
+			"time": "Time"
+		},
+		"search": {
+			"previous": "Previous match",
+			"next": "Next match",
+			"close": "Close search"
+		},
+		"groups": {
+			"savedGroups": "Saved groups",
+			"deleteGroup": "Delete group",
+			"namePlaceholder": "Group name...",
+			"saveGroup": "Save group"
+		},
+		"favorites": {
+			"title": "Favorites",
+			"add": "Add to favorites",
+			"remove": "Remove from favorites"
+		},
+		"controls": {
+			"autoScroll": "Auto-scroll",
+			"wrap": "Wrap"
+		},
+		"loading": "Loading logs...",
+		"errors": {
+			"fetchWithMessage": "Failed to fetch logs: {error}"
+		}
+	},
+	"environments": {
+		"page": {
+			"title": "Environments",
+			"total": "{count} total",
+			"addEnvironment": "Add environment",
+			"refresh": "Refresh",
+			"loading": "Loading environments...",
+			"empty": "No environments found",
+			"edgeConnectionOutbound": "Edge connection (outbound)",
+			"testingConnection": "Testing connection...",
+			"connected": "Connected",
+			"failed": "Failed",
+			"connectionFailed": "Connection failed",
+			"test": "Test",
+			"addModalTitle": "Add environment",
+			"editModalTitle": "Edit environment",
+			"quickUrl": "Quick URL (optional)",
+			"quickUrlPlaceholder": "http://192.168.1.4:2375 or https://docker.example.com:2376",
+			"quickUrlHelp": "Paste a full Docker URL to auto-fill the fields below",
+			"parse": "Parse",
+			"name": "Name",
+			"namePlaceholder": "Production server",
+			"host": "Host",
+			"hostPlaceholder": "192.168.1.100 or docker.example.com",
+			"hostPlaceholderShort": "192.168.1.100",
+			"port": "Port",
+			"protocol": "Protocol",
+			"tlsCertificatesOptional": "TLS certificates (optional)",
+			"caCertificate": "CA certificate",
+			"clientCertificate": "Client certificate",
+			"clientKey": "Client key",
+			"cancel": "Cancel",
+			"add": "Add",
+			"save": "Save",
+			"validation": {
+				"nameHostRequired": "Name and host are required"
+			},
+			"errors": {
+				"createFailed": "Failed to create environment",
+				"updateFailed": "Failed to update environment",
+				"deleteFailed": "Failed to delete environment"
+			},
+			"confirm": {
+				"deleteEnvironment": "Are you sure you want to delete this environment?"
+			},
+			"info": {
+				"host": "Host: {name}",
+				"containersImages": "Containers: {containers} | Images: {images}"
+			}
+		}
+	},
+	"containers": {
+		"page": {
+			"pageTitle": "Containers - Dockhand",
+			"title": "Containers",
+			"searchPlaceholder": "Search containers...",
+			"emptyTitle": "No containers found",
+			"emptyDescription": "Create a new container to get started"
+		},
+		"filters": {
+			"allStatuses": "All statuses",
+			"statuses": "statuses"
+		},
+		"status": {
+			"running": "Running",
+			"paused": "Paused",
+			"restarting": "Restarting",
+			"exited": "Exited",
+			"created": "Created",
+			"dead": "Dead"
+		},
+		"health": {
+			"healthy": "Healthy",
+			"unhealthy": "Unhealthy",
+			"starting": "Starting"
+		},
+		"actions": {
+			"checkUpdates": "Check for updates",
+			"checkingProgress": "Checking {checked}/{total}",
+			"update": "Update",
+			"updateAll": "Update all",
+			"updateAllWithUpdates": "Update all containers with available updates",
+			"updateAllCount": "Update all ({count})",
+			"dismissAllUpdates": "Dismiss all update indicators",
+			"prune": "Prune",
+			"pruneContainers": "Prune containers",
+			"start": "Start",
+			"startCount": "Start {count}",
+			"stop": "Stop",
+			"stopCount": "Stop {count}",
+			"pause": "Pause",
+			"pauseCount": "Pause {count}",
+			"unpause": "Unpause",
+			"unpauseCount": "Unpause {count}",
+			"restart": "Restart",
+			"restartCount": "Restart {count}",
+			"remove": "Remove",
+			"removeCount": "Remove {count}",
+			"delete": "Delete",
+			"updateSelectedToLatest": "Update selected containers to latest image",
+			"updateCount": "Update {count}",
+			"updateAvailableClick": "Update available - click to update",
+			"showLogs": "Show logs",
+			"openLogs": "Open logs",
+			"showTerminal": "Show terminal",
+			"browseFiles": "Browse files",
+			"viewDetails": "View details"
+		},
+		"confirm": {
+			"allUpdatableContainers": "all {count} containers",
+			"stoppedContainers": "stopped containers",
+			"stoppedContainerCount": "{count} stopped container(s)",
+			"runningContainerCount": "{count} running container(s)",
+			"pausedContainerCount": "{count} paused container(s)",
+			"containerCount": "{count} container(s)",
+			"selectedContainerCount": "{count} selected container(s)"
+		},
+		"batch": {
+			"titles": {
+				"starting": "Starting {count} container(s)",
+				"stopping": "Stopping {count} container(s)",
+				"restarting": "Restarting {count} container(s)",
+				"pausing": "Pausing {count} container(s)",
+				"unpausing": "Unpausing {count} container(s)",
+				"removing": "Removing {count} container(s)"
+			}
+		},
+		"selection": {
+			"selected": "{count} selected"
+		},
+		"layout": {
+			"switchToVertical": "Switch to vertical layout (logs/terminal on side)",
+			"switchToHorizontal": "Switch to horizontal layout (logs/terminal below)"
+		},
+		"update": {
+			"available": "Update available"
+		},
+		"system": {
+			"settingsAbout": "Settings > About",
+			"dockhandManagement": "Dockhand management container",
+			"hawserUpdateRemoteHost": "Update on the remote host where Hawser runs.",
+			"updateInstructionsGitHub": "Update instructions on GitHub",
+			"hawserRemoteAgent": "Hawser remote agent"
+		},
+		"tooltips": {
+			"restarts": "{count} restarts",
+			"networkIo": "↓{received} received / ↑{sent} sent",
+			"diskIo": "↓{read} read / ↑{written} written",
+			"openUrlInNewTab": "Open {url} in new tab",
+			"exposedInternalPort": "Exposed (internal) port"
+		},
+		"network": {
+			"noIp": "no IP",
+			"ipv4": "IPv4",
+			"ipv6": "IPv6",
+			"mac": "MAC"
+		},
+		"terminal": {
+			"detectingShells": "Detecting shells...",
+			"detectingAvailableShells": "Detecting available shells...",
+			"noShellAvailable": "No shell available",
+			"noShellInstalled": "This container has no shell installed.",
+			"noShellInstalledLong": "This container does not have any shell installed.",
+			"distrolessNoShellHint": "Containers built from scratch or distroless images often don't include shells.",
+			"unavailable": "unavailable",
+			"removeUser": "Remove user",
+			"addUserPlaceholder": "Add user... (Enter)",
+			"connect": "Connect",
+			"connectingTo": "Connecting to {name}...",
+			"shellUserLine": "Shell: {shell}, User: {user}",
+			"defaultUser": "default",
+			"sessionEnded": "Session ended.",
+			"connected": "Connected",
+			"openSession": "Open terminal session",
+			"configureSession": "Configure the shell and user for this session",
+			"selectShell": "Select shell",
+			"selectUser": "Select user",
+			"openInNewWindow": "Open in new window"
+		},
+		"autoUpdate": {
+			"notAvailable": "Auto-updates not available",
+			"dockhandCannotSelfUpdate": "Dockhand cannot update itself. To update, run on the host:",
+			"hawserUpdateRemoteHost": "Hawser agents must be updated on their remote host.",
+			"viewGitHubInstructions": "View update instructions on GitHub",
+			"enableAutomatic": "Enable automatic image updates",
+			"vulnerabilityCriteria": "Vulnerability criteria",
+			"blockByVulnerabilityCriteria": "Block auto-updates if new image has vulnerabilities matching this criteria"
+		},
+		"batchUpdate": {
+			"title": "Updating containers",
+			"processing": "Processing {current} of {total} containers...",
+			"complete": "Update complete",
+			"failed": "Update failed",
+			"preparing": "Preparing to update {count} container(s)...",
+			"updatedCount": "Updated ({count})",
+			"failedCount": "Failed ({count})",
+			"updateAnyway": "Update anyway",
+			"hideLogs": "Hide logs",
+			"showLogs": "Show logs",
+			"vulnerabilitiesFound": "{count} vulnerabilities found",
+			"columns": {
+				"fixed": "Fixed"
+			}
+		},
+		"create": {
+			"title": "Create new container",
+			"tabs": {
+				"pull": "Pull",
+				"scan": "Scan"
+			},
+			"scanDisabled": "Vulnerability scanning is disabled for this environment.",
+			"scanDisabledHelp": "Enable it in Settings -> Environments to scan images.",
+			"criticalHighFound": "Critical/high vulnerabilities found in image",
+			"creating": "Creating...",
+			"createContainer": "Create container",
+			"toasts": {
+				"created": "Container created successfully",
+				"createdWithImagePulled": "Container created (image {image} was pulled automatically)"
+			},
+			"errors": {
+				"createContainer": "Failed to create container",
+				"createContainerWithDetails": "Failed to create container: {error}"
+			}
+		},
+		"edit": {
+			"title": "Edit container",
+			"renameContainer": "Rename container",
+			"loading": "Loading container data...",
+			"updating": "Updating...",
+			"updateContainer": "Update container",
+			"composeRenameWarningPrefix": "This container is part of the",
+			"composeRenameWarningSuffix": "compose stack. Renaming it may cause issues with stack management.",
+			"composeConfigWarningPrefix": "This container is part of the",
+			"composeConfigWarningSuffix": "compose stack. Changes may be overwritten when the stack is redeployed.",
+			"toasts": {
+				"renamed": "Container renamed successfully!",
+				"updated": "Container updated successfully!"
+			},
+			"errors": {
+				"fetchContainer": "Failed to fetch container: {status}",
+				"loadContainerData": "Failed to load container data: {error}",
+				"renameContainer": "Failed to rename container",
+				"updateContainer": "Failed to update container",
+				"updateContainerWithDetails": "Failed to update container: {error}"
+			}
+		},
+		"inspect": {
+			"title": "Container details:",
+			"tabs": {
+				"overview": "Overview",
+				"layers": "Layers",
+				"processes": "Processes",
+				"mounts": "Mounts",
+				"files": "Files"
+			},
+			"live": {
+				"receivingUpdates": "Receiving live updates",
+				"connectionLost": "Connection lost"
+			},
+			"actions": {
+				"viewRawJson": "View raw JSON",
+				"leaveNetwork": "Leave",
+				"joinNetwork": "Join",
+				"openUrl": "Open {url}"
+			},
+			"sections": {
+				"basicInformation": "Basic information",
+				"dnsConfiguration": "DNS configuration",
+				"extraHosts": "Extra hosts",
+				"connectedNetworks": "Connected networks",
+				"resourceLimits": "Resource limits",
+				"cgroupSettings": "Cgroup settings",
+				"configuration": "Configuration",
+				"healthCheckLog": "Health check log"
+			},
+			"labels": {
+				"rx": "RX",
+				"tx": "TX",
+				"exitCode": "Exit Code",
+				"restartCount": "Restart Count",
+				"platform": "Platform",
+				"started": "Started",
+				"aliases": "Aliases",
+				"exposed": "exposed",
+				"readWrite": "Read/Write",
+				"readOnly": "Read-Only",
+				"destination": "Destination",
+				"propagation": "Propagation",
+				"privileged": "Privileged",
+				"readOnlyRoot": "Read-only Root",
+				"userNamespace": "User Namespace",
+				"apparmorProfile": "AppArmor Profile",
+				"addedCapabilities": "Added capabilities",
+				"droppedCapabilities": "Dropped capabilities",
+				"cpus": "CPUs",
+				"memorySwap": "Memory Swap",
+				"pidsLimit": "PIDs Limit",
+				"oomKill": "OOM Kill",
+				"cpuPeriodQuota": "CPU Period/Quota",
+				"count": "Count",
+				"cgroupParent": "Cgroup Parent",
+				"cgroupnsMode": "Cgroupns Mode",
+				"interval": "Interval",
+				"timeout": "Timeout",
+				"startPeriod": "Start period",
+				"currentStatus": "Current status",
+				"failingStreak": "Failing streak",
+				"yes": "Yes",
+				"no": "No",
+				"notAvailable": "N/A",
+				"all": "All"
+			},
+			"empty": {
+				"notRunning": "Container is not running",
+				"paused": "Container is paused",
+				"noProcesses": "No processes found",
+				"noImageInfo": "No image information available",
+				"noNetworks": "No networks connected.",
+				"noMounts": "No mounts configured",
+				"noEnvVars": "No environment variables",
+				"noLabels": "No labels",
+				"defaultSecurity": "Default security settings",
+				"waitingForHealthcheck": "Waiting for first health check to complete...",
+				"noHealthcheck": "No health check configured"
+			},
+			"network": {
+				"loadingNetworks": "Loading networks...",
+				"joinPlaceholder": "Join a network...",
+				"noAvailable": "No networks available"
+			},
+			"processes": {
+				"count": "{count} process(es)"
+			},
+			"copy": {
+				"copied": "Copied!",
+				"copyLabel": "Copy label",
+				"copyToClipboard": "Copy to clipboard"
+			},
+			"rawJson": {
+				"title": "Raw JSON"
+			},
+			"toasts": {
+				"connectedToNetwork": "Connected to {name}",
+				"disconnectedFromNetwork": "Disconnected from {name}"
+			},
+			"errors": {
+				"connectNetwork": "Failed to connect to network",
+				"disconnectNetwork": "Failed to disconnect from network"
+			}
+		},
+		"settings": {
+			"notSet": "Not set",
+			"advancedHint": "Advanced container options (click to expand)",
+			"badges": {
+				"configured": "configured"
+			},
+			"imageSummary": {
+				"pulling": "Pulling...",
+				"scanning": "Scanning...",
+				"ready": "Image pulled and ready",
+				"vulnerabilities": "{count} vulnerabilities",
+				"setImageInPull": "Go to \"Pull\" tab to set the image"
+			},
+			"configSet": {
+				"title": "Config set",
+				"apply": "Apply config set",
+				"selectPrefill": "Select a config set to pre-fill values...",
+				"selectMerge": "Select a config set to merge values...",
+				"mergeNote": "Note: Values from the config set will be merged with existing settings. Existing keys won't be overwritten."
+			},
+			"sections": {
+				"basic": "Basic settings",
+				"portMappings": "Port mappings",
+				"volumeMappings": "Volume mappings",
+				"environmentVariables": "Environment variables",
+				"resources": "Resources",
+				"security": "Security",
+				"healthcheck": "Healthcheck",
+				"dns": "DNS settings",
+				"devices": "Devices",
+				"gpu": "GPU",
+				"ulimits": "Ulimits"
+			},
+			"labels": {
+				"commandOptional": "Command (optional)",
+				"restartPolicy": "Restart policy",
+				"maxRetryCount": "Max retry count",
+				"networkMode": "Network mode",
+				"pullImageBeforeUpdate": "Pull image before update",
+				"startAfterCreation": "Start container after creation",
+				"startAfterUpdate": "Start container after update",
+				"aliasesCommaSeparated": "Aliases (comma-separated)",
+				"macAddress": "MAC address",
+				"hostPath": "Host path",
+				"containerPath": "Container path",
+				"key": "Key",
+				"value": "Value",
+				"memoryLimit": "Memory limit",
+				"memoryReservation": "Memory reservation",
+				"cpuLimit": "CPU limit",
+				"cpuShares": "CPU shares",
+				"cpuQuota": "CPU quota",
+				"cpuPeriod": "CPU period",
+				"privilegedMode": "Privileged mode",
+				"addCapabilities": "Add capabilities",
+				"dropCapabilities": "Drop capabilities",
+				"securityOptions": "Security options",
+				"enableHealthcheck": "Enable healthcheck",
+				"intervalSeconds": "Interval (s)",
+				"timeoutSeconds": "Timeout (s)",
+				"retries": "Retries",
+				"startSeconds": "Start (s)",
+				"dnsServers": "DNS servers",
+				"dnsSearchDomains": "DNS search domains",
+				"dnsOptions": "DNS options",
+				"enableGpuAccess": "Enable GPU access",
+				"gpuMode": "GPU mode",
+				"gpuCount": "GPU count",
+				"deviceIds": "Device IDs",
+				"capabilities": "Capabilities"
+			},
+			"restartPolicies": {
+				"no": "No",
+				"always": "Always",
+				"onFailure": "On failure",
+				"unlessStopped": "Unless stopped"
+			},
+			"networkModes": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"none": "None"
+			},
+			"placeholders": {
+				"unlimited": "Unlimited",
+				"selectNetwork": "Select network to add...",
+				"defaultCpuPeriod": "Default: 100000",
+				"selectCapabilityAdd": "Select capability to add...",
+				"selectCapabilityDrop": "Select capability to drop...",
+				"runtimeName": "Runtime name",
+				"addCapability": "Add capability...",
+				"soft": "Soft",
+				"hard": "Hard"
+			},
+			"help": {
+				"unlimitedRetries": "Leave empty for unlimited retries",
+				"additionalNetworks": "Container will be connected to selected networks in addition to the network mode above",
+				"resourceLimits": "Configure memory and CPU limits for this container",
+				"microsecondsPerPeriod": "Microseconds per period",
+				"periodInMicroseconds": "Period in microseconds",
+				"commonSecurityOptions": "Common options: no-new-privileges, seccomp=unconfined, apparmor=unconfined"
+			},
+			"portHelp": {
+				"supportedFormats": "Supported host port formats:",
+				"allInterfaces": "bind to all interfaces",
+				"specificIp": "bind to specific IP",
+				"portRange": "port range (container port must also be a range)",
+				"randomAllocation": "Leave host port empty for random allocation",
+				"findFreePort": "Hover the host port field and click the search icon to find the next available port."
+			},
+			"tooltips": {
+				"findFreePort": "Find next available Docker port"
+			},
+			"runtime": {
+				"defaultRunc": "Default (runc)",
+				"custom": "Custom: {runtime}",
+				"customOption": "Custom..."
+			},
+			"gpuModes": {
+				"all": "All",
+				"count": "Count",
+				"specific": "Specific"
+			},
+			"actions": {
+				"addDevice": "Add device",
+				"addUlimit": "Add ulimit"
+			}
+		},
+		"fileBrowser": {
+			"actions": {
+				"newFile": "New file",
+				"newDirectory": "New directory",
+				"uploadFiles": "Upload files",
+				"hideHiddenFiles": "Hide hidden files",
+				"showHiddenFiles": "Show hidden files",
+				"viewFile": "View file",
+				"editFile": "Edit file",
+				"rename": "Rename",
+				"changePermissions": "Change permissions",
+				"closeEditor": "Close editor",
+				"closeViewer": "Close viewer"
+			},
+			"empty": {
+				"directory": "Directory is empty",
+				"noVisibleFiles": "No visible files (hidden files are hidden)"
+			},
+			"labels": {
+				"permissions": "Permissions",
+				"directory": "directory",
+				"file": "file",
+				"readOnly": "read-only",
+				"readOnlyShort": "RO",
+				"newName": "New name",
+				"currentPermissions": "Current: {permissions}"
+			},
+			"tooltips": {
+				"readOnlyFile": "Read-only file (no write permission)",
+				"fileReadOnly": "File is read-only"
+			},
+			"create": {
+				"titleFile": "Create File",
+				"titleDirectory": "Create Directory",
+				"createdIn": "Will be created in: {path}"
+			},
+			"permissions": {
+				"read": "Read",
+				"write": "Write",
+				"execute": "Execute",
+				"owner": "Owner",
+				"group": "Group",
+				"others": "Others",
+				"octal": "Octal",
+				"symbolic": "Symbolic",
+				"enterOctal": "Or enter octal mode directly",
+				"applyRecursively": "Apply recursively"
+			},
+			"toasts": {
+				"fileSaved": "File saved",
+				"fileCreated": "File created",
+				"directoryCreated": "Directory created",
+				"deleted": "Deleted {name}",
+				"renamed": "Renamed successfully",
+				"permissionsChanged": "Permissions changed",
+				"uploaded": "Uploaded {count} file(s)",
+				"uploadFailures": "Failed: {errors}"
+			},
+			"errors": {
+				"readFile": "Failed to read file",
+				"openFile": "Failed to open file",
+				"saveFile": "Failed to save file",
+				"nameRequired": "Name is required",
+				"create": "Failed to create",
+				"delete": "Failed to delete",
+				"rename": "Failed to rename",
+				"modeRequired": "Mode is required",
+				"changePermissions": "Failed to change permissions",
+				"loadDirectory": "Failed to load directory",
+				"upload": "Upload failed",
+				"unableToBrowse": "Unable to browse files"
+			}
+		},
+		"toasts": {
+			"failedUpdateChecksSummary": "{prefix} ({count} failed to check)",
+			"allUpToDate": "All containers are up to date",
+			"updatesAvailable": "{count} update(s) available",
+			"clearUpdateIndicatorsFailed": "Failed to clear update indicators",
+			"updatedContainers": "Updated {count} container(s)",
+			"updateContainersFailed": "Failed to update {count} container(s)",
+			"updatesBlockedByPolicy": "{count} update(s) blocked by vulnerability policy",
+			"started": "Started {name}",
+			"startFailed": "Failed to start {name}",
+			"stopped": "Stopped {name}",
+			"stopFailed": "Failed to stop {name}",
+			"paused": "Paused {name}",
+			"pauseFailed": "Failed to pause {name}",
+			"resumed": "Resumed {name}",
+			"unpauseFailed": "Failed to unpause {name}",
+			"restarted": "Restarted {name}",
+			"restartFailed": "Failed to restart {name}",
+			"removed": "Removed {name}",
+			"removeFailed": "Failed to remove {name}",
+			"copiedToClipboard": "Copied to clipboard"
+		},
+		"errors": {
+			"startContainer": "Failed to start container",
+			"stopContainer": "Failed to stop container",
+			"pauseContainer": "Failed to pause container",
+			"unpauseContainer": "Failed to unpause container",
+			"restartContainer": "Failed to restart container",
+			"removeContainer": "Failed to remove container"
+		}
+	},
+	"volumes": {
+		"pageTitle": "Volumes - Dockhand",
+		"title": "Volumes",
+		"searchPlaceholder": "Search volumes...",
+		"notAvailable": "N/A",
+		"filters": {
+			"drivers": "drivers",
+			"usage": "Usage",
+			"usages": "usages"
+		},
+		"usage": {
+			"inUse": "In use",
+			"unused": "Unused"
+		},
+		"actions": {
+			"prune": "Prune",
+			"pruneVolumes": "Prune volumes",
+			"deleteSelected": "Delete {count}",
+			"clone": "Clone"
+		},
+		"confirm": {
+			"unusedVolumes": "unused volumes",
+			"volume": "volume"
+		},
+		"selection": {
+			"selected": "{count} selected",
+			"volumeCount": "{count} volume(s)"
+		},
+		"batch": {
+			"removing": "Removing {count} volume(s)"
+		},
+		"empty": {
+			"title": "No volumes found",
+			"description": "Create a volume to persist container data"
+		},
+		"tooltips": {
+			"viewDetails": "View details",
+			"browseFiles": "Browse files",
+			"exportAs": "Export volume as {format}",
+			"cloneVolume": "Clone volume"
+		},
+		"toasts": {
+			"loadFailed": "Failed to load volumes",
+			"removeFailedGeneric": "Failed to remove volume",
+			"removeFailed": "Failed to remove {name}",
+			"removed": "Removed {name}",
+			"exporting": "Exporting {name}...",
+			"exportFailed": "Failed to export {name}",
+			"pruned": "Unused volumes pruned",
+			"pruneFailed": "Failed to prune volumes"
+		},
+		"inspect": {
+			"title": "Volume details",
+			"sections": {
+				"basicInformation": "Basic information",
+				"mountpoint": "Mountpoint",
+				"driverOptions": "Driver options"
+			},
+			"mountpointDescription": "The location on the host where the volume data is stored",
+			"noDriverOptions": "No driver options configured",
+			"warningLabel": "Note:",
+			"warningText": "Removing this volume will permanently delete all data stored in it. Make sure no containers are using this volume before removal.",
+			"errors": {
+				"fetchDetails": "Failed to fetch volume details",
+				"loadDetails": "Failed to load volume details"
+			}
+		},
+		"clone": {
+			"title": "Clone volume",
+			"description": "Create a new volume with the same driver and options as \"{name}\".",
+			"newName": "New volume name",
+			"newNamePlaceholder": "Enter new volume name",
+			"note": "Note: This creates an empty volume with the same configuration. To copy data, use the Export feature on the source volume and import into the new volume.",
+			"errors": {
+				"nameRequired": "Please enter a name for the new volume",
+				"cloneFailed": "Failed to clone volume"
+			},
+			"toasts": {
+				"clonedAs": "Volume cloned as \"{name}\""
+			}
+		},
+		"browser": {
+			"title": "Browse volume - {name}",
+			"readOnly": "Read-only",
+			"inUseBy": "Volume is in use by:",
+			"editingDisabled": "- editing disabled",
+			"description": "Browse, edit, and manage files in the volume."
+		},
+		"create": {
+			"title": "Create volume",
+			"volumeName": "Volume name",
+			"selectDriver": "Select driver",
+			"driverHelp": "Volume driver to use (local is default)",
+			"serverIp": "Server / IP",
+			"sharePath": "Share path",
+			"smbVersion": "SMB version",
+			"nfsVersion": "NFS version",
+			"selectVersion": "Select version",
+			"domain": "Domain",
+			"domainHelp": "Optional AD/workgroup domain",
+			"additionalOptions": "Additional options",
+			"addOption": "Add option",
+			"addLabel": "Add label",
+			"keyPlaceholder": "Key",
+			"valuePlaceholder": "Value",
+			"valueOptionalPlaceholder": "Value (optional)",
+			"extraMountOptions": "Extra mount options appended to the mount string",
+			"exportPath": "Export path",
+			"soft": "Soft",
+			"hard": "Hard",
+			"mount": "mount",
+			"noLock": "No lock",
+			"noLabels": "No labels configured",
+			"creating": "Creating...",
+			"createVolume": "Create volume",
+			"drivers": {
+				"local": "Local",
+				"nfs": "NFS",
+				"cifs": "CIFS"
+			},
+			"driverDescriptions": {
+				"local": "Default local driver",
+				"nfs": "Network file system",
+				"cifs": "Windows/SMB shares"
+			},
+			"errors": {
+				"nameRequired": "Volume name is required",
+				"serverRequired": "Server is required",
+				"shareRequired": "Share path is required",
+				"exportPathRequired": "Export path is required",
+				"createFailed": "Failed to create volume"
+			}
+		}
+	},
+	"networks": {
+		"pageTitle": "Networks - Dockhand",
+		"title": "Networks",
+		"searchPlaceholder": "Search networks...",
+		"filters": {
+			"drivers": "drivers",
+			"scopes": "scopes"
+		},
+		"actions": {
+			"prune": "Prune",
+			"pruneNetworks": "Prune networks",
+			"viewGraph": "View Graph",
+			"deleteSelected": "Delete {count}"
+		},
+		"confirm": {
+			"unusedNetworks": "unused networks",
+			"network": "network"
+		},
+		"selection": {
+			"selected": "{count} selected",
+			"networkCount": "{count} network(s)"
+		},
+		"batch": {
+			"removing": "Removing {count} network(s)"
+		},
+		"empty": {
+			"title": "No networks found",
+			"description": "Create a network to connect containers"
+		},
+		"badges": {
+			"builtIn": "built-in",
+			"internal": "internal"
+		},
+		"tooltips": {
+			"viewDetails": "View details",
+			"connectContainer": "Connect container",
+			"copyNetworkId": "Copy network ID",
+			"duplicateNetwork": "Duplicate network"
+		},
+		"graph": {
+			"modalTitle": "View network graph",
+			"modalDescription": "View network connections between containers",
+			"toolbar": {
+				"switchToDarkTheme": "Switch to dark theme",
+				"switchToLightTheme": "Switch to light theme"
+			},
+			"layout": {
+				"changeLayout": "Change layout",
+				"tree": "Tree",
+				"grid": "Grid",
+				"circle": "Circle",
+				"radial": "Radial",
+				"force": "Force"
+			},
+			"legend": {
+				"service": "Service",
+				"network": "Network"
+			},
+			"nodeTypes": {
+				"service": "Service",
+				"network": "Network"
+			},
+			"nodeCaptions": {
+				"networkPrefix": "network"
+			},
+			"panel": {
+				"closePanel": "Close panel"
+			},
+			"fields": {
+				"containerId": "Container ID",
+				"driver": "Driver",
+				"ipamConfiguration": "IPAM configuration",
+				"subnet": "Subnet",
+				"gateway": "Gateway"
+			},
+			"flags": {
+				"externalNetwork": "External network",
+				"internalNetwork": "Internal network",
+				"attachable": "Attachable"
+			},
+			"edges": {
+				"networkConnection": "Network connection",
+				"networkConnectionDescription": "Service connected to this network."
+			}
+		},
+		"connect": {
+			"title": "Connect container to {network}",
+			"description": "Select a container to connect to this network.",
+			"containerLabel": "Container",
+			"selectContainer": "Select a container...",
+			"containerFallback": "container",
+			"cancel": "Cancel",
+			"connect": "Connect",
+			"empty": {
+				"title": "No containers available to connect.",
+				"description": "All containers are already connected to this network."
+			},
+			"toasts": {
+				"connected": "Connected {container} to {network}",
+				"connectFailed": "Failed to connect container"
+			}
+		},
+		"toasts": {
+			"loadFailed": "Failed to load networks",
+			"cannotRemoveBuiltin": "Cannot remove built-in network \"{name}\"",
+			"removeFailedGeneric": "Failed to remove network",
+			"removeFailed": "Failed to remove {name}",
+			"removed": "Removed {name}",
+			"disconnected": "Disconnected {container} from {network}",
+			"disconnectFailed": "Failed to disconnect container",
+			"idCopied": "Network ID copied to clipboard",
+			"copyIdFailed": "Failed to copy ID",
+			"created": "Created {name}",
+			"duplicateFailed": "Failed to duplicate network",
+			"pruned": "Unused networks pruned",
+			"pruneFailed": "Failed to prune networks"
+		},
+		"inspect": {
+			"title": "Network details",
+			"notAvailable": "N/A",
+			"yes": "Yes",
+			"no": "No",
+			"defaultDriver": "default",
+			"ipRange": "IP Range",
+			"connectedContainers": "Connected containers ({count})",
+			"noConnectedContainers": "No containers connected to this network",
+			"sections": {
+				"basicInformation": "Basic information",
+				"ipamConfiguration": "IPAM configuration",
+				"driverOptions": "Driver options"
+			},
+			"errors": {
+				"fetchDetails": "Failed to fetch network details",
+				"loadDetails": "Failed to load network details"
+			}
+		},
+		"create": {
+			"title": "Create network",
+			"description": "Configure a new Docker network with custom settings.",
+			"tabs": {
+				"basic": "Basic",
+				"options": "Options",
+				"labels": "Labels"
+			},
+			"networkName": "Network name",
+			"selectDriver": "Select driver",
+			"parentConfigRequired": "{driver} configuration (required)",
+			"parentInterface": "Parent interface",
+			"mode": "Mode",
+			"internalNetwork": "Internal network",
+			"internalNetworkDescription": "Restrict external access to this network",
+			"attachable": "Attachable",
+			"attachableDescription": "Allow manual container attachment (overlay networks)",
+			"enableIpv6": "Enable IPv6",
+			"enableIpv6Description": "Enable IPv6 networking",
+			"ipamDriver": "IPAM driver",
+			"ipamDriverHelp": "IP Address Management driver (default: default)",
+			"ipRange": "IP range",
+			"ipRangeHelp": "Allocate container IPs from a sub-range of the subnet",
+			"auxiliaryAddresses": "Auxiliary addresses",
+			"auxiliaryAddressesHelp": "Reserve IP addresses for network devices (e.g., host=192.168.1.1)",
+			"hostname": "Hostname",
+			"ipamOptions": "IPAM options",
+			"driverOptionsHelp": "Set driver-specific options (-o key=value)",
+			"commonOptionsForDriver": "Common options for {driver} driver:",
+			"labelsHelp": "Set metadata labels on the network",
+			"creating": "Creating...",
+			"createNetwork": "Create network",
+			"drivers": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"overlay": "Overlay",
+				"macvlan": "Macvlan",
+				"ipvlan": "IPvlan",
+				"none": "None"
+			},
+			"driverDescriptions": {
+				"bridge": "Default network driver",
+				"host": "Use host networking directly",
+				"overlay": "Swarm multi-host networking",
+				"macvlan": "Assign MAC address to containers",
+				"ipvlan": "IPvlan L2/L3 networking",
+				"none": "Disable networking"
+			},
+			"modes": {
+				"bridgeDefault": "Bridge (default)",
+				"private": "Private",
+				"passthru": "Passthru",
+				"l2Default": "L2 (default)"
+			},
+			"commonDriverOptions": {
+				"bridgeName": "Bridge device name",
+				"ipMasquerade": "Enable IP masquerading (true/false)",
+				"interContainerCommunication": "Enable inter-container communication (true/false)",
+				"hostBindingIpv4": "Host binding IPv4 address",
+				"mtu": "MTU size",
+				"parentInterface": "Parent interface (e.g., eth0)",
+				"macvlanMode": "Mode: bridge, private, vepa, passthru",
+				"ipvlanMode": "Mode: l2, l3, l3s",
+				"ipvlanFlag": "Flag: bridge, private, vepa",
+				"encryption": "Enable encryption (true/false)"
+			},
+			"errors": {
+				"nameRequired": "Network name is required",
+				"parentInterfaceRequired": "Parent interface is required for {driver} networks",
+				"subnetRequired": "Subnet is required for {driver} networks",
+				"createFailed": "Failed to create network",
+				"fixValidation": "Please fix the validation errors above"
+			}
+		}
+	},
+	"roles": {
+		"admin": "Admin",
+		"user": "User"
+	},
+	"profile": {
+		"pageTitle": "Profile - Dockhand",
+		"title": "Profile",
+		"description": "Manage your account settings",
+		"account": {
+			"title": "Account information",
+			"removePhoto": "Remove photo",
+			"role": "Role",
+			"lastLogin": "Last login"
+		},
+		"details": {
+			"title": "Profile details",
+			"displayName": "Display name",
+			"displayNamePlaceholder": "Enter display name",
+			"email": "Email",
+			"emailPlaceholder": "Enter email",
+			"saveChanges": "Save changes"
+		},
+		"security": {
+			"title": "Security",
+			"changePassword": "Change password",
+			"changePasswordDescription": "Change your password",
+			"managedBySso": "Managed by your SSO provider",
+			"mfaTitle": "Two-factor authentication",
+			"mfaEnabledDescription": "MFA is enabled for your account",
+			"mfaDisabledDescription": "Add an extra layer of security",
+			"disableMfa": "Disable MFA",
+			"setupMfa": "Setup MFA"
+		},
+		"tokens": {
+			"title": "API tokens",
+			"description": "Create tokens for CI/CD pipelines and scripts",
+			"generateToken": "Generate token",
+			"generateApiToken": "Generate API token",
+			"createdTitle": "Token created",
+			"copyNowWarning": "Copy this token now. It will not be shown again.",
+			"namePlaceholder": "e.g., CI/CD pipeline",
+			"confirmPasswordPlaceholder": "Confirm your password",
+			"expiration": "Expiration",
+			"creating": "Creating...",
+			"loading": "Loading tokens...",
+			"empty": "No API tokens created yet.",
+			"prefix": "Prefix",
+			"lastUsed": "Last used",
+			"expires": "Expires",
+			"expired": "Expired",
+			"revokeToken": "Revoke token",
+			"revokeDescription": "This token will stop working immediately.",
+			"revoke": "Revoke",
+			"expirationOptions": {
+				"none": "No expiration",
+				"days30": "30 days",
+				"days90": "90 days",
+				"year1": "1 year",
+				"custom": "Custom date"
+			},
+			"errors": {
+				"nameRequired": "Token name is required",
+				"passwordRequired": "Password is required",
+				"createFailed": "Failed to create token"
+			}
+		},
+		"appearance": {
+			"title": "Appearance",
+			"description": "Customize the look of the application"
+		},
+		"toasts": {
+			"profileUpdated": "Profile updated successfully",
+			"mfaEnabled": "MFA enabled successfully",
+			"mfaDisabled": "MFA disabled successfully",
+			"avatarUpdated": "Avatar updated successfully",
+			"avatarRemoved": "Avatar removed successfully"
+		},
+		"errors": {
+			"selectImageFile": "Please select an image file",
+			"loadProfile": "Failed to load profile",
+			"updateProfile": "Failed to update profile",
+			"setupMfa": "Failed to setup MFA",
+			"uploadAvatar": "Failed to upload avatar",
+			"removeAvatar": "Failed to remove avatar"
+		},
+		"password": {
+			"currentPassword": "Current password",
+			"currentPasswordPlaceholder": "Enter current password",
+			"newPassword": "New password",
+			"newPasswordPlaceholder": "Enter new password",
+			"repeatNewPassword": "Repeat new password",
+			"repeatNewPasswordPlaceholder": "Repeat new password",
+			"changedSuccessfully": "Password changed successfully",
+			"errors": {
+				"allFieldsRequired": "All fields are required",
+				"passwordsDoNotMatch": "Passwords do not match",
+				"tooShort": "Password must be at least 8 characters",
+				"changeFailed": "Failed to change password"
+			}
+		},
+		"mfa": {
+			"enabledTitle": "MFA enabled successfully",
+			"setupTitle": "Setup two-factor authentication",
+			"disableTitle": "Disable two-factor authentication",
+			"disableDescription": "Are you sure you want to disable two-factor authentication? This will make your account less secure.",
+			"backupCodesWarning": "Save these backup codes in a safe place. Each code can only be used once to sign in if you lose access to your authenticator app.",
+			"copyRequiresHttps": "Copy requires HTTPS",
+			"copyCodes": "Copy codes",
+			"scanQrHelp": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)",
+			"qrCodeAlt": "MFA QR code",
+			"manualCodeLabel": "Or enter this code manually:",
+			"verificationCode": "Verification code",
+			"codePlaceholder": "Enter 6-digit code",
+			"verifySetupHelp": "Enter the code from your authenticator app to verify setup",
+			"enableMfa": "Enable MFA",
+			"backupFileTitle": "Dockhand MFA Backup Codes",
+			"backupFileDescription": "These codes can be used to sign in if you lose access to your authenticator app.",
+			"backupFileSingleUse": "Each code can only be used once.",
+			"generatedAt": "Generated",
+			"errors": {
+				"codeRequired": "Please enter the verification code",
+				"invalidCode": "Invalid verification code",
+				"verifyFailed": "Failed to verify MFA"
+			}
+		}
+	},
+	"license": {
+		"expired": "License expired",
+		"expiresTomorrow": "License expires tomorrow",
+		"expiresInDays": "License expires in {days} days"
+	},
+	"commandPalette": {
+		"title": "Command Palette",
+		"description": "Search for pages and actions",
+		"placeholder": "Search...",
+		"noResults": "No results found.",
+		"groups": {
+			"navigation": "Navigation",
+			"enterprise": "Enterprise",
+			"lightTheme": "Light theme",
+			"darkTheme": "Dark theme",
+			"font": "Font",
+			"switchEnvironment": "Switch environment",
+			"containers": "Containers"
+		},
+		"actions": {
+			"viewLogs": "View logs",
+			"openTerminal": "Open terminal",
+			"restartContainer": "Restart",
+			"stopContainer": "Stop",
+			"startContainer": "Start"
+		},
+		"search": {
+			"auditCompliance": "Audit log compliance"
+		},
+		"errors": {
+			"loadData": "Failed to load command palette data",
+			"containerAction": "Failed to {action} container"
+		}
+	},
+	"auth": {
+		"welcomeBack": "Welcome back",
+		"signInDescription": "Sign in to your Dockhand account",
+		"mfaDescription": "Enter your two-factor authentication code",
+		"continueWith": "Continue with {provider}",
+		"orContinueWith": "or continue with",
+		"signInWith": "Sign in with",
+		"username": "Username",
+		"usernamePlaceholder": "Enter your username",
+		"password": "Password",
+		"passwordPlaceholder": "Enter your password",
+		"mfaRequired": "Two-factor authentication required",
+		"authenticationCode": "Authentication code",
+		"codePlaceholder": "Enter code",
+		"codeHelp": "Enter the 6-digit code from your authenticator app, or use a backup code",
+		"verifying": "Verifying...",
+		"signingIn": "Signing in...",
+		"verify": "Verify",
+		"signIn": "Sign in",
+		"backToLogin": "Back to login",
+		"footer": "Dockhand Docker Management",
+		"providers": {
+			"localAccount": "Local account",
+			"ldapDirectory": "LDAP directory",
+			"singleSignOn": "Single sign-on"
+		},
+		"errors": {
+			"loginFailed": "Login failed",
+			"unexpected": "An unexpected error occurred",
+			"sso": "Failed to initiate SSO login"
+		}
+	},
+	"settings": {
+		"page": {
+			"title": "Settings",
+			"pageTitle": "Settings - Dockhand"
+		},
+		"tabs": {
+			"general": "General",
+			"environments": "Environments",
+			"labels": "Labels",
+			"registries": "Registries",
+			"git": "Git",
+			"configSets": "Config sets",
+			"notifications": "Notifications",
+			"authentication": "Authentication",
+			"license": "License",
+			"about": "About"
+		},
+		"general": {
+			"appearance": "Appearance",
+			"appearanceAuthHint": "These settings apply to the login page and as defaults. Personal preferences can be configured in your profile.",
+			"appearanceGlobalHint": "Theme and font settings are global when authentication is disabled.",
+			"personalThemeHint": "Personal theme preferences can be configured in your profile.",
+			"showStoppedContainers": "Show stopped containers",
+			"showStoppedContainersDescription": "Display stopped and exited containers in lists",
+			"stoppedContainersShown": "Stopped containers shown",
+			"stoppedContainersHidden": "Stopped containers hidden",
+			"highlightUpdates": "Highlight available updates",
+			"highlightUpdatesDescription": "Highlight container rows in amber when updates are available",
+			"updateHighlightingEnabled": "Update highlighting enabled",
+			"updateHighlightingDisabled": "Update highlighting disabled",
+			"compactPortDisplay": "Compact port display",
+			"compactPortDisplayDescription": "Show first port with +N count instead of all ports",
+			"compactPortDisplayEnabled": "Compact port display enabled",
+			"showingAllPorts": "Showing all ports",
+			"showExposedPorts": "Show exposed ports",
+			"showExposedPortsTooltip": "Shows internal container ports (from EXPOSE directives) that are not published to the host. These appear in the container list with an amber badge to distinguish them from published port mappings.",
+			"showExposedPortsDescription": "Display internal container ports in the container list grid",
+			"showingExposedPorts": "Showing exposed ports in container list",
+			"exposedPortsHidden": "Exposed ports hidden from container list",
+			"timeFormat": "Time format",
+			"timeFormatDescription": "Display timestamps in 12-hour (AM/PM) or 24-hour format",
+			"timeFormatUpdated": "Time format set to {format}",
+			"time12h": "12-hour (AM/PM)",
+			"time24h": "24-hour",
+			"dateFormat": "Date format",
+			"dateFormatDescription": "How dates are displayed throughout the app",
+			"dateFormatUpdated": "Date format set to {format}",
+			"scheduling": "Scheduling",
+			"defaultTimezone": "Default timezone",
+			"defaultTimezoneDescription": "Default timezone for new environments. Used for scheduled tasks like auto-updates.",
+			"defaultTimezoneUpdated": "Default timezone set to {timezone}",
+			"confirmations": "Confirmations",
+			"confirmDestructiveActions": "Confirm destructive actions",
+			"confirmDestructiveActionsDescription": "Show confirmation dialogs before deleting resources",
+			"confirmationsEnabled": "Confirmations enabled",
+			"confirmationsDisabled": "Confirmations disabled",
+			"logsAndFiles": "Logs & files",
+			"logBufferSize": "Log buffer size (KB)",
+			"logBufferSizeDescription": "Maximum log buffer per container panel. Older logs are truncated when exceeded.",
+			"logBufferSizeUpdated": "Log buffer size updated",
+			"highLogBufferWarning": "High values may degrade browser performance with verbose containers. Recommended: 250-1000 KB.",
+			"downloadFormat": "Download format",
+			"downloadFormatDescription": "Archive format when downloading files from containers",
+			"downloadFormatUpdated": "Download format set to {format}",
+			"formatLogTimestamps": "Format log timestamps",
+			"formatLogTimestampsDescription": "Convert ISO timestamps in logs to your configured date/time format",
+			"formatLogTimestampsHelp": "Docker logs use UTC timestamps by default. When enabled, timestamps like {example} are converted to local time using your date/time settings.",
+			"logTimestampFormattingEnabled": "Log timestamp formatting enabled",
+			"logTimestampFormattingDisabled": "Log timestamp formatting disabled",
+			"composeTemplate": "Compose template",
+			"composeTemplateDescription": "Default YAML content when creating a new stack.",
+			"composeTemplateUpdated": "Compose template updated",
+			"templateReverted": "Template reverted to default",
+			"saveTemplate": "Save template",
+			"revertToDefault": "Revert to default",
+			"vulnerabilityScanners": "Vulnerability scanners",
+			"grypeImage": "Grype image",
+			"grypeImageDescription": "Docker image for Grype scanner. Pin to a specific version for supply chain security.",
+			"trivyImage": "Trivy image",
+			"trivyImageDescription": "Docker image for Trivy scanner. Pin to a specific version for supply chain security.",
+			"defaultGrypeArguments": "Default Grype arguments",
+			"defaultTrivyArguments": "Default Trivy arguments",
+			"imagePlaceholderHelp": "Use {placeholder} as placeholder for the image name",
+			"grypeImageUpdated": "Grype image updated",
+			"trivyImageUpdated": "Trivy image updated",
+			"grypeArgsUpdated": "Grype default arguments updated",
+			"trivyArgsUpdated": "Trivy default arguments updated",
+			"scannerCache": "Scanner cache",
+			"scannerCacheDescription": "Remove cached vulnerability databases to free disk space. Next scan will re-download fresh data (~200MB).",
+			"scannerCacheCleared": "Scanner cache cleared ({count} items removed)",
+			"scannerCacheEmpty": "Scanner cache was already empty",
+			"scannerCacheFailed": "Failed to clear scanner cache",
+			"clearing": "Clearing...",
+			"clearCache": "Clear cache",
+			"systemJobs": "System jobs",
+			"activityEventCollectionMode": "Activity event collection mode",
+			"activityEventCollectionModeTooltip": "Stream: Continuous event stream from Docker, instant notifications, higher CPU usage. Poll: Periodic checks for new events, slight notification delay, lower CPU usage.",
+			"stream": "Stream",
+			"poll": "Poll",
+			"every": "every",
+			"eventCollectionModeUpdated": "Event collection mode: {mode}",
+			"eventPollIntervalUpdated": "Event poll interval: {seconds}s",
+			"metricsCollectionInterval": "Metrics collection interval",
+			"metricsCollectionIntervalTooltip": "How often to collect CPU/memory metrics from running containers. Lower intervals provide more frequent updates but increase CPU usage.",
+			"metricsIntervalUpdated": "Metrics interval: {seconds}s",
+			"scheduleExecutionCleanup": "Schedule execution cleanup",
+			"scheduleExecutionCleanupDescription": "Delete executions older than specified days",
+			"scheduleRetentionUpdated": "Schedule retention updated",
+			"scheduleCleanupCronUpdated": "Schedule cleanup cron updated",
+			"scheduleCleanupEnabled": "Schedule cleanup enabled",
+			"scheduleCleanupDisabled": "Schedule cleanup disabled",
+			"containerEventCleanup": "Container event cleanup",
+			"containerEventCleanupDescription": "Delete events older than specified days",
+			"eventRetentionUpdated": "Event retention updated",
+			"eventCleanupCronUpdated": "Event cleanup cron updated",
+			"eventCleanupEnabled": "Event cleanup enabled",
+			"eventCleanupDisabled": "Event cleanup disabled",
+			"days": "days",
+			"volumeHelperCleanup": "Volume helper cleanup",
+			"alwaysEnabled": "Always enabled",
+			"volumeHelperCleanupDescription": "Automatically removes temporary containers used for browsing volume contents. Runs every 30 minutes and on startup.",
+			"scannerCacheCleanup": "Scanner cache cleanup",
+			"scannerCacheCleanupDescription": "Remove cached vulnerability databases to reclaim disk space",
+			"scannerCleanupCronUpdated": "Scanner cleanup cron updated",
+			"scannerCleanupEnabled": "Scanner cleanup enabled",
+			"scannerCleanupDisabled": "Scanner cleanup disabled",
+			"dashboard": "Dashboard",
+			"labelFilterMatching": "Label filter matching",
+			"labelFilterMatchingTooltip": "Controls how multiple selected labels filter environments on the dashboard. Any: shows environments that have at least one of the selected labels. All: shows only environments that have every selected label.",
+			"any": "any",
+			"all": "all",
+			"scanResults": {
+				"title": "External stack scan results",
+				"description": "Scanned {count} configured path(s) for Docker Compose files",
+				"selectEnvironment": "Select environment",
+				"failedToAdoptFallback": "Failed to adopt",
+				"summary": {
+					"found": "{count} found",
+					"new": "{count} new",
+					"adopted": "{count} adopted",
+					"alreadyAdopted": "{count} already adopted",
+					"errors": "{count} errors"
+				},
+				"adoptTo": "Adopt to:",
+				"loading": "Loading...",
+				"noEnvironments": "No environments configured",
+				"applyToAll": "Apply to all",
+				"availableForAdoption": "Available for adoption",
+				"selectAll": "Select all",
+				"deselectAll": "Deselect all",
+				"runningOn": "Running on {environments}",
+				"runningTooltipBefore": "This stack is already running (detected via Docker's",
+				"runningTooltipAfter": "label). Adopting will allow you to manage it through Dockhand.",
+				"envFileDetected": ".env file detected",
+				"runningElsewhere": "Running elsewhere",
+				"runningElsewhereTooltip": "This stack is running on a different environment ({environments}). You can still adopt it here, but it won't affect the running containers.",
+				"select": "Select",
+				"adoptedStacks": "Adopted stacks",
+				"alreadyAdopted": "Already adopted",
+				"errors": "Errors",
+				"empty": {
+					"title": "No Docker Compose files found in the configured paths.",
+					"description": "Make sure your paths contain compose.yaml, compose.yml, or similar files."
+				},
+				"scannedPaths": "Scanned paths",
+				"selectedCount": "{count} stack(s) selected",
+				"close": "Close",
+				"adopting": "Adopting...",
+				"adoptSelected": "Adopt selected",
+				"viewStacks": "View stacks",
+				"toasts": {
+					"adopted": "Adopted {count} stack(s)",
+					"failedCount": "Failed to adopt {count} stack(s)",
+					"failed": "Failed to adopt stacks"
+				}
+			}
+		},
+		"auth": {
+			"general": {
+				"authentication": "Authentication",
+				"enabledDescription": "Users must log in to access the application",
+				"disabledDescription": "Authentication is disabled - open access",
+				"auditActive": "Audit logging is active - all actions are recorded",
+				"auditEnableHint": "Enable authentication to activate audit logging",
+				"tabs": {
+					"general": "General",
+					"users": "Users",
+					"sso": "SSO / OIDC",
+					"ldap": "LDAP / AD",
+					"roles": "Roles"
+				},
+				"session": {
+					"title": "Session settings",
+					"timeoutLabel": "Session timeout",
+					"timeoutDescription": "How long until inactive sessions expire",
+					"seconds": "seconds",
+					"hours": "({count} hr)",
+					"save": "Save settings",
+					"enableFirst": "Enable authentication to configure session settings"
+				},
+				"toasts": {
+					"enabled": "Authentication enabled",
+					"disabled": "Authentication disabled",
+					"updateFailed": "Failed to update auth settings",
+					"settingsSaved": "Settings saved",
+					"saveFailed": "Failed to save settings"
+				}
+			},
+			"users": {
+				"list": {
+					"title": "Users",
+					"description": "Manage user accounts for local authentication, SSO, and LDAP.",
+					"addUser": "Add user",
+					"searchPlaceholder": "Search users...",
+					"count": "{visible} of {total} users",
+					"providerLocal": "Local",
+					"mfaEnabled": "Enabled",
+					"moreRoles": "+{count} more",
+					"noResults": "No users found matching \"{query}\"",
+					"table": {
+						"user": "User",
+						"email": "Email",
+						"mfa": "MFA",
+						"roles": "Roles",
+						"provider": "Provider"
+					},
+					"status": {
+						"disabled": "Disabled"
+					},
+					"empty": {
+						"title": "No users configured",
+						"description": "Create the first user to enable login"
+					},
+					"confirm": {
+						"deleteAction": "Delete",
+						"user": "user"
+					},
+					"lastAdmin": {
+						"title": "Delete last admin?",
+						"description": "This is the only admin account. Deleting it will <strong>disable authentication</strong> and allow anyone to access Dockhand without logging in.",
+						"cancel": "Cancel",
+						"confirm": "Delete and disable auth"
+					},
+					"toasts": {
+						"loadFailed": "Failed to fetch users",
+						"deleted": "User deleted",
+						"deletedAuthDisabled": "User deleted. Authentication has been disabled.",
+						"deleteFailed": "Failed to delete user"
+					}
+				},
+				"modal": {
+					"titleAdd": "Add user",
+					"titleEdit": "Edit user",
+					"ssoNotice": "SSO user - profile synced from identity provider",
+					"userDetails": "User details",
+					"username": "Username",
+					"email": "Email",
+					"displayName": "Display name",
+					"passwordSection": "Password",
+					"newPassword": "New password",
+					"keepPasswordHint": "(leave blank to keep current)",
+					"password": "Password",
+					"enterNewPassword": "Enter new password",
+					"enterPassword": "Enter password",
+					"confirmPassword": "Confirm password",
+					"repeatNewPassword": "Repeat new password",
+					"repeatPassword": "Repeat password",
+					"cancel": "Cancel",
+					"save": "Save",
+					"createUser": "Create user",
+					"mfa": {
+						"title": "Two-factor authentication",
+						"status": "MFA status",
+						"configured": "User has MFA configured",
+						"notConfigured": "User has not configured MFA"
+					},
+					"roles": {
+						"title": "Roles",
+						"description": "Assign roles to this user. Environment scope is configured on the role itself.",
+						"systemRoles": "System roles",
+						"customRoles": "Custom roles",
+						"allEnvironments": "All environments",
+						"environmentCountOne": "{count} environment",
+						"environmentCountMany": "{count} environments",
+						"noRoles": "No roles defined yet",
+						"fullAccess": "All users have full access to all environments.",
+						"upgrade": "Upgrade to Enterprise for role-based access control."
+					},
+					"validation": {
+						"usernameRequired": "Username is required",
+						"passwordRequired": "Password is required",
+						"passwordsMismatch": "Passwords do not match"
+					},
+					"errors": {
+						"createFailed": "Failed to create user",
+						"updateFailed": "Failed to update user"
+					},
+					"toasts": {
+						"mfaDisabled": "MFA disabled for user",
+						"disableMfaFailed": "Failed to disable MFA",
+						"fetchRolesFailed": "Failed to fetch user roles",
+						"syncRolesFailed": "Failed to sync user roles",
+						"created": "User created",
+						"updated": "User updated"
+					}
+				}
+			},
+			"ldap": {
+				"list": {
+					"title": "LDAP configurations",
+					"description": "Connect to LDAP or Active Directory servers for centralized user authentication.",
+					"addLdap": "Add LDAP",
+					"enterprise": {
+						"title": "Enterprise feature",
+						"description": "LDAP / Active Directory integration is available with an enterprise license. Connect to your organization's directory services for centralized authentication.",
+						"activateLicense": "Activate license"
+					},
+					"empty": {
+						"title": "No LDAP providers configured",
+						"description": "Click \"Add LDAP\" to configure a new LDAP server"
+					},
+					"status": {
+						"enabled": "Enabled",
+						"disabled": "Disabled"
+					},
+					"actions": {
+						"test": "Test",
+						"enable": "Enable",
+						"disable": "Disable"
+					},
+					"confirm": {
+						"deleteAction": "Delete",
+						"config": "LDAP config"
+					},
+					"test": {
+						"connectionSuccessful": "Connection successful! Found {count} users.",
+						"connectionFailed": "Connection failed: {error}",
+						"testFailed": "Failed to test connection"
+					},
+					"toasts": {
+						"loadFailed": "Failed to fetch LDAP configurations",
+						"deleted": "LDAP configuration deleted",
+						"deleteFailed": "Failed to delete LDAP configuration",
+						"connectionSuccessful": "LDAP connection successful - found {count} users",
+						"connectionFailedWithError": "LDAP connection failed: {error}",
+						"testFailed": "Failed to test LDAP connection",
+						"enabled": "LDAP enabled",
+						"disabled": "LDAP disabled",
+						"toggleFailed": "Failed to toggle LDAP configuration"
+					}
+				},
+				"modal": {
+					"titleAdd": "Add LDAP configuration",
+					"titleEdit": "Edit LDAP configuration",
+					"tabs": {
+						"connection": "Connection",
+						"groups": "Group settings"
+					},
+					"basicSettings": "Basic settings",
+					"name": "Name",
+					"namePlaceholder": "Corporate LDAP",
+					"serverUrl": "Server URL",
+					"enableConfiguration": "Enable this LDAP configuration",
+					"bindCredentials": "Bind credentials (optional)",
+					"bindCredentialsDescription": "Service account used to search for users. Leave empty for anonymous bind.",
+					"bindDn": "Bind DN",
+					"bindPassword": "Bind password",
+					"keepExistingPassword": "Leave blank to keep existing",
+					"enterPassword": "Enter password",
+					"userSearchSettings": "User search settings",
+					"baseDn": "Base DN",
+					"baseDnHelp": "The base DN to search for users.",
+					"userFilter": "User filter",
+					"userFilterHelpBefore": "LDAP filter to find users. Use",
+					"userFilterHelpAfter": "as placeholder.",
+					"attributeMapping": "Attribute mapping",
+					"usernameAttribute": "Username attribute",
+					"emailAttribute": "Email attribute",
+					"displayNameAttribute": "Display name attribute",
+					"tlsSettings": "TLS settings",
+					"enableTls": "Enable TLS (LDAPS or StartTLS)",
+					"caCertificateOptional": "CA certificate (optional)",
+					"groupSettings": "Group settings",
+					"groupSettingsDescription": "Configure group-based access control. These settings are optional.",
+					"groupBaseDn": "Group base DN",
+					"groupBaseDnHelp": "The base DN to search for groups.",
+					"adminGroup": "Admin group",
+					"adminGroupHelp": "Members of this group will be admins.",
+					"memberFilter": "Member filter",
+					"memberFilterHelpBefore": "Filter to find groups the user belongs to. Use",
+					"memberFilterHelpAfter": "as placeholder.",
+					"groupRoleMappings": "Group to role mappings",
+					"groupRoleMappingsDescription": "Map LDAP groups to Dockhand roles. Users in these groups will be assigned the corresponding role.",
+					"selectRole": "Select role",
+					"addMapping": "Add mapping",
+					"cancel": "Cancel",
+					"save": "Save",
+					"addConfiguration": "Add configuration",
+					"validation": {
+						"nameRequired": "Name is required",
+						"serverUrlRequired": "Server URL is required",
+						"baseDnRequired": "Base DN is required"
+					},
+					"errors": {
+						"createFailed": "Failed to create LDAP configuration",
+						"updateFailed": "Failed to update LDAP configuration"
+					}
+				}
+			},
+			"oidc": {
+				"list": {
+					"title": "SSO providers",
+					"description": "Enable SSO using OpenID Connect providers like Okta, Auth0, Azure AD, or Google Workspace.",
+					"addProvider": "Add provider",
+					"empty": {
+						"title": "No SSO providers configured",
+						"description": "Add an OIDC provider to enable single sign-on"
+					},
+					"status": {
+						"enabled": "Enabled",
+						"disabled": "Disabled"
+					},
+					"actions": {
+						"testConnection": "Test connection",
+						"enableProvider": "Enable provider",
+						"disableProvider": "Disable provider",
+						"editProvider": "Edit provider"
+					},
+					"confirm": {
+						"deleteAction": "Delete",
+						"provider": "OIDC provider",
+						"deleteTitle": "Delete"
+					},
+					"test": {
+						"connectionSuccessful": "Connection successful",
+						"issuer": "Issuer: {issuer}",
+						"connectionFailed": "Connection failed: {error}",
+						"testFailed": "Failed to test connection"
+					},
+					"toasts": {
+						"loadFailed": "Failed to fetch OIDC configurations",
+						"deleted": "OIDC provider deleted",
+						"deleteFailed": "Failed to delete OIDC provider",
+						"connectionSuccessful": "OIDC connection successful",
+						"connectionFailedWithError": "OIDC connection failed: {error}",
+						"testFailed": "Failed to test OIDC connection",
+						"enabled": "OIDC provider enabled",
+						"disabled": "OIDC provider disabled",
+						"toggleFailed": "Failed to toggle OIDC provider"
+					}
+				},
+				"modal": {
+					"titleAdd": "Add OIDC provider",
+					"titleEdit": "Edit OIDC provider",
+					"tabs": {
+						"general": "General",
+						"roleMapping": "Role mapping"
+					},
+					"basicSettings": "Basic settings",
+					"name": "Name",
+					"issuerUrl": "Issuer URL",
+					"enableProvider": "Enable this OIDC provider",
+					"clientCredentials": "Client credentials",
+					"clientCredentialsDescription": "Get these from your identity provider's application settings.",
+					"clientId": "Client ID",
+					"clientSecret": "Client secret",
+					"clientSecretPlaceholder": "your-client-secret",
+					"keepExistingSecret": "Leave blank to keep existing",
+					"redirectSettings": "Redirect settings",
+					"redirectUri": "Redirect URI",
+					"redirectUriHelp": "Add this URI to your identity provider's allowed callback URLs.",
+					"scopes": "Scopes",
+					"claimMapping": "Claim mapping",
+					"claimMappingDescription": "Map OIDC claims to user attributes.",
+					"usernameClaim": "Username claim",
+					"emailClaim": "Email claim",
+					"displayNameClaim": "Display name claim",
+					"enterpriseFeature": "Enterprise feature",
+					"enterpriseFeatureDescription": "Role mapping allows you to automatically assign Dockhand roles based on your identity provider's groups or claims. This feature requires an enterprise license.",
+					"activateLicense": "Activate license",
+					"groupsRolesClaim": "Groups/roles claim",
+					"groupsRolesClaimDescription": "Grant admin access based on claim values from your identity provider.",
+					"groupsRolesClaimPlaceholder": "groups, roles, etc.",
+					"claimName": "Claim name",
+					"claimNameHelp": "Name of the claim containing roles/groups",
+					"adminValues": "Admin value(s)",
+					"adminValuesHelp": "Comma-separated values that grant Admin role",
+					"claimRoleMappings": "Claim to role mappings",
+					"claimRoleMappingsDescription": "Map claim values from your identity provider to Dockhand roles.",
+					"addMapping": "Add mapping",
+					"noRoleMappings": "No role mappings configured. Click \"Add mapping\" to create one.",
+					"claimValue": "Claim value",
+					"claimValuePlaceholder": "e.g., developers, admins",
+					"dockhandRole": "Dockhand role",
+					"selectRole": "Select role...",
+					"cancel": "Cancel",
+					"save": "Save",
+					"addProvider": "Add provider",
+					"validation": {
+						"nameRequired": "Name is required",
+						"issuerUrlRequired": "Issuer URL is required",
+						"clientIdRequired": "Client ID is required",
+						"clientSecretRequired": "Client secret is required",
+						"redirectUriRequired": "Redirect URI is required"
+					},
+					"errors": {
+						"createFailed": "Failed to create OIDC configuration",
+						"updateFailed": "Failed to update OIDC configuration"
+					}
+				}
+			},
+			"roles": {
+				"categories": {
+					"containers": "Containers",
+					"images": "Images",
+					"volumes": "Volumes",
+					"networks": "Networks",
+					"stacks": "Stacks",
+					"environments": "Environments",
+					"registries": "Registries",
+					"notifications": "Notifications",
+					"configsets": "Config sets",
+					"settings": "Settings",
+					"users": "Users",
+					"git": "Git",
+					"license": "License",
+					"audit_logs": "Audit logs",
+					"activity": "Activity",
+					"schedules": "Schedules"
+				},
+				"permissions": {
+					"view": "View",
+					"create": "Create",
+					"start": "Start",
+					"stop": "Stop",
+					"restart": "Restart",
+					"remove": "Remove",
+					"delete": "Delete",
+					"exec": "Execute terminal",
+					"logs": "View logs",
+					"inspect": "Inspect",
+					"pull": "Pull",
+					"push": "Push",
+					"build": "Build",
+					"edit": "Edit",
+					"manage": "Manage",
+					"send": "Send",
+					"test": "Test",
+					"connect": "Connect",
+					"disconnect": "Disconnect",
+					"activate": "Activate",
+					"run": "Run"
+				},
+				"list": {
+					"title": "Roles",
+					"description": "Define roles with granular permissions and assign them to users for access control.",
+					"addRole": "Add role",
+					"enterprise": {
+						"title": "Enterprise feature",
+						"description": "Role-based access control (RBAC) is available with an enterprise license. Define custom roles with granular permissions and assign them to users.",
+						"activateLicense": "Activate license"
+					},
+					"empty": {
+						"title": "No roles configured",
+						"description": "Create a role to define custom permissions"
+					},
+					"badges": {
+						"system": "System"
+					},
+					"scopes": {
+						"system": "System",
+						"environment": "Env",
+						"all": "All"
+					},
+					"actions": {
+						"copyAsNewRole": "Copy as new role",
+						"editRole": "Edit role"
+					},
+					"confirm": {
+						"deleteAction": "Delete",
+						"role": "role",
+						"deleteTitle": "Delete"
+					},
+					"toasts": {
+						"loadFailed": "Failed to fetch roles",
+						"deleted": "Role deleted",
+						"deleteFailed": "Failed to delete role"
+					}
+				},
+				"modal": {
+					"titleCreate": "Create role",
+					"titleEdit": "Edit role",
+					"titleCopy": "Copy role",
+					"descriptionCreate": "Define a new role with specific permissions",
+					"descriptionEdit": "Update role permissions",
+					"descriptionCopy": "Create a new role based on \"{name}\"",
+					"copyName": "{name} (copy)",
+					"name": "Role name",
+					"namePlaceholder": "Developer",
+					"descriptionOptional": "Description (optional)",
+					"descriptionPlaceholder": "Access to development resources",
+					"systemPermissions": "System permissions",
+					"alwaysGlobal": "(always global)",
+					"environmentPermissions": "Environment permissions",
+					"allEnvironmentsIncludingNew": "All environments (incl. new)",
+					"selectEnvironmentWarning": "Select at least one environment for these permissions to be effective.",
+					"permissionsApplyToAllFuture": "Permissions apply to all environments, including future ones.",
+					"permissionsApplyToAll": "Permissions apply to all environments.",
+					"selectAll": "All",
+					"clear": "Clear",
+					"cancel": "Cancel",
+					"save": "Save",
+					"createRole": "Create role",
+					"validation": {
+						"nameRequired": "Role name is required",
+						"nameExists": "Role name already exists"
+					},
+					"errors": {
+						"createFailed": "Failed to create role",
+						"updateFailed": "Failed to update role"
+					},
+					"permissions": {
+						"users": {
+							"view": "View users",
+							"create": "Create users",
+							"edit": "Edit users",
+							"delete": "Delete users"
+						},
+						"settings": {
+							"view": "View settings",
+							"edit": "Edit settings"
+						},
+						"environments": {
+							"view": "View environments",
+							"create": "Create environments",
+							"edit": "Edit environments",
+							"delete": "Delete environments"
+						},
+						"registries": {
+							"view": "View registries",
+							"create": "Create registries",
+							"edit": "Edit registries",
+							"delete": "Delete registries"
+						},
+						"notifications": {
+							"view": "View notifications",
+							"create": "Create notifications",
+							"edit": "Edit notifications",
+							"delete": "Delete notifications",
+							"test": "Test notifications"
+						},
+						"configsets": {
+							"view": "View config sets",
+							"create": "Create config sets",
+							"edit": "Edit config sets",
+							"delete": "Delete config sets"
+						},
+						"git": {
+							"view": "View credentials & repos",
+							"create": "Create credentials & repos",
+							"edit": "Edit credentials & repos",
+							"delete": "Delete credentials & repos"
+						},
+						"license": {
+							"manage": "Manage license"
+						},
+						"audit_logs": {
+							"view": "View audit logs"
+						},
+						"schedules": {
+							"view": "View schedules",
+							"edit": "Edit schedules",
+							"run": "Run schedules"
+						},
+						"activity": {
+							"view": "View activity"
+						},
+						"containers": {
+							"view": "View containers",
+							"create": "Create containers",
+							"start": "Start containers",
+							"stop": "Stop containers",
+							"restart": "Restart containers",
+							"remove": "Remove containers",
+							"exec": "Execute terminal",
+							"logs": "View logs",
+							"inspect": "Inspect containers"
+						},
+						"images": {
+							"view": "View images",
+							"pull": "Pull images",
+							"push": "Push images",
+							"remove": "Remove images",
+							"build": "Build images",
+							"inspect": "Inspect images"
+						},
+						"volumes": {
+							"view": "View volumes",
+							"create": "Create volumes",
+							"remove": "Remove volumes",
+							"inspect": "Inspect volumes"
+						},
+						"networks": {
+							"view": "View networks",
+							"create": "Create networks",
+							"remove": "Remove networks",
+							"inspect": "Inspect networks",
+							"connect": "Connect containers",
+							"disconnect": "Disconnect containers"
+						},
+						"stacks": {
+							"view": "View stacks",
+							"create": "Create stacks",
+							"start": "Start stacks",
+							"stop": "Stop stacks",
+							"remove": "Remove stacks",
+							"edit": "Edit stacks"
+						}
+					}
+				}
+			}
+		},
+		"notifications": {
+			"list": {
+				"title": "Notification channels",
+				"description": "Configure notification channels to receive alerts about Docker events. Supports SMTP email and Apprise URLs (Discord, Slack, Telegram, ntfy, and more).",
+				"environmentSettingsNote": "Detailed notification settings (event types, enable/disable) are configured per environment in Environment settings.",
+				"count": "{count} channels",
+				"addChannel": "Add channel",
+				"refresh": "Refresh",
+				"loading": "Loading notification channels...",
+				"empty": {
+					"title": "No notification channels configured",
+					"description": "Add a channel to start receiving alerts about Docker events"
+				},
+				"status": {
+					"enabled": "Enabled",
+					"disabled": "Disabled",
+					"sendingTest": "Sending test...",
+					"testSent": "Test sent successfully",
+					"testFailed": "Test failed"
+				},
+				"actions": {
+					"test": "Test"
+				},
+				"confirm": {
+					"deleteAction": "Delete",
+					"channel": "channel",
+					"removeTitle": "Remove"
+				},
+				"toasts": {
+					"loadFailed": "Failed to fetch notification channels",
+					"deleted": "Notification channel deleted",
+					"deleteFailed": "Failed to delete notification channel",
+					"enabled": "Channel enabled",
+					"disabled": "Channel disabled",
+					"toggleFailed": "Failed to toggle notification channel",
+					"testSent": "Test notification sent successfully",
+					"testFailed": "Failed to test notification",
+					"testFailedWithError": "Test failed: {error}"
+				}
+			},
+			"modal": {
+				"titleAdd": "Add notification channel",
+				"titleEdit": "Edit notification channel",
+				"name": "Name",
+				"namePlaceholder": "My notification channel",
+				"type": "Type",
+				"status": "Status",
+				"enabled": "Enabled",
+				"disabled": "Disabled",
+				"yes": "Yes",
+				"no": "No",
+				"smtp": {
+					"configuration": "SMTP configuration",
+					"gmailHint": "smtp.gmail.com, port 587, TLS/SSL off. Use an App Password.",
+					"outlookHint": "smtp.office365.com, port 587, TLS/SSL off.",
+					"host": "SMTP host",
+					"port": "Port",
+					"skipTlsVerify": "Skip TLS verify",
+					"username": "Username",
+					"password": "Password",
+					"keepExistingPassword": "Leave blank to keep existing",
+					"passwordPlaceholder": "App password or token",
+					"fromEmail": "From email",
+					"fromName": "From name",
+					"recipients": "Recipients * (comma-separated)"
+				},
+				"apprise": {
+					"configuration": "Apprise configuration",
+					"urls": "Apprise URLs * (one per line)",
+					"supported": "Supports Gotify (gotify:// or gotifys:// for HTTPS), Discord, Slack, Mattermost (mmost:// or mmosts://), Telegram, ntfy, Pushover, Workflows (for e.g. Microsoft Teams), and generic JSON webhooks."
+				},
+				"systemEvents": {
+					"title": "Global system events",
+					"description": "These events are not tied to specific environments and are configured globally here.",
+					"licenseExpiring": {
+						"label": "License expiring",
+						"description": "Enterprise license expiring soon"
+					}
+				},
+				"environmentSpecificNote": "Environment-specific events (containers, stacks, auto-updates) are configured in each environment's settings.",
+				"actions": {
+					"testing": "Testing...",
+					"sent": "Sent!",
+					"failed": "Failed",
+					"test": "Test",
+					"cancel": "Cancel",
+					"save": "Save",
+					"add": "Add"
+				},
+				"validation": {
+					"nameRequired": "Name is required",
+					"smtpRequired": "Host, from email, and at least one recipient are required",
+					"appriseUrlRequired": "At least one Apprise URL is required"
+				},
+				"errors": {
+					"sendTestFailed": "Failed to send test notification",
+					"testFailed": "Failed to test notification",
+					"createFailed": "Failed to create notification",
+					"updateFailed": "Failed to update notification"
+				},
+				"toasts": {
+					"testSent": "Test notification sent successfully"
+				}
+			}
+		},
+		"configSets": {
+			"list": {
+				"infoTitle": "What are config sets?",
+				"infoDescription": "Config sets are reusable templates for container configuration. Define common environment variables, labels, ports, and volumes once, then apply them when creating or editing containers. Values from config sets can be overwritten during container creation.",
+				"totalCount": "{count} total",
+				"addConfigSet": "Add config set",
+				"refresh": "Refresh",
+				"loading": "Loading config sets...",
+				"edit": "Edit",
+				"network": "Network: {mode}",
+				"restart": "Restart: {policy}",
+				"badges": {
+					"envVars": "{count} env vars",
+					"labels": "{count} labels",
+					"ports": "{count} ports",
+					"volumes": "{count} volumes"
+				},
+				"empty": {
+					"title": "No config sets found",
+					"description": "Create a reusable config set to get started"
+				},
+				"confirm": {
+					"deleteAction": "Delete",
+					"configSet": "config set",
+					"removeTitle": "Remove"
+				},
+				"toasts": {
+					"loadFailed": "Failed to fetch config sets",
+					"deleted": "Config set deleted",
+					"deleteFailed": "Failed to delete config set"
+				}
+			},
+			"modal": {
+				"titleAdd": "Add config set",
+				"titleEdit": "Edit config set",
+				"name": "Name",
+				"description": "Description",
+				"descriptionPlaceholder": "Common settings for web services",
+				"networkMode": "Network mode",
+				"restartPolicy": "Restart policy",
+				"envVars": "Environment variables",
+				"labels": "Labels",
+				"portMappings": "Port mappings",
+				"volumeMappings": "Volume mappings",
+				"addRow": "Add",
+				"valuePlaceholder": "value",
+				"hostPort": "Host port",
+				"containerPort": "Container port",
+				"invalidPort": "Invalid port (1-65535)",
+				"hostPath": "Host path",
+				"containerPath": "Container path",
+				"cancel": "Cancel",
+				"save": "Save",
+				"add": "Add",
+				"networkOptions": {
+					"bridge": "Bridge",
+					"host": "Host",
+					"none": "None"
+				},
+				"restartOptions": {
+					"no": "No",
+					"always": "Always",
+					"on-failure": "On failure",
+					"unless-stopped": "Unless stopped"
+				},
+				"validation": {
+					"nameRequired": "Name is required",
+					"nameExists": "Config set name already exists"
+				},
+				"errors": {
+					"createFailed": "Failed to create config set",
+					"updateFailed": "Failed to update config set"
+				}
+			}
+		},
+		"labels": {
+			"title": "Environment labels",
+			"description": "Manage labels across all environments. Renaming or deleting a label applies to every environment using it.",
+			"count": "{count} labels",
+			"addLabel": "Add label",
+			"loading": "Loading labels...",
+			"preview": "Preview:",
+			"renameAcrossEnvironments": "Rename across all environments",
+			"empty": {
+				"title": "No labels found",
+				"description": "Click \"Add label\" to create one and assign it to environments"
+			},
+			"table": {
+				"label": "Label",
+				"color": "Color",
+				"environments": "Environments",
+				"usedBy": "Used by",
+				"actions": "Actions"
+			},
+			"color": {
+				"change": "Change color",
+				"pick": "Pick a color",
+				"resetDefault": "Reset to default"
+			},
+			"confirm": {
+				"removeAction": "Remove",
+				"label": "label",
+				"removeConfirm": "Remove"
+			},
+			"rename": {
+				"title": "Rename label",
+				"description": "This will rename \"{label}\" across {count} environments.",
+				"currentName": "Current name",
+				"newName": "New name",
+				"placeholder": "Enter new label name",
+				"alreadyExists": "Label \"{label}\" already exists. Environments with both labels will be merged."
+			},
+			"add": {
+				"title": "Add label",
+				"description": "Create a new label and assign it to one or more environments.",
+				"name": "Label name",
+				"placeholder": "e.g. production, staging, critical",
+				"alreadyExists": "This label already exists. It will be added to the selected environments that don't have it yet.",
+				"environments": "Environments",
+				"selectAll": "Select all",
+				"clear": "Clear",
+				"noEnvironments": "No environments available",
+				"selectedCount": "{count} environments selected"
+			},
+			"actions": {
+				"cancel": "Cancel",
+				"rename": "Rename",
+				"addLabel": "Add label"
+			},
+			"toasts": {
+				"renamed": "Renamed \"{oldLabel}\" to \"{newLabel}\" across {count} environments",
+				"renameFailed": "Failed to rename label",
+				"added": "Added \"{label}\" to {count} environments",
+				"addFailed": "Failed to add label",
+				"removed": "Removed \"{label}\" from {count} environments",
+				"deleteFailed": "Failed to delete label",
+				"colorSet": "Color set for \"{label}\"",
+				"colorReset": "Color reset for \"{label}\"",
+				"colorFailed": "Failed to set color"
+			}
+		},
+		"license": {
+			"management": "License management",
+			"managementDescriptionBefore": "Activate your license to validate commercial use.",
+			"managementDescriptionAfter": "licenses unlock premium features including RBAC, LDAP and audit logs.",
+			"loading": "Loading license information...",
+			"activeEnterprise": "Active Enterprise license",
+			"activeSmb": "Active SMB license",
+			"licensedTo": "Licensed to",
+			"licenseType": "License type",
+			"licensedHost": "Licensed host",
+			"issued": "Issued",
+			"expires": "Expires",
+			"neverPerpetual": "Never (Perpetual)",
+			"currentHostname": "Current hostname",
+			"currentHostnameValidation": "Current hostname (for license validation)",
+			"deactivate": "Deactivate license",
+			"activate": "Activate license",
+			"licenseName": "License name",
+			"licenseNamePlaceholder": "Your Company Name",
+			"licenseNameHelp": "Enter the name exactly as provided with your license",
+			"licenseKey": "License key",
+			"licenseKeyPlaceholder": "Paste your license key here...",
+			"validation": {
+				"nameKeyRequired": "Name and license key are required"
+			},
+			"errors": {
+				"fetchFailed": "Failed to fetch license info",
+				"activateFailed": "Failed to activate license",
+				"deactivateFailed": "Failed to deactivate license"
+			},
+			"toasts": {
+				"activated": "License activated successfully",
+				"deactivated": "License deactivated"
+			}
+		},
+		"environments": {
+			"list": {
+				"total": "{count} total",
+				"addEnvironment": "Add environment",
+				"testAll": "Test all",
+				"refresh": "Refresh",
+				"loading": "Loading environments...",
+				"empty": "No environments found",
+				"environmentFallback": "environment",
+				"connectionFailed": "Connection failed",
+				"table": {
+					"name": "Name",
+					"connection": "Connection",
+					"labels": "Labels",
+					"timezone": "Timezone",
+					"features": "Features",
+					"status": "Status",
+					"actions": "Actions"
+				},
+				"connectionTypes": {
+					"socketTitle": "Unix socket connection",
+					"directTitle": "Direct Docker connection",
+					"hawserStandardTitle": "Hawser agent (standard mode)",
+					"hawserEdgeTitle": "Hawser agent (edge mode)",
+					"edgeOutbound": "Edge connection (outbound)"
+				},
+				"features": {
+					"autoUpdateEnabled": "Auto-update enabled",
+					"updateCheckNotifyOnly": "Update check enabled (notify only)",
+					"scanningEnabled": "Vulnerability scanning enabled",
+					"activityEnabled": "Activity collection enabled",
+					"metricsEnabled": "Metrics collection enabled",
+					"imagePruningEnabled": "Automatic image pruning enabled"
+				},
+				"status": {
+					"connected": "Connected",
+					"failed": "Failed",
+					"testing": "Testing...",
+					"notTested": "Not tested"
+				},
+				"actions": {
+					"testConnection": "Test connection",
+					"editEnvironment": "Edit environment",
+					"pruneSystem": "Prune system",
+					"deleteEnvironment": "Delete environment"
+				},
+				"confirm": {
+					"pruneAction": "Prune",
+					"systemOn": "system on",
+					"systemPruneTitle": "System prune",
+					"deleteAction": "Delete",
+					"environment": "environment",
+					"removeTitle": "Remove"
+				},
+				"toasts": {
+					"deleted": "Deleted {name}",
+					"deleteFailed": "Failed to delete environment"
+				}
+			},
+			"modal": {
+				"titleAdd": "Add environment",
+				"titleEdit": "Edit environment",
+				"tabs": {
+					"general": "General",
+					"updates": "Updates",
+					"activity": "Activity",
+					"security": "Security",
+					"notifications": "Notifications"
+				},
+				"fields": {
+					"name": "Name",
+					"namePlaceholder": "Production",
+					"host": "Host",
+					"port": "Port",
+					"protocol": "Protocol"
+				},
+				"labels": {
+					"title": "Labels",
+					"addPlaceholder": "Add label...",
+					"maximumReached": "Maximum labels reached"
+				},
+				"icon": {
+					"removeCustom": "Remove custom icon",
+					"uploadCustom": "Upload custom icon",
+					"cropTitle": "Crop icon",
+					"saveLabel": "Save icon"
+				},
+				"connection": {
+					"type": "Connection type",
+					"socket": "Unix socket",
+					"socketHelp": "Connect via Docker socket on the same machine. Default path: /var/run/docker.sock. Also works with Docker Desktop and OrbStack.",
+					"socketShort": "Connect via Unix socket on the same machine.",
+					"socketPath": "Socket path",
+					"autoDetectSocket": "Auto-detect Docker socket",
+					"autoDetectSocketHelpPrefix": "Click",
+					"autoDetectSocketHelpSuffix": "to auto-detect available Docker sockets",
+					"direct": "Direct connection",
+					"directHelp": "Connect directly to Docker Engine API. Requires Docker to expose its API on a TCP port (default 2375/2376). Best for LAN environments.",
+					"directShort": "Connect directly to Docker Engine API on TCP port.",
+					"hawserStandard": "Hawser standard",
+					"hawserStandardOption": "Hawser agent (standard)",
+					"hawserStandardHelp": "Hawser agent listens on a port and Dockhand connects to it. Good for LAN with static IPs.",
+					"hawserStandardShort": "agent listens, Dockhand connects.",
+					"hawserEdge": "Hawser edge",
+					"hawserEdgeOption": "Hawser agent (edge)",
+					"hawserEdgeHelp": "Hawser agent initiates outbound WebSocket to Dockhand. No port forwarding needed. Perfect for VPS, NAT, or dynamic IPs.",
+					"hawserEdgeShort": "agent connects out to Dockhand. No port forwarding needed.",
+					"learnMoreHawser": "Learn more about Hawser"
+				},
+				"tls": {
+					"mtlsCertificates": "TLS certificates for mTLS authentication (RSA or ECDSA)",
+					"caCertificate": "CA certificate",
+					"clientCertificate": "Client certificate",
+					"clientKey": "Client key"
+				},
+				"hawser": {
+					"agentHost": "Agent host",
+					"agentPort": "Agent port",
+					"selfSignedCaCertificate": "CA certificate (for self-signed)",
+					"selfSignedCaHelp": "Paste the CA certificate if agent uses self-signed TLS (RSA or ECDSA).",
+					"skipTlsVerification": "Skip TLS verification",
+					"skipTlsVerificationDescription": "Disable certificate validation (insecure)",
+					"agentTokenOptional": "Agent token (optional)",
+					"agentTokenPlaceholder": "Token for agent authentication",
+					"generate": "Generate",
+					"regenerate": "Regenerate",
+					"generateConnectionToken": "Generate connection token",
+					"generateConnectionTokenHelp": "Generate a token now. It will be saved when you add the environment.",
+					"generateNewToken": "Generate new token",
+					"copyTokenNow": "Copy this token now - it won't be shown again!",
+					"copyTokenForAgent": "Copy this token now - you'll need it for the Hawser agent!",
+					"saveTokenNow": "Save this token now - it won't be shown again!",
+					"copyRequiresHttps": "Copy requires HTTPS",
+					"manualTokenHelp": "Enter a token manually or generate one. Set the same token as",
+					"manualTokenHelpSuffix": "env var on your Hawser agent.",
+					"runAgentOnTarget": "Run Hawser agent on the target host:",
+					"runOnHost": "Run on your host:",
+					"copyCommand": "Copy command",
+					"connectionStatus": "Connection status",
+					"connected": "Connected",
+					"waitingForAgent": "Waiting for agent",
+					"agent": "Agent",
+					"version": "Version",
+					"lastSeen": "Last seen",
+					"connectionToken": "Connection token",
+					"lastUsed": "Last used: {date}",
+					"noTokenGenerated": "No token generated yet. Click Generate above.",
+					"tokenGenerated": "Token generated successfully",
+					"generateTokenFailed": "Failed to generate token"
+				},
+				"publicIp": {
+					"label": "Public IP",
+					"tooltip": "IP address or hostname where container ports are accessible from your browser. For local Docker, use the server's LAN IP.",
+					"placeholder": "e.g., 192.168.1.4",
+					"help": "Used for clickable port links on the containers page"
+				},
+				"scanner": {
+					"title": "Vulnerability scanning",
+					"both": "Both",
+					"enableScanning": "Enable scanning",
+					"enableScanningDescription": "Scan images for known security vulnerabilities",
+					"scanner": "Scanner",
+					"scannerDescription": "Choose vulnerability scanner",
+					"autoPullInfo": "Scanner images will be pulled automatically on first scan. Vulnerability databases are cached in Docker volumes for faster subsequent scans.",
+					"ready": "Ready",
+					"notInstalled": "Not installed",
+					"pull": "Pull",
+					"remove": "Remove",
+					"latest": "Latest",
+					"pulling": "Pulling",
+					"update": "Update",
+					"checking": "Checking",
+					"check": "Check"
+				},
+				"notifications": {
+					"title": "Notification channels",
+					"addModeDescription": "Select which notification channels should send alerts for events from this environment.",
+					"editModeDescription": "Configure which notification channels should send alerts for events from this environment.",
+					"noneConfiguredYet": "No notification channels configured yet.",
+					"createInSettingsFirst": "Create notification channels in the Notifications settings tab first.",
+					"channelDisabledGlobally": "Channel disabled globally",
+					"eventTypesCount": "Event types ({count})",
+					"activityAutoEnabled": "Activity collection will be enabled automatically when you add a channel.",
+					"eventsBadge": "({count} events)",
+					"noneConfigured": "No notification channels configured",
+					"addChannelBelow": "Add a channel below to receive alerts for this environment",
+					"addChannelLabel": "Add notification channel:",
+					"noChannelsCreatedPrefix": "No notification channels have been created yet.",
+					"goToSettingsNotifications": "Go to Settings -> Notifications",
+					"noChannelsCreatedSuffix": "to add channels first.",
+					"contactAdmin": "No notification channels have been created yet. Contact your administrator to configure notification channels.",
+					"channelAdded": "Notification channel added",
+					"addChannelFailed": "Failed to add notification channel"
+				},
+				"actions": {
+					"testConnection": "Test connection",
+					"testing": "Testing...",
+					"cancel": "Cancel",
+					"add": "Add",
+					"save": "Save"
+				},
+				"validation": {
+					"nameRequired": "Name is required",
+					"hostRequired": "Host is required",
+					"hostIpOnly": "Enter an IP address or hostname only (no protocol or port)"
+				},
+				"errors": {
+					"createFailed": "Failed to create environment",
+					"updateFailed": "Failed to update environment"
+				},
+				"toasts": {
+					"iconUploadFailed": "Failed to upload icon",
+					"edgeModeTestDeferred": "Edge mode - connection will be tested when agent connects",
+					"connected": "Connected! Docker {version} - {count} containers",
+					"connectionFailed": "Connection failed",
+					"connectionTestFailed": "Connection test failed",
+					"noSocketsFound": "No Docker sockets found",
+					"socketFound": "Found {name}",
+					"socketsFound": "Found {count} Docker sockets",
+					"detectSocketsFailed": "Failed to detect sockets",
+					"updated": "Updated environment: {name}"
+				}
+			},
+			"activity": {
+				"collectActivity": "Collect container activity",
+				"collectActivityDescription": "Track container events (start, stop, restart, etc.) from this environment in real-time",
+				"collectMetrics": "Collect system metrics",
+				"collectMetricsDescription": "Collect CPU and memory usage statistics from this environment",
+				"highlightChanges": "Highlight value changes",
+				"highlightChangesDescription": "Show amber glow when container values change in the containers list",
+				"diskWarnings": "Disk space warnings",
+				"diskWarningsDescription": "Send notifications when Docker disk usage exceeds the threshold",
+				"thresholdPercentage": "Percentage",
+				"thresholdAbsolute": "Absolute (GB)"
+			},
+			"updates": {
+				"scheduledUpdateCheck": "Scheduled update check",
+				"scheduledUpdateCheckDescription": "Periodically check all containers in this environment for available image updates.",
+				"enableScheduledCheck": "Enable scheduled update check",
+				"enableScheduledCheckDescription": "Automatically check for container updates on a schedule",
+				"schedule": "Schedule",
+				"autoUpdateContainers": "Automatically update containers",
+				"autoUpdateContainersDescription": "When enabled, containers will be updated automatically when new images are found. When disabled, only sends notifications about available updates.",
+				"blockVulnerableUpdates": "Block updates with vulnerabilities",
+				"blockVulnerableUpdatesDescription": "Block auto-updates if the new image has vulnerabilities exceeding this criteria",
+				"autoUpdateWithScanInfo": "New images are pulled to a temporary tag, scanned, then deployed if they pass the vulnerability check. Blocked images are deleted automatically.",
+				"autoUpdateInfo": "Containers will be updated automatically when new images are available.",
+				"notifyOnlyInfo": "You'll receive notifications when updates are available. Containers won't be modified.",
+				"automaticImagePruning": "Automatic image pruning",
+				"automaticImagePruningDescription": "Automatically remove unused Docker images on a schedule to free up disk space.",
+				"enableImagePruning": "Enable automatic image pruning",
+				"enableImagePruningDescription": "Automatically remove unused images on a schedule",
+				"pruneMode": "Prune mode",
+				"danglingImagesOnly": "Dangling images only",
+				"allUnusedImages": "All unused images",
+				"danglingImagesDescription": "Only removes untagged image layers (safest option)",
+				"allUnusedImagesDescription": "Removes all images not used by any container (more aggressive)",
+				"lastPruned": "Last pruned: {date}",
+				"pruneResult": " - {count} images removed, {bytes} reclaimed",
+				"usedImagesPreserved": "Images in use by running or stopped containers will never be removed.",
+				"timezone": "Timezone",
+				"timezoneDescription": "Used for scheduling auto-updates, git syncs, and image pruning"
+			},
+			"events": {
+				"groups": {
+					"container": "Container events",
+					"autoUpdate": "Auto-update events",
+					"gitStack": "Git stack events",
+					"stack": "Stack events",
+					"security": "Security events",
+					"system": "System events"
+				},
+				"selection": {
+					"all": "All",
+					"some": "Some",
+					"none": "None"
+				},
+				"types": {
+					"containerStarted": { "label": "Container started", "description": "When a container starts running" },
+					"containerStopped": { "label": "Container stopped", "description": "When a container is stopped" },
+					"containerRestarted": { "label": "Container restarted", "description": "When a container restarts" },
+					"containerExited": { "label": "Container exited", "description": "When a container exits unexpectedly" },
+					"containerUnhealthy": { "label": "Container unhealthy", "description": "When a container health check fails" },
+					"containerHealthy": { "label": "Container healthy", "description": "When a container health check recovers" },
+					"containerOom": { "label": "Container OOM killed", "description": "When a container is killed due to out of memory" },
+					"containerUpdated": { "label": "Container updated", "description": "When a container image is updated" },
+					"autoUpdateSuccess": { "label": "Update succeeded", "description": "Container successfully updated to new image" },
+					"autoUpdateFailed": { "label": "Update failed", "description": "Container auto-update failed" },
+					"autoUpdateBlocked": { "label": "Update blocked", "description": "Update blocked due to vulnerability criteria" },
+					"updatesDetected": { "label": "Updates detected", "description": "Container image updates are available" },
+					"batchUpdateSuccess": { "label": "Batch update completed", "description": "Scheduled container updates completed" },
+					"gitSyncSuccess": { "label": "Git sync succeeded", "description": "Git stack synced and deployed successfully" },
+					"gitSyncFailed": { "label": "Git sync failed", "description": "Git stack sync or deploy failed" },
+					"gitSyncSkipped": { "label": "Git sync skipped", "description": "Git stack sync skipped (no changes)" },
+					"stackStarted": { "label": "Stack started", "description": "When a compose stack starts" },
+					"stackStopped": { "label": "Stack stopped", "description": "When a compose stack stops" },
+					"stackDeployed": { "label": "Stack deployed", "description": "Stack deployed (new or update)" },
+					"stackDeployFailed": { "label": "Stack deploy failed", "description": "Stack deployment failed" },
+					"vulnerabilityCritical": { "label": "Critical vulns found", "description": "Critical vulnerabilities found in image scan" },
+					"vulnerabilityHigh": { "label": "High vulns found", "description": "High severity vulnerabilities found" },
+					"vulnerabilityAny": { "label": "Any vulns found", "description": "Any vulnerabilities found (medium/low)" },
+					"imagePulled": { "label": "Image pulled", "description": "When a new image is pulled" },
+					"imagePruneSuccess": { "label": "Image prune completed", "description": "Scheduled image prune completed successfully" },
+					"imagePruneFailed": { "label": "Image prune failed", "description": "Scheduled image prune failed" },
+					"environmentOffline": { "label": "Environment offline", "description": "Environment became unreachable" },
+					"environmentOnline": { "label": "Environment online", "description": "Environment came back online" },
+					"diskSpaceWarning": { "label": "Disk space warning", "description": "Docker disk usage exceeds threshold" }
+				}
+			}
+		},
+		"registries": {
+			"total": "{count} total",
+			"addRegistry": "Add registry",
+			"refresh": "Refresh",
+			"loading": "Loading registries...",
+			"setDefault": "Set default",
+			"empty": {
+				"title": "No registries found",
+				"description": "Add a Docker registry to pull and push images"
+			},
+			"badges": {
+				"default": "Default",
+				"auth": "Auth"
+			},
+			"confirm": {
+				"deleteAction": "Delete",
+				"registry": "registry",
+				"removeTitle": "Remove"
+			},
+			"toasts": {
+				"loadFailed": "Failed to fetch registries",
+				"deleted": "Registry deleted",
+				"deleteFailed": "Failed to delete registry",
+				"defaultUpdated": "Default registry updated",
+				"defaultFailed": "Failed to set default registry"
+			},
+			"modal": {
+				"titleAdd": "Add registry",
+				"titleEdit": "Edit registry",
+				"name": "Name",
+				"namePlaceholder": "My Private Registry",
+				"url": "URL",
+				"credentialsOptional": "Credentials (optional)",
+				"credentialsKeepExisting": "Credentials (leave password blank to keep existing)",
+				"username": "Username",
+				"usernamePlaceholder": "username",
+				"passwordToken": "Password / Token",
+				"keepExistingPlaceholder": "leave blank to keep existing",
+				"passwordPlaceholder": "password or access token",
+				"cancel": "Cancel",
+				"save": "Save",
+				"add": "Add",
+				"validation": {
+					"nameUrlRequired": "Name and URL are required"
+				},
+				"errors": {
+					"createFailed": "Failed to create registry",
+					"updateFailed": "Failed to update registry"
+				}
+			}
+		},
+		"git": {
+			"auth": {
+				"sshKey": "SSH Key",
+				"password": "Password",
+				"none": "None"
+			},
+			"repositories": {
+				"title": "Git repositories",
+				"description": "Manage Git repositories that can be used to deploy stacks",
+				"addRepository": "Add repository",
+				"loading": "Loading repositories...",
+				"usingCredential": "Using credential: {credential}",
+				"publicRepository": "Public repository",
+				"public": "Public",
+				"testConnection": "Test connection",
+				"editRepository": "Edit repository",
+				"empty": {
+					"title": "No Git repositories configured",
+					"description": "Add a repository to use it when deploying stacks from Git"
+				},
+				"test": {
+					"connectedMessage": "Connected! Branch: {branch}, Last commit: {commit}",
+					"connectionFailed": "Connection failed",
+					"testFailed": "Failed to test connection"
+				},
+				"confirm": {
+					"deleteAction": "Delete",
+					"repository": "repository",
+					"deleteTitle": "Delete"
+				},
+				"toasts": {
+					"loadFailed": "Failed to fetch git repositories",
+					"deleted": "Repository deleted",
+					"deleteFailed": "Failed to delete repository",
+					"connectionSuccessful": "Repository connection successful",
+					"connectionFailedWithError": "Connection failed: {error}",
+					"testFailed": "Failed to test repository connection"
+				}
+			},
+			"repositoryModal": {
+				"titleAdd": "Add Git repository",
+				"titleEdit": "Edit Git repository",
+				"descriptionAdd": "Add a Git repository that can be used to deploy stacks",
+				"descriptionEdit": "Update repository settings",
+				"name": "Name",
+				"nameHelp": "A friendly name to identify this repository",
+				"url": "Repository URL",
+				"branch": "Branch",
+				"credentialOptional": "Credential (optional)",
+				"nonePublicRepository": "None (public repository)",
+				"addCredentials": "Add credentials",
+				"forPrivateRepositories": "for private repositories",
+				"cancel": "Cancel",
+				"test": "Test",
+				"saving": "Saving...",
+				"saveChanges": "Save changes",
+				"addRepository": "Add repository",
+				"validation": {
+					"urlRequiredToTest": "Repository URL is required to test",
+					"nameRequired": "Name is required",
+					"urlRequired": "Repository URL is required",
+					"nameExists": "Repository name already exists"
+				},
+				"errors": {
+					"saveFailed": "Failed to save repository"
+				},
+				"toasts": {
+					"connectionSuccessful": "Connection successful! Branch: {branch}, Commit: {commit}",
+					"connectionTestFailed": "Connection test failed",
+					"testFailed": "Failed to test connection",
+					"updated": "Repository updated",
+					"added": "Repository added"
+				}
+			},
+			"credentials": {
+				"title": "Git credentials",
+				"description": "Manage credentials for accessing Git repositories",
+				"addCredential": "Add credential",
+				"loading": "Loading credentials...",
+				"usernameLabel": "Username: {username}",
+				"noUsername": "No username",
+				"empty": {
+					"title": "No Git credentials configured",
+					"description": "Add credentials to connect to private Git repositories"
+				},
+				"confirm": {
+					"deleteAction": "Delete",
+					"credential": "credential",
+					"deleteTitle": "Delete"
+				},
+				"toasts": {
+					"loadFailed": "Failed to fetch git credentials",
+					"deleted": "Credential deleted",
+					"deleteFailed": "Failed to delete credential"
+				}
+			},
+			"credentialModal": {
+				"titleAdd": "Add Git credential",
+				"titleEdit": "Edit Git credential",
+				"descriptionAdd": "Create a new credential for accessing Git repositories",
+				"descriptionEdit": "Update credential settings",
+				"name": "Name",
+				"nameHelp": "A friendly name to identify this credential",
+				"authType": "Authentication type",
+				"passwordToken": "Password/Token",
+				"username": "Username",
+				"usernamePlaceholder": "Username or email",
+				"passwordOrToken": "Password or token",
+				"keepCurrentPlaceholder": "Leave empty to keep current",
+				"passwordPlaceholder": "Password or personal access token",
+				"currentPasswordSet": "Current password is set. Leave empty to keep it.",
+				"sshPrivateKey": "SSH private key",
+				"currentSshKeySet": "Current SSH key is set. Leave empty to keep it.",
+				"sshPassphraseOptional": "SSH passphrase (optional)",
+				"sshPassphrasePlaceholder": "Passphrase for encrypted key",
+				"cancel": "Cancel",
+				"saving": "Saving...",
+				"saveChanges": "Save changes",
+				"addCredential": "Add credential",
+				"validation": {
+					"nameRequired": "Name is required",
+					"passwordRequired": "Password is required",
+					"sshKeyRequired": "SSH private key is required"
+				},
+				"errors": {
+					"saveFailed": "Failed to save credential"
+				},
+				"toasts": {
+					"updated": "Credential updated",
+					"created": "Credential created"
+				}
+			}
+		},
+		"about": {
+			"dockhandLogo": "Dockhand Logo",
+			"version": "Version {version}",
+			"checkingForUpdates": "Checking for updates...",
+			"updateAvailable": "Update available - click to see what's new",
+			"upToDate": "Up to date",
+			"checkForUpdates": "Check for updates",
+			"systemInformation": "System information",
+			"unreleased": "Unreleased",
+			"development": "Development",
+			"systemLoading": "Loading...",
+			"latest": "Latest",
+			"changes": "{count} changes",
+			"changeNew": "New",
+			"changeFix": "Fix",
+			"loadingReleases": "Loading releases...",
+			"loadingDependencies": "Loading dependencies...",
+			"searchDependencies": "Search packages or licenses...",
+			"viewOnGithub": "View on GitHub",
+			"submitIssue": "Submit issue or idea",
+			"buyCoffee": "Buy me a coffee",
+			"communityNote": "Dockhand Community Edition is free and always will be. No strings attached. Like it? Fuel the dev with caffeine.",
+			"easterEgg": "Stop already, will you? Coming from r/selfhosted?",
+			"licenseTitle": "License terms and conditions",
+			"privacyTitle": "Privacy policy",
+			"failedToFetchLicense": "Failed to fetch license",
+			"failedToFetchPrivacy": "Failed to fetch privacy policy",
+			"selfUpdate": {
+				"updateDockhand": "Update Dockhand",
+				"updatingDockhand": "Updating Dockhand",
+				"updateComplete": "Update complete",
+				"updateFailed": "Update failed",
+				"preparing": "Preparing...",
+				"container": "Container",
+				"currentImage": "Current image",
+				"newImage": "New image",
+				"image": "Image",
+				"currentDigest": "Current digest",
+				"newDigest": "New digest",
+				"loadingReleaseNotes": "Loading release notes...",
+				"whatsNew": "What's new",
+				"composeNoteLabel": "Note:",
+				"composeNoteBefore": "This container is managed by Docker Compose. After update it will continue to work but may lose Compose tracking. Use",
+				"composeNoteAfter": "for Compose-aware updates.",
+				"updateNow": "Update now",
+				"progress": "Progress",
+				"reload": "Reload",
+				"updating": "Updating...",
+				"noResponseBody": "No response body",
+				"connectionLost": "Connection lost: {error}",
+				"updaterExited": "Updater exited with code {code}",
+				"backOnline": "Dockhand is back online",
+				"steps": {
+					"pulling_image": "Pulling new image",
+					"building_config": "Building container config",
+					"pulling_updater": "Pulling updater",
+					"creating_container": "Creating new container",
+					"launching_updater": "Launching updater",
+					"stopping": "Stopping Dockhand",
+					"removing": "Removing old container",
+					"renaming": "Renaming container",
+					"connecting": "Connecting networks",
+					"starting": "Starting Dockhand",
+					"reconnecting": "Waiting for Dockhand"
+				}
+			},
+			"taglines": [
+				"Simplify. Deploy. Smile.",
+				"Less typing. More shipping.",
+				"Zero friction. Just containers.",
+				"Docker management, distilled.",
+				"Build. Ship. Chill.",
+				"Think less. Deploy faster.",
+				"Automation for humans who still like buttons.",
+				"Serious about containers. Not about suffering.",
+				"Your shortcut to shipping sanity.",
+				"Finally, a tool that respects your time and your terminal."
+			]
+		}
+	},
+	"dataGrid": {
+		"actions": "Actions",
+		"selectAll": "Select all",
+		"deselectAll": "Deselect all",
+		"collapseRow": "Collapse",
+		"expandRow": "Expand"
+	},
+	"columnSettings": {
+		"title": "Column settings",
+		"columns": "Columns",
+		"resetToDefaults": "Reset to defaults"
+	},
+	"executionLog": {
+		"title": "Logs",
+		"toggleTheme": "Toggle log theme",
+		"empty": "No logs available"
+	},
+	"hostInfo": {
+		"selectEnvironment": "Select environment",
+		"noEnvironments": "No environments",
+		"searchEnvironments": "Search environments...",
+		"noMatchingEnvironments": "No matching environments",
+		"cannotSwitchOffline": "Cannot switch to \"{name}\" - environment is offline",
+		"cannotSwitchWithError": "Cannot switch to \"{name}\" - {error}",
+		"cannotSwitchConnectionFailed": "Cannot switch to \"{name}\" - connection failed",
+		"liveConnected": "Live updates connected",
+		"liveDisconnected": "Live updates disconnected",
+		"live": "Live",
+		"cores": "{count} cores",
+		"ram": "{memory} RAM",
+		"uptimeShort": "{days}d {hours}h",
+		"uptimeHours": "{hours}h"
+	},
+	"activity": {
+		"title": "Activity",
+		"stream": "Stream",
+		"poll": "Poll",
+		"containerPlaceholder": "Container...",
+		"actionPlaceholder": "Action",
+		"actionsSelected": "actions",
+		"environmentPlaceholder": "Environment",
+		"allEnvironments": "All environments",
+		"clearTitle": "Clear all",
+		"clearConfirm": "Clear",
+		"activityLog": "activity log",
+		"logCleared": "Activity log cleared",
+		"failedToClear": "Failed to clear activity",
+		"failedToFetch": "Failed to fetch events",
+		"empty": "No container events found",
+		"emptyDescription": "Events will appear here as containers start, stop, etc.",
+		"loadingMore": "Loading more...",
+		"endOfResults": "End of results ({count} events)",
+		"detailsTitle": "Event details",
+		"actions": {
+			"create": "Create",
+			"start": "Start",
+			"stop": "Stop",
+			"die": "Die",
+			"kill": "Kill",
+			"restart": "Restart",
+			"pause": "Pause",
+			"unpause": "Unpause",
+			"destroy": "Destroy",
+			"rename": "Rename",
+			"update": "Update",
+			"oom": "Out of memory",
+			"health_status": "Health status"
+		}
+	},
+	"audit": {
+		"title": "Audit log",
+		"detailsTitle": "Audit log details",
+		"enterpriseFeature": "Enterprise feature",
+		"enterpriseDescription": "Audit logging is an enterprise feature that tracks all user actions for compliance and security monitoring.",
+		"activateLicense": "Activate license",
+		"userPlaceholder": "User",
+		"entityPlaceholder": "Entity",
+		"actionPlaceholder": "Action",
+		"allEnvironments": "All environments",
+		"usersSelected": "{count} users",
+		"entitiesSelected": "{count} entities",
+		"actionsSelected": "{count} actions",
+		"liveActive": "Live updates active",
+		"connecting": "Connecting...",
+		"empty": "No audit log entries found",
+		"loadingMore": "Loading more...",
+		"endOfResults": "End of results ({count} entries)",
+		"failedToFetch": "Failed to fetch audit logs",
+		"actions": {
+			"create": "Create",
+			"update": "Update",
+			"delete": "Delete",
+			"start": "Start",
+			"stop": "Stop",
+			"restart": "Restart",
+			"pause": "Pause",
+			"unpause": "Unpause",
+			"pull": "Pull",
+			"push": "Push",
+			"prune": "Prune",
+			"exec": "Exec",
+			"connect": "Connect",
+			"disconnect": "Disconnect",
+			"login": "Login",
+			"logout": "Logout",
+			"sync": "Sync"
+		},
+		"entityTypes": {
+			"container": "Containers",
+			"image": "Images",
+			"volume": "Volumes",
+			"network": "Networks",
+			"stack": "Stacks",
+			"environment": "Environments",
+			"registry": "Registries",
+			"user": "Users",
+			"role": "Roles",
+			"settings": "Settings",
+			"git_repository": "Git repositories",
+			"git_credential": "Git credentials"
+		}
+	},
+	"registry": {
+		"title": "Registry",
+		"manageRegistries": "Manage registries",
+		"selectRegistry": "Select registry",
+		"authBadge": "auth",
+		"searchPlaceholder": "Search {registry} for images...",
+		"searchPlaceholderGeneric": "Search for images...",
+		"search": "Search",
+		"browse": "Browse",
+		"loadingCatalog": "Loading catalog...",
+		"searching": "Searching...",
+		"searchFailed": "Search failed",
+		"failedToSearch": "Failed to search images",
+		"failedToBrowse": "Failed to browse registry",
+		"noImagesInRegistry": "No images found in this registry",
+		"noImagesForQuery": "No images found for \"{query}\"",
+		"browseTip": "Tip: Large registries don't support search. Try {action} and use the filter to find images.",
+		"browseTipBefore": "Tip: Large registries don't support search. Try",
+		"browseTipAfter": "and use the filter to find images.",
+		"filterResults": "Filter results...",
+		"imageCount": "{count} images",
+		"imageCountOf": "{count} of {total} images",
+		"stars": "Stars",
+		"type": "Type",
+		"official": "Official",
+		"auto": "Auto",
+		"loadingTags": "Loading tags...",
+		"pull": "Pull",
+		"pullAndScan": "Pull & scan",
+		"pullThisTag": "Pull this tag",
+		"pullAndScanThisTag": "Pull and scan this tag",
+		"runThisTag": "Run container with this tag",
+		"copyToAnotherRegistry": "Copy to another registry",
+		"deleteTag": "Delete tag",
+		"deleteTagDescription": "Are you sure you want to delete {image}:{tag}? This cannot be undone.",
+		"deleteThisTag": "Delete this tag",
+		"deletedImage": "Deleted {image}:{tag}",
+		"failedToDeleteImage": "Failed to delete image",
+		"tagsLoaded": "{count} of {total} tags loaded",
+		"noTags": "No tags found",
+		"loadMoreImages": "Load more images",
+		"searchOrBrowseHint": "Search or browse {registry} to find images",
+		"searchHint": "Search {registry} to find and pull images",
+		"copy": {
+			"title": "Copy to registry",
+			"steps": {
+				"configure": "Configure",
+				"pull": "Pull",
+				"scan": "Scan",
+				"push": "Push"
+			},
+			"sourceImage": "Source image",
+			"targetRegistry": "Target registry",
+			"selectRegistry": "Select registry",
+			"noTargetRegistries": "No target registries available. Add a private registry in Settings.",
+			"imageNameTag": "Image name/tag",
+			"willPushAs": "Will be pushed as:",
+			"copyToClipboard": "Copy to clipboard",
+			"copyRequiresHttps": "Copy requires HTTPS",
+			"retryPull": "Retry pull",
+			"retryScan": "Retry scan",
+			"retryPush": "Retry push",
+			"done": "Done",
+			"cancel": "Cancel",
+			"startCopy": "Start copy",
+			"criticalHighFound": "Critical/high vulnerabilities found",
+			"vulnerabilitiesFound": "{count} vulnerabilities found",
+			"pushAnyway": "Push anyway",
+			"continueToPush": "Continue to push"
+		}
+	},
+	"stacks": {
+		"page": {
+			"pageTitle": "Stacks - Dockhand",
+			"title": "Compose stacks",
+			"searchPlaceholder": "Search stacks...",
+			"emptyTitle": "No compose stacks found",
+			"emptyDescription": "Create a stack or deploy from Git to get started"
+		},
+		"filters": {
+			"allStatuses": "All statuses",
+			"statuses": "statuses"
+		},
+		"status": {
+			"running": "Running",
+			"partial": "Partial",
+			"stopped": "Stopped",
+			"created": "Created",
+			"notDeployed": "Not deployed"
+		},
+		"source": {
+			"git": "Git",
+			"internal": "Internal",
+			"untracked": "Untracked",
+			"notSet": "Not set"
+		},
+		"actions": {
+			"fromGit": "From Git",
+			"adopt": "Adopt",
+			"collapseAll": "Collapse all",
+			"expandAll": "Expand all",
+			"startCount": "Start {count}",
+			"restartCount": "Restart {count}",
+			"stopCount": "Stop {count}",
+			"removeCount": "Remove {count}",
+			"down": "Down",
+			"downCount": "Down {count}",
+			"downRemoveContainers": "Down (remove containers)",
+			"recreate": "Recreate (stop & up)",
+			"deploy": "Deploy",
+			"syncFromGit": "Sync from Git",
+			"editGitStack": "Edit git stack",
+			"viewLogs": "View logs",
+			"openLogsInline": "Open logs inline",
+			"openLogsFullView": "Open logs in full view",
+			"alsoDeleteVolumes": "Also delete volumes"
+		},
+		"redeploy": {
+			"title": "Redeploy stack",
+			"pullImages": "Pull images",
+			"buildImages": "Build images",
+			"forceRecreate": "Force recreate"
+		},
+		"pathBar": {
+			"defaultLocation": "Default location",
+			"browseFor": "Browse for {label}",
+			"changeLocation": "Change location",
+			"copyPath": "Copy path",
+			"copyRequiresHttps": "Copy requires HTTPS"
+		},
+		"recentLocations": {
+			"title": "Locations",
+			"dockhandDefault": "Dockhand default",
+			"removeFromRecent": "Remove from recent",
+			"empty": "No locations yet. Browse folders to add them here."
+		},
+		"gitDeploy": {
+			"title": "Git deploy",
+			"complete": "Complete",
+			"failed": "Failed",
+			"deploying": "Deploying...",
+			"confirmTitle": "Sync from git?",
+			"confirmPrefix": "This will pull the latest changes for",
+			"confirmSuffix": "Containers will only restart if the configuration changed.",
+			"initializing": "Initializing...",
+			"copied": "Copied!",
+			"copyLogs": "Copy logs",
+			"steps": {
+				"connecting": "Connecting",
+				"cloning": "Cloning repository",
+				"fetching": "Fetching latest changes",
+				"reading": "Reading compose file",
+				"env": "Loading environment variables",
+				"secrets": "Preparing secrets",
+				"deploying": "Deploying stack"
+			},
+			"errors": {
+				"startFailed": "Failed to start deployment",
+				"deployFailed": "Failed to deploy"
+			}
+		},
+		"gitModal": {
+			"titleCreate": "Deploy from Git",
+			"titleEdit": "Edit git stack",
+			"descriptionCreate": "Deploy a compose stack from a Git repository",
+			"descriptionEdit": "Update git stack settings",
+			"repository": "Repository",
+			"selectExisting": "Select existing",
+			"addNew": "Add new",
+			"selectRepositoryPlaceholder": "Select a repository...",
+			"noRepositories": "No repositories configured. Click \"Add new\" to add one.",
+			"repositoryName": "Repository name",
+			"repositoryNamePlaceholder": "e.g., my-stacks",
+			"repositoryUrl": "Repository URL",
+			"branch": "Branch",
+			"credential": "Credential",
+			"nonePublic": "None (public)",
+			"stackName": "Stack name",
+			"stackNamePlaceholder": "e.g., my-app",
+			"stackNameHelp": "This will be the name of the deployed stack",
+			"composePath": "Compose file path",
+			"composePathHelp": "Path to the compose file within the repository",
+			"additionalEnvFile": "Additional env file (optional)",
+			"envFileTooltipDefault": "A .env file in the compose directory is always loaded automatically, if present.",
+			"envFileTooltipAdditional": "Use this field for an additional env file with a non-standard name, such as .env.production. Its values override the default .env.",
+			"envFileTooltipOverrides": "Overrides from the environment variables editor on the right always take highest precedence.",
+			"additionalEnvFileHelp": "Additional env file to pass to Docker Compose",
+			"contextDirectory": "Context directory (optional)",
+			"contextTooltipWorkingDirectory": "Working directory for Docker Compose, relative to the repository root. All files in this directory will be available for volume mounts and build contexts.",
+			"contextTooltipRoot": "Use . for the repository root when your compose file references files in sibling directories.",
+			"contextTooltipDefault": "Defaults to the compose file's parent directory.",
+			"contextPlaceholder": "Defaults to compose file's directory",
+			"contextHelp": "Relative to repository root, e.g. . for root",
+			"enableScheduledSync": "Enable scheduled sync",
+			"enableScheduledSyncHelp": "Automatically sync repository and redeploy stack if there are changes.",
+			"enableWebhook": "Enable webhook",
+			"enableWebhookHelp": "Receive push events from your Git provider to trigger sync and redeploy.",
+			"webhookUrl": "Webhook URL",
+			"copyUrl": "Copy URL",
+			"webhookSecret": "Webhook secret (optional)",
+			"webhookSecretPlaceholder": "Leave empty for no signature verification",
+			"copySecret": "Copy secret",
+			"generateSecret": "Generate secret",
+			"webhookUrlAfterCreate": "The webhook URL will be available after creating the stack.",
+			"webhookConfigureHelp": "Configure this URL in your Git provider. Secret is used for signature verification.",
+			"deployOptions": "Deploy options",
+			"buildImagesOnDeploy": "Build images on deploy",
+			"buildImagesOnDeployHelp": "Run --build to build images from Dockerfiles before starting containers.",
+			"disableBuildCache": "Disable build cache",
+			"disableBuildCacheHelp": "Pass --no-cache to force a clean build without using cached layers.",
+			"repullImages": "Re-pull images",
+			"repullImagesHelp": "Always pull latest images before deploying, even if the compose file hasn't changed. Useful for CI/CD workflows with static tags like :latest.",
+			"forceRedeployment": "Force redeployment",
+			"forceRedeploymentHelp": "Always redeploy the stack on webhook or scheduled sync, even if no git changes are detected.",
+			"deployNow": "Deploy now",
+			"deployNowHelp": "Clone and deploy the stack immediately",
+			"envOverridesInfo": "Override variables from your repository env files. Non-secrets are saved to <code class='bg-muted px-1 rounded'>.env.dockhand</code> in the stack directory. Secrets are stored in the database and injected via shell environment at deploy time.<br/><br/>Variables are available for <strong>compose file interpolation</strong> using <code class='bg-muted px-1 rounded'>${VAR_NAME}</code> syntax. They are not automatically injected into containers; use <code class='bg-muted px-1 rounded'>environment:</code> or reference <code class='bg-muted px-1 rounded'>.env.dockhand</code> in <code class='bg-muted px-1 rounded'>env_file:</code> to pass them through.",
+			"populate": "Populate",
+			"populateTooltip": "Clone the repository and load environment variables from the .env file in the compose directory and the additional env file, if specified, so you can see what you can override.",
+			"saveAndDeploy": "Save and deploy",
+			"saving": "Saving...",
+			"saveChanges": "Save changes",
+			"creating": "Creating...",
+			"existsTitle": "Stack already exists",
+			"existsDescription": "A stack named \"{name}\" already exists. Please choose a different name.",
+			"auth": {
+				"sshKey": "SSH Key",
+				"password": "Password",
+				"none": "None"
+			},
+			"validation": {
+				"stackNameRequired": "Stack name is required",
+				"stackNameInvalid": "Stack name must start with a letter or number, and contain only letters, numbers, hyphens, and underscores",
+				"repositoryRequired": "Please select a repository",
+				"repoNameRequired": "Repository name is required",
+				"repoUrlRequired": "Repository URL is required"
+			},
+			"errors": {
+				"saveFailed": "Failed to save git stack"
+			},
+			"toasts": {
+				"selectRepositoryFirst": "Please select a repository first",
+				"enterRepositoryUrlFirst": "Please enter a repository URL first",
+				"loadEnvFailed": "Failed to load env variables",
+				"noEnvFound": "No environment variables found",
+				"noEnvFoundDescription": "No .env files found in the repository. You can still add variables manually.",
+				"loadedVariableOne": "Loaded {count} variable",
+				"loadedVariableMany": "Loaded {count} variables",
+				"loadedVariablesDescription": "You can now customize values before deploying",
+				"deploymentFailed": "Deployment failed"
+			}
+		},
+		"modal": {
+			"titleCreate": "Create compose stack",
+			"descriptionCreate": "Create a new Docker Compose stack",
+			"descriptionEdit": "Edit compose file and environment variables",
+			"editorTab": "Editor",
+			"graphTab": "Graph",
+			"loadingCompose": "Loading compose file...",
+			"pathWillCreateIn": "Will create in {path}",
+			"customLocation": "Custom location",
+			"usingDefaultLocation": "Using default location",
+			"selectComposeFile": "Select compose file",
+			"selectComposeFileOrDirectory": "Select compose file or directory",
+			"selectEnvFileOrDirectory": "Select environment file or directory",
+			"relocateTitle": "Relocate {name}",
+			"untrackedStackTitle": "Untracked stack",
+			"untrackedStackDescription": "- this stack is running in Docker but Dockhand doesn't know where its compose file is stored on disk. Browse to locate the file to start editing and managing it.",
+			"runningContainers": "Running containers:",
+			"composeFile": "Compose file",
+			"envFile": "Env file",
+			"enterStackNameAbove": "Enter stack name above",
+			"notSpecified": "Not specified",
+			"noComposeSelected": "No compose file selected",
+			"noComposeSelectedDescription": "Browse to locate the compose file for this stack. The editor will load the file contents once selected.",
+			"browseForComposeFile": "Browse for compose file",
+			"selectFileInfoTitle": "What happens when you select a file:",
+			"copied": "Copied",
+			"envVarsInfo": "These variables will be written to a .env file in the stack directory and passed to the compose command.",
+			"unsavedChanges": "Unsaved changes",
+			"noChanges": "No changes",
+			"starting": "Starting...",
+			"createAndStart": "Create & Start",
+			"saveAndRedeploy": "Save & redeploy",
+			"unsavedDescription": "You have unsaved changes. Are you sure you want to close without saving?",
+			"continueEditing": "Continue editing",
+			"discardChanges": "Discard changes",
+			"moveStackFilesTitle": "Move stack files?",
+			"moveStackFilesDescriptionOne": "You've changed the stack location. There is {count} file in the old location that can be moved to the new location.",
+			"moveStackFilesDescriptionMany": "You've changed the stack location. There are {count} files in the old location that can be moved to the new location.",
+			"moveFilesQuestion": "Would you like to move all files to the new location, or leave them in place?",
+			"leaveFiles": "Leave files",
+			"moveFiles": "Move files",
+			"replaceContentTitle": "Replace editor content?",
+			"replaceContentDescription": "Loading a different compose file will replace the current editor content.",
+			"currentLabel": "Current:",
+			"newLabel": "New:",
+			"unsavedPlaceholder": "(unsaved)",
+			"replaceContent": "Replace content",
+			"relocateStackTitle": "Relocate stack?",
+			"relocateStackDescriptionOne": "All {count} file in the stack folder will be moved.",
+			"relocateStackDescriptionMany": "All {count} files in the stack folder will be moved.",
+			"fromLabel": "From",
+			"toLabel": "To",
+			"moving": "Moving...",
+			"validation": {
+				"stackNameInvalid": "Must be lowercase, start with a letter or number, and only contain letters, numbers, hyphens, and underscores",
+				"composeContentRequired": "Compose file content is required",
+				"composeContentOrPathRequired": "Compose file content or path is required",
+				"composeLocationRequired": "Please select a compose file location"
+			},
+			"toasts": {
+				"created": "Created stack \"{name}\"",
+				"applied": "Stack applied",
+				"saved": "Stack saved"
+			},
+			"errors": {
+				"moveFiles": "Failed to move files",
+				"moveFilesMessage": "An error occurred while moving files",
+				"loadCompose": "Failed to load compose file",
+				"createStack": "Failed to create stack",
+				"createStackMessage": "An error occurred while creating the stack",
+				"saveEnvironmentFile": "Failed to save environment file",
+				"saveCompose": "Failed to save compose file",
+				"applyStack": "Failed to apply stack",
+				"applyStackMessage": "An error occurred while applying the stack",
+				"saveStack": "Failed to save stack",
+				"saveStackMessage": "An error occurred while saving the stack"
+			}
+		},
+		"fileBrowser": {
+			"selectFile": "Select file",
+			"goUp": "Go up",
+			"folderName": "Folder name",
+			"createFolder": "Create folder",
+			"newFolder": "New folder",
+			"scanning": "Scanning...",
+			"scanThisFolder": "Scan this folder",
+			"unableToBrowse": "Unable to browse files",
+			"noSubdirectories": "No subdirectories",
+			"directoryEmpty": "Directory is empty",
+			"composeFile": "Compose file",
+			"selectedLabel": "Selected:",
+			"fileOrFolderHint": "Click to select file or folder, double-click to enter folder",
+			"fileHint": "Click a file to select it",
+			"errors": {
+				"loadDirectory": "Failed to load directory",
+				"createFolder": "Failed to create folder"
+			}
+		},
+		"graph": {
+			"toolbar": {
+				"addElement": "Add",
+				"cancelMode": "Cancel",
+				"dependencyMode": "Dependency",
+				"mountMode": "Mount",
+				"switchToDarkTheme": "Switch to dark theme",
+				"switchToLightTheme": "Switch to light theme"
+			},
+			"hints": {
+				"clickSourceService": "Click source service",
+				"clickTargetService": "Click target service",
+				"clickMountSource": "Click volume/network/config/secret",
+				"configSource": "Specify one of: file, content, or environment",
+				"secretSource": "Specify one of: file or environment"
+			},
+			"layout": {
+				"changeLayout": "Change layout",
+				"tree": "Tree",
+				"grid": "Grid",
+				"circle": "Circle",
+				"radial": "Radial",
+				"force": "Force"
+			},
+			"legend": {
+				"service": "Service",
+				"network": "Network",
+				"volume": "Volume",
+				"config": "Config",
+				"secret": "Secret"
+			},
+			"nodeTypes": {
+				"service": "Service",
+				"network": "Network",
+				"volume": "Volume",
+				"config": "Config",
+				"secret": "Secret"
+			},
+			"nodeCaptions": {
+				"build": "build",
+				"custom": "custom",
+				"missing": "missing",
+				"config": "config",
+				"secret": "secret"
+			},
+			"edgeLabels": {
+				"dependsOn": "depends on",
+				"links": "links"
+			},
+			"panel": {
+				"saveAndClose": "Save and close",
+				"deleteNode": "Delete node",
+				"closePanel": "Close panel",
+				"removeConnection": "Remove connection",
+				"removeDependency": "Remove dependency"
+			},
+			"fields": {
+				"serviceImage": "Service image",
+				"serviceCommand": "Service command",
+				"restartPolicy": "Restart policy",
+				"portMappings": "Port mappings",
+				"hostPort": "Host",
+				"containerPort": "Container",
+				"serviceVolumes": "Volume mounts",
+				"hostPath": "Host",
+				"containerPath": "Container",
+				"environmentVariables": "Environment variables",
+				"serviceLabels": "Service labels",
+				"key": "Key",
+				"value": "Value",
+				"dependsOn": "Dependencies",
+				"networkDriver": "Network driver",
+				"ipamConfiguration": "IPAM configuration",
+				"subnet": "Subnet",
+				"gateway": "Gateway",
+				"networkLabels": "Network labels",
+				"networkDriverOptions": "Network driver options",
+				"volumeDriver": "Volume driver",
+				"volumeLabels": "Volume labels",
+				"volumeDriverOptions": "Volume driver options",
+				"externalNameOptional": "External name (optional)",
+				"filePath": "File path",
+				"inlineContent": "Content (inline)",
+				"environmentVariable": "Environment variable"
+			},
+			"restartPolicy": {
+				"no": "No restart",
+				"always": "Always",
+				"onFailure": "On failure",
+				"unlessStopped": "Unless stopped"
+			},
+			"networkDrivers": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"overlay": "Overlay",
+				"macvlan": "Macvlan",
+				"ipvlan": "IPvlan",
+				"none": "None"
+			},
+			"flags": {
+				"externalNetwork": "External network",
+				"internalNetwork": "Internal network",
+				"attachableNetwork": "Attachable network",
+				"externalVolume": "External volume",
+				"externalConfig": "External config",
+				"externalSecret": "External secret"
+			},
+			"edges": {
+				"dependency": "Dependency",
+				"link": "Link",
+				"networkConnection": "Network connection",
+				"volumeMount": "Volume mount",
+				"configMount": "Config mount",
+				"secretMount": "Secret mount",
+				"dependencyDescription": "This service depends on {source} and will start after it.",
+				"volumeMountDescription": "Volume mounted to this service.",
+				"networkConnectionDescription": "Service connected to this network.",
+				"configMountDescription": "Config mounted to this service.",
+				"secretMountDescription": "Secret mounted to this service."
+			},
+			"addDialog": {
+				"title": "Add {type}",
+				"name": "Element name",
+				"serviceImage": "Service image",
+				"servicePorts": "Service ports (comma-separated)",
+				"cancel": "Cancel",
+				"addElement": "Add {type}",
+				"closeMenu": "Close add menu"
+			},
+			"errors": {
+				"yamlParse": "YAML parse error",
+				"showingPartialGraph": "{message} (showing partial graph)"
+			}
+		},
+		"import": {
+			"browserTitle": "Adopt stacks",
+			"browserTitleWithEnvironment": "Adopt stacks to {environment}",
+			"browserDescription": "Browse to a compose file or scan a directory for stacks.",
+			"remoteDescription": "Browse the Dockhand host filesystem to find compose files. Files are managed locally; Hawser only proxies Docker API calls, not filesystem access.",
+			"selectStacksTitle": "Select stacks to adopt to",
+			"foundDescription": "{count} stack(s) found. Select which ones to adopt into {environment}.",
+			"serviceCountOne": "{count} service",
+			"serviceCountMany": "{count} services",
+			"runningCount": "{count} running",
+			"remoteFilesPrefix": "These compose files are on the",
+			"remoteFilePrefix": "This compose file is on the",
+			"remoteFilesMiddle": "not on {environment}.",
+			"remoteFilesSuffix": "Docker commands will be sent to {environment} via Hawser, but the files are managed locally.",
+			"remoteFileSuffix": "Docker commands will be sent to {environment} via Hawser, but the file is managed locally.",
+			"adoptInfoTitle": "What happens when you adopt:",
+			"adoptManyInfo": "Dockhand will track these compose files, letting you edit, start, and stop the stacks from the UI. Your files stay in their current location.",
+			"adoptOneInfo": "Dockhand will track this compose file, letting you edit, start, and stop the stack from the UI. Your files stay in its current location.",
+			"selectedCount": "{selected} of {total} selected",
+			"adopting": "Adopting...",
+			"adoptSelected": "Adopt {count} stack(s)",
+			"previewTitle": "Adopt this stack?",
+			"previewDescription": "Review the compose file before adopting.",
+			"adoptStack": "Adopt stack",
+			"toasts": {
+				"scanFailed": "Failed to scan directory",
+				"allAlreadyAdopted": "All {count} stack(s) in this directory are already adopted",
+				"noneFound": "No compose stacks found in this directory",
+				"noEnvironment": "No environment selected",
+				"adoptFailed": "Failed to adopt stack",
+				"adoptManyFailed": "Failed to adopt stacks",
+				"adoptedStack": "Adopted stack \"{name}\"",
+				"adoptedStacks": "Adopted {count} stack(s)",
+				"failedWithMessage": "Failed: {error}",
+				"failedCount": "Failed to adopt {count} stack(s)"
+			}
+		},
+		"layout": {
+			"switchToVertical": "Switch to vertical layout (logs on side)",
+			"switchToHorizontal": "Switch to horizontal layout (logs below)"
+		},
+		"selection": {
+			"selected": "{count} selected",
+			"stackCountOne": "{count} stack",
+			"stackCountMany": "{count} stacks"
+		},
+		"confirm": {
+			"stack": "stack",
+			"container": "container",
+			"restartStack": "Restart stack"
+		},
+		"batch": {
+			"startingOne": "Starting {count} stack",
+			"startingMany": "Starting {count} stacks",
+			"stoppingOne": "Stopping {count} stack",
+			"stoppingMany": "Stopping {count} stacks",
+			"downOne": "Bringing down {count} stack",
+			"downMany": "Bringing down {count} stacks",
+			"restartingOne": "Restarting {count} stack",
+			"restartingMany": "Restarting {count} stacks",
+			"removingOne": "Removing {count} stack",
+			"removingMany": "Removing {count} stacks"
+		},
+		"metrics": {
+			"memoryShort": "Mem",
+			"networkShort": "Net",
+			"diskShort": "Disk",
+			"networkTooltip": "{received} received / {sent} sent",
+			"diskTooltip": "{read} read / {written} written"
+		},
+		"containers": {
+			"empty": "No containers",
+			"noIp": "no IP",
+			"restartCountOne": "{count} restart",
+			"restartCountMany": "{count} restarts",
+			"volumeMountedOne": "{count} volume mounted",
+			"volumeMountedMany": "{count} volumes mounted"
+		},
+		"tooltips": {
+			"dockhandSystem": "Dockhand management container",
+			"hawserSystem": "Hawser remote agent",
+			"envVarCountOne": "{count} environment variable configured",
+			"envVarCountMany": "{count} environment variables configured",
+			"deployedFromGit": "Deployed from Git repository",
+			"managedByDockhand": "Managed by Dockhand",
+			"untrackedStack": "Compose file location unknown. Click the stack name or edit button to locate it.",
+			"openInNewTab": "Open {url} in new tab"
+		},
+		"toasts": {
+			"loadFailed": "Failed to load stacks",
+			"started": "Started {name}",
+			"stopped": "Stopped {name}",
+			"restarted": "Restarted {name}",
+			"recreated": "Recreated {name}",
+			"redeployed": "Redeployed {name}",
+			"broughtDown": "Brought down {name}",
+			"removed": "Removed {name}",
+			"removedWithVolumes": "Removed {name} (volumes deleted)",
+			"containerStarted": "Container started",
+			"containerStopped": "Container stopped",
+			"containerRestarted": "Container restarted",
+			"containerPaused": "Container paused",
+			"containerUnpaused": "Container unpaused",
+			"containerRemoved": "Container removed"
+		},
+		"errors": {
+			"startTitle": "Failed to start {name}",
+			"startStack": "Failed to start stack",
+			"stopTitle": "Failed to stop {name}",
+			"stopStack": "Failed to stop stack",
+			"restartTitle": "Failed to restart {name}",
+			"restartStack": "Failed to restart stack",
+			"redeployTitle": "Failed to redeploy {name}",
+			"redeployStack": "Failed to redeploy stack",
+			"downTitle": "Failed to bring down {name}",
+			"downStack": "Failed to bring down stack",
+			"removeTitle": "Failed to remove {name}",
+			"removeStack": "Failed to remove stack"
+		}
+	},
+	"schedules": {
+		"title": "Schedules",
+		"searchPlaceholder": "Search schedules...",
+		"allTypes": "All types",
+		"typesSelected": "{count} types",
+		"allEnvironmentsShort": "All envs",
+		"environmentFallback": "Environment",
+		"environmentsSelected": "{count} envs",
+		"allStatuses": "All statuses",
+		"statusesSelected": "{count} statuses",
+		"hideSystemJobs": "Hide system jobs",
+		"showSystemJobs": "Show system jobs",
+		"showSystemJobsCount": "Show system ({count})",
+		"hideSystemJobsShort": "Hide system",
+		"systemBadge": "System",
+		"executionHistory": "Execution history",
+		"removeAll": "Remove all",
+		"removeAllExecutions": "Remove all executions",
+		"triggered": "Triggered",
+		"viewLogs": "View logs",
+		"viewLastExecutionLogs": "View last execution logs",
+		"deleteExecution": "Delete execution",
+		"pauseSchedule": "Pause schedule",
+		"resumeSchedule": "Resume schedule",
+		"runNow": "Run now",
+		"removeSchedule": "Remove schedule",
+		"scheduleItemType": "schedule",
+		"noRuns": "No runs",
+		"noExecutions": "No executions found",
+		"noSchedules": "No schedules found",
+		"emptyDescription": "Enable auto-update on containers or auto-sync on git stacks to see them here",
+		"executionDetails": "Execution details",
+		"containerUpdate": "Container update",
+		"environmentUpdate": "Environment update",
+		"gitStackSync": "Git stack sync",
+		"systemJob": "System job",
+		"blockedContainers": "Blocked containers",
+		"blocked": "Blocked",
+		"updateBlocked": "Update blocked due to vulnerabilities",
+		"updateBlockCriteria": "Update block criteria",
+		"blockReason": "Block reason",
+		"vulnerabilityScanResults": "Vulnerability scan results",
+		"scannedWith": "Scanned with {scanners}",
+		"scannedAt": "at {time}",
+		"scannerFallback": "scanner",
+		"loadMore": "Load more",
+		"overdue": "Overdue",
+		"lessThanOneMinute": "Less than 1 min",
+		"inMinutes": "In {count} min",
+		"inHours": "In {count} hours",
+		"triggeredToast": "Triggered: {name}",
+		"failedToLoadSchedules": "Failed to load schedules: {error}",
+		"failedToLoadExecutions": "Failed to load executions: {error}",
+		"failedToTrigger": "Failed to trigger schedule",
+		"failedToToggle": "Failed to toggle schedule",
+		"schedulePaused": "Schedule paused",
+		"scheduleResumed": "Schedule resumed",
+		"failedToDeleteSchedule": "Failed to delete schedule",
+		"scheduleRemoved": "Schedule removed: {name}",
+		"failedToLoadExecution": "Failed to load execution: {error}",
+		"failedToDeleteExecution": "Failed to delete execution",
+		"executionDeleted": "Execution deleted",
+		"noExecutionsToDelete": "No executions to delete",
+		"deletedExecutions": "Deleted {count} execution(s)",
+		"failedToDeleteExecutions": "Failed to delete executions: {error}",
+		"partiallyBlocked": "Partially blocked",
+		"descriptions": {
+			"checkScanAutoUpdate": "Check, scan & auto-update",
+			"checkAutoUpdate": "Check & auto-update",
+			"gitSync": "Git sync",
+			"pruneUnusedImages": "Prune unused images"
+		},
+		"status": {
+			"queued": "Queued",
+			"running": "Running",
+			"success": "Success",
+			"failed": "Failed",
+			"skipped": "Up-to-date",
+			"blocked": "Blocked"
+		},
+		"trigger": {
+			"cron": "Scheduled",
+			"webhook": "Webhook",
+			"manual": "Manual"
+		},
+		"types": {
+			"container_update": "Container updates",
+			"git_stack_sync": "Git stack sync",
+			"system_cleanup": "System cleanup",
+			"env_update_check": "Environment update check",
+			"image_prune": "Image prune"
+		}
+	},
+	"timezone": {
+		"select": "Select timezone...",
+		"search": "Search timezone...",
+		"empty": "No timezone found.",
+		"common": "Common",
+		"all": "All timezones"
+	},
+	"cron": {
+		"daily": "Daily",
+		"weekly": "Weekly",
+		"custom": "Custom",
+		"at": "at",
+		"on": "on",
+		"invalid": "Invalid",
+		"days": {
+			"monday": "Monday",
+			"tuesday": "Tuesday",
+			"wednesday": "Wednesday",
+			"thursday": "Thursday",
+			"friday": "Friday",
+			"saturday": "Saturday",
+			"sunday": "Sunday"
+		}
+	},
+	"batchOperation": {
+		"runningCloseConfirm": "Operation is still running. Cancel and close?",
+		"succeeded": "Succeeded",
+		"failed": "Failed",
+		"cancelled": "Cancelled",
+		"pending": "Pending",
+		"cancel": "Cancel"
+	},
+	"updateSteps": {
+		"pulling": "Pulling image",
+		"scanning": "Scanning for vulnerabilities",
+		"stopping": "Stopping",
+		"removing": "Removing",
+		"creating": "Creating",
+		"starting": "Starting",
+		"done": "Done",
+		"updated": "Updated",
+		"failed": "Failed",
+		"blocked": "Blocked by vulnerabilities",
+		"checked": "Checked",
+		"skipped": "Up-to-date"
+	},
+	"updateSummary": {
+		"checked": "Checked",
+		"updated": "updated",
+		"blocked": "blocked",
+		"failed": "failed",
+		"updatedLabel": "Updated",
+		"blockedLabel": "Blocked",
+		"failedLabel": "Failed"
+	},
+	"vulnerabilityCriteria": {
+		"labels": {
+			"never": "Never block",
+			"any": "Any vulnerability",
+			"critical_high": "Critical or high",
+			"critical": "Critical only",
+			"more_than_current": "More than current image"
+		},
+		"selectorLabels": {
+			"any": "Any vulnerabilities"
+		},
+		"titles": {
+			"never": "No vulnerability blocking",
+			"any": "Block on any vulnerability",
+			"critical_high": "Block on critical or high",
+			"critical": "Block on critical only",
+			"more_than_current": "Block if more than current"
+		}
+	},
+	"vulnerabilitySeverity": {
+		"critical": "Critical",
+		"high": "High",
+		"medium": "Medium",
+		"low": "Low",
+		"negligible": "Negligible",
+		"unknown": "Unknown"
+	},
+	"avatarCropper": {
+		"cropAvatar": "Crop avatar",
+		"cropHelp": "Drag to reposition. Use the slider to zoom.",
+		"saveAvatar": "Save avatar",
+		"cancel": "Cancel",
+		"uploading": "Uploading...",
+		"loading": "Loading...",
+		"errors": {
+			"noCropData": "No crop data available",
+			"canvasContext": "Failed to get canvas context",
+			"loadImage": "Failed to load image",
+			"cropImage": "Failed to crop image"
+		}
+	},
+	"codeEditor": {
+		"valueProvided": "Value provided",
+		"requiredVariableMissing": "Required variable not defined",
+		"missingRequiredVariable": "Missing required variable",
+		"requiredVariableDefined": "Required variable (defined)",
+		"optionalVariableDefault": "Optional variable (has default)",
+		"missingBadge": "MISSING",
+		"secretValue": "Secret value"
+	},
+	"diffViewer": {
+		"noChangesRecorded": "No changes recorded",
+		"yes": "Yes",
+		"no": "No",
+		"empty": "(empty)"
+	},
+	"iconPicker": {
+		"searchPlaceholder": "Search icons...",
+		"empty": "No icons found"
+	},
+	"ui": {
+		"dialog": {
+			"close": "Close"
+		},
+		"sidebar": {
+			"title": "Sidebar",
+			"description": "Displays the mobile sidebar.",
+			"toggle": "Toggle sidebar"
+		},
+		"errorDialog": {
+			"copyError": "Copy error",
+			"copyRequiresHttps": "Copy requires HTTPS",
+			"ok": "OK"
+		}
+	},
+	"whatsNewModal": {
+		"title": "Dockhand has been updated to {version}",
+		"dismiss": "Got it"
+	},
+	"stackEnvVarsEditor": {
+		"fromEnvFile": "From env file in repository",
+		"revertToFileValue": "Revert to file value",
+		"manualOverride": "Manual override (not in file)",
+		"requiredVariableDefined": "Required variable defined",
+		"optionalVariableDefault": "Optional variable (has default)",
+		"unusedVariable": "Unused variable",
+		"name": "Variable name",
+		"value": "Variable value",
+		"secretValueCannotUnhide": "Secret value (cannot unhide)",
+		"markedAsSecret": "Marked as secret",
+		"markAsSecret": "Mark as secret",
+		"noVariables": "No environment variables defined.",
+		"addFirstVariable": "Add your first variable"
+	},
+	"stackEnvVarsPanel": {
+		"title": "Environment variables",
+		"view": {
+			"form": "Form view",
+			"text": "Text view (raw .env file)"
+		},
+		"validation": {
+			"missing": "missing",
+			"defined": "defined",
+			"optional": "optional"
+		},
+		"actions": {
+			"load": "Load",
+			"add": "Add",
+			"clear": "Clear",
+			"clearTitle": "Clear all variables?",
+			"clearAction": "clear",
+			"clearItemType": "environment variables",
+			"clearConfirm": "Clear all"
+		},
+		"interpolation": {
+			"full": "These variables are available for <strong>compose file interpolation</strong> using <code class=\"bg-blue-100 dark:bg-blue-800/40 px-1 rounded\">${VAR_NAME}</code> syntax. To pass them to containers, reference them in the compose file's <code class=\"bg-blue-100 dark:bg-blue-800/40 px-1 rounded\">environment:</code> section."
+		},
+		"syntax": {
+			"required": "required",
+			"optional": "optional",
+			"requiredWithError": "required w/ error"
+		},
+		"secrets": {
+			"hiddenOne": "{count} secret not shown.",
+			"hiddenMany": "{count} secrets not shown.",
+			"storage": "Secrets are never written to disk and are injected via shell environment when the stack starts."
+		},
+		"parse": {
+			"noEquals": "Line {line}: \"{value}\" (no = found)",
+			"invalidName": "Line {line}: \"{key}\" (invalid variable name)"
+		},
+		"parseWarnings": {
+			"title": "Some lines couldn't be parsed:",
+			"more": "...and {count} more",
+			"switchToText": "Switch to text view to edit these lines."
+		},
+		"missing": {
+			"addMissing": "Add missing:"
+		}
+	},
+	"themeSelector": {
+		"lightTheme": "Light theme",
+		"darkTheme": "Dark theme",
+		"themeSystem": "Theme: system",
+		"toggleTheme": "Toggle theme",
+		"font": "Font",
+		"fontSize": "Font size",
+		"gridFontSize": "Grid font size",
+		"terminalFont": "Terminal font",
+		"editorFont": "Editor font",
+		"fontSizes": {
+			"xsmall": "Extra Small",
+			"small": "Small",
+			"normal": "Normal",
+			"medium": "Medium",
+			"large": "Large",
+			"xlarge": "Extra Large"
+		}
+	}
+}

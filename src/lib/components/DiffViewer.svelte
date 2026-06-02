@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ArrowRight } from 'lucide-svelte';
 	import { formatFieldName, type AuditDiff, type FieldChange } from '$lib/utils/diff';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		diff: AuditDiff | null;
@@ -13,10 +14,10 @@
 			return '—';
 		}
 		if (typeof value === 'boolean') {
-			return value ? 'Yes' : 'No';
+			return value ? $t('diffViewer.yes') : $t('diffViewer.no');
 		}
 		if (Array.isArray(value)) {
-			if (value.length === 0) return '(empty)';
+			if (value.length === 0) return $t('diffViewer.empty');
 			if (value.every(v => typeof v === 'string' || typeof v === 'number')) {
 				return value.join(', ');
 			}
@@ -71,5 +72,5 @@
 		{/each}
 	</div>
 {:else}
-	<p class="text-sm text-muted-foreground italic">No changes recorded</p>
+	<p class="text-sm text-muted-foreground italic">{$t('diffViewer.noChangesRecorded')}</p>
 {/if}

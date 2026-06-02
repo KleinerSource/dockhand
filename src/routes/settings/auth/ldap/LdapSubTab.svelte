@@ -17,6 +17,7 @@
 	import { licenseStore } from '$lib/stores/license';
 	import LdapModal from './LdapModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	interface LdapRoleMapping {
 		groupDn: string;
@@ -74,7 +75,7 @@
 			}
 		} catch (error) {
 			console.error('Failed to fetch LDAP configs:', error);
-			toast.error('Failed to fetch LDAP configurations');
+			toast.error(translate('settings.auth.ldap.list.toasts.loadFailed'));
 		} finally {
 			ldapLoading = false;
 		}
@@ -112,13 +113,13 @@
 			const response = await fetch(`/api/auth/ldap/${configId}`, { method: 'DELETE' });
 			if (response.ok) {
 				await fetchLdapConfigs();
-				toast.success('LDAP configuration deleted');
+				toast.success(translate('settings.auth.ldap.list.toasts.deleted'));
 			} else {
-				toast.error('Failed to delete LDAP configuration');
+				toast.error(translate('settings.auth.ldap.list.toasts.deleteFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to delete LDAP config:', error);
-			toast.error('Failed to delete LDAP configuration');
+			toast.error(translate('settings.auth.ldap.list.toasts.deleteFailed'));
 		} finally {
 			confirmDeleteLdapId = null;
 		}
@@ -132,13 +133,13 @@
 			const data = await response.json();
 			ldapTestResult = data;
 			if (data.success) {
-				toast.success(`LDAP connection successful - found ${data.userCount} users`);
+				toast.success(translate('settings.auth.ldap.list.toasts.connectionSuccessful', { count: data.userCount }));
 			} else {
-				toast.error(`LDAP connection failed: ${data.error}`);
+				toast.error(translate('settings.auth.ldap.list.toasts.connectionFailedWithError', { error: data.error }));
 			}
 		} catch (error) {
-			ldapTestResult = { success: false, error: 'Failed to test connection' };
-			toast.error('Failed to test LDAP connection');
+			ldapTestResult = { success: false, error: translate('settings.auth.ldap.list.test.testFailed') };
+			toast.error(translate('settings.auth.ldap.list.toasts.testFailed'));
 		} finally {
 			ldapTesting = null;
 		}
@@ -153,13 +154,13 @@
 			});
 			if (response.ok) {
 				await fetchLdapConfigs();
-				toast.success(`LDAP ${config.enabled ? 'disabled' : 'enabled'}`);
+				toast.success(translate(config.enabled ? 'settings.auth.ldap.list.toasts.disabled' : 'settings.auth.ldap.list.toasts.enabled'));
 			} else {
-				toast.error('Failed to toggle LDAP configuration');
+				toast.error(translate('settings.auth.ldap.list.toasts.toggleFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to toggle LDAP config:', error);
-			toast.error('Failed to toggle LDAP configuration');
+			toast.error(translate('settings.auth.ldap.list.toasts.toggleFailed'));
 		}
 	}
 
@@ -188,14 +189,14 @@
 			<div class="text-center">
 				<h3 class="text-lg font-medium mb-2 flex items-center justify-center gap-2">
 					<Crown class="w-5 h-5 text-amber-500" />
-					Enterprise feature
+					{$t('settings.auth.ldap.list.enterprise.title')}
 				</h3>
 				<p class="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-					LDAP / Active Directory integration is available with an enterprise license. Connect to your organization's directory services for centralized authentication.
+					{$t('settings.auth.ldap.list.enterprise.description')}
 				</p>
 				<Button onclick={() => onTabChange('license')}>
 					<Key class="w-4 h-4" />
-					Activate license
+					{$t('settings.auth.ldap.list.enterprise.activateLicense')}
 				</Button>
 			</div>
 		</Card.Content>
@@ -208,14 +209,14 @@
 					<div>
 						<Card.Title class="text-sm font-medium flex items-center gap-2">
 							<Network class="w-4 h-4" />
-							LDAP configurations
+							{$t('settings.auth.ldap.list.title')}
 						</Card.Title>
-						<p class="text-xs text-muted-foreground mt-1">Connect to LDAP or Active Directory servers for centralized user authentication.</p>
+						<p class="text-xs text-muted-foreground mt-1">{$t('settings.auth.ldap.list.description')}</p>
 					</div>
 					{#if $canAccess('settings', 'edit')}
 						<Button size="sm" onclick={() => openLdapModal(null)}>
 							<Plus class="w-4 h-4" />
-							Add LDAP
+							{$t('settings.auth.ldap.list.addLdap')}
 						</Button>
 					{/if}
 				</div>
@@ -228,8 +229,8 @@
 				{:else if ldapConfigs.length === 0}
 					<EmptyState
 						icon={Network}
-						title="No LDAP providers configured"
-						description="Click 'Add LDAP' to configure a new LDAP server"
+						title={$t('settings.auth.ldap.list.empty.title')}
+						description={$t('settings.auth.ldap.list.empty.description')}
 						class="py-8"
 					/>
 				{:else}
@@ -242,9 +243,9 @@
 										<div class="flex items-center gap-2">
 											<span class="font-medium">{config.name}</span>
 											{#if config.enabled}
-												<Badge variant="default" class="text-xs">Enabled</Badge>
+												<Badge variant="default" class="text-xs">{$t('settings.auth.ldap.list.status.enabled')}</Badge>
 											{:else}
-												<Badge variant="secondary" class="text-xs">Disabled</Badge>
+												<Badge variant="secondary" class="text-xs">{$t('settings.auth.ldap.list.status.disabled')}</Badge>
 											{/if}
 										</div>
 										<p class="text-xs text-muted-foreground">{config.serverUrl}</p>
@@ -260,7 +261,7 @@
 										{#if ldapTesting === config.id}
 											<RefreshCw class="w-4 h-4 animate-spin" />
 										{:else}
-											Test
+											{$t('settings.auth.ldap.list.actions.test')}
 										{/if}
 									</Button>
 									{#if $canAccess('settings', 'edit')}
@@ -269,7 +270,7 @@
 											size="sm"
 											onclick={() => toggleLdapEnabled(config)}
 										>
-											{config.enabled ? 'Disable' : 'Enable'}
+											{config.enabled ? $t('settings.auth.ldap.list.actions.disable') : $t('settings.auth.ldap.list.actions.enable')}
 										</Button>
 										<Button
 											variant="outline"
@@ -280,8 +281,8 @@
 										</Button>
 										<ConfirmPopover
 											open={confirmDeleteLdapId === config.id}
-											action="Delete"
-											itemType="LDAP config"
+											action={$t('settings.auth.ldap.list.confirm.deleteAction')}
+											itemType={$t('settings.auth.ldap.list.confirm.config')}
 											itemName={config.name}
 											onConfirm={() => deleteLdapConfig(config.id)}
 											onOpenChange={(open) => confirmDeleteLdapId = open ? config.id : null}
@@ -298,9 +299,9 @@
 					{#if ldapTestResult}
 						<div class="mt-4 p-3 rounded-lg {ldapTestResult.success ? 'bg-green-500/10 text-green-600' : 'bg-destructive/10 text-destructive'}">
 							{#if ldapTestResult.success}
-								<p class="text-sm">Connection successful! Found {ldapTestResult.userCount} users.</p>
+								<p class="text-sm">{$t('settings.auth.ldap.list.test.connectionSuccessful', { count: ldapTestResult.userCount })}</p>
 							{:else}
-								<p class="text-sm">Connection failed: {ldapTestResult.error}</p>
+								<p class="text-sm">{$t('settings.auth.ldap.list.test.connectionFailed', { error: ldapTestResult.error })}</p>
 							{/if}
 						</div>
 					{/if}

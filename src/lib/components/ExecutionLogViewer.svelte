@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Sun, Moon } from 'lucide-svelte';
 	import { getTimeFormat } from '$lib/stores/settings';
+	import { getIntlLocale, locale, t } from '$lib/i18n';
 
 	interface Props {
 		logs: string | null;
@@ -48,7 +49,7 @@
 	function formatTimestamp(timestamp: string): string {
 		const d = new Date(timestamp);
 		if (isNaN(d.getTime())) return timestamp;
-		return new Intl.DateTimeFormat('en-GB', {
+		return new Intl.DateTimeFormat(getIntlLocale($locale), {
 			timeZone: timezone || undefined,
 			hour: '2-digit',
 			minute: '2-digit',
@@ -60,13 +61,13 @@
 
 <div class="flex-1 flex flex-col min-h-0">
 	<div class="flex items-center justify-between text-xs text-muted-foreground mb-1 shrink-0">
-		<span>Logs</span>
+		<span>{$t('executionLog.title')}</span>
 		{#if onToggleTheme}
 			<button
 				type="button"
 				onclick={onToggleTheme}
 				class="p-1 rounded hover:bg-muted transition-colors"
-				title="Toggle log theme"
+				title={$t('executionLog.toggleTheme')}
 			>
 				{#if darkMode}
 					<Sun class="w-3.5 h-3.5" />
@@ -98,7 +99,7 @@
 				</div>
 			{/each}
 		{:else}
-			<span class="text-muted-foreground">No logs available</span>
+			<span class="text-muted-foreground">{$t('executionLog.empty')}</span>
 		{/if}
 	</div>
 </div>

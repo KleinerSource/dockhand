@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Cpu, MemoryStick, Loader2 } from 'lucide-svelte';
 	import { formatBytes } from '$lib/utils/format';
+	import { t } from '$lib/i18n';
 
 	interface Metrics {
 		cpuPercent?: number;
@@ -61,7 +62,7 @@
 			<div class="space-y-1">
 				<div class="flex items-center justify-between text-xs">
 					<span class="flex items-center gap-1 text-muted-foreground/50">
-						<Cpu class="w-3 h-3" /> CPU <Loader2 class="w-3 h-3 animate-spin" />
+						<Cpu class="w-3 h-3" /> {$t('common.labels.cpu')} <Loader2 class="w-3 h-3 animate-spin" />
 					</span>
 					<div class="skeleton w-10 h-3.5 rounded"></div>
 				</div>
@@ -72,7 +73,7 @@
 			<div class="space-y-1">
 				<div class="flex items-center justify-between text-xs">
 					<span class="flex items-center gap-1 text-muted-foreground/50">
-						<MemoryStick class="w-3 h-3" /> Memory <Loader2 class="w-3 h-3 animate-spin" />
+						<MemoryStick class="w-3 h-3" /> {$t('common.labels.memory')} <Loader2 class="w-3 h-3 animate-spin" />
 					</span>
 					<div class="skeleton w-16 h-3.5 rounded"></div>
 				</div>
@@ -85,12 +86,12 @@
 {:else if !collectMetrics}
 	<!-- Metrics collection disabled -->
 	<div class="text-xs text-muted-foreground text-center py-1">
-		Metrics collection disabled
+		{$t('dashboard.stats.metricsCollectionDisabled')}
 	</div>
 {:else if !hasMetrics}
 	<!-- No metrics available -->
 	<div class="text-xs text-muted-foreground text-center py-1">
-		No metrics available
+		{$t('dashboard.stats.noMetricsAvailable')}
 	</div>
 {:else if compact}
 	<!-- Compact horizontal bars for mini tiles -->
@@ -122,7 +123,7 @@
 		<div class="space-y-1">
 			<div class="flex items-center justify-between text-xs">
 				<span class="flex items-center gap-1 text-muted-foreground">
-					<Cpu class="w-3 h-3" /> CPU
+					<Cpu class="w-3 h-3" /> {$t('common.labels.cpu')}
 				</span>
 				<span class="font-medium">{cpuPercent.toFixed(1)}%</span>
 			</div>
@@ -136,7 +137,7 @@
 		<div class="space-y-1">
 			<div class="flex items-center justify-between text-xs">
 				<span class="flex items-center gap-1 text-muted-foreground">
-					<MemoryStick class="w-3 h-3" /> Memory
+					<MemoryStick class="w-3 h-3" /> {$t('common.labels.memory')}
 				</span>
 				<span class="font-medium">
 					{memoryPercent.toFixed(1)}%

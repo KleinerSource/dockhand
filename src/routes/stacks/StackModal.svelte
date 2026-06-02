@@ -24,6 +24,7 @@
 	import { toast } from 'svelte-sonner';
 	import ComposeGraphViewer from './ComposeGraphViewer.svelte';
 	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	// Get sidebar state to adjust modal positioning
 	const sidebar = useSidebar();
@@ -127,15 +128,15 @@
 		if (mode !== 'create') return undefined;
 		// Show hint when user selected a directory but hasn't entered stack name yet
 		if (browsedBaseDirectory && !workingComposePath) {
-			return `Will create in ${browsedBaseDirectory}/`;
+			return translate('stacks.modal.pathWillCreateIn', { path: `${browsedBaseDirectory}/` });
 		}
 		if (!workingComposePath) return undefined;
 		switch (pathSource) {
 			case 'browsed':
 			case 'custom':
-				return 'Custom location';
+				return translate('stacks.modal.customLocation');
 			case 'default':
-				return 'Using default location';
+				return translate('stacks.modal.usingDefaultLocation');
 			default:
 				return undefined;
 		}
@@ -173,7 +174,7 @@
 		// For tracked stacks, allow both files and directories
 		const isUntracked = needsFileLocation;
 		fileBrowserConfig = {
-			title: isUntracked ? 'Select compose file' : 'Select compose file or directory',
+			title: isUntracked ? translate('stacks.modal.selectComposeFile') : translate('stacks.modal.selectComposeFileOrDirectory'),
 			selectFilter: /\.ya?ml$/,
 			selectMode: isUntracked ? 'file' : 'file_or_directory',
 			onSelect: handleComposeSelect
@@ -183,7 +184,7 @@
 
 	function openEnvBrowser() {
 		fileBrowserConfig = {
-			title: 'Select environment file or directory',
+			title: translate('stacks.modal.selectEnvFileOrDirectory'),
 			selectFilter: /\.env($|\.)/,  // matches .env, .env.local, app.env, etc.
 			selectMode: 'file_or_directory',
 			onSelect: handleEnvSelect
@@ -194,7 +195,7 @@
 	function openChangeLocationBrowser() {
 		const displayName = mode === 'edit' ? stackName : newStackName;
 		fileBrowserConfig = {
-			title: `Relocate ${displayName}`,
+			title: translate('stacks.modal.relocateTitle', { name: displayName }),
 			icon: FolderSync,
 			selectMode: 'directory',
 			onSelect: handleChangeLocation
@@ -291,7 +292,7 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error((typeof data.error === 'string' ? data.error : data.message) || 'Failed to move files');
+				throw new Error((typeof data.error === 'string' ? data.error : data.message) || translate('stacks.modal.errors.moveFiles'));
 			}
 
 			const result = await response.json();
@@ -318,8 +319,8 @@
 
 		} catch (e: any) {
 			operationError = {
-				title: 'Failed to move files',
-				message: e.message || 'An error occurred while moving files'
+				title: translate('stacks.modal.errors.moveFiles'),
+				message: e.message || translate('stacks.modal.errors.moveFilesMessage')
 			};
 		} finally {
 			movingLocation = false;
@@ -756,7 +757,7 @@
 					}
 					return;
 				}
-				throw new Error((typeof data.error === 'string' ? data.error : data.message) || 'Failed to load compose file');
+				throw new Error((typeof data.error === 'string' ? data.error : data.message) || translate('stacks.modal.errors.loadCompose'));
 			}
 
 			composeContent = data.content;
@@ -848,16 +849,16 @@
 		let hasErrors = false;
 
 		if (!newStackName.trim()) {
-			errors.stackName = 'Stack name is required';
+			errors.stackName = translate('stacks.gitModal.validation.stackNameRequired');
 			hasErrors = true;
 		} else if (!/^[a-z0-9][a-z0-9_-]*$/.test(newStackName.trim())) {
-			errors.stackName = 'Must be lowercase, start with a letter or number, and only contain letters, numbers, hyphens, and underscores';
+			errors.stackName = translate('stacks.modal.validation.stackNameInvalid');
 			hasErrors = true;
 		}
 
 		const content = composeContent || defaultCompose;
 		if (!content.trim()) {
-			errors.compose = 'Compose file content is required';
+			errors.compose = translate('stacks.modal.validation.composeContentRequired');
 			hasErrors = true;
 		}
 
@@ -928,19 +929,19 @@
 			const data = start ? await readJobResponse(response) : await response.json();
 
 			if (!response.ok && !data.success) {
-				throw new Error((typeof data.error === 'string' ? data.error : data.message) || 'Failed to create stack');
+				throw new Error((typeof data.error === 'string' ? data.error : data.message) || translate('stacks.modal.errors.createStack'));
 			}
 			if (data.success === false) {
-				throw new Error(data.error || 'Failed to create stack');
+				throw new Error(data.error || translate('stacks.modal.errors.createStack'));
 			}
 
-			toast.success(`Created stack "${newStackName.trim()}"`);
+			toast.success(translate('stacks.modal.toasts.created', { name: newStackName.trim() }));
 			onSuccess();
 			handleClose();
 		} catch (e: any) {
 			operationError = {
-				title: 'Failed to create stack',
-				message: e.message || 'An error occurred while creating the stack',
+				title: translate('stacks.modal.errors.createStack'),
+				message: e.message || translate('stacks.modal.errors.createStackMessage'),
 				details: e.details
 			};
 			// Only transition to edit mode if the stack was actually persisted (response was ok
@@ -961,13 +962,13 @@
 
 		// Validate compose content (unless file location is needed and we have a path)
 		if (!composeContent.trim() && !workingComposePath.trim()) {
-			errors.compose = 'Compose file content or path is required';
+			errors.compose = translate('stacks.modal.validation.composeContentOrPathRequired');
 			return;
 		}
 
 		// If file location is needed, require a compose path
 		if (needsFileLocation && !workingComposePath.trim()) {
-			errors.compose = 'Please select a compose file location';
+			errors.compose = translate('stacks.modal.validation.composeLocationRequired');
 			return;
 		}
 
@@ -1060,8 +1061,8 @@
 			);
 
 			if (!rawEnvResponse.ok) {
-				const rawEnvError = await rawEnvResponse.json().catch(() => ({ error: 'Failed to save environment file' }));
-				throw new Error((typeof rawEnvError.error === 'string' ? rawEnvError.error : rawEnvError.message) || 'Failed to save environment file');
+				const rawEnvError = await rawEnvResponse.json().catch(() => ({ error: translate('stacks.modal.errors.saveEnvironmentFile') }));
+				throw new Error((typeof rawEnvError.error === 'string' ? rawEnvError.error : rawEnvError.message) || translate('stacks.modal.errors.saveEnvironmentFile'));
 			}
 
 			// Save only secrets to DB (non-secrets are in the .env file written above)
@@ -1107,14 +1108,14 @@
 			const data = restart ? await readJobResponse(response) : await response.json();
 
 			if (!response.ok && !data.success) {
-				throw new Error((typeof data.error === 'string' ? data.error : data.message) || 'Failed to save compose file');
+				throw new Error((typeof data.error === 'string' ? data.error : data.message) || translate('stacks.modal.errors.saveCompose'));
 			}
 			if (data.success === false) {
-				throw new Error(data.error || 'Failed to save compose file');
+				throw new Error(data.error || translate('stacks.modal.errors.saveCompose'));
 			}
 
 			isDirty = false; // Reset dirty flag after successful save
-			toast.success(restart ? 'Stack applied' : 'Stack saved');
+			toast.success(translate(restart ? 'stacks.modal.toasts.applied' : 'stacks.modal.toasts.saved'));
 			onSuccess();
 
 			if (!restart) {
@@ -1125,8 +1126,8 @@
 			}
 		} catch (e: any) {
 			operationError = {
-				title: restart ? 'Failed to apply stack' : 'Failed to save stack',
-				message: e.message || (restart ? 'An error occurred while applying the stack' : 'An error occurred while saving the stack'),
+				title: translate(restart ? 'stacks.modal.errors.applyStack' : 'stacks.modal.errors.saveStack'),
+				message: e.message || translate(restart ? 'stacks.modal.errors.applyStackMessage' : 'stacks.modal.errors.saveStackMessage'),
 				details: e.details
 			};
 		} finally {
@@ -1347,16 +1348,16 @@
 						<div>
 							<Dialog.Title class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
 								{#if mode === 'create'}
-									Create compose stack
+									{$t('stacks.modal.titleCreate')}
 								{:else}
 									{stackName}
 								{/if}
 							</Dialog.Title>
 							<Dialog.Description class="text-xs text-zinc-500 dark:text-zinc-400">
 								{#if mode === 'create'}
-									Create a new Docker Compose stack
+									{$t('stacks.modal.descriptionCreate')}
 								{:else}
-									Edit compose file and environment variables
+									{$t('stacks.modal.descriptionEdit')}
 								{/if}
 							</Dialog.Description>
 						</div>
@@ -1371,14 +1372,14 @@
 							onclick={() => activeTab = 'editor'}
 						>
 							<Code class="w-3.5 h-3.5" />
-							Editor
+							{$t('stacks.modal.editorTab')}
 						</button>
 						<button
 							class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors {activeTab === 'graph' ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
 							onclick={() => activeTab = 'graph'}
 						>
 							<GitGraph class="w-3.5 h-3.5" />
-							Graph
+							{$t('stacks.modal.graphTab')}
 						</button>
 					</div>
 
@@ -1387,7 +1388,7 @@
 						<button
 							onclick={toggleEditorTheme}
 							class="p-1.5 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-							title={editorTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+							title={editorTheme === 'light' ? $t('themeSelector.darkTheme') : $t('themeSelector.lightTheme')}
 						>
 							{#if editorTheme === 'light'}
 								<Moon class="w-4 h-4" />
@@ -1420,7 +1421,7 @@
 				<div class="flex-1 flex items-center justify-center">
 					<div class="flex items-center gap-3 text-zinc-400 dark:text-zinc-500">
 						<Loader2 class="w-5 h-5 animate-spin" />
-						<span>Loading compose file...</span>
+						<span>{$t('stacks.modal.loadingCompose')}</span>
 					</div>
 				</div>
 			{:else}
@@ -1429,7 +1430,7 @@
 					<div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
 						<div class="flex gap-4 items-start">
 							<div class="flex-1 max-w-xs space-y-1">
-								<Label for="stack-name">Stack name</Label>
+								<Label for="stack-name">{$t('stacks.gitModal.stackName')}</Label>
 								<Input
 									id="stack-name"
 									bind:value={newStackName}
@@ -1451,12 +1452,12 @@
 						<div class="flex items-start gap-3">
 							<AlertCircle class="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
 							<div class="flex-1 min-w-0">
-								<p class="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
-									<span class="font-medium text-amber-800 dark:text-amber-300">Untracked stack</span> — this stack is running in Docker but Dockhand doesn't know where its compose file is stored on disk. Browse to locate the file to start editing and managing it.
+									<p class="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+									<span class="font-medium text-amber-800 dark:text-amber-300">{$t('stacks.modal.untrackedStackTitle')}</span> {$t('stacks.modal.untrackedStackDescription')}
 								</p>
 								{#if stackContainers.length > 0}
 									<div class="text-xs text-zinc-500 dark:text-zinc-400">
-										<span class="font-medium text-zinc-700 dark:text-zinc-300">Running containers:</span>
+										<span class="font-medium text-zinc-700 dark:text-zinc-300">{$t('stacks.modal.runningContainers')}</span>
 										<div class="mt-1.5 flex flex-wrap gap-1.5">
 											{#each stackContainers as container}
 												<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs {container.state === 'running' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'}">
@@ -1480,14 +1481,14 @@
 							<!-- Compose path -->
 							<div class="flex-shrink-0 px-4 py-2" style="width: {splitRatio}%">
 								<PathBarItem
-									label="Compose file"
+									label={$t('stacks.modal.composeFile')}
 									path={workingComposePath || null}
 									placeholder="/path/to/compose.yaml"
 									copied={composePathCopied}
 									onCopy={() => copyText(workingComposePath, (v) => composePathCopied = v)}
 									onBrowse={openComposeBrowser}
 									onChangeLocation={mode === 'edit' && !needsFileLocation ? openChangeLocationBrowser : undefined}
-									defaultText={mode === 'create' ? 'Enter stack name above' : 'Not specified'}
+									defaultText={mode === 'create' ? $t('stacks.modal.enterStackNameAbove') : $t('stacks.modal.notSpecified')}
 									sourceHint={pathSourceHint}
 								/>
 							</div>
@@ -1496,7 +1497,7 @@
 							<!-- Env path -->
 							<div class="flex-1 min-w-0 px-4 py-2 bg-zinc-100/50 dark:bg-zinc-800/50">
 								<PathBarItem
-									label="Env file"
+									label={$t('stacks.modal.envFile')}
 									path={displayEnvPath || null}
 									selectedPath={workingEnvPath || suggestedEnvPath || ''}
 									placeholder="/path/to/.env (optional)"
@@ -1505,7 +1506,7 @@
 									onBrowse={openEnvBrowser}
 									isEditable={true}
 									isCustom={!!workingEnvPath}
-									defaultText={mode === 'create' ? 'Enter stack name above' : 'Not specified'}
+									defaultText={mode === 'create' ? $t('stacks.modal.enterStackNameAbove') : $t('stacks.modal.notSpecified')}
 									isSuggested={isEnvPathSuggested}
 									onPathChange={(value) => {
 										workingEnvPath = value;
@@ -1524,18 +1525,18 @@
 											<!-- Empty state for untracked stacks -->
 											<div class="h-full rounded-md border border-dashed border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800/30 flex flex-col items-center justify-center text-center px-8">
 												<FolderOpen class="w-12 h-12 text-zinc-300 dark:text-zinc-600 mb-4" />
-												<h3 class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">No compose file selected</h3>
+												<h3 class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{$t('stacks.modal.noComposeSelected')}</h3>
 												<p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 max-w-sm">
-													Browse to locate the compose file for this stack. The editor will load the file contents once selected.
+													{$t('stacks.modal.noComposeSelectedDescription')}
 												</p>
 												<Button variant="outline" size="sm" onclick={openComposeBrowser}>
 													<FolderOpen class="w-4 h-4" />
-													Browse for compose file
+													{$t('stacks.modal.browseForComposeFile')}
 												</Button>
 												<!-- Info box explaining what happens -->
 												<div class="mt-6 max-w-md flex items-start gap-2.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2.5 text-left">
 													<Info class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-													<span><span class="font-medium text-amber-600 dark:text-amber-400">What happens when you select a file:</span> <span class="text-zinc-600 dark:text-zinc-400">Dockhand will track this compose file, letting you edit, start, and stop the stack from the UI. Your files stay in their current location.</span></span>
+													<span><span class="font-medium text-amber-600 dark:text-amber-400">{$t('stacks.modal.selectFileInfoTitle')}</span> <span class="text-zinc-600 dark:text-zinc-400">{$t('stacks.import.adoptOneInfo')}</span></span>
 												</div>
 											</div>
 										{:else}
@@ -1554,15 +1555,15 @@
 																<Tooltip.Trigger>
 																	<XCircle class="w-3 h-3 text-red-500" />
 																</Tooltip.Trigger>
-																<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+																<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
 															</Tooltip.Root>
-															Failed
+															{$t('common.states.failed')}
 														{:else if composeContentCopied === 'ok'}
 															<Check class="w-3 h-3 text-green-500" />
-															Copied
+															{$t('stacks.modal.copied')}
 														{:else}
 															<Copy class="w-3 h-3" />
-															Copy
+															{$t('common.actions.copy')}
 														{/if}
 													</Button>
 												</div>
@@ -1602,7 +1603,7 @@
 									existingSecretKeys={mode === 'edit' ? existingSecretKeys : new Set()}
 									onchange={() => { markDirty(); debouncedValidate(); }}
 									theme={editorTheme}
-									infoText="These variables will be written to a .env file in the stack directory and passed to the compose command."
+									infoText={$t('stacks.modal.envVarsInfo')}
 								/>
 							</div>
 						</div>
@@ -1623,15 +1624,15 @@
 		<div class="px-5 py-2.5 border-t border-zinc-200 dark:border-zinc-700 flex items-center justify-between flex-shrink-0">
 			<div class="text-xs text-zinc-500 dark:text-zinc-400">
 				{#if isDirty}
-					<span class="text-amber-600 dark:text-amber-500">Unsaved changes</span>
+					<span class="text-amber-600 dark:text-amber-500">{$t('stacks.modal.unsavedChanges')}</span>
 				{:else}
-					No changes
+					{$t('stacks.modal.noChanges')}
 				{/if}
 			</div>
 
 			<div class="flex items-center gap-2">
 				<Button variant="outline" onclick={tryClose} disabled={saving}>
-					Cancel
+					{$t('common.actions.cancel')}
 				</Button>
 
 				{#if mode === 'create'}
@@ -1639,19 +1640,19 @@
 					<Button variant="outline" onclick={() => handleCreate(false)} disabled={saving}>
 						{#if saving}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Creating...
+							{$t('stacks.gitModal.creating')}
 						{:else}
 							<Save class="w-4 h-4" />
-							Create
+							{$t('common.actions.create')}
 						{/if}
 					</Button>
 					<Button onclick={() => handleCreate(true)} disabled={saving}>
 						{#if saving}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Starting...
+							{$t('stacks.modal.starting')}
 						{:else}
 							<Play class="w-4 h-4" />
-							Create & Start
+							{$t('stacks.modal.createAndStart')}
 						{/if}
 					</Button>
 				{:else}
@@ -1659,19 +1660,19 @@
 					<Button variant="outline" class="w-24" onclick={() => handleSave(false)} disabled={saving || loading || (needsFileLocation && !workingComposePath.trim())}>
 						{#if saving && !savingWithRestart}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Saving...
+							{$t('stacks.gitModal.saving')}
 						{:else}
 							<Save class="w-4 h-4" />
-							Save
+							{$t('common.actions.save')}
 						{/if}
 					</Button>
 					<Button class="w-36" onclick={() => handleSave(true)} disabled={saving || loading || (needsFileLocation && !workingComposePath.trim())}>
 						{#if saving && savingWithRestart}
 							<Loader2 class="w-4 h-4 animate-spin" />
-							Deploying...
+							{$t('stacks.gitDeploy.deploying')}
 						{:else}
 							<Play class="w-4 h-4" />
-							Save & redeploy
+							{$t('stacks.modal.saveAndRedeploy')}
 						{/if}
 					</Button>
 				{/if}
@@ -1684,17 +1685,17 @@
 <Dialog.Root bind:open={showConfirmClose}>
 	<Dialog.Content class="max-w-sm">
 		<Dialog.Header>
-			<Dialog.Title>Unsaved changes</Dialog.Title>
+			<Dialog.Title>{$t('stacks.modal.unsavedChanges')}</Dialog.Title>
 			<Dialog.Description>
-				You have unsaved changes. Are you sure you want to close without saving?
+				{$t('stacks.modal.unsavedDescription')}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex justify-end gap-1.5 mt-4">
 			<Button variant="outline" size="sm" onclick={() => showConfirmClose = false}>
-				Continue editing
+				{$t('stacks.modal.continueEditing')}
 			</Button>
 			<Button variant="destructive" size="sm" onclick={discardAndClose}>
-				Discard changes
+				{$t('stacks.modal.discardChanges')}
 			</Button>
 		</div>
 	</Dialog.Content>
@@ -1704,9 +1705,9 @@
 <Dialog.Root bind:open={showPathChangeConfirm}>
 	<Dialog.Content class="max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>Move stack files?</Dialog.Title>
+			<Dialog.Title>{$t('stacks.modal.moveStackFilesTitle')}</Dialog.Title>
 			<Dialog.Description>
-				You've changed the stack location. There {pathChangeFileCount === 1 ? 'is' : 'are'} {pathChangeFileCount} file{pathChangeFileCount === 1 ? '' : 's'} in the old location that can be moved to the new location.
+				{$t(pathChangeFileCount === 1 ? 'stacks.modal.moveStackFilesDescriptionOne' : 'stacks.modal.moveStackFilesDescriptionMany', { count: pathChangeFileCount })}
 			</Dialog.Description>
 		</Dialog.Header>
 		{#if pathChangeOldDir}
@@ -1718,18 +1719,18 @@
 			</div>
 		{/if}
 		<p class="text-sm text-muted-foreground">
-			Would you like to move all files to the new location, or leave them in place?
+			{$t('stacks.modal.moveFilesQuestion')}
 		</p>
 		<div class="flex justify-end gap-1.5 mt-4">
 			<Button variant="outline" size="sm" onclick={() => showPathChangeConfirm = false}>
-				Cancel
+				{$t('common.actions.cancel')}
 			</Button>
 			<Button variant="secondary" size="sm" onclick={confirmPathChangeKeepFiles}>
-				Leave files
+				{$t('stacks.modal.leaveFiles')}
 			</Button>
 			<Button variant="default" size="sm" onclick={confirmPathChangeAndMove}>
 				<ArrowRight class="w-3.5 h-3.5" />
-				Move files
+				{$t('stacks.modal.moveFiles')}
 			</Button>
 		</div>
 	</Dialog.Content>
@@ -1739,21 +1740,21 @@
 <Dialog.Root bind:open={showBrowseConfirm}>
 	<Dialog.Content class="max-w-lg">
 		<Dialog.Header>
-			<Dialog.Title>Replace editor content?</Dialog.Title>
+			<Dialog.Title>{$t('stacks.modal.replaceContentTitle')}</Dialog.Title>
 			<Dialog.Description>
-				Loading a different compose file will replace the current editor content.
+				{$t('stacks.modal.replaceContentDescription')}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="my-3 space-y-2 text-sm">
 			<div class="flex items-start gap-2 text-muted-foreground">
-				<span class="text-xs font-medium text-zinc-500 shrink-0 pt-0.5">Current:</span>
+				<span class="text-xs font-medium text-zinc-500 shrink-0 pt-0.5">{$t('stacks.modal.currentLabel')}</span>
 				<code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded break-all">
-					{workingComposePath || '(unsaved)'}
+					{workingComposePath || $t('stacks.modal.unsavedPlaceholder')}
 				</code>
 			</div>
 			<div class="flex items-start gap-2">
 				<ArrowRight class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-				<span class="text-xs font-medium text-zinc-500 shrink-0 pt-0.5">New:</span>
+				<span class="text-xs font-medium text-zinc-500 shrink-0 pt-0.5">{$t('stacks.modal.newLabel')}</span>
 				<code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded break-all">
 					{pendingBrowsePath}
 				</code>
@@ -1761,10 +1762,10 @@
 		</div>
 		<div class="flex justify-end gap-1.5 mt-4">
 			<Button variant="outline" size="sm" onclick={cancelBrowseConfirm}>
-				Cancel
+				{$t('common.actions.cancel')}
 			</Button>
 			<Button variant="default" size="sm" onclick={confirmBrowseAndLoad}>
-				Replace content
+				{$t('stacks.modal.replaceContent')}
 			</Button>
 		</div>
 	</Dialog.Content>
@@ -1776,15 +1777,15 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<FolderSync class="w-5 h-5" />
-				Relocate stack?
+				{$t('stacks.modal.relocateStackTitle')}
 			</Dialog.Title>
 			<Dialog.Description>
-				All {changeLocationFileCount} file{changeLocationFileCount === 1 ? '' : 's'} in the stack folder will be moved.
+				{$t(changeLocationFileCount === 1 ? 'stacks.modal.relocateStackDescriptionOne' : 'stacks.modal.relocateStackDescriptionMany', { count: changeLocationFileCount })}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="my-3 space-y-1 text-sm">
 			<div class="flex items-start gap-2 text-muted-foreground">
-				<span class="text-xs font-medium text-zinc-500 shrink-0 w-10">From</span>
+				<span class="text-xs font-medium text-zinc-500 shrink-0 w-10">{$t('stacks.modal.fromLabel')}</span>
 				<code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded break-all">
 					{changeLocationOldDir}
 				</code>
@@ -1793,7 +1794,7 @@
 				<ArrowDown class="w-4 h-4 text-amber-500" />
 			</div>
 			<div class="flex items-start gap-2">
-				<span class="text-xs font-medium text-zinc-500 shrink-0 w-10">To</span>
+				<span class="text-xs font-medium text-zinc-500 shrink-0 w-10">{$t('stacks.modal.toLabel')}</span>
 				<code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded break-all">
 					{pendingNewLocation}
 				</code>
@@ -1801,15 +1802,15 @@
 		</div>
 		<div class="flex justify-end gap-1.5 mt-4">
 			<Button variant="outline" size="sm" onclick={cancelChangeLocation} disabled={movingLocation}>
-				Cancel
+				{$t('common.actions.cancel')}
 			</Button>
 			<Button variant="default" size="sm" onclick={confirmChangeLocation} disabled={movingLocation}>
 				{#if movingLocation}
 					<Loader2 class="w-3.5 h-3.5 animate-spin" />
-					Moving...
+					{$t('stacks.modal.moving')}
 				{:else}
 					<FolderSync class="w-3.5 h-3.5" />
-					Move files
+					{$t('stacks.modal.moveFiles')}
 				{/if}
 			</Button>
 		</div>
@@ -1822,15 +1823,15 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<TriangleAlert class="w-5 h-5 text-amber-500" />
-				Stack already exists
+				{$t('stacks.gitModal.existsTitle')}
 			</Dialog.Title>
 			<Dialog.Description>
-				A stack named "{newStackName}" already exists. Please choose a different name.
+				{$t('stacks.gitModal.existsDescription', { name: newStackName })}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex justify-end mt-4">
 			<Button size="sm" onclick={() => showExistsWarning = false}>
-				OK
+				{$t('common.actions.ok')}
 			</Button>
 		</div>
 	</Dialog.Content>

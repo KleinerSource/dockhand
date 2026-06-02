@@ -17,6 +17,8 @@
 	import { authStore } from '$lib/stores/auth';
 	import { themeStore, applyTheme } from '$lib/stores/theme';
 	import { gridPreferencesStore } from '$lib/stores/grid-preferences';
+	import { appSettings } from '$lib/stores/settings';
+	import { locale, t } from '$lib/i18n';
 	import { shouldShowWhatsNew } from '$lib/utils/version';
 	import { AlertTriangle, Search } from 'lucide-svelte';
 
@@ -52,6 +54,10 @@
 			const userId = $authStore.authEnabled && $authStore.user ? $authStore.user.id : undefined;
 			themeStore.init(userId);
 		}
+	});
+
+	$effect(() => {
+		locale.set($appSettings.language);
 	});
 
 	// Refresh environments when user becomes authenticated
@@ -123,7 +129,7 @@
 
 <svelte:head>
 	<link rel="icon" href="/logo_light.webp" />
-	<title>Dockhand - Docker Management</title>
+	<title>{$t('meta.appTitle')}</title>
 </svelte:head>
 
 {#if isLoginPage}
@@ -147,7 +153,7 @@
 						class="flex items-center gap-2 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground border rounded-md hover:bg-muted/50 transition-colors"
 					>
 						<Search class="w-3.5 h-3.5" />
-						<span class="hidden sm:inline">Search...</span>
+						<span class="hidden sm:inline">{$t('commandPalette.placeholder')}</span>
 						<kbd class="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-2xs font-medium text-muted-foreground">
 							{#if isMac}
 								<span class="text-xs">⌘</span>
@@ -167,11 +173,11 @@
 						>
 							<AlertTriangle class="w-3.5 h-3.5" />
 							{#if $daysUntilExpiry <= 0}
-								License expired
+								{$t('license.expired')}
 							{:else if $daysUntilExpiry === 1}
-								License expires tomorrow
+								{$t('license.expiresTomorrow')}
 							{:else}
-								License expires in {$daysUntilExpiry} days
+								{$t('license.expiresInDays', { days: $daysUntilExpiry })}
 							{/if}
 						</a>
 					{/if}

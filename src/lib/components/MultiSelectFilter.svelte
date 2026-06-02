@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select';
 	import type { Component } from 'svelte';
+	import { t } from '$lib/i18n';
 
 	interface FilterOption {
 		value: string;
@@ -78,7 +79,7 @@
 				class="w-full px-2 py-1 text-xs text-left text-muted-foreground/60 hover:text-muted-foreground"
 				onclick={clearAndClose}
 			>
-				Clear
+				{$t('filters.clear')}
 			</button>
 		{/if}
 		{#each options as option}

@@ -7,6 +7,7 @@
 	import { toast } from 'svelte-sonner';
 	import { appendEnvParam } from '$lib/stores/environment';
 	import { focusFirstInput } from '$lib/utils';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -38,7 +39,7 @@
 
 	async function handleClone() {
 		if (!newName.trim()) {
-			error = 'Please enter a name for the new volume';
+			error = translate('volumes.clone.errors.nameRequired');
 			return;
 		}
 
@@ -55,14 +56,14 @@
 
 			if (!response.ok) {
 				const data = await response.json();
-				throw new Error(data.details || data.error || 'Failed to clone volume');
+				throw new Error(data.details || data.error || translate('volumes.clone.errors.cloneFailed'));
 			}
 
-			toast.success(`Volume cloned as "${newName}"`);
+			toast.success(translate('volumes.clone.toasts.clonedAs', { name: newName }));
 			onsuccess();
 			open = false;
 		} catch (e: any) {
-			error = e.message || 'Failed to clone volume';
+			error = e.message || translate('volumes.clone.errors.cloneFailed');
 		} finally {
 			cloning = false;
 		}
@@ -74,20 +75,20 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<Copy class="w-5 h-5" />
-				Clone volume
+				{$t('volumes.clone.title')}
 			</Dialog.Title>
 			<Dialog.Description>
-				Create a new volume with the same driver and options as "{volumeName}".
+				{$t('volumes.clone.description', { name: volumeName })}
 			</Dialog.Description>
 		</Dialog.Header>
 
 		<div class="space-y-4 py-4">
 			<div class="space-y-2">
-				<Label for="new-name">New volume name</Label>
+				<Label for="new-name">{$t('volumes.clone.newName')}</Label>
 				<Input
 					id="new-name"
 					bind:value={newName}
-					placeholder="Enter new volume name"
+					placeholder={$t('volumes.clone.newNamePlaceholder')}
 					disabled={cloning}
 					onkeydown={(e) => e.key === 'Enter' && handleClone()}
 				/>
@@ -98,13 +99,13 @@
 			{/if}
 
 			<p class="text-xs text-muted-foreground">
-				Note: This creates an empty volume with the same configuration. To copy data, use the Export feature on the source volume and import into the new volume.
+				{$t('volumes.clone.note')}
 			</p>
 		</div>
 
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (open = false)} disabled={cloning}>
-				Cancel
+				{$t('common.actions.cancel')}
 			</Button>
 			<Button onclick={handleClone} disabled={cloning || !newName.trim()}>
 				{#if cloning}
@@ -112,7 +113,7 @@
 				{:else}
 					<Copy class="w-4 h-4" />
 				{/if}
-				Clone
+				{$t('volumes.actions.clone')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

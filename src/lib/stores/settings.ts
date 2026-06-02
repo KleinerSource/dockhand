@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
 
 export type TimeFormat = '12h' | '24h';
 export type DateFormat = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD' | 'DD.MM.YYYY';
@@ -9,6 +10,7 @@ export type LabelFilterMode = 'any' | 'all';
 
 export interface AppSettings {
 	confirmDestructive: boolean;
+	language: Locale;
 	showStoppedContainers: boolean;
 	highlightUpdates: boolean;
 	timeFormat: TimeFormat;
@@ -42,6 +44,7 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
 	confirmDestructive: true,
+	language: DEFAULT_LOCALE,
 	showStoppedContainers: true,
 	highlightUpdates: true,
 	timeFormat: '24h',
@@ -106,6 +109,7 @@ function createSettingsStore() {
 				const settings = await response.json();
 				set({
 					confirmDestructive: settings.confirmDestructive ?? DEFAULT_SETTINGS.confirmDestructive,
+					language: settings.language ?? DEFAULT_SETTINGS.language,
 					showStoppedContainers: settings.showStoppedContainers ?? DEFAULT_SETTINGS.showStoppedContainers,
 					highlightUpdates: settings.highlightUpdates ?? DEFAULT_SETTINGS.highlightUpdates,
 					timeFormat: settings.timeFormat ?? DEFAULT_SETTINGS.timeFormat,
@@ -134,7 +138,7 @@ function createSettingsStore() {
 					defaultGrypeImage: settings.defaultGrypeImage ?? DEFAULT_SETTINGS.defaultGrypeImage,
 					defaultTrivyImage: settings.defaultTrivyImage ?? DEFAULT_SETTINGS.defaultTrivyImage,
 					defaultComposeTemplate: settings.defaultComposeTemplate ?? DEFAULT_SETTINGS.defaultComposeTemplate,
-				labelFilterMode: settings.labelFilterMode ?? DEFAULT_SETTINGS.labelFilterMode
+					labelFilterMode: settings.labelFilterMode ?? DEFAULT_SETTINGS.labelFilterMode
 				});
 			}
 		} catch {
@@ -156,6 +160,7 @@ function createSettingsStore() {
 				const updatedSettings = await response.json();
 				set({
 					confirmDestructive: updatedSettings.confirmDestructive ?? DEFAULT_SETTINGS.confirmDestructive,
+					language: updatedSettings.language ?? DEFAULT_SETTINGS.language,
 					showStoppedContainers: updatedSettings.showStoppedContainers ?? DEFAULT_SETTINGS.showStoppedContainers,
 					highlightUpdates: updatedSettings.highlightUpdates ?? DEFAULT_SETTINGS.highlightUpdates,
 					timeFormat: updatedSettings.timeFormat ?? DEFAULT_SETTINGS.timeFormat,
@@ -184,7 +189,7 @@ function createSettingsStore() {
 					defaultGrypeImage: updatedSettings.defaultGrypeImage ?? DEFAULT_SETTINGS.defaultGrypeImage,
 					defaultTrivyImage: updatedSettings.defaultTrivyImage ?? DEFAULT_SETTINGS.defaultTrivyImage,
 					defaultComposeTemplate: updatedSettings.defaultComposeTemplate ?? DEFAULT_SETTINGS.defaultComposeTemplate,
-				labelFilterMode: updatedSettings.labelFilterMode ?? DEFAULT_SETTINGS.labelFilterMode
+					labelFilterMode: updatedSettings.labelFilterMode ?? DEFAULT_SETTINGS.labelFilterMode
 				});
 			}
 		} catch (error) {
@@ -215,6 +220,13 @@ function createSettingsStore() {
 			update((current) => {
 				const newSettings = { ...current, confirmDestructive: value };
 				saveSettings({ confirmDestructive: value });
+				return newSettings;
+			});
+		},
+		setLanguage: (value: Locale) => {
+			update((current) => {
+				const newSettings = { ...current, language: value };
+				saveSettings({ language: value });
 				return newSettings;
 			});
 		},

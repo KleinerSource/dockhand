@@ -19,6 +19,7 @@
 	import { TogglePill } from '$lib/components/ui/toggle-pill';
 	import { canAccess, authStore } from '$lib/stores/auth';
 	import { licenseStore } from '$lib/stores/license';
+	import { t, translate } from '$lib/i18n';
 
 	// Sub-tab components
 	import UsersSubTab from './users/UsersSubTab.svelte';
@@ -91,18 +92,18 @@
 			});
 			if (response.ok) {
 				// authEnabled already updated via binding
-				toast.success(checked ? 'Authentication enabled' : 'Authentication disabled');
+				toast.success(translate(checked ? 'settings.auth.general.toasts.enabled' : 'settings.auth.general.toasts.disabled'));
 				// Update global auth store so other components react immediately
 				await authStore.check();
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to update auth settings');
+				toast.error(data.error || translate('settings.auth.general.toasts.updateFailed'));
 				// Revert toggle on error - checked is new value, so previous was !checked
 				authEnabled = !checked;
 			}
 		} catch (error) {
 			console.error('Failed to update auth settings:', error);
-			toast.error('Failed to update auth settings');
+			toast.error(translate('settings.auth.general.toasts.updateFailed'));
 			// Revert toggle on error
 			authEnabled = !checked;
 		} finally {
@@ -119,14 +120,14 @@
 				body: JSON.stringify({ sessionTimeout: sessionTimeout })
 			});
 			if (response.ok) {
-				toast.success('Settings saved');
+				toast.success(translate('settings.auth.general.toasts.settingsSaved'));
 			} else {
 				console.error('Failed to save auth settings');
-				toast.error('Failed to save settings');
+				toast.error(translate('settings.auth.general.toasts.saveFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to save auth settings:', error);
-			toast.error('Failed to save settings');
+			toast.error(translate('settings.auth.general.toasts.saveFailed'));
 		} finally {
 			authSaving = false;
 		}
@@ -158,7 +159,7 @@
 	<Shield class="w-5 h-5 text-muted-foreground mt-0.5" />
 	<div class="flex-1">
 		<div class="flex items-center gap-3">
-			<p class="text-sm font-medium">Authentication</p>
+			<p class="text-sm font-medium">{$t('settings.auth.general.authentication')}</p>
 			<TogglePill
 				bind:checked={authEnabled}
 				onchange={(checked) => handleAuthEnabledToggle(checked)}
@@ -167,17 +168,17 @@
 		</div>
 		<p class="text-xs text-muted-foreground mt-1">
 			{authEnabled
-				? 'Users must log in to access the application'
-				: 'Authentication is disabled - open access'}
+				? $t('settings.auth.general.enabledDescription')
+				: $t('settings.auth.general.disabledDescription')}
 		</p>
 		<p class="text-xs text-muted-foreground mt-1 flex items-center gap-1">
 			<Crown class="w-3 h-3 text-amber-500" />
 			{#if $licenseStore.isEnterprise}
 				{authEnabled
-					? 'Audit logging is active - all actions are recorded'
-					: 'Enable authentication to activate audit logging'}
+					? $t('settings.auth.general.auditActive')
+					: $t('settings.auth.general.auditEnableHint')}
 			{:else}
-				Enable authentication to activate audit logging
+				{$t('settings.auth.general.auditEnableHint')}
 			{/if}
 		</p>
 	</div>
@@ -193,7 +194,7 @@
 		onclick={() => (authSubTab = 'general')}
 	>
 		<Settings class="w-4 h-4" />
-		General
+		{$t('settings.auth.general.tabs.general')}
 	</button>
 	<button
 		class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all {authSubTab ===
@@ -203,7 +204,7 @@
 		onclick={() => (authSubTab = 'local')}
 	>
 		<User class="w-4 h-4" />
-		Users
+		{$t('settings.auth.general.tabs.users')}
 	</button>
 	<button
 		class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all {authSubTab ===
@@ -213,7 +214,7 @@
 		onclick={() => (authSubTab = 'sso')}
 	>
 		<LogIn class="w-4 h-4" />
-		SSO / OIDC
+		{$t('settings.auth.general.tabs.sso')}
 	</button>
 	<button
 		class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all {authSubTab ===
@@ -223,7 +224,7 @@
 		onclick={() => (authSubTab = 'ldap')}
 	>
 		<Network class="w-4 h-4" />
-		LDAP / AD
+		{$t('settings.auth.general.tabs.ldap')}
 		<Crown class="w-3 h-3 text-amber-500" />
 	</button>
 	<button
@@ -234,7 +235,7 @@
 		onclick={() => (authSubTab = 'roles')}
 	>
 		<Shield class="w-4 h-4" />
-		Roles
+		{$t('settings.auth.general.tabs.roles')}
 		<Crown class="w-3 h-3 text-amber-500" />
 	</button>
 </div>
@@ -249,14 +250,14 @@
 				<Card.Header>
 					<Card.Title class="text-sm font-medium flex items-center gap-2">
 						<KeyRound class="w-4 h-4" />
-						Session settings
+						{$t('settings.auth.general.session.title')}
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
 					<div class="space-y-1.5">
-						<Label class="text-sm">Session timeout</Label>
+						<Label class="text-sm">{$t('settings.auth.general.session.timeoutLabel')}</Label>
 						<p class="text-xs text-muted-foreground mb-2">
-							How long until inactive sessions expire
+							{$t('settings.auth.general.session.timeoutDescription')}
 						</p>
 						<div class="flex items-center gap-2">
 							<Input
@@ -272,9 +273,9 @@
 								class="w-32"
 								disabled={!$canAccess('settings', 'edit')}
 							/>
-							<span class="text-sm text-muted-foreground">seconds</span>
+							<span class="text-sm text-muted-foreground">{$t('settings.auth.general.session.seconds')}</span>
 							<span class="text-xs text-muted-foreground">
-								({Math.floor(sessionTimeout / 3600)} hours)
+								{$t('settings.auth.general.session.hours', { count: Math.floor(sessionTimeout / 3600) })}
 							</span>
 						</div>
 					</div>
@@ -285,7 +286,7 @@
 							{:else}
 								<Save class="w-4 h-4" />
 							{/if}
-							Save settings
+							{$t('settings.auth.general.session.save')}
 						</Button>
 					{/if}
 				</Card.Content>
@@ -293,7 +294,7 @@
 		{:else}
 			<div class="text-center py-12 text-muted-foreground">
 				<Shield class="w-12 h-12 mx-auto mb-3 opacity-30" />
-				<p class="text-sm">Enable authentication to configure session settings</p>
+				<p class="text-sm">{$t('settings.auth.general.session.enableFirst')}</p>
 			</div>
 		{/if}
 	</div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import { CheckCircle2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-svelte';
+	import { t, translate } from '$lib/i18n';
 
 	interface ScanResult {
 		scanner: 'grype' | 'trivy';
@@ -94,6 +95,11 @@
 		}
 	}
 
+	function getSeverityLabel(severity: string): string {
+		const key = severity.toLowerCase();
+		return translate(`vulnerabilitySeverity.${key}`);
+	}
+
 	function toggleVulnDetails(id: string) {
 		if (expandedVulns.has(id)) {
 			expandedVulns.delete(id);
@@ -105,7 +111,7 @@
 </script>
 
 {#if results.length === 0}
-	<div class="text-sm text-muted-foreground">No scan results available</div>
+	<div class="text-sm text-muted-foreground">{$t('scanResults.empty')}</div>
 {:else}
 	<div class="flex flex-col gap-2 h-full">
 		<!-- Scanner tabs (only if multiple results) -->
@@ -136,42 +142,42 @@
 			<div class="flex flex-wrap items-center gap-1.5 shrink-0">
 				{#if activeResult.summary.critical > 0}
 					<Badge variant="outline" class="bg-red-500/10 text-red-500 border-red-500/30 text-xs py-0">
-						{activeResult.summary.critical} Critical
+						{activeResult.summary.critical} {$t('vulnerabilitySeverity.critical')}
 					</Badge>
 				{/if}
 				{#if activeResult.summary.high > 0}
 					<Badge variant="outline" class="bg-orange-500/10 text-orange-500 border-orange-500/30 text-xs py-0">
-						{activeResult.summary.high} High
+						{activeResult.summary.high} {$t('vulnerabilitySeverity.high')}
 					</Badge>
 				{/if}
 				{#if activeResult.summary.medium > 0}
 					<Badge variant="outline" class="bg-yellow-500/10 text-yellow-600 border-yellow-500/30 text-xs py-0">
-						{activeResult.summary.medium} Medium
+						{activeResult.summary.medium} {$t('vulnerabilitySeverity.medium')}
 					</Badge>
 				{/if}
 				{#if activeResult.summary.low > 0}
 					<Badge variant="outline" class="bg-blue-500/10 text-blue-500 border-blue-500/30 text-xs py-0">
-						{activeResult.summary.low} Low
+						{activeResult.summary.low} {$t('vulnerabilitySeverity.low')}
 					</Badge>
 				{/if}
 				{#if activeResult.summary.negligible > 0}
 					<Badge variant="outline" class="bg-gray-500/10 text-gray-500 border-gray-500/30 text-xs py-0">
-						{activeResult.summary.negligible} Negligible
+						{activeResult.summary.negligible} {$t('vulnerabilitySeverity.negligible')}
 					</Badge>
 				{/if}
 				{#if activeResult.summary.unknown > 0}
 					<Badge variant="outline" class="bg-gray-500/10 text-gray-500 border-gray-500/30 text-xs py-0">
-						{activeResult.summary.unknown} Unknown
+						{activeResult.summary.unknown} {$t('vulnerabilitySeverity.unknown')}
 					</Badge>
 				{/if}
 				{#if activeResult.vulnerabilities.length === 0}
 					<Badge variant="outline" class="bg-green-500/10 text-green-500 border-green-500/30 text-xs py-0">
 						<CheckCircle2 class="w-3 h-3 mr-1" />
-						No vulnerabilities
+						{$t('scanResults.noVulnerabilities')}
 					</Badge>
 				{/if}
 				<span class="text-xs text-muted-foreground ml-2">
-					{activeResult.scanner === 'grype' ? 'Grype' : 'Trivy'} • {activeResult.vulnerabilities.length} total
+					{activeResult.scanner === 'grype' ? 'Grype' : 'Trivy'} • {$t('scanResults.total', { count: activeResult.vulnerabilities.length })}
 					{#if activeResult.scanDuration}• {formatDuration(activeResult.scanDuration)}{/if}
 				</span>
 			</div>
@@ -184,7 +190,7 @@
 							<tr>
 								<th class="text-left py-1.5 px-2 font-medium w-[22%]">
 									<button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => toggleSort('id')}>
-										CVE ID
+										{$t('scanResults.columns.cveId')}
 										{#if sortBy === 'id'}
 											{#if sortDir === 'asc'}<ArrowUp class="w-3 h-3" />{:else}<ArrowDown class="w-3 h-3" />{/if}
 										{:else}
@@ -194,7 +200,7 @@
 								</th>
 								<th class="text-left py-1.5 px-2 font-medium w-[12%]">
 									<button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => toggleSort('severity')}>
-										Severity
+										{$t('scanResults.columns.severity')}
 										{#if sortBy === 'severity'}
 											{#if sortDir === 'asc'}<ArrowUp class="w-3 h-3" />{:else}<ArrowDown class="w-3 h-3" />{/if}
 										{:else}
@@ -204,7 +210,7 @@
 								</th>
 								<th class="text-left py-1.5 px-2 font-medium w-[28%]">
 									<button type="button" class="flex items-center gap-1 hover:text-foreground transition-colors" onclick={() => toggleSort('package')}>
-										Package
+										{$t('common.labels.package')}
 										{#if sortBy === 'package'}
 											{#if sortDir === 'asc'}<ArrowUp class="w-3 h-3" />{:else}<ArrowDown class="w-3 h-3" />{/if}
 										{:else}
@@ -212,8 +218,8 @@
 										{/if}
 									</button>
 								</th>
-								<th class="text-left py-1.5 px-2 font-medium w-[18%]">Installed</th>
-								<th class="text-left py-1.5 px-2 font-medium w-[20%]">Fixed in</th>
+								<th class="text-left py-1.5 px-2 font-medium w-[18%]">{$t('scanResults.columns.installed')}</th>
+								<th class="text-left py-1.5 px-2 font-medium w-[20%]">{$t('scanResults.columns.fixedIn')}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -240,7 +246,7 @@
 									</td>
 									<td class="py-1 px-2">
 										<Badge variant="outline" class="{getSeverityColor(vuln.severity)} text-xs py-0 px-1.5">
-											{vuln.severity}
+											{getSeverityLabel(vuln.severity)}
 										</Badge>
 									</td>
 									<td class="py-1 px-2 max-w-[300px]">

@@ -4,6 +4,7 @@
 	import { PanelLeft as PanelLeftIcon } from "lucide-svelte";
 	import type { ComponentProps } from "svelte";
 	import { useSidebar } from "./context.svelte.js";
+	import { t } from "$lib/i18n";
 
 	let {
 		ref = $bindable(null),
@@ -31,5 +32,5 @@
 	{...restProps}
 >
 	<PanelLeftIcon />
-	<span class="sr-only">Toggle Sidebar</span>
+	<span class="sr-only">{$t('ui.sidebar.toggle')}</span>
 </Button>

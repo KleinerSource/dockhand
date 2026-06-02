@@ -9,6 +9,7 @@
 	import { canAccess } from '$lib/stores/auth';
 	import { licenseStore } from '$lib/stores/license';
 	import { formatDate } from '$lib/stores/settings';
+	import { t, translate } from '$lib/i18n';
 
 	// License state
 	interface LicenseInfo {
@@ -44,7 +45,7 @@
 			licenseInfo = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch license info:', error);
-			licenseInfo = { valid: false, active: false, error: 'Failed to fetch license info' };
+			licenseInfo = { valid: false, active: false, error: translate('settings.license.errors.fetchFailed') };
 		} finally {
 			licenseLoading = false;
 		}
@@ -52,7 +53,7 @@
 
 	async function activateLicense() {
 		if (!licenseFormName.trim() || !licenseFormKey.trim()) {
-			licenseFormError = 'Name and license key are required';
+			licenseFormError = translate('settings.license.validation.nameKeyRequired');
 			return;
 		}
 
@@ -72,21 +73,21 @@
 			const result = await response.json();
 
 			if (!response.ok || result.error) {
-				licenseFormError = result.error || 'Failed to activate license';
+				licenseFormError = result.error || translate('settings.license.errors.activateFailed');
 				return;
 			}
 
 			// Refresh license info and update global store
 			await fetchLicenseInfo();
 			await licenseStore.check();
-			toast.success('License activated successfully');
+			toast.success(translate('settings.license.toasts.activated'));
 
 			// Clear form
 			licenseFormName = '';
 			licenseFormKey = '';
 		} catch (error) {
-			licenseFormError = 'Failed to activate license';
-			toast.error('Failed to activate license');
+			licenseFormError = translate('settings.license.errors.activateFailed');
+			toast.error(translate('settings.license.errors.activateFailed'));
 		} finally {
 			licenseFormSaving = false;
 		}
@@ -97,10 +98,10 @@
 			await fetch('/api/license', { method: 'DELETE' });
 			await fetchLicenseInfo();
 			await licenseStore.check();
-			toast.success('License deactivated');
+			toast.success(translate('settings.license.toasts.deactivated'));
 		} catch (error) {
 			console.error('Failed to deactivate license:', error);
-			toast.error('Failed to deactivate license');
+			toast.error(translate('settings.license.errors.deactivateFailed'));
 		}
 	}
 
@@ -115,9 +116,9 @@
 			<div class="flex items-start gap-3">
 				<Crown class="w-5 h-5 text-amber-500 mt-0.5" />
 				<div>
-					<p class="text-sm font-medium">License management</p>
+					<p class="text-sm font-medium">{$t('settings.license.management')}</p>
 					<p class="text-xs text-muted-foreground">
-						Activate your license to validate commercial use. <span class="font-medium">Enterprise</span> licenses unlock premium features including RBAC, LDAP and audit logs.
+						{$t('settings.license.managementDescriptionBefore')} <span class="font-medium">Enterprise</span> {$t('settings.license.managementDescriptionAfter')}
 					</p>
 				</div>
 			</div>
@@ -128,7 +129,7 @@
 		<Card.Root>
 			<Card.Content class="py-8 text-center">
 				<RefreshCw class="w-6 h-6 mx-auto mb-2 animate-spin text-muted-foreground" />
-				<p class="text-sm text-muted-foreground">Loading license information...</p>
+				<p class="text-sm text-muted-foreground">{$t('settings.license.loading')}</p>
 			</Card.Content>
 		</Card.Root>
 	{:else if licenseInfo?.valid && licenseInfo?.active}
@@ -139,21 +140,21 @@
 				<Card.Title class="text-sm font-medium flex items-center gap-2">
 					{#if isEnterprise}
 						<Crown class="w-4 h-4 text-amber-500" />
-						Active Enterprise license
+						{$t('settings.license.activeEnterprise')}
 					{:else}
 						<Building2 class="w-4 h-4 text-blue-500" />
-						Active SMB license
+						{$t('settings.license.activeSmb')}
 					{/if}
 				</Card.Title>
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<div class="grid grid-cols-2 gap-4 text-sm">
 					<div>
-						<p class="text-muted-foreground">Licensed to</p>
+						<p class="text-muted-foreground">{$t('settings.license.licensedTo')}</p>
 						<p class="font-medium">{licenseInfo.payload?.name}</p>
 					</div>
 					<div>
-						<p class="text-muted-foreground">License type</p>
+						<p class="text-muted-foreground">{$t('settings.license.licenseType')}</p>
 						<p class="font-medium flex items-center gap-1">
 							{#if isEnterprise}
 								<Crown class="w-3.5 h-3.5 text-amber-500" />
@@ -165,27 +166,27 @@
 						</p>
 					</div>
 					<div>
-						<p class="text-muted-foreground">Licensed host</p>
+						<p class="text-muted-foreground">{$t('settings.license.licensedHost')}</p>
 						<p class="font-medium font-mono text-xs">{licenseInfo.payload?.host}</p>
 					</div>
 					<div>
-						<p class="text-muted-foreground">Issued</p>
+						<p class="text-muted-foreground">{$t('settings.license.issued')}</p>
 						<p class="font-medium">{formatDate(licenseInfo.payload?.issued || '')}</p>
 					</div>
 					<div>
-						<p class="text-muted-foreground">Expires</p>
-						<p class="font-medium">{licenseInfo.payload?.expires ? formatDate(licenseInfo.payload.expires) : 'Never (Perpetual)'}</p>
+						<p class="text-muted-foreground">{$t('settings.license.expires')}</p>
+						<p class="font-medium">{licenseInfo.payload?.expires ? formatDate(licenseInfo.payload.expires) : $t('settings.license.neverPerpetual')}</p>
 					</div>
 				</div>
 				<div class="pt-2 border-t">
-					<p class="text-xs text-muted-foreground mb-2">Current hostname</p>
+					<p class="text-xs text-muted-foreground mb-2">{$t('settings.license.currentHostname')}</p>
 					<code class="text-xs bg-muted px-2 py-1 rounded">{licenseInfo.hostname}</code>
 				</div>
 				{#if $canAccess('settings', 'edit')}
 				<div class="flex justify-end">
 					<Button variant="outline" size="sm" onclick={deactivateLicense}>
 						<XCircle class="w-4 h-4" />
-						Deactivate license
+						{$t('settings.license.deactivate')}
 					</Button>
 				</div>
 				{/if}
@@ -197,7 +198,7 @@
 			<Card.Header>
 				<Card.Title class="text-sm font-medium flex items-center gap-2">
 					<Key class="w-4 h-4" />
-					Activate license
+					{$t('settings.license.activate')}
 				</Card.Title>
 			</Card.Header>
 			<Card.Content class="space-y-4">
@@ -214,30 +215,30 @@
 				{/if}
 
 				<div class="space-y-2">
-					<Label for="license-name">License name</Label>
+					<Label for="license-name">{$t('settings.license.licenseName')}</Label>
 					<Input
 						id="license-name"
 						bind:value={licenseFormName}
-						placeholder="Your Company Name"
+						placeholder={$t('settings.license.licenseNamePlaceholder')}
 						disabled={!$canAccess('settings', 'edit')}
 					/>
-					<p class="text-xs text-muted-foreground">Enter the name exactly as provided with your license</p>
+					<p class="text-xs text-muted-foreground">{$t('settings.license.licenseNameHelp')}</p>
 				</div>
 
 				<div class="space-y-2">
-					<Label for="license-key">License key</Label>
+					<Label for="license-key">{$t('settings.license.licenseKey')}</Label>
 					<textarea
 						id="license-key"
 						bind:value={licenseFormKey}
-						placeholder="Paste your license key here..."
+						placeholder={$t('settings.license.licenseKeyPlaceholder')}
 						class="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono"
 						disabled={!$canAccess('settings', 'edit')}
 					></textarea>
 				</div>
 
 				<div class="pt-2 border-t">
-					<p class="text-xs text-muted-foreground mb-2">Current hostname (for license validation)</p>
-					<code class="text-xs bg-muted px-2 py-1 rounded">{licenseInfo?.hostname || 'Unknown'}</code>
+					<p class="text-xs text-muted-foreground mb-2">{$t('settings.license.currentHostnameValidation')}</p>
+					<code class="text-xs bg-muted px-2 py-1 rounded">{licenseInfo?.hostname || $t('common.states.unknown')}</code>
 				</div>
 
 				{#if $canAccess('settings', 'edit')}
@@ -248,7 +249,7 @@
 						{:else}
 							<ShieldCheck class="w-4 h-4" />
 						{/if}
-						Activate license
+						{$t('settings.license.activate')}
 					</Button>
 				</div>
 				{/if}

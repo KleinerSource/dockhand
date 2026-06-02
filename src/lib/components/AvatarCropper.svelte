@@ -2,6 +2,7 @@
 	import Cropper from 'svelte-easy-crop';
 	import { Button } from '$lib/components/ui/button';
 	import { ZoomIn, ZoomOut, X, Check } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		show: boolean;
@@ -25,8 +26,8 @@
 		outputSize = 256,
 		outputFormat = 'image/jpeg',
 		outputQuality = 0.9,
-		title = 'Crop avatar',
-		saveLabel = 'Save avatar'
+		title,
+		saveLabel
 	}: Props = $props();
 
 	// Cropper state
@@ -232,9 +233,9 @@
 		<div class="bg-background rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
 			<!-- Header -->
 			<div class="p-4 border-b">
-				<h3 class="text-lg font-semibold">{title}</h3>
+				<h3 class="text-lg font-semibold">{title || $t('avatarCropper.cropAvatar')}</h3>
 				<p class="text-sm text-muted-foreground mt-1">
-					Drag to reposition. Use the slider to zoom.
+					{$t('avatarCropper.cropHelp')}
 				</p>
 			</div>
 
@@ -278,7 +279,7 @@
 					disabled={saving}
 				>
 					<X class="w-4 h-4" />
-					Cancel
+					{$t('avatarCropper.cancel')}
 				</Button>
 				<Button
 					class="flex-1"
@@ -286,7 +287,7 @@
 					disabled={saving || !imageLoaded}
 				>
 					<Check class="w-4 h-4" />
-					{saving ? 'Uploading...' : !imageLoaded ? 'Loading...' : saveLabel}
+					{saving ? $t('avatarCropper.uploading') : !imageLoaded ? $t('avatarCropper.loading') : (saveLabel || $t('avatarCropper.saveAvatar'))}
 				</Button>
 			</div>
 		</div>

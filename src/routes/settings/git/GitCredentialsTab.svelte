@@ -9,6 +9,7 @@
 	import { canAccess } from '$lib/stores/auth';
 	import GitCredentialModal from './GitCredentialModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	interface GitCredential {
 		id: number;
@@ -33,7 +34,7 @@
 			credentials = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch git credentials:', error);
-			toast.error('Failed to fetch git credentials');
+			toast.error(translate('settings.git.credentials.toasts.loadFailed'));
 		} finally {
 			loading = false;
 		}
@@ -58,24 +59,24 @@
 			const response = await fetch(`/api/git/credentials/${id}`, { method: 'DELETE' });
 			if (response.ok) {
 				await fetchCredentials();
-				toast.success('Credential deleted');
+				toast.success(translate('settings.git.credentials.toasts.deleted'));
 			} else {
-				toast.error('Failed to delete credential');
+				toast.error(translate('settings.git.credentials.toasts.deleteFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to delete credential:', error);
-			toast.error('Failed to delete credential');
+			toast.error(translate('settings.git.credentials.toasts.deleteFailed'));
 		}
 	}
 
 	function getAuthTypeBadge(authType: string) {
 		switch (authType) {
 			case 'password':
-				return { label: 'Password', class: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' };
+				return { label: translate('settings.git.auth.password'), class: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' };
 			case 'ssh':
-				return { label: 'SSH Key', class: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' };
+				return { label: translate('settings.git.auth.sshKey'), class: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' };
 			default:
-				return { label: 'None', class: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' };
+				return { label: translate('settings.git.auth.none'), class: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' };
 		}
 	}
 
@@ -87,26 +88,26 @@
 <div class="space-y-4">
 	<div class="flex justify-between items-center">
 		<div>
-			<h3 class="text-lg font-medium">Git credentials</h3>
-			<p class="text-sm text-muted-foreground">Manage credentials for accessing Git repositories</p>
+			<h3 class="text-lg font-medium">{$t('settings.git.credentials.title')}</h3>
+			<p class="text-sm text-muted-foreground">{$t('settings.git.credentials.description')}</p>
 		</div>
 		{#if $canAccess('settings', 'edit')}
 			<Button size="sm" onclick={() => openModal()}>
 				<Plus class="w-4 h-4" />
-				Add credential
+				{$t('settings.git.credentials.addCredential')}
 			</Button>
 		{/if}
 	</div>
 
 	{#if loading}
-		<p class="text-sm text-muted-foreground">Loading credentials...</p>
+		<p class="text-sm text-muted-foreground">{$t('settings.git.credentials.loading')}</p>
 	{:else if credentials.length === 0}
 		<Card.Root>
 			<Card.Content>
 				<EmptyState
 					icon={Key}
-					title="No Git credentials configured"
-					description="Add credentials to connect to private Git repositories"
+					title={$t('settings.git.credentials.empty.title')}
+					description={$t('settings.git.credentials.empty.description')}
 				/>
 			</Card.Content>
 		</Card.Root>
@@ -129,9 +130,9 @@
 								<div class="font-medium text-sm">{cred.name}</div>
 								<div class="text-xs text-muted-foreground">
 									{#if cred.username}
-										Username: {cred.username}
+										{$t('settings.git.credentials.usernameLabel', { username: cred.username })}
 									{:else}
-										No username
+										{$t('settings.git.credentials.noUsername')}
 									{/if}
 								</div>
 							</div>
@@ -146,10 +147,10 @@
 								</Button>
 								<ConfirmPopover
 									open={confirmDeleteId === cred.id}
-									action="Delete"
-									itemType="credential"
+									action={$t('settings.git.credentials.confirm.deleteAction')}
+									itemType={$t('settings.git.credentials.confirm.credential')}
 									itemName={cred.name}
-									title="Delete"
+									title={$t('settings.git.credentials.confirm.deleteTitle')}
 									onConfirm={() => deleteCredential(cred.id)}
 									onOpenChange={(open) => confirmDeleteId = open ? cred.id : null}
 								>

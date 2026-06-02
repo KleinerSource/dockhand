@@ -21,6 +21,7 @@
 	import { licenseStore } from '$lib/stores/license';
 	import OidcModal from './OidcModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	interface OidcConfig {
 		id: number;
@@ -73,7 +74,7 @@
 			}
 		} catch (error) {
 			console.error('Failed to fetch OIDC configs:', error);
-			toast.error('Failed to fetch OIDC configurations');
+			toast.error(translate('settings.auth.oidc.list.toasts.loadFailed'));
 		} finally {
 			oidcLoading = false;
 		}
@@ -100,13 +101,13 @@
 			const response = await fetch(`/api/auth/oidc/${configId}`, { method: 'DELETE' });
 			if (response.ok) {
 				await fetchOidcConfigs();
-				toast.success('OIDC provider deleted');
+				toast.success(translate('settings.auth.oidc.list.toasts.deleted'));
 			} else {
-				toast.error('Failed to delete OIDC provider');
+				toast.error(translate('settings.auth.oidc.list.toasts.deleteFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to delete OIDC config:', error);
-			toast.error('Failed to delete OIDC provider');
+			toast.error(translate('settings.auth.oidc.list.toasts.deleteFailed'));
 		} finally {
 			confirmDeleteOidcId = null;
 		}
@@ -120,13 +121,13 @@
 			const data = await response.json();
 			oidcTestResult = data;
 			if (data.success) {
-				toast.success('OIDC connection successful');
+				toast.success(translate('settings.auth.oidc.list.toasts.connectionSuccessful'));
 			} else {
-				toast.error(`OIDC connection failed: ${data.error}`);
+				toast.error(translate('settings.auth.oidc.list.toasts.connectionFailedWithError', { error: data.error }));
 			}
 		} catch (error) {
-			oidcTestResult = { success: false, error: 'Failed to test connection' };
-			toast.error('Failed to test OIDC connection');
+			oidcTestResult = { success: false, error: translate('settings.auth.oidc.list.test.testFailed') };
+			toast.error(translate('settings.auth.oidc.list.toasts.testFailed'));
 		} finally {
 			oidcTesting = null;
 		}
@@ -141,13 +142,13 @@
 			});
 			if (response.ok) {
 				await fetchOidcConfigs();
-				toast.success(`OIDC provider ${config.enabled ? 'disabled' : 'enabled'}`);
+				toast.success(translate(config.enabled ? 'settings.auth.oidc.list.toasts.disabled' : 'settings.auth.oidc.list.toasts.enabled'));
 			} else {
-				toast.error('Failed to toggle OIDC provider');
+				toast.error(translate('settings.auth.oidc.list.toasts.toggleFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to toggle OIDC config:', error);
-			toast.error('Failed to toggle OIDC provider');
+			toast.error(translate('settings.auth.oidc.list.toasts.toggleFailed'));
 		}
 	}
 
@@ -163,14 +164,14 @@
 				<div>
 					<Card.Title class="text-sm font-medium flex items-center gap-2">
 						<LogIn class="w-4 h-4" />
-						SSO providers
+						{$t('settings.auth.oidc.list.title')}
 					</Card.Title>
-					<p class="text-xs text-muted-foreground mt-1">Enable SSO using OpenID Connect providers like Okta, Auth0, Azure AD, or Google Workspace.</p>
+					<p class="text-xs text-muted-foreground mt-1">{$t('settings.auth.oidc.list.description')}</p>
 				</div>
 				{#if $canAccess('settings', 'edit')}
 					<Button size="sm" onclick={() => openOidcModal(null)}>
 						<Plus class="w-4 h-4" />
-						Add provider
+						{$t('settings.auth.oidc.list.addProvider')}
 					</Button>
 				{/if}
 			</div>
@@ -183,8 +184,8 @@
 			{:else if oidcConfigs.length === 0}
 				<EmptyState
 					icon={LogIn}
-					title="No SSO providers configured"
-					description="Add an OIDC provider to enable single sign-on"
+					title={$t('settings.auth.oidc.list.empty.title')}
+					description={$t('settings.auth.oidc.list.empty.description')}
 					class="py-8"
 				/>
 			{:else}
@@ -195,9 +196,9 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-sm">{config.name}</span>
 									{#if config.enabled}
-										<Badge variant="default" class="text-xs">Enabled</Badge>
+										<Badge variant="default" class="text-xs">{$t('settings.auth.oidc.list.status.enabled')}</Badge>
 									{:else}
-										<Badge variant="outline" class="text-xs">Disabled</Badge>
+										<Badge variant="outline" class="text-xs">{$t('settings.auth.oidc.list.status.disabled')}</Badge>
 									{/if}
 								</div>
 								<span class="text-xs text-muted-foreground truncate block">{config.issuerUrl}</span>
@@ -206,7 +207,7 @@
 								<Button
 									variant="ghost"
 									size="sm"
-									title="Test connection"
+									title={$t('settings.auth.oidc.list.actions.testConnection')}
 									onclick={() => testOidcConnection(config.id)}
 									disabled={oidcTesting === config.id}
 								>
@@ -220,7 +221,7 @@
 									<Button
 										variant="ghost"
 										size="sm"
-										title={config.enabled ? 'Disable provider' : 'Enable provider'}
+										title={config.enabled ? $t('settings.auth.oidc.list.actions.disableProvider') : $t('settings.auth.oidc.list.actions.enableProvider')}
 										onclick={() => toggleOidcEnabled(config)}
 									>
 										{#if config.enabled}
@@ -232,17 +233,17 @@
 									<Button
 										variant="ghost"
 										size="sm"
-										title="Edit provider"
+										title={$t('settings.auth.oidc.list.actions.editProvider')}
 										onclick={() => openOidcModal(config)}
 									>
 										<Pencil class="w-4 h-4" />
 									</Button>
 									<ConfirmPopover
 										open={confirmDeleteOidcId === config.id}
-										action="Delete"
-										itemType="OIDC provider"
+										action={$t('settings.auth.oidc.list.confirm.deleteAction')}
+										itemType={$t('settings.auth.oidc.list.confirm.provider')}
 										itemName={config.name}
-										title="Delete"
+										title={$t('settings.auth.oidc.list.confirm.deleteTitle')}
 										onConfirm={() => deleteOidcConfig(config.id)}
 										onOpenChange={(open) => confirmDeleteOidcId = open ? config.id : null}
 									>
@@ -262,15 +263,15 @@
 					{#if oidcTestResult.success}
 						<div class="flex items-center gap-2 text-green-600">
 							<Check class="w-4 h-4" />
-							<p class="text-sm font-medium">Connection successful</p>
+							<p class="text-sm font-medium">{$t('settings.auth.oidc.list.test.connectionSuccessful')}</p>
 						</div>
 						{#if oidcTestResult.issuer}
-							<p class="text-xs text-muted-foreground mt-1">Issuer: {oidcTestResult.issuer}</p>
+							<p class="text-xs text-muted-foreground mt-1">{$t('settings.auth.oidc.list.test.issuer', { issuer: oidcTestResult.issuer })}</p>
 						{/if}
 					{:else}
 						<div class="flex items-center gap-2 text-destructive">
 							<XCircle class="w-4 h-4" />
-							<p class="text-sm">Connection failed: {oidcTestResult.error}</p>
+							<p class="text-sm">{$t('settings.auth.oidc.list.test.connectionFailed', { error: oidcTestResult.error })}</p>
 						</div>
 					{/if}
 				</div>

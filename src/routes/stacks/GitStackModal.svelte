@@ -17,6 +17,7 @@
 	import { focusFirstInput } from '$lib/utils';
 	import { readJobResponse } from '$lib/utils/sse-fetch';
 	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	// Get sidebar state to adjust modal positioning
 	const sidebar = useSidebar();
@@ -32,9 +33,9 @@
 
 	function getAuthLabel(authType: string) {
 		switch (authType) {
-			case 'ssh': return 'SSH Key';
-			case 'password': return 'Password';
-			default: return 'None';
+			case 'ssh': return translate('stacks.gitModal.auth.sshKey');
+			case 'password': return translate('stacks.gitModal.auth.password');
+			default: return translate('stacks.gitModal.auth.none');
 		}
 	}
 
@@ -278,11 +279,11 @@
 	async function populateEnvVars() {
 		// Validate we have repository info
 		if (formRepoMode === 'existing' && !formRepositoryId) {
-			toast.error('Please select a repository first');
+			toast.error(translate('stacks.gitModal.toasts.selectRepositoryFirst'));
 			return;
 		}
 		if (formRepoMode === 'new' && !formNewRepoUrl.trim()) {
-			toast.error('Please enter a repository URL first');
+			toast.error(translate('stacks.gitModal.toasts.enterRepositoryUrlFirst'));
 			return;
 		}
 
@@ -310,8 +311,8 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				toast.error('Failed to load env variables', {
-					description: data.error || 'Unknown error'
+				toast.error(translate('stacks.gitModal.toasts.loadEnvFailed'), {
+					description: data.error || translate('common.errors.unknown')
 				});
 				return;
 			}
@@ -320,8 +321,8 @@
 			const count = Object.keys(vars).length;
 
 			if (count === 0) {
-				toast.info('No environment variables found', {
-					description: 'No .env files found in the repository. You can still add variables manually.'
+				toast.info(translate('stacks.gitModal.toasts.noEnvFound'), {
+					description: translate('stacks.gitModal.toasts.noEnvFoundDescription')
 				});
 				return;
 			}
@@ -337,12 +338,12 @@
 			envVars = [...newVars, ...existingUserVars];
 			fileEnvVars = vars;
 
-			toast.success(`Loaded ${count} variable${count === 1 ? '' : 's'}`, {
-				description: 'You can now customize values before deploying'
+			toast.success(translate(count === 1 ? 'stacks.gitModal.toasts.loadedVariableOne' : 'stacks.gitModal.toasts.loadedVariableMany', { count }), {
+				description: translate('stacks.gitModal.toasts.loadedVariablesDescription')
 			});
 		} catch (e) {
 			console.error('Failed to populate env vars:', e);
-			toast.error('Failed to load env variables');
+			toast.error(translate('stacks.gitModal.toasts.loadEnvFailed'));
 		} finally {
 			populatingEnvVars = false;
 		}
@@ -413,25 +414,25 @@
 
 		const trimmedStackName = formStackName.trim();
 		if (!trimmedStackName) {
-			errors.stackName = 'Stack name is required';
+			errors.stackName = translate('stacks.gitModal.validation.stackNameRequired');
 			hasErrors = true;
 		} else if (!STACK_NAME_REGEX.test(trimmedStackName)) {
-			errors.stackName = 'Stack name must start with a letter or number, and contain only letters, numbers, hyphens, and underscores';
+			errors.stackName = translate('stacks.gitModal.validation.stackNameInvalid');
 			hasErrors = true;
 		}
 
 		if (formRepoMode === 'existing' && !formRepositoryId) {
-			errors.repository = 'Please select a repository';
+			errors.repository = translate('stacks.gitModal.validation.repositoryRequired');
 			hasErrors = true;
 		}
 
 		if (formRepoMode === 'new' && !formNewRepoName.trim()) {
-			errors.repoName = 'Repository name is required';
+			errors.repoName = translate('stacks.gitModal.validation.repoNameRequired');
 			hasErrors = true;
 		}
 
 		if (formRepoMode === 'new' && !formNewRepoUrl.trim()) {
-			errors.repoUrl = 'Repository URL is required';
+			errors.repoUrl = translate('stacks.gitModal.validation.repoUrlRequired');
 			hasErrors = true;
 		}
 
@@ -515,14 +516,14 @@
 			const data = await readJobResponse(response);
 
 			if (!response.ok) {
-				formError = data.error || 'Failed to save git stack';
+				formError = data.error || translate('stacks.gitModal.errors.saveFailed');
 				return;
 			}
 
 			// Check if deployment failed
 			if (data.deployResult && !data.deployResult.success) {
-				toast.error('Deployment failed', {
-					description: data.deployResult.error || 'Unknown error'
+				toast.error(translate('stacks.gitModal.toasts.deploymentFailed'), {
+					description: data.deployResult.error || translate('common.errors.unknown')
 				});
 				onSaved(); // Still refresh the list to show the new stack
 				onClose(); // Close modal, error shown as toast
@@ -532,7 +533,7 @@
 			onSaved();
 			onClose();
 		} catch (error) {
-			formError = 'Failed to save git stack';
+			formError = translate('stacks.gitModal.errors.saveFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -582,10 +583,10 @@
 					</div>
 					<div>
 						<Dialog.Title class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-							{gitStack ? 'Edit git stack' : 'Deploy from Git'}
+							{gitStack ? $t('stacks.gitModal.titleEdit') : $t('stacks.gitModal.titleCreate')}
 						</Dialog.Title>
 						<Dialog.Description class="text-xs text-zinc-500 dark:text-zinc-400">
-							{gitStack ? 'Update git stack settings' : 'Deploy a compose stack from a Git repository'}
+							{gitStack ? $t('stacks.gitModal.descriptionEdit') : $t('stacks.gitModal.descriptionCreate')}
 						</Dialog.Description>
 					</div>
 				</div>
@@ -607,7 +608,7 @@
 			<!-- Repository selection -->
 			{#if !gitStack}
 				<div class="space-y-3">
-					<Label>Repository</Label>
+					<Label>{$t('stacks.gitModal.repository')}</Label>
 					<div class="flex gap-2">
 						<Button
 							variant={formRepoMode === 'existing' ? 'default' : 'outline'}
@@ -615,14 +616,14 @@
 							onclick={() => formRepoMode = 'existing'}
 							disabled={repositories.length === 0}
 						>
-							Select existing
+							{$t('stacks.gitModal.selectExisting')}
 						</Button>
 						<Button
 							variant={formRepoMode === 'new' ? 'default' : 'outline'}
 							size="sm"
 							onclick={() => formRepoMode = 'new'}
 						>
-							Add new
+							{$t('stacks.gitModal.addNew')}
 						</Button>
 					</div>
 
@@ -645,7 +646,7 @@
 										<span class="text-muted-foreground text-xs truncate hidden sm:inline">({repoPath})</span>
 									</div>
 								{:else}
-									<span class="text-muted-foreground">Select a repository...</span>
+									<span class="text-muted-foreground">{$t('stacks.gitModal.selectRepositoryPlaceholder')}</span>
 								{/if}
 							</Select.Trigger>
 							<Select.Content>
@@ -673,17 +674,17 @@
 							<p class="text-xs text-destructive">{errors.repository}</p>
 						{:else if repositories.length === 0}
 							<p class="text-xs text-muted-foreground">
-								No repositories configured. Click "Add new" to add one.
+								{$t('stacks.gitModal.noRepositories')}
 							</p>
 						{/if}
 					{:else}
 						<div class="space-y-3 p-3 border rounded-md bg-muted/30">
 							<div class="space-y-2">
-								<Label for="new-repo-name">Repository name</Label>
+								<Label for="new-repo-name">{$t('stacks.gitModal.repositoryName')}</Label>
 								<Input
 									id="new-repo-name"
 									bind:value={formNewRepoName}
-									placeholder="e.g., my-stacks"
+									placeholder={$t('stacks.gitModal.repositoryNamePlaceholder')}
 									class={errors.repoName ? 'border-destructive focus-visible:ring-destructive' : ''}
 									oninput={() => errors.repoName = undefined}
 								/>
@@ -692,7 +693,7 @@
 								{/if}
 							</div>
 							<div class="space-y-2">
-								<Label for="new-repo-url">Repository URL</Label>
+								<Label for="new-repo-url">{$t('stacks.gitModal.repositoryUrl')}</Label>
 								<Input
 									id="new-repo-url"
 									bind:value={formNewRepoUrl}
@@ -706,11 +707,11 @@
 							</div>
 							<div class="grid grid-cols-2 gap-3">
 								<div class="space-y-2">
-									<Label for="new-repo-branch">Branch</Label>
+									<Label for="new-repo-branch">{$t('stacks.gitModal.branch')}</Label>
 									<Input id="new-repo-branch" bind:value={formNewRepoBranch} placeholder="main" />
 								</div>
 								<div class="space-y-2">
-									<Label for="new-repo-credential">Credential</Label>
+									<Label for="new-repo-credential">{$t('stacks.gitModal.credential')}</Label>
 									<Select.Root
 										type="single"
 										value={formNewRepoCredentialId?.toString() ?? 'none'}
@@ -729,14 +730,14 @@
 												<span>{selectedCred.name} ({getAuthLabel(selectedCred.authType)})</span>
 											{:else}
 												<Key class="w-4 h-4 mr-2 text-muted-foreground" />
-												<span>None (public)</span>
+												<span>{$t('stacks.gitModal.nonePublic')}</span>
 											{/if}
 										</Select.Trigger>
 										<Select.Content>
 											<Select.Item value="none">
 												<span class="flex items-center gap-2">
 													<Key class="w-4 h-4 text-muted-foreground" />
-													None (public)
+													{$t('stacks.gitModal.nonePublic')}
 												</span>
 											</Select.Item>
 											{#each credentials as cred}
@@ -764,24 +765,24 @@
 
 			<!-- Stack configuration -->
 			<div class="space-y-2">
-				<Label for="stack-name">Stack name</Label>
+				<Label for="stack-name">{$t('stacks.gitModal.stackName')}</Label>
 				<Input
 					id="stack-name"
 					bind:value={formStackName}
-					placeholder="e.g., my-app"
+					placeholder={$t('stacks.gitModal.stackNamePlaceholder')}
 					class={errors.stackName ? 'border-destructive focus-visible:ring-destructive' : ''}
 					oninput={() => { errors.stackName = undefined; formStackNameUserModified = true; }}
 				/>
 				{#if errors.stackName}
 					<p class="text-xs text-destructive">{errors.stackName}</p>
 				{:else}
-					<p class="text-xs text-muted-foreground">This will be the name of the deployed stack</p>
+					<p class="text-xs text-muted-foreground">{$t('stacks.gitModal.stackNameHelp')}</p>
 				{/if}
 			</div>
 
 			{#if gitStack && selectedRepo}
 				<div class="space-y-2">
-					<Label>Repository</Label>
+					<Label>{$t('stacks.gitModal.repository')}</Label>
 					<div class="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
 						<FolderGit2 class="w-3.5 h-3.5 shrink-0" />
 						<span class="truncate" title={selectedRepo.url}>{selectedRepo.url}</span>
@@ -793,24 +794,24 @@
 			{/if}
 
 			<div class="space-y-2">
-				<Label for="compose-path">Compose file path</Label>
+				<Label for="compose-path">{$t('stacks.gitModal.composePath')}</Label>
 				<Input id="compose-path" bind:value={formComposePath} placeholder="compose.yaml" />
-				<p class="text-xs text-muted-foreground">Path to the compose file within the repository</p>
+				<p class="text-xs text-muted-foreground">{$t('stacks.gitModal.composePathHelp')}</p>
 			</div>
 
 			<!-- Additional env file for variable substitution -->
 			<div class="space-y-2">
 				<div class="flex items-center gap-1.5">
-					<Label for="env-file-path">Additional env file (optional)</Label>
+					<Label for="env-file-path">{$t('stacks.gitModal.additionalEnvFile')}</Label>
 					<Tooltip.Root>
 						<Tooltip.Trigger>
 							<HelpCircle class="w-3.5 h-3.5 text-muted-foreground cursor-help" />
 						</Tooltip.Trigger>
 						<Tooltip.Content>
 							<div class="w-80">
-								<p class="text-xs">A <code class="bg-muted px-1 rounded">.env</code> file in the compose directory is always loaded automatically, if present.</p>
-								<p class="text-xs mt-2">Use this field for an additional env file with a non-standard name (e.g. <code class="bg-muted px-1 rounded">.env.production</code>). Its values override the default <code class="bg-muted px-1 rounded">.env</code>.</p>
-								<p class="text-xs mt-2">Overrides from the environment variables editor on the right always take highest precedence.</p>
+								<p class="text-xs">{$t('stacks.gitModal.envFileTooltipDefault')}</p>
+								<p class="text-xs mt-2">{$t('stacks.gitModal.envFileTooltipAdditional')}</p>
+								<p class="text-xs mt-2">{$t('stacks.gitModal.envFileTooltipOverrides')}</p>
 							</div>
 						</Tooltip.Content>
 					</Tooltip.Root>
@@ -820,22 +821,22 @@
 						bind:value={formEnvFilePath}
 						placeholder=""
 					/>
-				<p class="text-xs text-muted-foreground">Additional env file to pass to Docker Compose</p>
+				<p class="text-xs text-muted-foreground">{$t('stacks.gitModal.additionalEnvFileHelp')}</p>
 			</div>
 
 			<!-- Context directory -->
 			<div class="space-y-2">
 				<div class="flex items-center gap-1.5">
-					<Label for="context-dir">Context directory (optional)</Label>
+					<Label for="context-dir">{$t('stacks.gitModal.contextDirectory')}</Label>
 					<Tooltip.Root>
 						<Tooltip.Trigger>
 							<HelpCircle class="w-3.5 h-3.5 text-muted-foreground cursor-help" />
 						</Tooltip.Trigger>
 						<Tooltip.Content>
 							<div class="w-80">
-								<p class="text-xs">Working directory for Docker Compose, relative to the repository root. All files in this directory will be available for volume mounts and build contexts.</p>
-								<p class="text-xs mt-2">Use <code class="bg-muted px-1 rounded">.</code> for the repository root when your compose file references files in sibling directories.</p>
-								<p class="text-xs mt-2">Defaults to the compose file's parent directory.</p>
+								<p class="text-xs">{$t('stacks.gitModal.contextTooltipWorkingDirectory')}</p>
+								<p class="text-xs mt-2">{$t('stacks.gitModal.contextTooltipRoot')}</p>
+								<p class="text-xs mt-2">{$t('stacks.gitModal.contextTooltipDefault')}</p>
 							</div>
 						</Tooltip.Content>
 					</Tooltip.Root>
@@ -844,9 +845,9 @@
 					id="context-dir"
 					value={formContextDir ?? ''}
 					oninput={(e) => { const v = (e.target as HTMLInputElement).value; formContextDir = v.trim() || null; }}
-					placeholder="Defaults to compose file's directory"
+					placeholder={$t('stacks.gitModal.contextPlaceholder')}
 				/>
-				<p class="text-xs text-muted-foreground">Relative to repository root, e.g. <code class="text-xs bg-muted px-1 rounded">.</code> for root</p>
+				<p class="text-xs text-muted-foreground">{$t('stacks.gitModal.contextHelp')}</p>
 			</div>
 
 			<!-- Auto-update section -->
@@ -854,12 +855,12 @@
 			<div class="flex items-center gap-3">
 				<div class="flex items-center gap-2 flex-1">
 					<RefreshCw class="w-4 h-4 text-muted-foreground" />
-					<Label class="text-sm font-normal">Enable scheduled sync</Label>
+					<Label class="text-sm font-normal">{$t('stacks.gitModal.enableScheduledSync')}</Label>
 				</div>
 				<TogglePill bind:checked={formAutoUpdate} />
 			</div>
 				<p class="text-xs text-muted-foreground">
-					Automatically sync repository and redeploy stack if there are changes.
+					{$t('stacks.gitModal.enableScheduledSyncHelp')}
 				</p>
 				{#if formAutoUpdate}
 					<CronEditor
@@ -874,17 +875,17 @@
 			<div class="flex items-center gap-3">
 				<div class="flex items-center gap-2 flex-1">
 					<Webhook class="w-4 h-4 text-muted-foreground" />
-					<Label class="text-sm font-normal">Enable webhook</Label>
+					<Label class="text-sm font-normal">{$t('stacks.gitModal.enableWebhook')}</Label>
 				</div>
 				<TogglePill bind:checked={formWebhookEnabled} />
 			</div>
 				<p class="text-xs text-muted-foreground">
-					Receive push events from your Git provider to trigger sync and redeploy.
+					{$t('stacks.gitModal.enableWebhookHelp')}
 				</p>
 				{#if formWebhookEnabled}
 					{#if gitStack}
 						<div class="space-y-2">
-							<Label>Webhook URL</Label>
+							<Label>{$t('stacks.gitModal.webhookUrl')}</Label>
 							<div class="flex gap-2">
 								<Input
 									value={getWebhookUrl(gitStack.id)}
@@ -895,14 +896,14 @@
 									variant="outline"
 									size="sm"
 									onclick={() => copyWebhookField(getWebhookUrl(gitStack.id), 'url')}
-									title="Copy URL"
+									title={$t('stacks.gitModal.copyUrl')}
 								>
 									{#if copiedWebhookUrl === 'error'}
 										<Tooltip.Root open>
 											<Tooltip.Trigger>
 												<XCircle class="w-4 h-4 text-red-500" />
 											</Tooltip.Trigger>
-											<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+											<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
 										</Tooltip.Root>
 									{:else if copiedWebhookUrl === 'ok'}
 										<Check class="w-4 h-4 text-green-500" />
@@ -914,12 +915,12 @@
 						</div>
 					{/if}
 					<div class="space-y-2">
-						<Label for="webhook-secret">Webhook secret (optional)</Label>
+						<Label for="webhook-secret">{$t('stacks.gitModal.webhookSecret')}</Label>
 						<div class="flex gap-2">
 							<Input
 								id="webhook-secret"
 								bind:value={formWebhookSecret}
-								placeholder="Leave empty for no signature verification"
+								placeholder={$t('stacks.gitModal.webhookSecretPlaceholder')}
 								class="font-mono text-xs"
 							/>
 							{#if gitStack && formWebhookSecret}
@@ -927,14 +928,14 @@
 									variant="outline"
 									size="sm"
 									onclick={() => copyWebhookField(formWebhookSecret, 'secret')}
-									title="Copy secret"
+									title={$t('stacks.gitModal.copySecret')}
 								>
 									{#if copiedWebhookSecret === 'error'}
 										<Tooltip.Root open>
 											<Tooltip.Trigger>
 												<XCircle class="w-4 h-4 text-red-500" />
 											</Tooltip.Trigger>
-											<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+											<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
 										</Tooltip.Root>
 									{:else if copiedWebhookSecret === 'ok'}
 										<Check class="w-4 h-4 text-green-500" />
@@ -953,17 +954,17 @@
 										<Key class="w-4 h-4" />
 									</Button>
 								</Tooltip.Trigger>
-								<Tooltip.Content>Generate secret</Tooltip.Content>
+								<Tooltip.Content>{$t('stacks.gitModal.generateSecret')}</Tooltip.Content>
 							</Tooltip.Root>
 						</div>
 					</div>
 					{#if !gitStack}
 						<p class="text-xs text-muted-foreground">
-							The webhook URL will be available after creating the stack.
+							{$t('stacks.gitModal.webhookUrlAfterCreate')}
 						</p>
 					{:else}
 						<p class="text-xs text-muted-foreground">
-							Configure this URL in your Git provider. Secret is used for signature verification.
+							{$t('stacks.gitModal.webhookConfigureHelp')}
 						</p>
 					{/if}
 				{/if}
@@ -971,48 +972,48 @@
 
 			<!-- Deploy options section -->
 			<div class="space-y-3 p-3 bg-muted/50 rounded-md">
-				<p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Deploy options</p>
+				<p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">{$t('stacks.gitModal.deployOptions')}</p>
 				<div class="flex items-center gap-3">
 					<div class="flex items-center gap-2 flex-1">
 						<Hammer class="w-4 h-4 text-muted-foreground" />
-						<Label class="text-sm font-normal">Build images on deploy</Label>
+						<Label class="text-sm font-normal">{$t('stacks.gitModal.buildImagesOnDeploy')}</Label>
 					</div>
 					<TogglePill bind:checked={formBuildOnDeploy} />
 				</div>
 				<p class="text-xs text-muted-foreground">
-					Run <code class="text-xs bg-muted px-1 rounded">--build</code> to build images from Dockerfiles before starting containers.
+					{$t('stacks.gitModal.buildImagesOnDeployHelp')}
 				</p>
 				{#if formBuildOnDeploy}
 				<div class="flex items-center gap-3 ml-6">
 					<div class="flex items-center gap-2 flex-1">
 						<Ban class="w-4 h-4 text-muted-foreground" />
-						<Label class="text-sm font-normal">Disable build cache</Label>
+						<Label class="text-sm font-normal">{$t('stacks.gitModal.disableBuildCache')}</Label>
 					</div>
 					<TogglePill bind:checked={formNoBuildCache} />
 				</div>
 				<p class="text-xs text-muted-foreground ml-6">
-					Pass <code class="text-xs bg-muted px-1 rounded">--no-cache</code> to force a clean build without using cached layers.
+					{$t('stacks.gitModal.disableBuildCacheHelp')}
 				</p>
 				{/if}
 				<div class="flex items-center gap-3">
 					<div class="flex items-center gap-2 flex-1">
 						<ArrowDownToLine class="w-4 h-4 text-muted-foreground" />
-						<Label class="text-sm font-normal">Re-pull images</Label>
+						<Label class="text-sm font-normal">{$t('stacks.gitModal.repullImages')}</Label>
 					</div>
 					<TogglePill bind:checked={formRepullImages} />
 				</div>
 				<p class="text-xs text-muted-foreground">
-					Always pull latest images before deploying, even if the compose file hasn't changed. Useful for CI/CD workflows with static tags like <code class="text-xs bg-muted px-1 rounded">:latest</code>.
+					{$t('stacks.gitModal.repullImagesHelp')}
 				</p>
 				<div class="flex items-center gap-3">
 					<div class="flex items-center gap-2 flex-1">
 						<Zap class="w-4 h-4 text-muted-foreground" />
-						<Label class="text-sm font-normal">Force redeployment</Label>
+						<Label class="text-sm font-normal">{$t('stacks.gitModal.forceRedeployment')}</Label>
 					</div>
 					<TogglePill bind:checked={formForceRedeploy} />
 				</div>
 				<p class="text-xs text-muted-foreground">
-					Always redeploy the stack on webhook or scheduled sync, even if no git changes are detected.
+					{$t('stacks.gitModal.forceRedeploymentHelp')}
 				</p>
 			</div>
 
@@ -1023,8 +1024,8 @@
 						<div class="flex items-center gap-2 flex-1">
 							<Rocket class="w-4 h-4 text-muted-foreground" />
 							<div class="flex-1">
-								<Label class="text-sm font-normal">Deploy now</Label>
-								<p class="text-xs text-muted-foreground">Clone and deploy the stack immediately</p>
+								<Label class="text-sm font-normal">{$t('stacks.gitModal.deployNow')}</Label>
+								<p class="text-xs text-muted-foreground">{$t('stacks.gitModal.deployNowHelp')}</p>
 							</div>
 						</div>
 						<TogglePill bind:checked={formDeployNow} />
@@ -1056,7 +1057,7 @@
 				<StackEnvVarsPanel
 					bind:variables={envVars}
 					placeholder={{ key: 'MY_VAR', value: 'value' }}
-					infoText="Override variables from your repository env files. Non-secrets are saved to <code class='bg-muted px-1 rounded'>.env.dockhand</code> in the stack directory. Secrets are stored in the database and injected via shell environment at deploy time.<br/><br/>Variables are available for <strong>compose file interpolation</strong> using <code class='bg-muted px-1 rounded'>${'{VAR_NAME}'}</code> syntax. They are not automatically injected into containers — use <code class='bg-muted px-1 rounded'>environment:</code> or reference <code class='bg-muted px-1 rounded'>.env.dockhand</code> in <code class='bg-muted px-1 rounded'>env_file:</code> to pass them through."
+					infoText={$t('stacks.gitModal.envOverridesInfo')}
 					existingSecretKeys={gitStack !== null ? existingSecretKeys : new Set()}
 					showInterpolationHint={true}
 				>
@@ -1073,10 +1074,10 @@
 								>
 									{#if populatingEnvVars}
 										<Loader2 class="w-3.5 h-3.5 mr-1 animate-spin" />
-										Loading...
+										{$t('common.states.loading')}
 									{:else}
 										<Download class="w-3.5 h-3.5" />
-										Populate
+										{$t('stacks.gitModal.populate')}
 									{/if}
 								</Button>
 								<Tooltip.Root>
@@ -1085,7 +1086,7 @@
 									</Tooltip.Trigger>
 									<Tooltip.Content>
 										<div class="w-64">
-											<p class="text-xs">Clone the repository and load environment variables from the <code class="bg-muted px-1 rounded">.env</code> file (in compose directory) and additional env file (if specified), so you can see what you can override.</p>
+											<p class="text-xs">{$t('stacks.gitModal.populateTooltip')}</p>
 										</div>
 									</Tooltip.Content>
 								</Tooltip.Root>
@@ -1097,32 +1098,32 @@
 		</div>
 
 		<Dialog.Footer class="px-5 py-2.5 border-t border-zinc-200 dark:border-zinc-700 flex-shrink-0">
-			<Button variant="outline" onclick={onClose}>Cancel</Button>
+			<Button variant="outline" onclick={onClose}>{$t('common.actions.cancel')}</Button>
 			{#if gitStack}
 				<Button variant="outline" onclick={() => saveGitStack(true)} disabled={formSaving}>
 					{#if formSaving}
 						<Loader2 class="w-4 h-4 mr-1 animate-spin" />
-						Deploying...
+						{$t('stacks.gitDeploy.deploying')}
 					{:else}
 						<Rocket class="w-4 h-4" />
-						Save and deploy
+						{$t('stacks.gitModal.saveAndDeploy')}
 					{/if}
 				</Button>
 				<Button onclick={() => saveGitStack(false)} disabled={formSaving}>
 					{#if formSaving}
 						<Loader2 class="w-4 h-4 mr-1 animate-spin" />
-						Saving...
+						{$t('stacks.gitModal.saving')}
 					{:else}
-						Save changes
+						{$t('stacks.gitModal.saveChanges')}
 					{/if}
 				</Button>
 			{:else}
 				<Button onclick={() => saveGitStack(formDeployNow)} disabled={formSaving}>
 					{#if formSaving}
 						<Loader2 class="w-4 h-4 mr-1 animate-spin" />
-						{formDeployNow ? 'Deploying...' : 'Creating...'}
+						{formDeployNow ? $t('stacks.gitDeploy.deploying') : $t('stacks.gitModal.creating')}
 					{:else}
-						{formDeployNow ? 'Deploy' : 'Create'}
+						{formDeployNow ? $t('common.actions.deploy') : $t('common.actions.create')}
 					{/if}
 				</Button>
 			{/if}
@@ -1136,15 +1137,15 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<TriangleAlert class="w-5 h-5 text-amber-500" />
-				Stack already exists
+				{$t('stacks.gitModal.existsTitle')}
 			</Dialog.Title>
 			<Dialog.Description>
-				A stack named "{formStackName}" already exists. Please choose a different name.
+				{$t('stacks.gitModal.existsDescription', { name: formStackName })}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex justify-end mt-4">
 			<Button size="sm" onclick={() => showExistsWarning = false}>
-				OK
+				{$t('common.actions.ok')}
 			</Button>
 		</div>
 	</Dialog.Content>

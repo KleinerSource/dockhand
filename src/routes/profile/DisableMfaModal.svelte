@@ -3,6 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { AlertTriangle, RefreshCw, Shield } from 'lucide-svelte';
 	import { focusFirstInput } from '$lib/utils';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -40,23 +41,23 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2 text-destructive">
 				<AlertTriangle class="w-5 h-5" />
-				Disable two-factor authentication
+				{$t('profile.mfa.disableTitle')}
 			</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4">
 			<p class="text-sm text-muted-foreground">
-				Are you sure you want to disable two-factor authentication? This will make your account less secure.
+				{$t('profile.mfa.disableDescription')}
 			</p>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={onClose}>Cancel</Button>
+			<Button variant="outline" onclick={onClose}>{$t('common.actions.cancel')}</Button>
 			<Button variant="destructive" onclick={disableMfa} disabled={loading}>
 				{#if loading}
 					<RefreshCw class="w-4 h-4 animate-spin" />
 				{:else}
 					<Shield class="w-4 h-4" />
 				{/if}
-				Disable MFA
+				{$t('profile.security.disableMfa')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

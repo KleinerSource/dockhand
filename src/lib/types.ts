@@ -171,6 +171,7 @@ export type GridId = 'containers' | 'images' | 'imageTags' | 'networks' | 'stack
 export interface ColumnConfig {
 	id: string;
 	label: string;
+	labelKey?: string;
 	width?: number;
 	minWidth?: number;
 	resizable?: boolean;

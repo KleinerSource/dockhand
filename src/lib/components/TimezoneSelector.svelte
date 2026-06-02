@@ -4,6 +4,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { Button } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
+	import { getIntlLocale, locale, t } from '$lib/i18n';
 
 	interface Props {
 		value: string;
@@ -18,7 +19,7 @@
 		onchange,
 		id,
 		class: className,
-		placeholder = 'Select timezone...'
+		placeholder
 	}: Props = $props();
 
 	let open = $state(false);
@@ -112,7 +113,7 @@
 	function formatTimezone(tz: string): string {
 		try {
 			const now = new Date();
-			const formatter = new Intl.DateTimeFormat('en-US', {
+			const formatter = new Intl.DateTimeFormat(getIntlLocale($locale), {
 				timeZone: tz,
 				timeZoneName: 'shortOffset'
 			});
@@ -148,7 +149,7 @@
 			>
 				<span class="flex items-center gap-2 truncate">
 					<Globe class="h-4 w-4 shrink-0 text-muted-foreground" />
-					<span class="truncate">{value ? formatTimezoneShort(value) : placeholder}</span>
+					<span class="truncate">{value ? formatTimezoneShort(value) : (placeholder ?? $t('timezone.select'))}</span>
 				</span>
 				<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 			</Button>
@@ -156,11 +157,11 @@
 	</Popover.Trigger>
 	<Popover.Content class="w-[350px] p-0 z-[200]" align="start">
 		<Command.Root shouldFilter={false}>
-			<Command.Input bind:value={searchQuery} placeholder="Search timezone..." />
+			<Command.Input bind:value={searchQuery} placeholder={$t('timezone.search')} />
 			<Command.List class="max-h-[300px]">
-				<Command.Empty>No timezone found.</Command.Empty>
+				<Command.Empty>{$t('timezone.empty')}</Command.Empty>
 				{#if filteredCommon.length > 0}
-					<Command.Group heading="Common">
+					<Command.Group heading={$t('timezone.common')}>
 						{#each filteredCommon as tz}
 							<Command.Item value={tz} onSelect={() => selectTimezone(tz)}>
 								<Check class={cn('mr-2 h-4 w-4', value === tz ? 'opacity-100' : 'opacity-0')} />
@@ -170,7 +171,7 @@
 					</Command.Group>
 				{/if}
 				{#if filteredOther.length > 0}
-					<Command.Group heading="All timezones">
+					<Command.Group heading={$t('timezone.all')}>
 						{#each filteredOther as tz}
 							<Command.Item value={tz} onSelect={() => selectTimezone(tz)}>
 								<Check class={cn('mr-2 h-4 w-4', value === tz ? 'opacity-100' : 'opacity-0')} />

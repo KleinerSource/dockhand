@@ -9,6 +9,7 @@
 	import EnvironmentIcon from '$lib/components/EnvironmentIcon.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { focusFirstInput } from '$lib/utils';
+	import { t, translate } from '$lib/i18n';
 
 	export interface Role {
 		id: number;
@@ -88,103 +89,103 @@
 	// Permission definitions - separated into system and environment categories
 	const systemPermissions = {
 		users: [
-			{ key: 'view', label: 'View users' },
-			{ key: 'create', label: 'Create users' },
-			{ key: 'edit', label: 'Edit users' },
-			{ key: 'delete', label: 'Delete users' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.users.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.users.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.users.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.users.delete' }
 		],
 		settings: [
-			{ key: 'view', label: 'View settings' },
-			{ key: 'edit', label: 'Edit settings' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.settings.view' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.settings.edit' }
 		],
 		environments: [
-			{ key: 'view', label: 'View environments' },
-			{ key: 'create', label: 'Create environments' },
-			{ key: 'edit', label: 'Edit environments' },
-			{ key: 'delete', label: 'Delete environments' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.environments.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.environments.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.environments.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.environments.delete' }
 		],
 		registries: [
-			{ key: 'view', label: 'View registries' },
-			{ key: 'create', label: 'Create registries' },
-			{ key: 'edit', label: 'Edit registries' },
-			{ key: 'delete', label: 'Delete registries' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.registries.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.registries.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.registries.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.registries.delete' }
 		],
 		notifications: [
-			{ key: 'view', label: 'View notifications' },
-			{ key: 'create', label: 'Create notifications' },
-			{ key: 'edit', label: 'Edit notifications' },
-			{ key: 'delete', label: 'Delete notifications' },
-			{ key: 'test', label: 'Test notifications' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.notifications.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.notifications.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.notifications.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.notifications.delete' },
+			{ key: 'test', labelKey: 'settings.auth.roles.modal.permissions.notifications.test' }
 		],
 		configsets: [
-			{ key: 'view', label: 'View config sets' },
-			{ key: 'create', label: 'Create config sets' },
-			{ key: 'edit', label: 'Edit config sets' },
-			{ key: 'delete', label: 'Delete config sets' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.configsets.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.configsets.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.configsets.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.configsets.delete' }
 		],
 		git: [
-			{ key: 'view', label: 'View credentials & repos' },
-			{ key: 'create', label: 'Create credentials & repos' },
-			{ key: 'edit', label: 'Edit credentials & repos' },
-			{ key: 'delete', label: 'Delete credentials & repos' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.git.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.git.create' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.git.edit' },
+			{ key: 'delete', labelKey: 'settings.auth.roles.modal.permissions.git.delete' }
 		],
 		license: [
-			{ key: 'manage', label: 'Manage license' }
+			{ key: 'manage', labelKey: 'settings.auth.roles.modal.permissions.license.manage' }
 		],
 		audit_logs: [
-			{ key: 'view', label: 'View audit logs' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.audit_logs.view' }
 		],
 		schedules: [
-			{ key: 'view', label: 'View schedules' },
-			{ key: 'edit', label: 'Edit schedules' },
-			{ key: 'run', label: 'Run schedules' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.schedules.view' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.schedules.edit' },
+			{ key: 'run', labelKey: 'settings.auth.roles.modal.permissions.schedules.run' }
 		]
 	};
 
 	const environmentPermissions = {
 		activity: [
-			{ key: 'view', label: 'View activity' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.activity.view' }
 		],
 		containers: [
-			{ key: 'view', label: 'View containers' },
-			{ key: 'create', label: 'Create containers' },
-			{ key: 'start', label: 'Start containers' },
-			{ key: 'stop', label: 'Stop containers' },
-			{ key: 'restart', label: 'Restart containers' },
-			{ key: 'remove', label: 'Remove containers' },
-			{ key: 'exec', label: 'Execute terminal' },
-			{ key: 'logs', label: 'View logs' },
-			{ key: 'inspect', label: 'Inspect containers' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.containers.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.containers.create' },
+			{ key: 'start', labelKey: 'settings.auth.roles.modal.permissions.containers.start' },
+			{ key: 'stop', labelKey: 'settings.auth.roles.modal.permissions.containers.stop' },
+			{ key: 'restart', labelKey: 'settings.auth.roles.modal.permissions.containers.restart' },
+			{ key: 'remove', labelKey: 'settings.auth.roles.modal.permissions.containers.remove' },
+			{ key: 'exec', labelKey: 'settings.auth.roles.modal.permissions.containers.exec' },
+			{ key: 'logs', labelKey: 'settings.auth.roles.modal.permissions.containers.logs' },
+			{ key: 'inspect', labelKey: 'settings.auth.roles.modal.permissions.containers.inspect' }
 		],
 		images: [
-			{ key: 'view', label: 'View images' },
-			{ key: 'pull', label: 'Pull images' },
-			{ key: 'push', label: 'Push images' },
-			{ key: 'remove', label: 'Remove images' },
-			{ key: 'build', label: 'Build images' },
-			{ key: 'inspect', label: 'Inspect images' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.images.view' },
+			{ key: 'pull', labelKey: 'settings.auth.roles.modal.permissions.images.pull' },
+			{ key: 'push', labelKey: 'settings.auth.roles.modal.permissions.images.push' },
+			{ key: 'remove', labelKey: 'settings.auth.roles.modal.permissions.images.remove' },
+			{ key: 'build', labelKey: 'settings.auth.roles.modal.permissions.images.build' },
+			{ key: 'inspect', labelKey: 'settings.auth.roles.modal.permissions.images.inspect' }
 		],
 		volumes: [
-			{ key: 'view', label: 'View volumes' },
-			{ key: 'create', label: 'Create volumes' },
-			{ key: 'remove', label: 'Remove volumes' },
-			{ key: 'inspect', label: 'Inspect volumes' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.volumes.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.volumes.create' },
+			{ key: 'remove', labelKey: 'settings.auth.roles.modal.permissions.volumes.remove' },
+			{ key: 'inspect', labelKey: 'settings.auth.roles.modal.permissions.volumes.inspect' }
 		],
 		networks: [
-			{ key: 'view', label: 'View networks' },
-			{ key: 'create', label: 'Create networks' },
-			{ key: 'remove', label: 'Remove networks' },
-			{ key: 'inspect', label: 'Inspect networks' },
-			{ key: 'connect', label: 'Connect containers' },
-			{ key: 'disconnect', label: 'Disconnect containers' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.networks.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.networks.create' },
+			{ key: 'remove', labelKey: 'settings.auth.roles.modal.permissions.networks.remove' },
+			{ key: 'inspect', labelKey: 'settings.auth.roles.modal.permissions.networks.inspect' },
+			{ key: 'connect', labelKey: 'settings.auth.roles.modal.permissions.networks.connect' },
+			{ key: 'disconnect', labelKey: 'settings.auth.roles.modal.permissions.networks.disconnect' }
 		],
 		stacks: [
-			{ key: 'view', label: 'View stacks' },
-			{ key: 'create', label: 'Create stacks' },
-			{ key: 'start', label: 'Start stacks' },
-			{ key: 'stop', label: 'Stop stacks' },
-			{ key: 'remove', label: 'Remove stacks' },
-			{ key: 'edit', label: 'Edit stacks' }
+			{ key: 'view', labelKey: 'settings.auth.roles.modal.permissions.stacks.view' },
+			{ key: 'create', labelKey: 'settings.auth.roles.modal.permissions.stacks.create' },
+			{ key: 'start', labelKey: 'settings.auth.roles.modal.permissions.stacks.start' },
+			{ key: 'stop', labelKey: 'settings.auth.roles.modal.permissions.stacks.stop' },
+			{ key: 'remove', labelKey: 'settings.auth.roles.modal.permissions.stacks.remove' },
+			{ key: 'edit', labelKey: 'settings.auth.roles.modal.permissions.stacks.edit' }
 		]
 	};
 
@@ -309,7 +310,7 @@
 				formSaving = false;
 			} else if (copyFrom) {
 				// Copying from existing role - new role with pre-filled permissions
-				formName = `${copyFrom.name} (copy)`;
+				formName = translate('settings.auth.roles.modal.copyName', { name: copyFrom.name });
 				formDescription = copyFrom.description || '';
 				// Copy environment scope from source role
 				formAllEnvironments = copyFrom.environmentIds === null || copyFrom.environmentIds === undefined;
@@ -350,7 +351,7 @@
 		}
 	}
 
-	function toggleAllPermissions(category: keyof typeof formPermissions, enable: boolean, definitions: { key: string; label: string }[]) {
+	function toggleAllPermissions(category: keyof typeof formPermissions, enable: boolean, definitions: { key: string; labelKey: string }[]) {
 		if (enable) {
 			formPermissions[category] = definitions.map(p => p.key);
 		} else {
@@ -369,7 +370,7 @@
 	async function save() {
 		formErrors = {};
 		if (!formName.trim()) {
-			formErrors.name = 'Role name is required';
+			formErrors.name = translate('settings.auth.roles.modal.validation.nameRequired');
 			return;
 		}
 
@@ -400,13 +401,13 @@
 			} else {
 				const data = await response.json();
 				if (data.error?.includes('already exists')) {
-					formErrors.name = 'Role name already exists';
+					formErrors.name = translate('settings.auth.roles.modal.validation.nameExists');
 				} else {
-					formError = data.error || `Failed to ${isEditing ? 'update' : 'create'} role`;
+					formError = data.error || translate(isEditing ? 'settings.auth.roles.modal.errors.updateFailed' : 'settings.auth.roles.modal.errors.createFailed');
 				}
 			}
 		} catch {
-			formError = `Failed to ${isEditing ? 'update' : 'create'} role`;
+			formError = translate(isEditing ? 'settings.auth.roles.modal.errors.updateFailed' : 'settings.auth.roles.modal.errors.createFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -424,22 +425,22 @@
 			<Dialog.Title class="flex items-center gap-2">
 				{#if isEditing}
 					<Pencil class="w-5 h-5" />
-					Edit role
+					{$t('settings.auth.roles.modal.titleEdit')}
 				{:else if isCopying}
 					<Copy class="w-5 h-5" />
-					Copy role
+					{$t('settings.auth.roles.modal.titleCopy')}
 				{:else}
 					<Shield class="w-5 h-5" />
-					Create role
+					{$t('settings.auth.roles.modal.titleCreate')}
 				{/if}
 			</Dialog.Title>
 			<Dialog.Description>
 				{#if isEditing}
-					Update role permissions
+					{$t('settings.auth.roles.modal.descriptionEdit')}
 				{:else if isCopying}
-					Create a new role based on "{copyFrom?.name}"
+					{$t('settings.auth.roles.modal.descriptionCopy', { name: copyFrom?.name })}
 				{:else}
-					Define a new role with specific permissions
+					{$t('settings.auth.roles.modal.descriptionCreate')}
 				{/if}
 			</Dialog.Description>
 		</Dialog.Header>
@@ -451,10 +452,10 @@
 		{/if}
 		<div class="flex-shrink-0 grid grid-cols-2 gap-4 py-4">
 			<div class="space-y-2">
-				<Label>Role name</Label>
+				<Label>{$t('settings.auth.roles.modal.name')}</Label>
 				<Input
 					bind:value={formName}
-					placeholder="Developer"
+					placeholder={$t('settings.auth.roles.modal.namePlaceholder')}
 					class={formErrors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
 					oninput={() => formErrors.name = undefined}
 				/>
@@ -463,10 +464,10 @@
 				{/if}
 			</div>
 			<div class="space-y-2">
-				<Label>Description (optional)</Label>
+				<Label>{$t('settings.auth.roles.modal.descriptionOptional')}</Label>
 				<Input
 					bind:value={formDescription}
-					placeholder="Access to development resources"
+					placeholder={$t('settings.auth.roles.modal.descriptionPlaceholder')}
 				/>
 			</div>
 		</div>
@@ -478,8 +479,8 @@
 				<div class="px-4 py-3 border-b bg-muted/30">
 					<div class="flex items-center gap-2">
 						<Building2 class="w-4 h-4" />
-						<span class="font-medium text-sm">System permissions</span>
-						<span class="text-xs text-muted-foreground">(always global)</span>
+						<span class="font-medium text-sm">{$t('settings.auth.roles.modal.systemPermissions')}</span>
+						<span class="text-xs text-muted-foreground">{$t('settings.auth.roles.modal.alwaysGlobal')}</span>
 					</div>
 				</div>
 				<div class="p-3 grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -489,7 +490,7 @@
 							<!-- Category pill on border -->
 							<div class="absolute -top-2.5 left-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border {categoryColorsSolid[category] || 'bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-700'}">
 								<IconComponent class="w-3.5 h-3.5" />
-								<span class="text-xs font-medium capitalize">{category}</span>
+								<span class="text-xs font-medium">{$t(`settings.auth.roles.categories.${category}`)}</span>
 							</div>
 							<!-- Select all / Clear links -->
 							<div class="absolute -top-2 right-3 flex gap-2 bg-background px-1">
@@ -498,7 +499,7 @@
 									class="text-xs text-primary hover:underline"
 									onclick={() => toggleAllPermissions(category as keyof typeof formPermissions, true, permissions)}
 								>
-									All
+									{$t('settings.auth.roles.modal.selectAll')}
 								</button>
 								<span class="text-muted-foreground">|</span>
 								<button
@@ -506,7 +507,7 @@
 									class="text-xs text-muted-foreground hover:underline"
 									onclick={() => toggleAllPermissions(category as keyof typeof formPermissions, false, permissions)}
 								>
-									Clear
+									{$t('settings.auth.roles.modal.clear')}
 								</button>
 							</div>
 							<div class="flex flex-col gap-1.5">
@@ -520,7 +521,7 @@
 										{#if PermIcon}
 											<PermIcon class="w-3 h-3 text-muted-foreground" />
 										{/if}
-										<span class="text-xs truncate">{permission.label}</span>
+										<span class="text-xs truncate">{$t(permission.labelKey)}</span>
 									</label>
 								{/each}
 							</div>
@@ -535,11 +536,11 @@
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2">
 							<Globe class="w-4 h-4" />
-							<span class="font-medium text-sm">Environment permissions</span>
+							<span class="font-medium text-sm">{$t('settings.auth.roles.modal.environmentPermissions')}</span>
 						</div>
 						{#if environments.length > 0}
 							<div class="flex items-center gap-2">
-								<span class="text-xs text-muted-foreground">All environments (incl. new)</span>
+								<span class="text-xs text-muted-foreground">{$t('settings.auth.roles.modal.allEnvironmentsIncludingNew')}</span>
 								<TogglePill bind:checked={formAllEnvironments} />
 							</div>
 						{/if}
@@ -557,17 +558,17 @@
 										<EnvironmentIcon icon={env.icon || 'globe'} envId={env.id} class="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
 										<span class="truncate">{env.name}</span>
 									</label>
-								{/each}
-							</div>
-							{#if formEnvironmentIds.length === 0}
-								<p class="text-xs text-amber-600 mt-2">Select at least one environment for these permissions to be effective.</p>
-							{/if}
-						{:else}
-							<p class="text-xs text-muted-foreground mt-1">Permissions apply to all environments, including future ones.</p>
+							{/each}
+						</div>
+						{#if formEnvironmentIds.length === 0}
+							<p class="text-xs text-amber-600 mt-2">{$t('settings.auth.roles.modal.selectEnvironmentWarning')}</p>
 						{/if}
 					{:else}
-						<p class="text-xs text-muted-foreground mt-1">Permissions apply to all environments.</p>
+						<p class="text-xs text-muted-foreground mt-1">{$t('settings.auth.roles.modal.permissionsApplyToAllFuture')}</p>
 					{/if}
+				{:else}
+					<p class="text-xs text-muted-foreground mt-1">{$t('settings.auth.roles.modal.permissionsApplyToAll')}</p>
+				{/if}
 				</div>
 				<div class="p-3 grid grid-cols-2 lg:grid-cols-5 gap-3">
 					{#each Object.entries(environmentPermissions) as [category, permissions]}
@@ -576,7 +577,7 @@
 							<!-- Category pill on border -->
 							<div class="absolute -top-2.5 left-3 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border {categoryColorsSolid[category] || 'bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-700'}">
 								<IconComponent class="w-3.5 h-3.5" />
-								<span class="text-xs font-medium capitalize">{category}</span>
+								<span class="text-xs font-medium">{$t(`settings.auth.roles.categories.${category}`)}</span>
 							</div>
 							<!-- Select all / Clear links -->
 							<div class="absolute -top-2 right-3 flex gap-2 bg-background px-1">
@@ -585,7 +586,7 @@
 									class="text-xs text-primary hover:underline"
 									onclick={() => toggleAllPermissions(category as keyof typeof formPermissions, true, permissions)}
 								>
-									All
+									{$t('settings.auth.roles.modal.selectAll')}
 								</button>
 								<span class="text-muted-foreground">|</span>
 								<button
@@ -593,7 +594,7 @@
 									class="text-xs text-muted-foreground hover:underline"
 									onclick={() => toggleAllPermissions(category as keyof typeof formPermissions, false, permissions)}
 								>
-									Clear
+									{$t('settings.auth.roles.modal.clear')}
 								</button>
 							</div>
 							<div class="flex flex-col gap-1.5">
@@ -607,7 +608,7 @@
 										{#if PermIcon}
 											<PermIcon class="w-3 h-3 text-muted-foreground" />
 										{/if}
-										<span class="text-xs truncate">{permission.label}</span>
+										<span class="text-xs truncate">{$t(permission.labelKey)}</span>
 									</label>
 								{/each}
 							</div>
@@ -618,7 +619,7 @@
 		</div>
 
 		<Dialog.Footer class="flex-shrink-0 pt-4">
-			<Button variant="outline" onclick={handleClose}>Cancel</Button>
+			<Button variant="outline" onclick={handleClose}>{$t('settings.auth.roles.modal.cancel')}</Button>
 			<Button onclick={save} disabled={formSaving}>
 				{#if formSaving}
 					<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
@@ -627,7 +628,7 @@
 				{:else}
 					<Plus class="w-4 h-4" />
 				{/if}
-				{isEditing ? 'Save' : 'Create role'}
+				{isEditing ? $t('settings.auth.roles.modal.save') : $t('settings.auth.roles.modal.createRole')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

@@ -3,6 +3,7 @@
 	import { sseConnected } from '$lib/stores/events';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Wifi } from 'lucide-svelte';
+	import { formatNumber, locale, t } from '$lib/i18n';
 	import type { Component } from 'svelte';
 
 	interface Props {
@@ -58,9 +59,9 @@
 	// Format count display
 	const countDisplay = $derived(() => {
 		if (count === undefined) return null;
-		const countStr = typeof count === 'number' ? count.toLocaleString() : count;
+		const countStr = typeof count === 'number' ? formatNumber(count, $locale) : count;
 		if (total !== undefined) {
-			return `${countStr} of ${total.toLocaleString()}`;
+			return $t('common.counts.of', { count: countStr, total: formatNumber(total, $locale) });
 		}
 		return countStr;
 	});
@@ -75,7 +76,7 @@
 		</Badge>
 	{/if}
 	{#if showConnection}
-		<span title={$sseConnected ? 'Live updates active - grid will auto-refresh' : 'Connecting to live updates...'}>
+		<span title={$sseConnected ? $t('common.liveUpdates.active') : $t('common.liveUpdates.connecting')}>
 			<Wifi class="w-3.5 h-3.5 {$sseConnected ? 'text-emerald-500' : 'text-muted-foreground'}" />
 		</span>
 	{/if}

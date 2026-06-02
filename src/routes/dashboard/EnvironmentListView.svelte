@@ -8,6 +8,7 @@
 	import type { DataGridRowState, DataGridSortState } from '$lib/components/data-grid/types';
 	import type { ColumnConfig } from '$lib/types';
 	import type { TileItem } from '$lib/stores/dashboard';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		tiles: TileItem[];
@@ -23,11 +24,11 @@
 
 	function connectionLabel(type: string | undefined): string {
 		switch (type) {
-			case 'hawser-standard': return 'Standard';
-			case 'hawser-edge': return 'Edge';
-			case 'direct': return 'Direct';
-			case 'socket': return 'Socket';
-			default: return 'Socket';
+			case 'hawser-standard': return $t('dashboard.connections.standard');
+			case 'hawser-edge': return $t('dashboard.connections.edge');
+			case 'direct': return $t('dashboard.connections.direct');
+			case 'socket': return $t('dashboard.connections.socket');
+			default: return $t('dashboard.connections.socket');
 		}
 	}
 

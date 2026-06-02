@@ -1,33 +1,33 @@
 <script lang="ts" module>
 	// Static data moved outside component to prevent recreation on each mount
 	const NETWORK_DRIVERS = [
-		{ value: 'bridge', label: 'Bridge', description: 'Default network driver' },
-		{ value: 'host', label: 'Host', description: 'Use host networking directly' },
-		{ value: 'overlay', label: 'Overlay', description: 'Swarm multi-host networking' },
-		{ value: 'macvlan', label: 'Macvlan', description: 'Assign MAC address to containers' },
-		{ value: 'ipvlan', label: 'IPvlan', description: 'IPvlan L2/L3 networking' },
-		{ value: 'none', label: 'None', description: 'Disable networking' }
+		{ value: 'bridge', labelKey: 'networks.create.drivers.bridge', descriptionKey: 'networks.create.driverDescriptions.bridge' },
+		{ value: 'host', labelKey: 'networks.create.drivers.host', descriptionKey: 'networks.create.driverDescriptions.host' },
+		{ value: 'overlay', labelKey: 'networks.create.drivers.overlay', descriptionKey: 'networks.create.driverDescriptions.overlay' },
+		{ value: 'macvlan', labelKey: 'networks.create.drivers.macvlan', descriptionKey: 'networks.create.driverDescriptions.macvlan' },
+		{ value: 'ipvlan', labelKey: 'networks.create.drivers.ipvlan', descriptionKey: 'networks.create.driverDescriptions.ipvlan' },
+		{ value: 'none', labelKey: 'networks.create.drivers.none', descriptionKey: 'networks.create.driverDescriptions.none' }
 	] as const;
 
-	const COMMON_DRIVER_OPTIONS: Record<string, { key: string; description: string }[]> = {
+	const COMMON_DRIVER_OPTIONS: Record<string, { key: string; descriptionKey: string }[]> = {
 		bridge: [
-			{ key: 'com.docker.network.bridge.name', description: 'Bridge device name' },
-			{ key: 'com.docker.network.bridge.enable_ip_masquerade', description: 'Enable IP masquerading (true/false)' },
-			{ key: 'com.docker.network.bridge.enable_icc', description: 'Enable inter-container communication (true/false)' },
-			{ key: 'com.docker.network.bridge.host_binding_ipv4', description: 'Host binding IPv4 address' },
-			{ key: 'com.docker.network.driver.mtu', description: 'MTU size' }
+			{ key: 'com.docker.network.bridge.name', descriptionKey: 'networks.create.commonDriverOptions.bridgeName' },
+			{ key: 'com.docker.network.bridge.enable_ip_masquerade', descriptionKey: 'networks.create.commonDriverOptions.ipMasquerade' },
+			{ key: 'com.docker.network.bridge.enable_icc', descriptionKey: 'networks.create.commonDriverOptions.interContainerCommunication' },
+			{ key: 'com.docker.network.bridge.host_binding_ipv4', descriptionKey: 'networks.create.commonDriverOptions.hostBindingIpv4' },
+			{ key: 'com.docker.network.driver.mtu', descriptionKey: 'networks.create.commonDriverOptions.mtu' }
 		],
 		macvlan: [
-			{ key: 'parent', description: 'Parent interface (e.g., eth0)' },
-			{ key: 'macvlan_mode', description: 'Mode: bridge, private, vepa, passthru' }
+			{ key: 'parent', descriptionKey: 'networks.create.commonDriverOptions.parentInterface' },
+			{ key: 'macvlan_mode', descriptionKey: 'networks.create.commonDriverOptions.macvlanMode' }
 		],
 		ipvlan: [
-			{ key: 'parent', description: 'Parent interface (e.g., eth0)' },
-			{ key: 'ipvlan_mode', description: 'Mode: l2, l3, l3s' },
-			{ key: 'ipvlan_flag', description: 'Flag: bridge, private, vepa' }
+			{ key: 'parent', descriptionKey: 'networks.create.commonDriverOptions.parentInterface' },
+			{ key: 'ipvlan_mode', descriptionKey: 'networks.create.commonDriverOptions.ipvlanMode' },
+			{ key: 'ipvlan_flag', descriptionKey: 'networks.create.commonDriverOptions.ipvlanFlag' }
 		],
 		overlay: [
-			{ key: 'encrypted', description: 'Enable encryption (true/false)' }
+			{ key: 'encrypted', descriptionKey: 'networks.create.commonDriverOptions.encryption' }
 		]
 	};
 
@@ -46,6 +46,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import { currentEnvironment, appendEnvParam } from '$lib/stores/environment';
 	import { focusFirstInput } from '$lib/utils';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -125,18 +126,18 @@
 		let hasErrors = false;
 
 		if (!name.trim()) {
-			errors.name = 'Network name is required';
+			errors.name = translate('networks.create.errors.nameRequired');
 			hasErrors = true;
 		}
 
 		// Validation for macvlan/ipvlan
 		if (needsParentConfig) {
 			if (!parentInterface.trim()) {
-				errors.parentInterface = `Parent interface is required for ${driver} networks`;
+				errors.parentInterface = translate('networks.create.errors.parentInterfaceRequired', { driver });
 				hasErrors = true;
 			}
 			if (!subnet.trim()) {
-				errors.subnet = `Subnet is required for ${driver} networks`;
+				errors.subnet = translate('networks.create.errors.subnetRequired', { driver });
 				hasErrors = true;
 			}
 		}
@@ -232,14 +233,14 @@
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.details || data.error || 'Failed to create network');
+				throw new Error(data.details || data.error || translate('networks.create.errors.createFailed'));
 			}
 
 			resetForm();
 			open = false;
 			onSuccess?.();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to create network';
+			error = err instanceof Error ? err.message : translate('networks.create.errors.createFailed');
 		} finally {
 			creating = false;
 		}
@@ -256,24 +257,24 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<Network class="w-5 h-5" />
-				Create network
+				{$t('networks.create.title')}
 			</Dialog.Title>
-			<Dialog.Description>Configure a new Docker network with custom settings.</Dialog.Description>
+			<Dialog.Description>{$t('networks.create.description')}</Dialog.Description>
 		</Dialog.Header>
 
 		<Tabs.Root value="basic" class="mt-4">
 			<Tabs.List class="grid w-full grid-cols-4">
 				<Tabs.Trigger value="basic" class="flex items-center gap-1.5 text-xs">
-					<Network class="w-3.5 h-3.5" />Basic
+					<Network class="w-3.5 h-3.5" />{$t('networks.create.tabs.basic')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="ipam" class="flex items-center gap-1.5 text-xs">
 					<Settings class="w-3.5 h-3.5" />IPAM
 				</Tabs.Trigger>
 				<Tabs.Trigger value="options" class="flex items-center gap-1.5 text-xs">
-					<Settings class="w-3.5 h-3.5" />Options
+					<Settings class="w-3.5 h-3.5" />{$t('networks.create.tabs.options')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="labels" class="flex items-center gap-1.5 text-xs">
-					<Tag class="w-3.5 h-3.5" />Labels
+					<Tag class="w-3.5 h-3.5" />{$t('networks.create.tabs.labels')}
 				</Tabs.Trigger>
 			</Tabs.List>
 
@@ -281,7 +282,7 @@
 				<!-- Basic Tab -->
 				<Tabs.Content value="basic" class="space-y-4 h-full overflow-y-auto">
 				<div class="space-y-2">
-					<Label for="name">Network name *</Label>
+					<Label for="name">{$t('networks.create.networkName')} *</Label>
 					<Input
 						id="name"
 						bind:value={name}
@@ -295,9 +296,10 @@
 				</div>
 
 				<div class="space-y-2">
-					<Label for="driver">Driver</Label>
+					<Label for="driver">{$t('common.labels.driver')}</Label>
 					<Select.Root type="single" bind:value={driver}>
 						<Select.Trigger class="w-full h-9">
+							{@const selectedDriver = NETWORK_DRIVERS.find(d => d.value === driver)}
 							<span class="flex items-center">
 								{#if driver === 'bridge'}
 									<Share2 class="w-4 h-4 mr-2 text-emerald-500" />
@@ -312,12 +314,16 @@
 								{:else}
 									<CircleOff class="w-4 h-4 mr-2 text-muted-foreground" />
 								{/if}
-								{NETWORK_DRIVERS.find(d => d.value === driver)?.label || 'Select driver'}
+								{#if selectedDriver}
+									{$t(selectedDriver.labelKey)}
+								{:else}
+									{$t('networks.create.selectDriver')}
+								{/if}
 							</span>
 						</Select.Trigger>
 						<Select.Content>
 							{#each NETWORK_DRIVERS as d}
-								<Select.Item value={d.value} label={d.label}>
+								<Select.Item value={d.value} label={$t(d.labelKey)}>
 									{#snippet children()}
 										<div class="flex items-center">
 											{#if d.value === 'bridge'}
@@ -334,8 +340,8 @@
 												<CircleOff class="w-4 h-4 mr-2 text-muted-foreground" />
 											{/if}
 											<div class="flex flex-col">
-												<span>{d.label}</span>
-												<span class="text-xs text-muted-foreground">{d.description}</span>
+												<span>{$t(d.labelKey)}</span>
+												<span class="text-xs text-muted-foreground">{$t(d.descriptionKey)}</span>
 											</div>
 										</div>
 									{/snippet}
@@ -348,11 +354,11 @@
 				{#if needsParentConfig}
 					<div class="bg-amber-500/10 border border-amber-500/20 rounded-md p-3 space-y-3">
 						<p class="text-xs font-medium text-amber-600 dark:text-amber-400">
-							{driver === 'macvlan' ? 'Macvlan' : 'IPvlan'} configuration (required)
+							{$t('networks.create.parentConfigRequired', { driver: driver === 'macvlan' ? 'Macvlan' : 'IPvlan' })}
 						</p>
 						<div class="grid grid-cols-2 gap-3">
 							<div class="space-y-1">
-								<Label for="parentInterface" class="text-xs">Parent interface *</Label>
+								<Label for="parentInterface" class="text-xs">{$t('networks.create.parentInterface')} *</Label>
 								<Input
 									id="parentInterface"
 									bind:value={parentInterface}
@@ -366,39 +372,39 @@
 							</div>
 							{#if driver === 'macvlan'}
 								<div class="space-y-1">
-									<Label for="macvlanMode" class="text-xs">Mode</Label>
+									<Label for="macvlanMode" class="text-xs">{$t('networks.create.mode')}</Label>
 									<Select.Root type="single" bind:value={macvlanMode}>
 										<Select.Trigger class="h-8 text-xs">
 											<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />
-											<span>{macvlanMode === 'bridge' ? 'Bridge (default)' : macvlanMode === 'private' ? 'Private' : macvlanMode === 'vepa' ? 'VEPA' : 'Passthru'}</span>
+											<span>{macvlanMode === 'bridge' ? $t('networks.create.modes.bridgeDefault') : macvlanMode === 'private' ? $t('networks.create.modes.private') : macvlanMode === 'vepa' ? 'VEPA' : $t('networks.create.modes.passthru')}</span>
 										</Select.Trigger>
 										<Select.Content>
-											<Select.Item value="bridge" label="Bridge (default)">
-												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />Bridge (default)
+											<Select.Item value="bridge" label={$t('networks.create.modes.bridgeDefault')}>
+												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />{$t('networks.create.modes.bridgeDefault')}
 											</Select.Item>
-											<Select.Item value="private" label="Private">
-												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />Private
+											<Select.Item value="private" label={$t('networks.create.modes.private')}>
+												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />{$t('networks.create.modes.private')}
 											</Select.Item>
 											<Select.Item value="vepa" label="VEPA">
 												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />VEPA
 											</Select.Item>
-											<Select.Item value="passthru" label="Passthru">
-												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />Passthru
+											<Select.Item value="passthru" label={$t('networks.create.modes.passthru')}>
+												<Layers class="w-3 h-3 mr-1.5 text-muted-foreground" />{$t('networks.create.modes.passthru')}
 											</Select.Item>
 										</Select.Content>
 									</Select.Root>
 								</div>
 							{:else}
 								<div class="space-y-1">
-									<Label for="ipvlanMode" class="text-xs">Mode</Label>
+									<Label for="ipvlanMode" class="text-xs">{$t('networks.create.mode')}</Label>
 									<Select.Root type="single" bind:value={ipvlanMode}>
 										<Select.Trigger class="h-8 text-xs">
 											<Share2 class="w-3 h-3 mr-1.5 text-muted-foreground" />
-											<span>{ipvlanMode === 'l2' ? 'L2 (default)' : ipvlanMode === 'l3' ? 'L3' : 'L3S'}</span>
+											<span>{ipvlanMode === 'l2' ? $t('networks.create.modes.l2Default') : ipvlanMode === 'l3' ? 'L3' : 'L3S'}</span>
 										</Select.Trigger>
 										<Select.Content>
-											<Select.Item value="l2" label="L2 (default)">
-												<Share2 class="w-3 h-3 mr-1.5 text-muted-foreground" />L2 (default)
+											<Select.Item value="l2" label={$t('networks.create.modes.l2Default')}>
+												<Share2 class="w-3 h-3 mr-1.5 text-muted-foreground" />{$t('networks.create.modes.l2Default')}
 											</Select.Item>
 											<Select.Item value="l3" label="L3">
 												<Share2 class="w-3 h-3 mr-1.5 text-muted-foreground" />L3
@@ -413,7 +419,7 @@
 						</div>
 						<div class="grid grid-cols-2 gap-3">
 							<div class="space-y-1">
-								<Label for="subnetQuick" class="text-xs">Subnet *</Label>
+								<Label for="subnetQuick" class="text-xs">{$t('common.labels.subnet')} *</Label>
 								<Input
 									id="subnetQuick"
 									bind:value={subnet}
@@ -426,7 +432,7 @@
 								{/if}
 							</div>
 							<div class="space-y-1">
-								<Label for="gatewayQuick" class="text-xs">Gateway</Label>
+								<Label for="gatewayQuick" class="text-xs">{$t('common.labels.gateway')}</Label>
 								<Input id="gatewayQuick" bind:value={gateway} placeholder="192.168.1.1" class="h-8" />
 							</div>
 						</div>
@@ -437,24 +443,24 @@
 					<div class="flex items-center gap-3">
 						<TogglePill bind:checked={internal} />
 						<div>
-							<span class="text-sm font-normal">Internal network</span>
-							<span class="text-muted-foreground text-xs block">Restrict external access to this network</span>
+							<span class="text-sm font-normal">{$t('networks.create.internalNetwork')}</span>
+							<span class="text-muted-foreground text-xs block">{$t('networks.create.internalNetworkDescription')}</span>
 						</div>
 					</div>
 
 					<div class="flex items-center gap-3">
 						<TogglePill bind:checked={attachable} />
 						<div>
-							<span class="text-sm font-normal">Attachable</span>
-							<span class="text-muted-foreground text-xs block">Allow manual container attachment (overlay networks)</span>
+							<span class="text-sm font-normal">{$t('networks.create.attachable')}</span>
+							<span class="text-muted-foreground text-xs block">{$t('networks.create.attachableDescription')}</span>
 						</div>
 					</div>
 
 					<div class="flex items-center gap-3">
 						<TogglePill bind:checked={enableIPv6} />
 						<div>
-							<span class="text-sm font-normal">Enable IPv6</span>
-							<span class="text-muted-foreground text-xs block">Enable IPv6 networking</span>
+							<span class="text-sm font-normal">{$t('networks.create.enableIpv6')}</span>
+							<span class="text-muted-foreground text-xs block">{$t('networks.create.enableIpv6Description')}</span>
 						</div>
 					</div>
 				</div>
@@ -463,45 +469,45 @@
 				<!-- IPAM Tab -->
 				<Tabs.Content value="ipam" class="space-y-4 h-full overflow-y-auto">
 				<div class="space-y-2">
-					<Label for="ipamDriver">IPAM driver</Label>
+					<Label for="ipamDriver">{$t('networks.create.ipamDriver')}</Label>
 					<Input id="ipamDriver" bind:value={ipamDriver} placeholder="default" />
-					<p class="text-xs text-muted-foreground">IP Address Management driver (default: default)</p>
+					<p class="text-xs text-muted-foreground">{$t('networks.create.ipamDriverHelp')}</p>
 				</div>
 
 				<div class="grid grid-cols-2 gap-4">
 					<div class="space-y-2">
-						<Label for="subnet">Subnet</Label>
+						<Label for="subnet">{$t('common.labels.subnet')}</Label>
 						<Input id="subnet" bind:value={subnet} placeholder="172.20.0.0/16" />
 					</div>
 					<div class="space-y-2">
-						<Label for="gateway">Gateway</Label>
+						<Label for="gateway">{$t('common.labels.gateway')}</Label>
 						<Input id="gateway" bind:value={gateway} placeholder="172.20.0.1" />
 					</div>
 				</div>
 
 				<div class="space-y-2">
-					<Label for="ipRange">IP range</Label>
+					<Label for="ipRange">{$t('networks.create.ipRange')}</Label>
 					<Input id="ipRange" bind:value={ipRange} placeholder="172.20.10.0/24" />
-					<p class="text-xs text-muted-foreground">Allocate container IPs from a sub-range of the subnet</p>
+					<p class="text-xs text-muted-foreground">{$t('networks.create.ipRangeHelp')}</p>
 				</div>
 
 				<!-- Auxiliary Addresses -->
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<Label>Auxiliary addresses</Label>
+						<Label>{$t('networks.create.auxiliaryAddresses')}</Label>
 						<Button variant="outline" size="sm" onclick={() => auxAddresses = addItem(auxAddresses)}>
-							<Plus class="w-3 h-3" />Add
+							<Plus class="w-3 h-3" />{$t('common.actions.add')}
 						</Button>
 					</div>
-					<p class="text-xs text-muted-foreground">Reserve IP addresses for network devices (e.g., host=192.168.1.1)</p>
+					<p class="text-xs text-muted-foreground">{$t('networks.create.auxiliaryAddressesHelp')}</p>
 					{#each auxAddresses as aux, i}
 						<div class="flex gap-2 items-center">
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Hostname</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('networks.create.hostname')}</span>
 								<Input bind:value={aux.key} class="h-9" />
 							</div>
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">IP</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('common.labels.ip')}</span>
 								<Input bind:value={aux.value} class="h-9" />
 							</div>
 							<Button variant="ghost" size="sm" onclick={() => auxAddresses = removeItem(auxAddresses, i)}>
@@ -514,19 +520,19 @@
 				<!-- IPAM Options -->
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<Label>IPAM options</Label>
+						<Label>{$t('networks.create.ipamOptions')}</Label>
 						<Button variant="outline" size="sm" onclick={() => ipamOptions = addItem(ipamOptions)}>
-							<Plus class="w-3 h-3" />Add
+							<Plus class="w-3 h-3" />{$t('common.actions.add')}
 						</Button>
 					</div>
 					{#each ipamOptions as opt, i}
 						<div class="flex gap-2 items-center">
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Key</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.keyPlaceholder')}</span>
 								<Input bind:value={opt.key} class="h-9" />
 							</div>
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Value</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.valuePlaceholder')}</span>
 								<Input bind:value={opt.value} class="h-9" />
 							</div>
 							<Button variant="ghost" size="sm" onclick={() => ipamOptions = removeItem(ipamOptions, i)}>
@@ -541,18 +547,18 @@
 				<Tabs.Content value="options" class="space-y-4 h-full overflow-y-auto">
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<Label>Driver options</Label>
+						<Label>{$t('volumes.inspect.sections.driverOptions')}</Label>
 						<Button variant="outline" size="sm" onclick={() => driverOptions = addItem(driverOptions)}>
-							<Plus class="w-3 h-3" />Add
+							<Plus class="w-3 h-3" />{$t('common.actions.add')}
 						</Button>
 					</div>
-					<p class="text-xs text-muted-foreground">Set driver-specific options (-o key=value)</p>
+					<p class="text-xs text-muted-foreground">{$t('networks.create.driverOptionsHelp')}</p>
 
 					{#if COMMON_DRIVER_OPTIONS[driver]?.length > 0}
 						<div class="bg-muted/50 rounded-md p-3 text-xs space-y-1">
-							<p class="font-medium">Common options for {driver} driver:</p>
+							<p class="font-medium">{$t('networks.create.commonOptionsForDriver', { driver })}</p>
 							{#each COMMON_DRIVER_OPTIONS[driver] as opt}
-								<p><code class="bg-muted px-1 rounded">{opt.key}</code> - {opt.description}</p>
+								<p><code class="bg-muted px-1 rounded">{opt.key}</code> - {$t(opt.descriptionKey)}</p>
 							{/each}
 						</div>
 					{/if}
@@ -560,11 +566,11 @@
 					{#each driverOptions as opt, i}
 						<div class="flex gap-2 items-center">
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Key</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.keyPlaceholder')}</span>
 								<Input bind:value={opt.key} class="h-9" />
 							</div>
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Value</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.valuePlaceholder')}</span>
 								<Input bind:value={opt.value} class="h-9" />
 							</div>
 							<Button variant="ghost" size="sm" onclick={() => driverOptions = removeItem(driverOptions, i)}>
@@ -579,21 +585,21 @@
 				<Tabs.Content value="labels" class="space-y-4 h-full overflow-y-auto">
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<Label>Labels</Label>
+						<Label>{$t('common.labels.labels')}</Label>
 						<Button variant="outline" size="sm" onclick={() => labels = addItem(labels)}>
-							<Plus class="w-3 h-3" />Add
+							<Plus class="w-3 h-3" />{$t('common.actions.add')}
 						</Button>
 					</div>
-					<p class="text-xs text-muted-foreground">Set metadata labels on the network</p>
+					<p class="text-xs text-muted-foreground">{$t('networks.create.labelsHelp')}</p>
 
 					{#each labels as label, i}
 						<div class="flex gap-2 items-center">
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Key</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.keyPlaceholder')}</span>
 								<Input bind:value={label.key} class="h-9" />
 							</div>
 							<div class="flex-1 relative">
-								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Value</span>
+								<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('volumes.create.valuePlaceholder')}</span>
 								<Input bind:value={label.value} class="h-9" />
 							</div>
 							<Button variant="ghost" size="sm" onclick={() => labels = removeItem(labels, i)}>
@@ -602,7 +608,7 @@
 						</div>
 					{/each}
 					{#if labels.length === 0}
-						<p class="text-xs text-muted-foreground italic">No labels configured</p>
+						<p class="text-xs text-muted-foreground italic">{$t('volumes.create.noLabels')}</p>
 					{/if}
 				</div>
 				</Tabs.Content>
@@ -619,14 +625,14 @@
 		{#if errors.name || errors.parentInterface || errors.subnet}
 			<Alert.Root variant="destructive" class="mt-4">
 				<TriangleAlert class="h-4 w-4" />
-				<Alert.Description>Please fix the validation errors above</Alert.Description>
+				<Alert.Description>{$t('networks.create.errors.fixValidation')}</Alert.Description>
 			</Alert.Root>
 		{/if}
 
 		<Dialog.Footer class="mt-6">
-			<Button variant="outline" onclick={handleClose} disabled={creating}>Cancel</Button>
+			<Button variant="outline" onclick={handleClose} disabled={creating}>{$t('common.actions.cancel')}</Button>
 			<Button onclick={handleSubmit} disabled={creating}>
-				{#if creating}Creating...{:else}Create network{/if}
+				{#if creating}{$t('networks.create.creating')}{:else}{$t('networks.create.createNetwork')}{/if}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

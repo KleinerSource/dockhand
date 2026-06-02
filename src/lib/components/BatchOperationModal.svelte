@@ -5,6 +5,7 @@
 	import { Check, X, Loader2, Circle, Ban } from 'lucide-svelte';
 	import { onDestroy } from 'svelte';
 	import { formatBytes } from '$lib/utils/format';
+	import { t } from '$lib/i18n';
 
 	const progressText: Record<string, string> = {
 		remove: 'removing',
@@ -177,7 +178,7 @@
 	function handleClose() {
 		if (isRunning) {
 			// Confirm before closing during operation
-			if (!confirm('Operation is still running. Cancel and close?')) {
+			if (!confirm($t('batchOperation.runningCloseConfirm'))) {
 				return;
 			}
 			handleCancel();
@@ -285,19 +286,19 @@
 		<!-- Footer: Summary + Button in one row -->
 		<div class="flex items-center justify-between pt-2">
 			<div class="flex items-center gap-3 text-sm">
-				<div class="flex items-center gap-1" title="Succeeded">
+				<div class="flex items-center gap-1" title={$t('batchOperation.succeeded')}>
 					<Check class="w-4 h-4 text-green-500" />
 					<span class="tabular-nums">{successCount}</span>
 				</div>
-				<div class="flex items-center gap-1" title="Failed">
+				<div class="flex items-center gap-1" title={$t('batchOperation.failed')}>
 					<X class="w-4 h-4 text-red-500" />
 					<span class="tabular-nums">{failCount}</span>
 				</div>
-				<div class="flex items-center gap-1" title="Cancelled">
+				<div class="flex items-center gap-1" title={$t('batchOperation.cancelled')}>
 					<Ban class="w-4 h-4 text-amber-500" />
 					<span class="tabular-nums">{cancelledCount}</span>
 				</div>
-				<div class="flex items-center gap-1 text-muted-foreground" title="Pending">
+				<div class="flex items-center gap-1 text-muted-foreground" title={$t('batchOperation.pending')}>
 					<Circle class="w-4 h-4" />
 					<span class="tabular-nums">{items.length - successCount - failCount - cancelledCount}</span>
 				</div>

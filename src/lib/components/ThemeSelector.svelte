@@ -6,18 +6,19 @@
 	import { lightThemes, darkThemes, fonts, monospaceFonts } from '$lib/themes';
 	import { themeStore, applyTheme, type FontSize } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth';
+	import { t } from '$lib/i18n';
 
 	// Preload all monospace Google Fonts so dropdown previews render correctly
 	let monoFontsLoaded = $state(false);
 
 	// Font size options
-	const fontSizes: { id: FontSize; name: string }[] = [
-		{ id: 'xsmall', name: 'Extra Small' },
-		{ id: 'small', name: 'Small' },
-		{ id: 'normal', name: 'Normal' },
-		{ id: 'medium', name: 'Medium' },
-		{ id: 'large', name: 'Large' },
-		{ id: 'xlarge', name: 'Extra Large' }
+	const fontSizes: { id: FontSize; labelKey: string }[] = [
+		{ id: 'xsmall', labelKey: 'themeSelector.fontSizes.xsmall' },
+		{ id: 'small', labelKey: 'themeSelector.fontSizes.small' },
+		{ id: 'normal', labelKey: 'themeSelector.fontSizes.normal' },
+		{ id: 'medium', labelKey: 'themeSelector.fontSizes.medium' },
+		{ id: 'large', labelKey: 'themeSelector.fontSizes.large' },
+		{ id: 'xlarge', labelKey: 'themeSelector.fontSizes.xlarge' }
 	];
 
 	interface Props {
@@ -150,7 +151,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<Sun class="w-4 h-4 text-muted-foreground" />
-			<Label>Light theme</Label>
+			<Label>{$t('themeSelector.lightTheme')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedLightTheme} onValueChange={handleLightThemeChange}>
 			<Select.Trigger class="w-56">
@@ -186,7 +187,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<Moon class="w-4 h-4 text-muted-foreground" />
-			<Label>Dark theme</Label>
+			<Label>{$t('themeSelector.darkTheme')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedDarkTheme} onValueChange={handleDarkThemeChange}>
 			<Select.Trigger class="w-56">
@@ -222,7 +223,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<Type class="w-4 h-4 text-muted-foreground" />
-			<Label>Font</Label>
+			<Label>{$t('themeSelector.font')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedFont} onValueChange={handleFontChange}>
 			<Select.Trigger class="w-56">
@@ -246,20 +247,20 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<AArrowUp class="w-4 h-4 text-muted-foreground" />
-			<Label>Font size</Label>
+			<Label>{$t('themeSelector.fontSize')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedFontSize} onValueChange={handleFontSizeChange}>
 			<Select.Trigger class="w-56">
 				{#each fontSizes as size}
 					{#if size.id === selectedFontSize}
-						<span>{size.name}</span>
+						<span>{$t(size.labelKey)}</span>
 					{/if}
 				{/each}
 			</Select.Trigger>
 			<Select.Content>
 				{#each fontSizes as size}
 					<Select.Item value={size.id}>
-						<span>{size.name}</span>
+						<span>{$t(size.labelKey)}</span>
 					</Select.Item>
 				{/each}
 			</Select.Content>
@@ -270,20 +271,20 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<Table class="w-4 h-4 text-muted-foreground" />
-			<Label>Grid font size</Label>
+			<Label>{$t('themeSelector.gridFontSize')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedGridFontSize} onValueChange={handleGridFontSizeChange}>
 			<Select.Trigger class="w-56">
 				{#each fontSizes as size}
 					{#if size.id === selectedGridFontSize}
-						<span>{size.name}</span>
+						<span>{$t(size.labelKey)}</span>
 					{/if}
 				{/each}
 			</Select.Trigger>
 			<Select.Content>
 				{#each fontSizes as size}
 					<Select.Item value={size.id}>
-						<span>{size.name}</span>
+						<span>{$t(size.labelKey)}</span>
 					</Select.Item>
 				{/each}
 			</Select.Content>
@@ -294,7 +295,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<Terminal class="w-4 h-4 text-muted-foreground" />
-			<Label>Terminal font</Label>
+			<Label>{$t('themeSelector.terminalFont')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedTerminalFont} onValueChange={handleTerminalFontChange}>
 			<Select.Trigger class="w-56">
@@ -318,7 +319,7 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-2">
 			<CodeXml class="w-4 h-4 text-muted-foreground" />
-			<Label>Editor font</Label>
+			<Label>{$t('themeSelector.editorFont')}</Label>
 		</div>
 		<Select.Root type="single" value={selectedEditorFont} onValueChange={handleEditorFontChange}>
 			<Select.Trigger class="w-56">

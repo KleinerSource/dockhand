@@ -11,6 +11,7 @@
 	import { TogglePill } from '$lib/components/ui/toggle-pill';
 	import NotificationModal from './NotificationModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	// Notification types
 	interface NotificationSetting {
@@ -41,7 +42,7 @@
 			notifications = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch notifications:', error);
-			toast.error('Failed to fetch notification channels');
+			toast.error(translate('settings.notifications.list.toasts.loadFailed'));
 		} finally {
 			notifLoading = false;
 		}
@@ -60,13 +61,13 @@
 
 			if (response.ok) {
 				await fetchNotifications();
-				toast.success('Notification channel deleted');
+				toast.success(translate('settings.notifications.list.toasts.deleted'));
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to delete notification channel');
+				toast.error(data.error || translate('settings.notifications.list.toasts.deleteFailed'));
 			}
 		} catch (error) {
-			toast.error('Failed to delete notification channel');
+			toast.error(translate('settings.notifications.list.toasts.deleteFailed'));
 		}
 	}
 
@@ -79,13 +80,13 @@
 			});
 			if (response.ok) {
 				await fetchNotifications();
-				toast.success(`Channel ${notif.enabled ? 'disabled' : 'enabled'}`);
+				toast.success(translate(notif.enabled ? 'settings.notifications.list.toasts.disabled' : 'settings.notifications.list.toasts.enabled'));
 			} else {
-				toast.error('Failed to toggle notification channel');
+				toast.error(translate('settings.notifications.list.toasts.toggleFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to toggle notification:', error);
-			toast.error('Failed to toggle notification channel');
+			toast.error(translate('settings.notifications.list.toasts.toggleFailed'));
 		}
 	}
 
@@ -100,13 +101,13 @@
 			});
 			testResult = await response.json();
 			if (testResult?.success) {
-				toast.success('Test notification sent successfully');
+				toast.success(translate('settings.notifications.list.toasts.testSent'));
 			} else {
-				toast.error(`Test failed: ${testResult?.error || 'Unknown error'}`);
+				toast.error(translate('settings.notifications.list.toasts.testFailedWithError', { error: testResult?.error || translate('common.states.unknown') }));
 			}
 		} catch (error) {
-			testResult = { success: false, error: 'Failed to test notification' };
-			toast.error('Failed to test notification');
+			testResult = { success: false, error: translate('settings.notifications.list.toasts.testFailed') };
+			toast.error(translate('settings.notifications.list.toasts.testFailed'));
 		}
 
 		// Store which notification was tested, clear testing state
@@ -131,13 +132,13 @@
 			<div class="flex items-start gap-3">
 				<Bell class="w-5 h-5 text-muted-foreground mt-0.5" />
 				<div>
-					<p class="text-sm font-medium">Notification channels</p>
+					<p class="text-sm font-medium">{$t('settings.notifications.list.title')}</p>
 					<p class="text-xs text-muted-foreground mt-1">
-						Configure notification channels to receive alerts about Docker events. Supports SMTP email and Apprise URLs (Discord, Slack, Telegram, ntfy, and more).
+						{$t('settings.notifications.list.description')}
 					</p>
 					<p class="text-xs text-amber-600 dark:text-amber-500 mt-2 flex items-center gap-1">
 						<Info class="w-3 h-3" />
-						Detailed notification settings (event types, enable/disable) are configured per environment in Environment settings.
+						{$t('settings.notifications.list.environmentSettingsNote')}
 					</p>
 				</div>
 			</div>
@@ -146,26 +147,26 @@
 
 	<div class="flex justify-between items-center">
 		<div class="flex items-center gap-3">
-			<Badge variant="secondary" class="text-xs">{notifications.length} channels</Badge>
+			<Badge variant="secondary" class="text-xs">{$t('settings.notifications.list.count', { count: notifications.length })}</Badge>
 		</div>
 		<div class="flex gap-2">
 			{#if $canAccess('notifications', 'create')}
 				<Button size="sm" onclick={() => openNotifModal()}>
 					<Plus class="w-4 h-4" />
-					Add channel
+					{$t('settings.notifications.list.addChannel')}
 				</Button>
 			{/if}
-			<Button size="sm" variant="outline" onclick={fetchNotifications}>Refresh</Button>
+			<Button size="sm" variant="outline" onclick={fetchNotifications}>{$t('settings.notifications.list.refresh')}</Button>
 		</div>
 	</div>
 
 	{#if notifLoading && notifications.length === 0}
-		<p class="text-muted-foreground text-sm">Loading notification channels...</p>
+		<p class="text-muted-foreground text-sm">{$t('settings.notifications.list.loading')}</p>
 	{:else if notifications.length === 0}
 		<EmptyState
 			icon={Bell}
-			title="No notification channels configured"
-			description="Add a channel to start receiving alerts about Docker events"
+			title={$t('settings.notifications.list.empty.title')}
+			description={$t('settings.notifications.list.empty.description')}
 		/>
 	{:else}
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -189,7 +190,7 @@
 								/>
 							{:else}
 								<Badge variant={notif.enabled ? 'default' : 'secondary'} class="text-xs">
-									{notif.enabled ? 'Enabled' : 'Disabled'}
+									{notif.enabled ? $t('settings.notifications.list.status.enabled') : $t('settings.notifications.list.status.disabled')}
 								</Badge>
 							{/if}
 						</div>
@@ -206,16 +207,16 @@
 						{#if testingNotif === notif.id}
 							<div class="text-xs text-muted-foreground flex items-center gap-1">
 								<RefreshCw class="w-3 h-3 animate-spin" />
-								Sending test...
+								{$t('settings.notifications.list.status.sendingTest')}
 							</div>
 						{:else if testResult && testedNotifId === notif.id}
 							<div class="text-xs flex items-center gap-1 {testResult.success ? 'text-green-600' : 'text-destructive'}">
 								{#if testResult.success}
 									<CheckCircle2 class="w-3 h-3" />
-									Test sent successfully
+									{$t('settings.notifications.list.status.testSent')}
 								{:else}
 									<XCircle class="w-3 h-3" />
-									{testResult.error || 'Test failed'}
+									{testResult.error || $t('settings.notifications.list.status.testFailed')}
 								{/if}
 							</div>
 						{/if}
@@ -228,7 +229,7 @@
 								disabled={testingNotif !== null}
 							>
 								<Send class="w-3 h-3" />
-								Test
+								{$t('settings.notifications.list.actions.test')}
 							</Button>
 							{#if $canAccess('notifications', 'edit')}
 								<Button
@@ -242,10 +243,10 @@
 							{#if $canAccess('notifications', 'delete')}
 								<ConfirmPopover
 									open={confirmDeleteNotificationId === notif.id}
-									action="Delete"
-									itemType="channel"
+									action={$t('settings.notifications.list.confirm.deleteAction')}
+									itemType={$t('settings.notifications.list.confirm.channel')}
 									itemName={notif.name}
-									title="Remove"
+									title={$t('settings.notifications.list.confirm.removeTitle')}
 									position="left"
 									onConfirm={() => deleteNotification(notif.id)}
 									onOpenChange={(open) => confirmDeleteNotificationId = open ? notif.id : null}

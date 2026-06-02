@@ -9,11 +9,12 @@
 	import { untrack } from 'svelte';
 	import type { VulnerabilityCriteria } from '$lib/server/db';
 	import type { StepType } from '$lib/utils/update-steps';
-	import { getStepLabel, getStepIcon, getStepColor } from '$lib/utils/update-steps';
+	import { getStepIcon, getStepColor } from '$lib/utils/update-steps';
 	import VulnerabilityCriteriaBadge from '$lib/components/VulnerabilityCriteriaBadge.svelte';
 	import UpdateSummaryStats from '$lib/components/UpdateSummaryStats.svelte';
 	import ScannerSeverityPills from '$lib/components/ScannerSeverityPills.svelte';
 	import { watchJob } from '$lib/utils/sse-fetch';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -86,6 +87,10 @@
 	let errorMessage = $state('');
 	let forceUpdating = $state<Set<string>>(new Set()); // Track containers being force-updated
 	let filterMode = $state<'updated' | 'failed'>('updated');
+
+	function getStepLabel(step: StepType): string {
+		return translate(`updateSteps.${step}`);
+	}
 
 	let showFilterButtons = $derived(
 		summary && (summary.failed > 0 || summary.blocked > 0) && summary.success > 0
@@ -439,7 +444,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 		<Dialog.Header class="shrink-0">
 			<Dialog.Title class="flex items-center gap-2">
 				<CircleArrowUp class="w-5 h-5 text-amber-500" />
-				Updating containers
+				{$t('containers.batchUpdate.title')}
 				{#if vulnerabilityCriteria !== 'never'}
 					<span class="ml-2">
 						<VulnerabilityCriteriaBadge criteria={vulnerabilityCriteria} />
@@ -455,14 +460,14 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 						</span>
 						<span class="text-muted-foreground ml-2">({currentIndex}/{totalCount})</span>
 					{:else}
-						Processing {currentIndex} of {totalCount} containers...
+						{$t('containers.batchUpdate.processing', { current: currentIndex, total: totalCount })}
 					{/if}
 				{:else if status === 'complete'}
-					Update complete
+					{$t('containers.batchUpdate.complete')}
 				{:else if status === 'error'}
-					Update failed
+					{$t('containers.batchUpdate.failed')}
 				{:else}
-					Preparing to update {containerIds.length} container{containerIds.length > 1 ? 's' : ''}...
+					{$t('containers.batchUpdate.preparing', { count: containerIds.length })}
 				{/if}
 			</Dialog.Description>
 		</Dialog.Header>
@@ -471,7 +476,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 			<!-- Progress bar -->
 			<div class="space-y-2 shrink-0">
 				<div class="flex items-center justify-between text-sm">
-					<span class="text-muted-foreground">Progress</span>
+					<span class="text-muted-foreground">{$t('common.labels.progress')}</span>
 					<Badge variant="secondary">{currentIndex}/{totalCount}</Badge>
 				</div>
 				<Progress value={progressPercentage} class="h-2" />
@@ -488,7 +493,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 							onclick={() => filterMode = 'updated'}
 						>
 							<CheckCircle2 class="w-3 h-3 mr-1" />
-							Updated ({summary.success})
+							{$t('containers.batchUpdate.updatedCount', { count: summary.success })}
 						</Button>
 						<Button
 							variant={filterMode === 'failed' ? 'destructive' : 'outline'}
@@ -497,7 +502,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 							onclick={() => filterMode = 'failed'}
 						>
 							<XCircle class="w-3 h-3 mr-1" />
-							Failed ({summary.failed + summary.blocked})
+							{$t('containers.batchUpdate.failedCount', { count: summary.failed + summary.blocked })}
 						</Button>
 					</div>
 				{/if}
@@ -543,7 +548,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 											class="h-6 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/50"
 											onclick={() => forceUpdateContainer(item.containerId)}
 										>
-											Update anyway
+											{$t('containers.batchUpdate.updateAnyway')}
 										</Button>
 									{/if}
 								{/if}
@@ -552,7 +557,7 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 										type="button"
 										onclick={() => toggleLogs(item.containerId)}
 										class="p-1 hover:bg-muted rounded cursor-pointer"
-										title={item.showLogs ? 'Hide logs' : 'Show logs'}
+										title={item.showLogs ? $t('containers.batchUpdate.hideLogs') : $t('containers.batchUpdate.showLogs')}
 									>
 										{#if item.showLogs}
 											<ChevronDown class="w-4 h-4 text-muted-foreground" />
@@ -586,17 +591,17 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 									{#if item.vulnerabilities && item.vulnerabilities.length > 0}
 										<div class="border-t border-dashed my-1 border-muted-foreground/30"></div>
 										<div class="text-muted-foreground text-[10px] uppercase tracking-wider font-medium mb-1">
-											{item.vulnerabilities.length}{item.vulnerabilities.length >= 100 ? '+' : ''} vulnerabilities found
+											{$t('containers.batchUpdate.vulnerabilitiesFound', { count: `${item.vulnerabilities.length}${item.vulnerabilities.length >= 100 ? '+' : ''}` })}
 										</div>
 										<div>
 											<table class="w-full">
 												<thead>
 													<tr class="text-left text-muted-foreground border-b">
-														<th class="pb-1 pr-2 font-medium">CVE</th>
-														<th class="pb-1 pr-2 font-medium">Severity</th>
-														<th class="pb-1 pr-2 font-medium">Package</th>
-														<th class="pb-1 pr-2 font-medium">Version</th>
-														<th class="pb-1 font-medium">Fixed</th>
+														<th class="pb-1 pr-2 font-medium">{$t('scanResults.columns.cveId')}</th>
+														<th class="pb-1 pr-2 font-medium">{$t('scanResults.columns.severity')}</th>
+														<th class="pb-1 pr-2 font-medium">{$t('common.labels.package')}</th>
+														<th class="pb-1 pr-2 font-medium">{$t('common.labels.version')}</th>
+														<th class="pb-1 font-medium">{$t('containers.batchUpdate.columns.fixed')}</th>
 													</tr>
 												</thead>
 												<tbody>

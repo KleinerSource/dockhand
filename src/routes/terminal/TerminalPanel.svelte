@@ -3,6 +3,7 @@
 	import { X, GripHorizontal, RefreshCw, Copy, Trash2 } from 'lucide-svelte';
 	import * as Select from '$lib/components/ui/select';
 	import Terminal from './Terminal.svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		containerId: string;
@@ -167,15 +168,15 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between px-3 py-1.5 border-b border-zinc-800 bg-zinc-900/50">
 		<div class="flex items-center gap-2">
-			<span class="text-xs text-zinc-400">Terminal:</span>
+			<span class="text-xs text-zinc-400">{$t('terminal.terminal')}:</span>
 			<span class="text-xs text-zinc-200 font-medium">{containerName}</span>
 			{#if connected}
 				<span class="inline-flex items-center gap-1 text-xs text-green-500">
 					<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-					Connected
+					{$t('terminal.connected')}
 				</span>
 			{:else}
-				<span class="text-xs text-zinc-500">Disconnected</span>
+				<span class="text-xs text-zinc-500">{$t('terminal.disconnected')}</span>
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
@@ -194,7 +195,7 @@
 			<button
 				onclick={() => terminalComponent?.clear()}
 				class="p-1 rounded hover:bg-zinc-800 transition-colors"
-				title="Clear terminal (Ctrl+L)"
+				title={$t('terminal.clearCtrl')}
 			>
 				<Trash2 class="w-3 h-3 text-zinc-500 hover:text-zinc-300" />
 			</button>
@@ -202,7 +203,7 @@
 			<button
 				onclick={() => terminalComponent?.copyOutput()}
 				class="p-1 rounded hover:bg-zinc-800 transition-colors"
-				title="Copy output"
+				title={$t('terminal.copyOutput')}
 			>
 				<Copy class="w-3 h-3 text-zinc-500 hover:text-zinc-300" />
 			</button>
@@ -211,7 +212,7 @@
 				<button
 					onclick={() => terminalComponent?.reconnect()}
 					class="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-amber-500/20 ring-1 ring-amber-500/50 text-amber-400 hover:bg-amber-500/30 transition-colors"
-					title="Reconnect"
+					title={$t('terminal.reconnect')}
 				>
 					<RefreshCw class="w-3 h-3" />
 				</button>
@@ -220,7 +221,7 @@
 			<button
 				onclick={handleClose}
 				class="p-1 rounded hover:bg-zinc-800 transition-colors"
-				title="Close terminal"
+				title={$t('terminal.close')}
 			>
 				<X class="w-3 h-3 text-zinc-500 hover:text-zinc-300" />
 			</button>

@@ -8,6 +8,7 @@
 	import type { VulnerabilityCriteria } from '$lib/components/VulnerabilityCriteriaSelector.svelte';
 	import { parseHostPort, expandPortBindings, formatHostPort } from '$lib/utils/port-parse';
 	import { formatBytes } from '$lib/utils/format';
+	import { t, translate } from '$lib/i18n';
 
 	// Parse shell command respecting quotes
 	function parseShellCommand(cmd: string): string[] {
@@ -346,7 +347,7 @@
 			const data = await response.json();
 
 			if (!response.ok || data.error) {
-				throw new Error(data.error || `Failed to fetch container: ${response.status}`);
+				throw new Error(data.error || translate('containers.edit.errors.fetchContainer', { status: response.status }));
 			}
 
 			// Parse basic container data
@@ -613,7 +614,7 @@
 				runtime
 			};
 		} catch (err) {
-			error = 'Failed to load container data: ' + String(err);
+			error = translate('containers.edit.errors.loadContainerData', { error: String(err) });
 		} finally {
 			loadingData = false;
 			requestAnimationFrame(() => {
@@ -834,12 +835,12 @@
 				const result = await response.json();
 
 				if (!response.ok) {
-					error = result.error || 'Failed to rename container';
+					error = result.error || translate('containers.edit.errors.renameContainer');
 					loading = false;
 					return;
 				}
 
-				statusMessage = 'Container renamed successfully!';
+				statusMessage = translate('containers.edit.toasts.renamed');
 
 				if (autoUpdateChanged) {
 					await saveAutoUpdateSettings(name.trim());
@@ -986,14 +987,14 @@
 				const result = await response.json();
 
 				if (!response.ok) {
-					error = result.error || 'Failed to update container';
+					error = result.error || translate('containers.edit.errors.updateContainer');
 					if (result.details) {
 						error += ': ' + result.details;
 					}
 					return;
 				}
 
-				statusMessage = 'Container updated successfully!';
+				statusMessage = translate('containers.edit.toasts.updated');
 			}
 
 			if (autoUpdateChanged) {
@@ -1012,7 +1013,7 @@
 			onClose();
 		} catch (err) {
 			if (signal.aborted) return;
-			error = 'Failed to update container: ' + String(err);
+			error = translate('containers.edit.errors.updateContainerWithDetails', { error: String(err) });
 		} finally {
 			loading = false;
 			abortController = null;
@@ -1051,7 +1052,7 @@
 	<Dialog.Content class="max-w-4xl w-full max-h-[90vh] p-0 flex flex-col overflow-hidden sm:max-h-[85vh]">
 		<Dialog.Header class="px-5 py-4 border-b bg-muted/30 shrink-0 sticky top-0 z-10">
 			<Dialog.Title class="text-base font-semibold flex items-center gap-1">
-				Edit container
+				{$t('containers.edit.title')}
 				{#if isEditingTitle}
 					<span class="ml-1">-</span>
 					<input
@@ -1067,7 +1068,7 @@
 					<button
 						type="button"
 						onclick={saveEditingTitle}
-						title="Save"
+						title={$t('common.actions.save')}
 						class="p-0.5 rounded hover:bg-muted transition-colors"
 					>
 						<Check class="w-3 h-3 text-green-500 hover:text-green-600" />
@@ -1075,7 +1076,7 @@
 					<button
 						type="button"
 						onclick={cancelEditingTitle}
-						title="Cancel"
+						title={$t('common.actions.cancel')}
 						class="p-0.5 rounded hover:bg-muted transition-colors"
 					>
 						<X class="w-3 h-3 text-muted-foreground hover:text-foreground" />
@@ -1085,7 +1086,7 @@
 					<button
 						type="button"
 						onclick={startEditingTitle}
-						title="Rename container"
+						title={$t('containers.edit.renameContainer')}
 						class="p-0.5 rounded hover:bg-muted transition-colors ml-0.5"
 					>
 						<Pencil class="w-3 h-3 text-muted-foreground hover:text-foreground" />
@@ -1097,7 +1098,7 @@
 		{#if loadingData}
 			<div class="flex-1 flex items-center justify-center text-muted-foreground text-sm min-h-[200px]">
 				<Loader2 class="w-5 h-5 animate-spin mr-2" />
-				Loading container data...
+				{$t('containers.edit.loading')}
 			</div>
 		{:else}
 			<div class="px-5 py-4 flex-1 overflow-y-auto">
@@ -1105,13 +1106,13 @@
 				{#if showComposeRenameWarning}
 					<div class="mb-4 px-3 py-2 text-xs text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md flex items-start gap-2">
 						<Layers class="w-4 h-4 shrink-0 mt-0.5" />
-						<span>This container is part of the <strong>{composeStackName}</strong> compose stack. Renaming it may cause issues with stack management.</span>
+						<span>{$t('containers.edit.composeRenameWarningPrefix')} <strong>{composeStackName}</strong> {$t('containers.edit.composeRenameWarningSuffix')}</span>
 					</div>
 				{/if}
 				{#if showComposeConfigWarning}
 					<div class="mb-4 px-3 py-2 text-xs text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md flex items-start gap-2">
 						<Layers class="w-4 h-4 shrink-0 mt-0.5" />
-						<span>This container is part of the <strong>{composeStackName}</strong> compose stack. Changes may be overwritten when the stack is redeployed.</span>
+						<span>{$t('containers.edit.composeConfigWarningPrefix')} <strong>{composeStackName}</strong> {$t('containers.edit.composeConfigWarningSuffix')}</span>
 					</div>
 				{/if}
 
@@ -1185,14 +1186,14 @@
 
 			<div class="flex justify-end gap-2 px-5 py-3 border-t bg-muted/30 shrink-0">
 				<Button type="button" variant="outline" onclick={handleClose} size="sm">
-					Cancel
+					{$t('common.actions.cancel')}
 				</Button>
 				<Button type="button" variant="secondary" disabled={loading} size="sm" onclick={handleSubmit}>
 					{#if loading}
 						<Loader2 class="w-4 h-4 mr-1 animate-spin" />
-						Updating...
+						{$t('containers.edit.updating')}
 					{:else}
-						Update container
+						{$t('containers.edit.updateContainer')}
 					{/if}
 				</Button>
 			</div>

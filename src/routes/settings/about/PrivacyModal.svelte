@@ -1,8 +1,8 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { Shield, X } from 'lucide-svelte';
-	import { onMount } from 'svelte';
+	import { Shield } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -17,11 +17,11 @@
 	async function fetchPrivacy() {
 		try {
 			const res = await fetch('/api/legal/privacy');
-			if (!res.ok) throw new Error('Failed to fetch privacy policy');
+			if (!res.ok) throw new Error($t('settings.about.failedToFetchPrivacy'));
 			const data = await res.json();
 			content = data.content;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Unknown error';
+			error = e instanceof Error ? e.message : $t('common.states.unknown');
 		} finally {
 			loading = false;
 		}
@@ -39,14 +39,14 @@
 		<Dialog.Header class="shrink-0">
 			<Dialog.Title class="flex items-center gap-2">
 				<Shield class="w-5 h-5" />
-				Privacy policy
+				{$t('settings.about.privacyTitle')}
 			</Dialog.Title>
 		</Dialog.Header>
 
 		<div class="flex-1 min-h-0 overflow-hidden">
 			{#if loading}
 				<div class="flex items-center justify-center h-full">
-					<div class="text-sm text-muted-foreground">Loading...</div>
+					<div class="text-sm text-muted-foreground">{$t('common.states.loading')}</div>
 				</div>
 			{:else if error}
 				<div class="flex items-center justify-center h-full">
@@ -59,7 +59,7 @@
 
 		<Dialog.Footer class="shrink-0">
 			<Button variant="outline" onclick={() => open = false}>
-				Close
+				{$t('common.actions.close')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

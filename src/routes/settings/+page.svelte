@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Settings - Dockhand</title>
+	<title>{$t('settings.page.pageTitle')}</title>
 </svelte:head>
 
 <script lang="ts">
@@ -31,6 +31,7 @@
 	import AuthTab from './auth/AuthTab.svelte';
 	import LicenseTab from './license/LicenseTab.svelte';
 	import AboutTab from './about/AboutTab.svelte';
+	import { t } from '$lib/i18n';
 
 	// Tab state from URL
 	let activeTab = $derived($page.url.searchParams.get('tab') || 'general');
@@ -44,50 +45,50 @@
 
 <div class="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
 	<div class="shrink-0 flex flex-wrap justify-between items-center gap-3 min-h-8">
-		<PageHeader icon={Settings} title="Settings" showConnection={false} />
+		<PageHeader icon={Settings} title={$t('settings.page.title')} showConnection={false} />
 	</div>
 
 	<Tabs.Root value={activeTab} onValueChange={handleTabChange} class="w-full flex-1 min-h-0 flex flex-col">
 		<Tabs.List class="w-full flex flex-wrap h-auto gap-1 p-1">
 			<Tabs.Trigger value="general" class="flex-1 flex items-center justify-center gap-1.5">
 				<Settings class="w-4 h-4" />
-				General
+				{$t('settings.tabs.general')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="environments" class="flex-1 flex items-center justify-center gap-1.5">
 				<Globe class="w-4 h-4" />
-				Environments
+				{$t('settings.tabs.environments')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="labels" class="flex-1 flex items-center justify-center gap-1.5">
 				<Tags class="w-4 h-4" />
-				Labels
+				{$t('settings.tabs.labels')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="registries" class="flex-1 flex items-center justify-center gap-1.5">
 				<Download class="w-4 h-4" />
-				Registries
+				{$t('settings.tabs.registries')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="git" class="flex-1 flex items-center justify-center gap-1.5">
 				<GitBranch class="w-4 h-4" />
-				Git
+				{$t('settings.tabs.git')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="config-sets" class="flex-1 flex items-center justify-center gap-1.5">
 				<Layers class="w-4 h-4" />
-				Config sets
+				{$t('settings.tabs.configSets')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="notifications" class="flex-1 flex items-center justify-center gap-1.5">
 				<Bell class="w-4 h-4" />
-				Notifications
+				{$t('settings.tabs.notifications')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="auth" class="flex-1 flex items-center justify-center gap-1.5">
 				<Users class="w-4 h-4" />
-				Authentication
+				{$t('settings.tabs.authentication')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="license" class="flex-1 flex items-center justify-center gap-1.5">
 				<Crown class="w-4 h-4" />
-				License
+				{$t('settings.tabs.license')}
 			</Tabs.Trigger>
 			<Tabs.Trigger value="about" class="flex-1 flex items-center justify-center gap-1.5">
 				<Info class="w-4 h-4" />
-				About
+				{$t('settings.tabs.about')}
 			</Tabs.Trigger>
 		</Tabs.List>
 

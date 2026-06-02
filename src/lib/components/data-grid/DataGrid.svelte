@@ -7,6 +7,7 @@
 	import { getAllColumnConfigs } from '$lib/config/grid-columns';
 	import ColumnSettingsPopover from '$lib/components/ColumnSettingsPopover.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import { t } from '$lib/i18n';
 	import type { GridId, ColumnConfig, ColumnPreference } from '$lib/types';
 	import type { DataGridSortState, DataGridRowState } from './types';
 	import { setDataGridContext } from './context';
@@ -241,6 +242,11 @@
 	// Get column config by ID
 	function getColumnConfig(colId: string): ColumnConfig | undefined {
 		return columnConfigMap.get(colId);
+	}
+
+	function getColumnLabel(colConfig: ColumnConfig | undefined): string {
+		if (!colConfig) return '';
+		return colConfig.labelKey ? $t(colConfig.labelKey) : colConfig.label;
 	}
 
 	// Handle resize during drag (RAF throttled for performance)
@@ -600,7 +606,7 @@
 					{@const colConfig = columnConfigMap.get(colId)}
 					{#if colConfig}
 						<th class="{colConfig.align === 'right' ? 'text-right' : colConfig.align === 'center' ? 'text-center' : 'text-left'} py-2 px-2 font-medium" style="width: {getDisplayWidth(colId)}px">
-							{colConfig.label}
+							{getColumnLabel(colConfig)}
 						</th>
 					{/if}
 				{/each}
@@ -610,7 +616,7 @@
 					<th class="text-right py-2 px-2 font-medium actions-col" style="width: {getDisplayWidth(colId)}px">
 						{#if colId === 'actions'}
 							<div class="flex items-center justify-end gap-1">
-								<span>Actions</span>
+								<span>{$t('dataGrid.actions')}</span>
 								<ColumnSettingsPopover {gridId} />
 							</div>
 						{/if}
@@ -663,7 +669,7 @@
 							type="button"
 							onclick={toggleSelectAll}
 							class="flex items-center justify-center transition-colors opacity-40 hover:opacity-100 cursor-pointer"
-							title={allSelected ? 'Deselect all' : 'Select all'}
+							title={allSelected ? $t('dataGrid.deselectAll') : $t('dataGrid.selectAll')}
 						>
 							{#if allSelected}
 								<CheckSquare class="w-3.5 h-3.5 text-muted-foreground" />
@@ -678,7 +684,7 @@
 					{:else if headerCell}
 						{@render headerCell(colConfig!, sortState)}
 					{:else}
-						{colConfig?.label ?? ''}
+						{getColumnLabel(colConfig)}
 					{/if}
 				</th>
 			{/each}
@@ -699,7 +705,7 @@
 								onclick={() => toggleSort(getSortField(colId))}
 								class="flex items-center gap-1 hover:text-foreground transition-colors w-full {colConfig.align === 'right' ? 'justify-end' : colConfig.align === 'center' ? 'justify-center' : ''}"
 							>
-								{colConfig.label}
+								{getColumnLabel(colConfig)}
 								{#if sortState?.field === getSortField(colId)}
 									{#if sortState.direction === 'asc'}
 										<ArrowUp class="w-3 h-3" />
@@ -711,7 +717,7 @@
 								{/if}
 							</button>
 						{:else}
-							{colConfig.label}
+							{getColumnLabel(colConfig)}
 						{/if}
 
 						<!-- Resize handle -->
@@ -735,13 +741,13 @@
 				<th class="text-right py-2 px-2 font-medium actions-col" style="width: {getDisplayWidth(colId)}px">
 					{#if colId === 'actions'}
 						<div class="flex items-center justify-end gap-1">
-							<span>Actions</span>
+							<span>{$t('dataGrid.actions')}</span>
 							<ColumnSettingsPopover {gridId} />
 						</div>
 					{:else if headerCell}
 						{@render headerCell(colConfig!, sortState)}
 					{:else}
-						{colConfig?.label ?? ''}
+						{getColumnLabel(colConfig)}
 					{/if}
 
 					<!-- Resize handle for fixed end columns -->
@@ -798,7 +804,7 @@
 									toggleExpand(item[keyField]);
 								}}
 								class="flex items-center justify-center transition-colors cursor-pointer opacity-50 hover:opacity-100"
-								title={rowState.isExpanded ? 'Collapse' : 'Expand'}
+								title={rowState.isExpanded ? $t('dataGrid.collapseRow') : $t('dataGrid.expandRow')}
 							>
 								{#if rowState.isExpanded}
 									<ChevronDown class="w-4 h-4 text-muted-foreground" />
@@ -904,7 +910,7 @@
 										type="button"
 										onclick={(e) => { e.stopPropagation(); toggleExpand(item[keyField]); }}
 										class="flex items-center justify-center transition-colors cursor-pointer opacity-50 hover:opacity-100"
-										title={rowState.isExpanded ? 'Collapse' : 'Expand'}
+										title={rowState.isExpanded ? $t('dataGrid.collapseRow') : $t('dataGrid.expandRow')}
 									>
 										{#if rowState.isExpanded}
 											<ChevronDown class="w-4 h-4 text-muted-foreground" />

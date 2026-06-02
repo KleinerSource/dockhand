@@ -7,6 +7,7 @@
 	import { currentEnvironment } from '$lib/stores/environment';
 	import ScanTab from '$lib/components/ScanTab.svelte';
 	import type { ScanResult } from '$lib/components/ScanTab.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -90,6 +91,10 @@
 		return name.replace(/[/:]/g, '-').replace(/[^a-zA-Z0-9.-]/g, '_');
 	}
 
+	function getSeverityLabel(severity: string): string {
+		return translate(`vulnerabilitySeverity.${severity.toLowerCase()}`);
+	}
+
 	function formatDuration(ms: number): string {
 		if (ms < 1000) return `${ms}ms`;
 		return `${(ms / 1000).toFixed(1)}s`;
@@ -98,14 +103,23 @@
 	function exportToCSV() {
 		if (exportResults.length === 0) return;
 
-		const headers = ['Scanner', 'CVE ID', 'Severity', 'Package', 'Installed Version', 'Fixed Version', 'Description', 'Link'];
+		const headers = [
+			translate('imageScan.report.scanner'),
+			translate('imageScan.report.cveId'),
+			translate('imageScan.report.severity'),
+			translate('imageScan.report.package'),
+			translate('imageScan.report.installedVersion'),
+			translate('imageScan.report.fixedVersion'),
+			translate('imageScan.report.description'),
+			translate('imageScan.report.link')
+		];
 		const rows: string[][] = [];
 		for (const result of exportResults) {
 			for (const v of result.vulnerabilities) {
 				rows.push([
 					result.scanner,
 					v.id,
-					v.severity,
+					getSeverityLabel(v.severity),
 					v.package,
 					v.version,
 					v.fixedVersion || '',
@@ -128,8 +142,8 @@
 	function exportToMarkdown() {
 		if (exportResults.length === 0) return;
 
-		let md = `# Vulnerability Scan Report\n\n`;
-		md += `**Image:** \`${imageName}\`\n\n`;
+		let md = `# ${translate('imageScan.report.title')}\n\n`;
+		md += `**${translate('common.labels.image')}:** \`${imageName}\`\n\n`;
 
 		for (const result of exportResults) {
 			const scannerLabel = result.scanner === 'grype' ? 'Grype (Anchore)' : 'Trivy (Aqua Security)';
@@ -137,21 +151,21 @@
 			if (exportResults.length > 1) {
 				md += `---\n\n# ${scannerLabel}\n\n`;
 			} else {
-				md += `**Scanner:** ${scannerLabel}\n\n`;
+				md += `**${translate('imageScan.report.scanner')}:** ${scannerLabel}\n\n`;
 			}
-			md += `**Duration:** ${formatDuration(result.scanDuration || duration)}\n\n`;
+			md += `**${translate('common.labels.duration')}:** ${formatDuration(result.scanDuration || duration)}\n\n`;
 
 			const summaryParts = [];
-			if (result.summary.critical > 0) summaryParts.push(`**${result.summary.critical} Critical**`);
-			if (result.summary.high > 0) summaryParts.push(`**${result.summary.high} High**`);
-			if (result.summary.medium > 0) summaryParts.push(`${result.summary.medium} Medium`);
-			if (result.summary.low > 0) summaryParts.push(`${result.summary.low} Low`);
-			if (result.summary.negligible > 0) summaryParts.push(`${result.summary.negligible} Negligible`);
-			if (result.summary.unknown > 0) summaryParts.push(`${result.summary.unknown} Unknown`);
+			if (result.summary.critical > 0) summaryParts.push(`**${result.summary.critical} ${translate('vulnerabilitySeverity.critical')}**`);
+			if (result.summary.high > 0) summaryParts.push(`**${result.summary.high} ${translate('vulnerabilitySeverity.high')}**`);
+			if (result.summary.medium > 0) summaryParts.push(`${result.summary.medium} ${translate('vulnerabilitySeverity.medium')}`);
+			if (result.summary.low > 0) summaryParts.push(`${result.summary.low} ${translate('vulnerabilitySeverity.low')}`);
+			if (result.summary.negligible > 0) summaryParts.push(`${result.summary.negligible} ${translate('vulnerabilitySeverity.negligible')}`);
+			if (result.summary.unknown > 0) summaryParts.push(`${result.summary.unknown} ${translate('vulnerabilitySeverity.unknown')}`);
 
-			md += `## Summary\n\n`;
-			md += summaryParts.length > 0 ? summaryParts.join(' | ') : 'No vulnerabilities found';
-			md += `\n\n**Total:** ${result.vulnerabilities.length} vulnerabilities\n\n`;
+			md += `## ${translate('imageScan.report.summary')}\n\n`;
+			md += summaryParts.length > 0 ? summaryParts.join(' | ') : translate('imageScan.report.noVulnerabilitiesFound');
+			md += `\n\n**${translate('imageScan.report.total')}:** ${translate('imageScan.report.vulnerabilityCount', { count: result.vulnerabilities.length })}\n\n`;
 
 			if (result.vulnerabilities.length > 0) {
 				const bySeverity: Record<string, typeof result.vulnerabilities> = {};
@@ -167,19 +181,19 @@
 					const vulns = bySeverity[severity];
 					if (!vulns || vulns.length === 0) continue;
 
-					md += `## ${severity.charAt(0).toUpperCase() + severity.slice(1)} (${vulns.length})\n\n`;
+					md += `## ${getSeverityLabel(severity)} (${vulns.length})\n\n`;
 
 					for (const vuln of vulns) {
 						md += `### ${vuln.id}\n\n`;
-						md += `- **Package:** \`${vuln.package}\`\n`;
-						md += `- **Installed:** \`${vuln.version}\`\n`;
+						md += `- **${translate('common.labels.package')}:** \`${vuln.package}\`\n`;
+						md += `- **${translate('imageScan.report.installed')}:** \`${vuln.version}\`\n`;
 						if (vuln.fixedVersion) {
-							md += `- **Fixed in:** \`${vuln.fixedVersion}\`\n`;
+							md += `- **${translate('imageScan.report.fixedIn')}:** \`${vuln.fixedVersion}\`\n`;
 						} else {
-							md += `- **Fixed in:** *No fix available*\n`;
+							md += `- **${translate('imageScan.report.fixedIn')}:** *${translate('imageScan.report.noFixAvailable')}*\n`;
 						}
 						if (vuln.link) {
-							md += `- **Reference:** [${vuln.id}](${vuln.link})\n`;
+							md += `- **${translate('imageScan.report.reference')}:** [${vuln.id}](${vuln.link})\n`;
 						}
 						if (vuln.description) {
 							md += `\n${vuln.description}\n`;
@@ -190,7 +204,7 @@
 			}
 		}
 
-		md += `---\n\n*Report generated by Dockhand*\n`;
+		md += `---\n\n*${translate('imageScan.report.generatedByDockhand')}*\n`;
 
 		const scannerSuffix = exportResults.length > 1 ? 'combined' : exportResults[0].scanner;
 		const filename = `vuln-report-${sanitizeFilename(imageName)}-${scannerSuffix}-${new Date().toISOString().split('T')[0]}.md`;
@@ -254,7 +268,7 @@
 				{:else}
 					<ShieldCheck class="w-5 h-5" />
 				{/if}
-				Vulnerability scan
+				{$t('imageScan.title')}
 				<code class="text-sm font-normal bg-muted px-1.5 py-0.5 rounded ml-1">{imageName}</code>
 			</Dialog.Title>
 		</Dialog.Header>
@@ -276,7 +290,7 @@
 			<div class="flex gap-2">
 				{#if scanStatus === 'error'}
 					<Button variant="outline" onclick={() => scanTabRef?.startScan()}>
-						Retry
+						{$t('common.actions.retry')}
 					</Button>
 				{/if}
 				{#if scanStatus === 'complete' && scanResults.length > 0 && totalVulnerabilities > 0}
@@ -285,7 +299,7 @@
 							{#snippet child({ props })}
 								<Button variant="outline" {...props}>
 									<Download class="w-4 h-4" />
-									Export
+									{$t('common.actions.export')}
 								</Button>
 							{/snippet}
 						</DropdownMenu.Trigger>
@@ -305,15 +319,15 @@
 							{/if}
 							<DropdownMenu.Item onclick={exportToMarkdown} disabled={exportResults.length === 0}>
 								<FileText class="w-4 h-4 mr-2 text-blue-500" />
-								Markdown report (.md)
+								{$t('imageScan.exports.markdown')}
 							</DropdownMenu.Item>
 							<DropdownMenu.Item onclick={exportToCSV} disabled={exportResults.length === 0}>
 								<FileSpreadsheet class="w-4 h-4 mr-2 text-green-500" />
-								CSV spreadsheet (.csv)
+								{$t('imageScan.exports.csv')}
 							</DropdownMenu.Item>
 							<DropdownMenu.Item onclick={exportToJSON} disabled={exportResults.length === 0}>
 								<FileText class="w-4 h-4 mr-2 text-amber-500" />
-								JSON data (.json)
+								{$t('imageScan.exports.json')}
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
@@ -325,9 +339,9 @@
 				disabled={scanStatus === 'scanning'}
 			>
 				{#if scanStatus === 'scanning'}
-					Scanning...
+					{$t('imageScan.status.scanning')}
 				{:else}
-					Close
+					{$t('common.actions.close')}
 				{/if}
 			</Button>
 		</Dialog.Footer>

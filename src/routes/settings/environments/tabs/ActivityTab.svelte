@@ -4,6 +4,7 @@
 	import { TogglePill } from '$lib/components/ui/toggle-pill';
 	import * as Select from '$lib/components/ui/select';
 	import { Percent, HardDrive } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		collectActivity: boolean;
@@ -28,22 +29,22 @@
 
 <div class="flex items-start gap-3">
 	<div class="flex-1">
-		<Label>Collect container activity</Label>
-		<p class="text-xs text-muted-foreground">Track container events (start, stop, restart, etc.) from this environment in real-time</p>
+		<Label>{$t('settings.environments.activity.collectActivity')}</Label>
+		<p class="text-xs text-muted-foreground">{$t('settings.environments.activity.collectActivityDescription')}</p>
 	</div>
 	<TogglePill bind:checked={collectActivity} />
 </div>
 <div class="flex items-start gap-3">
 	<div class="flex-1">
-		<Label>Collect system metrics</Label>
-		<p class="text-xs text-muted-foreground">Collect CPU and memory usage statistics from this environment</p>
+		<Label>{$t('settings.environments.activity.collectMetrics')}</Label>
+		<p class="text-xs text-muted-foreground">{$t('settings.environments.activity.collectMetricsDescription')}</p>
 	</div>
 	<TogglePill bind:checked={collectMetrics} />
 </div>
 <div class="flex items-start gap-3">
 	<div class="flex-1">
-		<Label>Highlight value changes</Label>
-		<p class="text-xs text-muted-foreground">Show amber glow when container values change in the containers list</p>
+		<Label>{$t('settings.environments.activity.highlightChanges')}</Label>
+		<p class="text-xs text-muted-foreground">{$t('settings.environments.activity.highlightChangesDescription')}</p>
 	</div>
 	<TogglePill bind:checked={highlightChanges} />
 </div>
@@ -51,8 +52,8 @@
 <div class="border-t pt-4 mt-2 space-y-3">
 	<div class="flex items-start gap-3">
 		<div class="flex-1">
-			<Label>Disk space warnings</Label>
-			<p class="text-xs text-muted-foreground">Send notifications when Docker disk usage exceeds the threshold</p>
+			<Label>{$t('settings.environments.activity.diskWarnings')}</Label>
+			<p class="text-xs text-muted-foreground">{$t('settings.environments.activity.diskWarningsDescription')}</p>
 		</div>
 		<TogglePill bind:checked={diskWarningEnabled} />
 	</div>
@@ -64,10 +65,10 @@
 					<div class="flex items-center gap-2">
 						{#if diskWarningMode === 'percentage'}
 							<Percent class="w-3.5 h-3.5" />
-							<span>Percentage</span>
+							<span>{$t('settings.environments.activity.thresholdPercentage')}</span>
 						{:else}
 							<HardDrive class="w-3.5 h-3.5" />
-							<span>Absolute (GB)</span>
+							<span>{$t('settings.environments.activity.thresholdAbsolute')}</span>
 						{/if}
 					</div>
 				</Select.Trigger>
@@ -75,13 +76,13 @@
 					<Select.Item value="percentage">
 						<div class="flex items-center gap-2">
 							<Percent class="w-3.5 h-3.5" />
-							Percentage
+							{$t('settings.environments.activity.thresholdPercentage')}
 						</div>
 					</Select.Item>
 					<Select.Item value="absolute">
 						<div class="flex items-center gap-2">
 							<HardDrive class="w-3.5 h-3.5" />
-							Absolute (GB)
+							{$t('settings.environments.activity.thresholdAbsolute')}
 						</div>
 					</Select.Item>
 				</Select.Content>

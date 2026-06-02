@@ -40,6 +40,7 @@
 	import ThemeSelector from '$lib/components/ThemeSelector.svelte';
 	import { themeStore } from '$lib/stores/theme';
 	import PageHeader from '$lib/components/PageHeader.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	interface Profile {
 		id: number;
@@ -132,7 +133,7 @@
 		const file = input.files?.[0];
 		if (file) {
 			if (!file.type.startsWith('image/')) {
-				formError = 'Please select an image file';
+				formError = translate('profile.errors.selectImageFile');
 				return;
 			}
 			const reader = new FileReader();
@@ -170,10 +171,10 @@
 				goto('/login');
 			} else {
 				const data = await response.json();
-				error = data.error || 'Failed to load profile';
+				error = data.error || translate('profile.errors.loadProfile');
 			}
 		} catch (e) {
-			error = 'Failed to load profile';
+			error = translate('profile.errors.loadProfile');
 		} finally {
 			loading = false;
 		}
@@ -196,16 +197,16 @@
 
 			if (response.ok) {
 				profile = await response.json();
-				formSuccess = 'Profile updated successfully';
+				formSuccess = translate('profile.toasts.profileUpdated');
 				// Refresh auth store to update sidebar
 				await authStore.check();
 				setTimeout(() => formSuccess = '', 3000);
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to update profile';
+				formError = data.error || translate('profile.errors.updateProfile');
 			}
 		} catch (e) {
-			formError = 'Failed to update profile';
+			formError = translate('profile.errors.updateProfile');
 		} finally {
 			formSaving = false;
 		}
@@ -238,10 +239,10 @@
 				showMfaSetupModal = true;
 			} else {
 				const data = await response.json();
-				mfaError = data.error || 'Failed to setup MFA';
+				mfaError = data.error || translate('profile.errors.setupMfa');
 			}
 		} catch (e) {
-			mfaError = 'Failed to setup MFA';
+			mfaError = translate('profile.errors.setupMfa');
 		} finally {
 			mfaLoading = false;
 		}
@@ -249,16 +250,16 @@
 
 	async function handleMfaEnabled() {
 		await fetchProfile();
-		showSuccessMessage('MFA enabled successfully');
+		showSuccessMessage(translate('profile.toasts.mfaEnabled'));
 	}
 
 	async function handleMfaDisabled() {
 		await fetchProfile();
-		showSuccessMessage('MFA disabled successfully');
+		showSuccessMessage(translate('profile.toasts.mfaDisabled'));
 	}
 
 	function formatProfileDate(dateStr: string | null): string {
-		if (!dateStr) return 'Never';
+		if (!dateStr) return translate('common.states.never');
 		return formatDateTime(dateStr, true);
 	}
 
@@ -278,7 +279,7 @@
 				if (profile) {
 					profile.avatar = data.avatar;
 				}
-				formSuccess = 'Avatar updated successfully';
+				formSuccess = translate('profile.toasts.avatarUpdated');
 				await authStore.check();
 				setTimeout(() => formSuccess = '', 3000);
 				// Close cropper
@@ -289,10 +290,10 @@
 				}
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to upload avatar';
+				formError = data.error || translate('profile.errors.uploadAvatar');
 			}
 		} catch (e) {
-			formError = 'Failed to upload avatar';
+			formError = translate('profile.errors.uploadAvatar');
 		} finally {
 			avatarSaving = false;
 		}
@@ -311,15 +312,15 @@
 				if (profile) {
 					profile.avatar = null;
 				}
-				formSuccess = 'Avatar removed successfully';
+				formSuccess = translate('profile.toasts.avatarRemoved');
 				await authStore.check();
 				setTimeout(() => formSuccess = '', 3000);
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to remove avatar';
+				formError = data.error || translate('profile.errors.removeAvatar');
 			}
 		} catch (e) {
-			formError = 'Failed to remove avatar';
+			formError = translate('profile.errors.removeAvatar');
 		} finally {
 			avatarSaving = false;
 		}
@@ -346,13 +347,13 @@
 </script>
 
 <svelte:head>
-	<title>Profile - Dockhand</title>
+	<title>{$t('profile.pageTitle')}</title>
 </svelte:head>
 
 <div class="container mx-auto p-6">
 	<div class="flex items-center gap-3 mb-6">
-		<PageHeader icon={User} title="Profile" showConnection={false}>
-			<p class="text-muted-foreground text-sm">Manage your account settings</p>
+		<PageHeader icon={User} title={$t('profile.title')} showConnection={false}>
+			<p class="text-muted-foreground text-sm">{$t('profile.description')}</p>
 		</PageHeader>
 	</div>
 
@@ -387,7 +388,7 @@
 				<Card.Header>
 					<Card.Title class="flex items-center gap-2">
 						<User class="w-5 h-5" />
-						Account information
+						{$t('profile.account.title')}
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
@@ -431,7 +432,7 @@
 										onclick={removeAvatar}
 										disabled={avatarSaving}
 										class="absolute -bottom-1 -right-1 p-1 rounded-full bg-background border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
-										title="Remove photo"
+										title={$t('profile.account.removePhoto')}
 									>
 										<Trash2 class="w-3.5 h-3.5" />
 									</button>
@@ -443,19 +444,19 @@
 						<div class="flex-1 space-y-4">
 							<div class="grid grid-cols-2 gap-4">
 								<div>
-									<Label class="text-muted-foreground text-xs">Username</Label>
+									<Label class="text-muted-foreground text-xs">{$t('auth.username')}</Label>
 									<p class="font-medium">{profile.username}</p>
 								</div>
 								<div>
-									<Label class="text-muted-foreground text-xs">Role</Label>
+									<Label class="text-muted-foreground text-xs">{$t('profile.account.role')}</Label>
 									<div class="flex items-center gap-2">
 										{#if profile.isAdmin}
 											<Badge variant="default" class="gap-1 rounded-sm">
 												<Crown class="w-3 h-3" />
-												Admin
+												{$t('roles.admin')}
 											</Badge>
 										{:else}
-											<Badge variant="secondary" class="rounded-sm">User</Badge>
+											<Badge variant="secondary" class="rounded-sm">{$t('roles.user')}</Badge>
 										{/if}
 									</div>
 								</div>
@@ -463,14 +464,14 @@
 
 							<div class="grid grid-cols-2 gap-4">
 								<div>
-									<Label class="text-muted-foreground text-xs">Created</Label>
+									<Label class="text-muted-foreground text-xs">{$t('common.labels.created')}</Label>
 									<p class="text-sm flex items-center gap-1">
 										<Calendar class="w-3.5 h-3.5" />
 										{formatProfileDate(profile.createdAt)}
 									</p>
 								</div>
 								<div>
-									<Label class="text-muted-foreground text-xs">Last login</Label>
+									<Label class="text-muted-foreground text-xs">{$t('profile.account.lastLogin')}</Label>
 									<p class="text-sm flex items-center gap-1">
 										<Clock class="w-3.5 h-3.5" />
 										{formatProfileDate(profile.lastLogin)}
@@ -487,7 +488,7 @@
 				<Card.Header>
 					<Card.Title class="flex items-center gap-2">
 						<Mail class="w-5 h-5" />
-						Profile details
+						{$t('profile.details.title')}
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="flex-1 flex flex-col space-y-4">
@@ -500,18 +501,18 @@
 
 					<div class="space-y-4 flex-1">
 						<div class="space-y-2">
-							<Label>Display name</Label>
+							<Label>{$t('profile.details.displayName')}</Label>
 							<Input
 								bind:value={formDisplayName}
-								placeholder="Enter display name"
+								placeholder={$t('profile.details.displayNamePlaceholder')}
 							/>
 						</div>
 						<div class="space-y-2">
-							<Label>Email</Label>
+							<Label>{$t('profile.details.email')}</Label>
 							<Input
 								type="email"
 								bind:value={formEmail}
-								placeholder="Enter email"
+								placeholder={$t('profile.details.emailPlaceholder')}
 							/>
 						</div>
 					</div>
@@ -523,7 +524,7 @@
 							{:else}
 								<Check class="w-4 h-4" />
 							{/if}
-							Save changes
+							{$t('profile.details.saveChanges')}
 						</Button>
 					</div>
 				</Card.Content>
@@ -539,7 +540,7 @@
 				<Card.Header>
 					<Card.Title class="flex items-center gap-2">
 						<Shield class="w-5 h-5" />
-						Security
+						{$t('profile.security.title')}
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-4">
@@ -549,12 +550,12 @@
 							<div class="flex items-center gap-3">
 								<Key class="w-5 h-5 text-muted-foreground" />
 								<div>
-									<p class="font-medium">Password</p>
-									<p class="text-sm text-muted-foreground">Change your password</p>
+									<p class="font-medium">{$t('auth.password')}</p>
+									<p class="text-sm text-muted-foreground">{$t('profile.security.changePasswordDescription')}</p>
 								</div>
 							</div>
 							<Button variant="outline" onclick={() => showPasswordModal = true}>
-								Change password
+								{$t('profile.security.changePassword')}
 							</Button>
 						</div>
 					{:else}
@@ -562,8 +563,8 @@
 							<div class="flex items-center gap-3">
 								<Key class="w-5 h-5 text-muted-foreground" />
 								<div>
-									<p class="font-medium">Password</p>
-									<p class="text-sm text-muted-foreground">Managed by your SSO provider</p>
+									<p class="font-medium">{$t('auth.password')}</p>
+									<p class="text-sm text-muted-foreground">{$t('profile.security.managedBySso')}</p>
 								</div>
 							</div>
 							<Badge class="gap-1 rounded-sm bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/30">
@@ -580,28 +581,28 @@
 								<Smartphone class="w-5 h-5 text-muted-foreground" />
 								<div>
 									<div class="flex items-center gap-2">
-										<p class="font-medium">Two-factor authentication</p>
+										<p class="font-medium">{$t('profile.security.mfaTitle')}</p>
 										{#if profile.mfaEnabled}
 											<Badge variant="default" class="bg-green-500 gap-1 rounded-sm">
 												<ShieldCheck class="w-3 h-3" />
-												Enabled
+												{$t('common.states.enabled')}
 											</Badge>
 										{:else}
-											<Badge variant="secondary" class="rounded-sm">Disabled</Badge>
+											<Badge variant="secondary" class="rounded-sm">{$t('common.states.disabled')}</Badge>
 										{/if}
 									</div>
 									<p class="text-sm text-muted-foreground">
 										{#if profile.mfaEnabled}
-											MFA is enabled for your account
+											{$t('profile.security.mfaEnabledDescription')}
 										{:else}
-											Add an extra layer of security
+											{$t('profile.security.mfaDisabledDescription')}
 										{/if}
 									</p>
 								</div>
 							</div>
 							{#if profile.mfaEnabled}
 								<Button variant="outline" onclick={() => showDisableMfaModal = true}>
-									Disable MFA
+									{$t('profile.security.disableMfa')}
 								</Button>
 							{:else}
 								<Button onclick={setupMfa} disabled={mfaLoading}>
@@ -610,7 +611,7 @@
 									{:else}
 										<QrCode class="w-4 h-4" />
 									{/if}
-									Setup MFA
+									{$t('profile.security.setupMfa')}
 								</Button>
 							{/if}
 						</div>
@@ -619,8 +620,8 @@
 							<div class="flex items-center gap-3">
 								<Smartphone class="w-5 h-5 text-muted-foreground" />
 								<div>
-									<p class="font-medium">Two-factor authentication</p>
-									<p class="text-sm text-muted-foreground">Managed by your SSO provider</p>
+									<p class="font-medium">{$t('profile.security.mfaTitle')}</p>
+									<p class="text-sm text-muted-foreground">{$t('profile.security.managedBySso')}</p>
 								</div>
 							</div>
 							<Badge class="gap-1 rounded-sm bg-yellow-500/20 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/30">
@@ -645,28 +646,28 @@
 					<Card.Title class="flex items-center gap-2 justify-between">
 						<span class="flex items-center gap-2">
 							<KeyRound class="w-5 h-5" />
-							API tokens
+							{$t('profile.tokens.title')}
 						</span>
 						<Button variant="outline" size="sm" onclick={() => showApiTokenModal = true}>
 							<Plus class="w-4 h-4 mr-1" />
-							Generate token
+							{$t('profile.tokens.generateToken')}
 						</Button>
 					</Card.Title>
-					<Card.Description>Create tokens for CI/CD pipelines and scripts</Card.Description>
+					<Card.Description>{$t('profile.tokens.description')}</Card.Description>
 				</Card.Header>
 				<Card.Content>
 					{#if tokensLoading}
-						<p class="text-sm text-muted-foreground">Loading tokens...</p>
+						<p class="text-sm text-muted-foreground">{$t('profile.tokens.loading')}</p>
 					{:else if apiTokens.length === 0}
-						<p class="text-sm text-muted-foreground">No API tokens created yet.</p>
+						<p class="text-sm text-muted-foreground">{$t('profile.tokens.empty')}</p>
 					{:else}
 						<Table.Root>
 							<Table.Header>
 								<Table.Row>
-									<Table.Head>Name</Table.Head>
-									<Table.Head>Prefix</Table.Head>
-									<Table.Head>Last used</Table.Head>
-									<Table.Head>Expires</Table.Head>
+									<Table.Head>{$t('common.labels.name')}</Table.Head>
+									<Table.Head>{$t('profile.tokens.prefix')}</Table.Head>
+									<Table.Head>{$t('profile.tokens.lastUsed')}</Table.Head>
+									<Table.Head>{$t('profile.tokens.expires')}</Table.Head>
 									<Table.Head class="w-[80px]"></Table.Head>
 								</Table.Row>
 							</Table.Header>
@@ -678,22 +679,22 @@
 											<code class="text-xs bg-muted px-1.5 py-0.5 rounded">dh_{token.tokenPrefix}...</code>
 										</Table.Cell>
 										<Table.Cell class="text-sm text-muted-foreground">
-											{token.lastUsed ? formatDateTime(token.lastUsed) : 'Never'}
+											{token.lastUsed ? formatDateTime(token.lastUsed) : $t('common.states.never')}
 										</Table.Cell>
 										<Table.Cell class="text-sm">
 											{#if isTokenExpired(token.expiresAt)}
-												<Badge variant="destructive">Expired</Badge>
+												<Badge variant="destructive">{$t('profile.tokens.expired')}</Badge>
 											{:else if token.expiresAt}
 												{formatDateTime(token.expiresAt)}
 											{:else}
-												<span class="text-muted-foreground">Never</span>
+												<span class="text-muted-foreground">{$t('common.states.never')}</span>
 											{/if}
 										</Table.Cell>
 										<Table.Cell>
 											<ConfirmPopover
-												title="Revoke token"
-												description="This token will stop working immediately."
-												confirmText="Revoke"
+												title={$t('profile.tokens.revokeToken')}
+												description={$t('profile.tokens.revokeDescription')}
+												confirmText={$t('profile.tokens.revoke')}
 												onConfirm={() => revokeToken(token.id)}
 											>
 												<Button variant="ghost" size="sm" class="text-destructive hover:text-destructive">
@@ -719,9 +720,9 @@
 				<Card.Header>
 					<Card.Title class="flex items-center gap-2">
 						<Palette class="w-5 h-5" />
-						Appearance
+						{$t('profile.appearance.title')}
 					</Card.Title>
-					<Card.Description>Customize the look of the application</Card.Description>
+					<Card.Description>{$t('profile.appearance.description')}</Card.Description>
 				</Card.Header>
 				<Card.Content>
 					<ThemeSelector userId={profile.id} />

@@ -9,6 +9,7 @@
 	import { canAccess } from '$lib/stores/auth';
 	import GitRepositoryModal from './GitRepositoryModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	interface GitCredential {
 		id: number;
@@ -41,7 +42,7 @@
 			repositories = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch git repositories:', error);
-			toast.error('Failed to fetch git repositories');
+			toast.error(translate('settings.git.repositories.toasts.loadFailed'));
 		} finally {
 			loading = false;
 		}
@@ -53,7 +54,7 @@
 			credentials = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch git credentials:', error);
-			toast.error('Failed to fetch git credentials');
+			toast.error(translate('settings.git.credentials.toasts.loadFailed'));
 		}
 	}
 
@@ -76,13 +77,13 @@
 			const response = await fetch(`/api/git/repositories/${id}`, { method: 'DELETE' });
 			if (response.ok) {
 				await fetchRepositories();
-				toast.success('Repository deleted');
+				toast.success(translate('settings.git.repositories.toasts.deleted'));
 			} else {
-				toast.error('Failed to delete repository');
+				toast.error(translate('settings.git.repositories.toasts.deleteFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to delete repository:', error);
-			toast.error('Failed to delete repository');
+			toast.error(translate('settings.git.repositories.toasts.deleteFailed'));
 		}
 	}
 
@@ -96,16 +97,16 @@
 				testResult = {
 					id,
 					success: true,
-					message: `Connected! Branch: ${data.branch}, Last commit: ${data.lastCommit}`
+					message: translate('settings.git.repositories.test.connectedMessage', { branch: data.branch, commit: data.lastCommit })
 				};
-				toast.success('Repository connection successful');
+				toast.success(translate('settings.git.repositories.toasts.connectionSuccessful'));
 			} else {
 				testResult = {
 					id,
 					success: false,
-					message: data.error || 'Connection failed'
+					message: data.error || translate('settings.git.repositories.test.connectionFailed')
 				};
-				toast.error(`Connection failed: ${data.error || 'Unknown error'}`);
+				toast.error(translate('settings.git.repositories.toasts.connectionFailedWithError', { error: data.error || translate('common.states.unknown') }));
 			}
 			// Auto-clear after 5 seconds
 			setTimeout(() => {
@@ -117,9 +118,9 @@
 			testResult = {
 				id,
 				success: false,
-				message: 'Failed to test connection'
+				message: translate('settings.git.repositories.test.testFailed')
 			};
-			toast.error('Failed to test repository connection');
+			toast.error(translate('settings.git.repositories.toasts.testFailed'));
 		} finally {
 			testingId = null;
 		}
@@ -134,26 +135,26 @@
 <div class="space-y-4">
 	<div class="flex justify-between items-center">
 		<div>
-			<h3 class="text-lg font-medium">Git repositories</h3>
-			<p class="text-sm text-muted-foreground">Manage Git repositories that can be used to deploy stacks</p>
+			<h3 class="text-lg font-medium">{$t('settings.git.repositories.title')}</h3>
+			<p class="text-sm text-muted-foreground">{$t('settings.git.repositories.description')}</p>
 		</div>
 		{#if $canAccess('settings', 'edit')}
 			<Button size="sm" onclick={() => openModal()}>
 				<Plus class="w-4 h-4" />
-				Add repository
+				{$t('settings.git.repositories.addRepository')}
 			</Button>
 		{/if}
 	</div>
 
 	{#if loading}
-		<p class="text-sm text-muted-foreground">Loading repositories...</p>
+		<p class="text-sm text-muted-foreground">{$t('settings.git.repositories.loading')}</p>
 	{:else if repositories.length === 0}
 		<Card.Root>
 			<Card.Content>
 				<EmptyState
 					icon={FolderGit2}
-					title="No Git repositories configured"
-					description="Add a repository to use it when deploying stacks from Git"
+					title={$t('settings.git.repositories.empty.title')}
+					description={$t('settings.git.repositories.empty.description')}
 				/>
 			</Card.Content>
 		</Card.Root>
@@ -182,14 +183,14 @@
 							</span>
 						{/if}
 						{#if repo.credentialName}
-							<span class="flex items-center gap-1 text-xs text-muted-foreground" title="Using credential: {repo.credentialName}">
+							<span class="flex items-center gap-1 text-xs text-muted-foreground" title={$t('settings.git.repositories.usingCredential', { credential: repo.credentialName })}>
 								<Lock class="w-3 h-3" />
 								<span class="hidden sm:inline">{repo.credentialName}</span>
 							</span>
 						{:else}
-							<span class="flex items-center gap-1 text-xs text-muted-foreground" title="Public repository">
+							<span class="flex items-center gap-1 text-xs text-muted-foreground" title={$t('settings.git.repositories.publicRepository')}>
 								<Globe class="w-3 h-3" />
-								<span class="hidden sm:inline">Public</span>
+								<span class="hidden sm:inline">{$t('settings.git.repositories.public')}</span>
 							</span>
 						{/if}
 						<Badge variant="outline" class="text-xs flex items-center gap-1">
@@ -202,7 +203,7 @@
 							class="h-7 w-7"
 							onclick={() => testRepository(repo.id)}
 							disabled={testingId === repo.id}
-							title="Test connection"
+							title={$t('settings.git.repositories.testConnection')}
 						>
 							{#if testingId === repo.id}
 								<Loader2 class="w-3.5 h-3.5 animate-spin" />
@@ -211,15 +212,15 @@
 							{/if}
 						</Button>
 						{#if $canAccess('settings', 'edit')}
-							<Button variant="ghost" size="icon" class="h-7 w-7" onclick={() => openModal(repo)} title="Edit repository">
+							<Button variant="ghost" size="icon" class="h-7 w-7" onclick={() => openModal(repo)} title={$t('settings.git.repositories.editRepository')}>
 								<Pencil class="w-3.5 h-3.5" />
 							</Button>
 							<ConfirmPopover
 								open={confirmDeleteId === repo.id}
-								action="Delete"
-								itemType="repository"
+								action={$t('settings.git.repositories.confirm.deleteAction')}
+								itemType={$t('settings.git.repositories.confirm.repository')}
 								itemName={repo.name}
-								title="Delete"
+								title={$t('settings.git.repositories.confirm.deleteTitle')}
 								onConfirm={() => deleteRepository(repo.id)}
 								onOpenChange={(open) => confirmDeleteId = open ? repo.id : null}
 							>

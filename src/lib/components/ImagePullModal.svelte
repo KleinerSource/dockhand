@@ -11,6 +11,7 @@
 	import PullTab from '$lib/components/PullTab.svelte';
 	import ScanTab from '$lib/components/ScanTab.svelte';
 	import type { ScanResult } from '$lib/components/ScanTab.svelte';
+	import { t } from '$lib/i18n';
 
 	interface Registry {
 		id: number;
@@ -69,7 +70,7 @@
 
 	// Get all registries plus a Docker Hub option
 	const allRegistries = $derived([
-		{ id: 'dockerhub' as const, name: 'Docker Hub (public)', url: 'https://hub.docker.com', hasCredentials: false, is_default: false },
+		{ id: 'dockerhub' as const, name: $t('imagePull.dockerHubPublic'), url: 'https://hub.docker.com', hasCredentials: false, is_default: false },
 		...registries.filter(r => !isDockerHub(r))
 	]);
 
@@ -219,7 +220,7 @@
 
 	const effectiveEnvId = $derived(envId ?? $currentEnvironment?.id ?? null);
 
-	const title = $derived(envHasScanning ? 'Pull & scan image' : 'Pull image');
+	const title = $derived(envHasScanning ? $t('imagePull.modalTitleWithScan') : $t('imagePull.modalTitle'));
 </script>
 
 <Dialog.Root bind:open onOpenChange={handleClose}>
@@ -257,7 +258,7 @@
 					disabled={isProcessing}
 				>
 					<Settings2 class="w-3.5 h-3.5 inline mr-1.5" />
-					Configure
+					{$t('imagePull.steps.configure')}
 				</button>
 				<ArrowBigRight class="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
 			{/if}
@@ -267,7 +268,7 @@
 				disabled={isProcessing || (needsConfigureStep && pullStatus === 'idle')}
 			>
 				<Download class="w-3.5 h-3.5 inline mr-1.5" />
-				Pull
+				{$t('imagePull.steps.pull')}
 				{#if pullStatus === 'complete'}
 					<CheckCircle2 class="w-3.5 h-3.5 inline ml-1 text-green-500" />
 				{:else if pullStatus === 'error'}
@@ -294,7 +295,7 @@
 					{:else}
 						<ShieldCheck class="w-3.5 h-3.5 inline mr-1.5" />
 					{/if}
-					Scan
+					{$t('imagePull.steps.scan')}
 					{#if scanStatus === 'complete'}
 						<CheckCircle2 class="w-3.5 h-3.5 inline ml-1 text-green-500" />
 					{:else if scanStatus === 'error'}
@@ -311,7 +312,7 @@
 			{#if needsConfigureStep}
 				<div class="space-y-4 px-1 overflow-auto" class:hidden={activeTab !== 'configure'}>
 					<div class="space-y-2">
-						<Label>Registry</Label>
+						<Label>{$t('common.labels.registry')}</Label>
 						<Select.Root
 							type="single"
 							value={selectedRegistryId === 'dockerhub' ? 'dockerhub' : selectedRegistryId ? String(selectedRegistryId) : undefined}
@@ -326,7 +327,7 @@
 									{/if}
 									<span class="flex-1 text-left">{selectedRegistry.name}</span>
 								{:else}
-									<span class="text-muted-foreground">Select registry</span>
+									<span class="text-muted-foreground">{$t('registry.selectRegistry')}</span>
 								{/if}
 							</Select.Trigger>
 							<Select.Content>
@@ -339,7 +340,7 @@
 										{/if}
 										{registry.name}
 										{#if registry.hasCredentials}
-											<Badge variant="outline" class="ml-2 text-xs">auth</Badge>
+											<Badge variant="outline" class="ml-2 text-xs">{$t('registry.authBadge')}</Badge>
 										{/if}
 									</Select.Item>
 								{/each}
@@ -348,10 +349,10 @@
 					</div>
 
 					<div class="space-y-2">
-						<Label>Image name</Label>
+						<Label>{$t('imagePull.imageName')}</Label>
 						<Input
 							bind:value={configImageName}
-							placeholder={selectedRegistryId === 'dockerhub' ? 'nginx:latest or library/nginx:1.25' : 'myimage:latest'}
+							placeholder={selectedRegistryId === 'dockerhub' ? $t('imagePull.placeholders.dockerHub') : $t('imagePull.placeholders.privateRegistry')}
 							onkeydown={(e: KeyboardEvent) => {
 								if (e.key === 'Enter' && configImageName.trim()) {
 									startPullFromConfigure();
@@ -359,13 +360,13 @@
 							}}
 						/>
 						<p class="text-xs text-muted-foreground">
-							Format: <code class="bg-muted px-1 py-0.5 rounded">image:tag</code> or <code class="bg-muted px-1 py-0.5 rounded">namespace/image:tag</code>
+							{$t('imagePull.imageFormatPrefix')} <code class="bg-muted px-1 py-0.5 rounded">image:tag</code> {$t('imagePull.imageFormatOr')} <code class="bg-muted px-1 py-0.5 rounded">namespace/image:tag</code>
 						</p>
 					</div>
 
 					{#if configImageName.trim()}
 						<div class="space-y-2">
-							<Label class="text-muted-foreground">Full image reference</Label>
+							<Label class="text-muted-foreground">{$t('imagePull.fullReference')}</Label>
 							<div class="p-2 bg-muted rounded text-sm">
 								<code class="break-all">{fullImageReference}</code>
 							</div>
@@ -408,11 +409,11 @@
 			<div>
 				{#if activeTab === 'pull' && pullStatus === 'error'}
 					<Button variant="outline" onclick={() => pullTabRef?.startPull()}>
-						Retry
+						{$t('common.actions.retry')}
 					</Button>
 				{:else if activeTab === 'scan' && scanStatus === 'error'}
 					<Button variant="outline" onclick={() => scanTabRef?.startScan()}>
-						Retry scan
+						{$t('imageScan.retryScan')}
 					</Button>
 				{/if}
 			</div>
@@ -426,10 +427,10 @@
 					>
 						{#if isDeleting}
 							<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-							Removing...
+							{$t('imagePull.removing')}
 						{:else}
 							<Trash2 class="w-4 h-4" />
-							Remove image
+							{$t('imagePull.removeImage')}
 						{/if}
 					</Button>
 					<Button
@@ -438,7 +439,7 @@
 						disabled={isDeleting}
 					>
 						<CheckCircle2 class="w-4 h-4" />
-						Keep image
+						{$t('imagePull.keepImage')}
 					</Button>
 				{:else if showDeleteButton && pullStatus === 'complete' && !envHasScanning}
 					<!-- Show Keep/Remove buttons after pull completes when no scanning (Images page) -->
@@ -449,10 +450,10 @@
 					>
 						{#if isDeleting}
 							<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-							Removing...
+							{$t('imagePull.removing')}
 						{:else}
 							<Trash2 class="w-4 h-4" />
-							Remove image
+							{$t('imagePull.removeImage')}
 						{/if}
 					</Button>
 					<Button
@@ -461,7 +462,7 @@
 						disabled={isDeleting}
 					>
 						<CheckCircle2 class="w-4 h-4" />
-						Keep image
+						{$t('imagePull.keepImage')}
 					</Button>
 				{:else}
 					<Button
@@ -469,7 +470,7 @@
 						onclick={handleClose}
 						disabled={isProcessing}
 					>
-						{pullStatus === 'complete' && !envHasScanning ? 'Done' : 'Cancel'}
+						{pullStatus === 'complete' && !envHasScanning ? $t('common.actions.done') : $t('common.actions.cancel')}
 					</Button>
 					{#if activeTab === 'configure'}
 						<Button
@@ -477,7 +478,7 @@
 							disabled={!configImageName.trim()}
 						>
 							<Download class="w-4 h-4" />
-							Pull
+							{$t('imagePull.steps.pull')}
 						</Button>
 					{:else if pullStatus === 'complete' || scanStatus === 'complete'}
 						<Button
@@ -485,7 +486,7 @@
 							onclick={handleClose}
 							disabled={isProcessing}
 						>
-							OK
+							{$t('common.actions.ok')}
 						</Button>
 					{/if}
 				{/if}

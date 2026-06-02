@@ -10,6 +10,7 @@
 	import { toast } from 'svelte-sonner';
 	import { currentEnvironment, environments } from '$lib/stores/environment';
 	import EnvironmentIcon from '$lib/components/EnvironmentIcon.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	interface DiscoveredStack {
 		name: string;
@@ -53,7 +54,7 @@
 
 	// Use current environment from store
 	const envId = $derived($currentEnvironment?.id ?? null);
-	const envName = $derived($currentEnvironment?.name ?? 'Unknown');
+	const envName = $derived($currentEnvironment?.name ?? translate('common.states.unknown'));
 	// Look up the icon from the environments list since currentEnvironment doesn't store it
 	const currentEnvData = $derived($environments.find(e => e.id === envId));
 	const envIcon = $derived(currentEnvData?.icon || 'globe');
@@ -130,7 +131,7 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				toast.error(data.error || 'Failed to scan directory');
+				toast.error(data.error || translate('stacks.import.toasts.scanFailed'));
 				return;
 			}
 
@@ -164,9 +165,9 @@
 
 			if (discovered.length === 0) {
 				if (skippedCount > 0) {
-					toast.info(`All ${skippedCount} stack(s) in this directory are already adopted`);
+					toast.info(translate('stacks.import.toasts.allAlreadyAdopted', { count: skippedCount }));
 				} else {
-					toast.info('No compose stacks found in this directory');
+					toast.info(translate('stacks.import.toasts.noneFound'));
 				}
 			} else {
 				const selections = new Map<string, boolean>();
@@ -181,7 +182,7 @@
 			await filesystemBrowser?.addRecentLocation(path);
 
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Failed to scan directory');
+			toast.error(e instanceof Error ? e.message : translate('stacks.import.toasts.scanFailed'));
 		} finally {
 			scanning = false;
 		}
@@ -189,7 +190,7 @@
 
 	async function adoptSingleFile(entry: FileEntry) {
 		if (!envId) {
-			toast.error('No environment selected');
+			toast.error(translate('stacks.import.toasts.noEnvironment'));
 			return;
 		}
 
@@ -221,20 +222,20 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				toast.error(data.error || 'Failed to adopt stack');
+				toast.error(data.error || translate('stacks.import.toasts.adoptFailed'));
 				return;
 			}
 
 			if (data.adopted?.length > 0) {
-				toast.success(`Adopted stack "${data.adopted[0]}"`);
+				toast.success(translate('stacks.import.toasts.adoptedStack', { name: data.adopted[0] }));
 				await filesystemBrowser?.addRecentLocation(parentDir);
 				onAdopted?.();
 				handleClose();
 			} else if (data.failed?.length > 0) {
-				toast.error(`Failed: ${data.failed[0].error}`);
+				toast.error(translate('stacks.import.toasts.failedWithMessage', { error: data.failed[0].error }));
 			}
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Failed to adopt');
+			toast.error(e instanceof Error ? e.message : translate('stacks.import.toasts.adoptFailed'));
 		} finally {
 			adopting = false;
 		}
@@ -261,20 +262,20 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				toast.error(data.error || 'Failed to adopt stacks');
+				toast.error(data.error || translate('stacks.import.toasts.adoptManyFailed'));
 				return;
 			}
 
 			if (data.adopted?.length > 0) {
-				toast.success(`Adopted ${data.adopted.length} stack(s)`);
+				toast.success(translate('stacks.import.toasts.adoptedStacks', { count: data.adopted.length }));
 				onAdopted?.();
 				handleClose();
 			}
 			if (data.failed?.length > 0) {
-				toast.error(`Failed to adopt ${data.failed.length} stack(s)`);
+				toast.error(translate('stacks.import.toasts.failedCount', { count: data.failed.length }));
 			}
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Failed to adopt');
+			toast.error(e instanceof Error ? e.message : translate('stacks.import.toasts.adoptManyFailed'));
 		} finally {
 			adopting = false;
 		}
@@ -311,15 +312,16 @@
 
 	// Browser title with environment info
 	const browserTitle = $derived.by(() => {
-		const envPart = envName ? ` to ${envName}` : '';
-		return `Adopt stacks${envPart}`;
+		return envName
+			? translate('stacks.import.browserTitleWithEnvironment', { environment: envName })
+			: translate('stacks.import.browserTitle');
 	});
 
 	const browserDescription = $derived.by(() => {
 		if (isRemoteEnv) {
-			return `Browse the Dockhand host filesystem to find compose files. Files are managed locally — Hawser only proxies Docker API calls, not filesystem access.`;
+			return translate('stacks.import.remoteDescription');
 		}
-		return 'Browse to a compose file or scan a directory for stacks.';
+		return translate('stacks.import.browserDescription');
 	});
 </script>
 
@@ -346,12 +348,12 @@
 			<Dialog.Header class="px-6 py-4 border-b shrink-0">
 				<Dialog.Title class="flex items-center gap-2">
 					<Import class="w-5 h-5" />
-					Select stacks to adopt to
+					{$t('stacks.import.selectStacksTitle')}
 					<EnvironmentIcon icon={envIcon} envId={envId} class="w-4 h-4 text-muted-foreground" />
 					<span class="text-muted-foreground font-normal">{envName}</span>
 				</Dialog.Title>
 				<Dialog.Description>
-					{scanResults.length} stack(s) found. Select which ones to adopt into {envName}.
+					{$t('stacks.import.foundDescription', { count: scanResults.length, environment: envName })}
 				</Dialog.Description>
 			</Dialog.Header>
 
@@ -375,13 +377,13 @@
 										<span class="font-medium truncate">{stack.name}</span>
 										{#if stack.serviceCount}
 											<Badge variant="outline" class="text-xs">
-												{stack.serviceCount} service{stack.serviceCount !== 1 ? 's' : ''}
+												{$t(stack.serviceCount === 1 ? 'stacks.import.serviceCountOne' : 'stacks.import.serviceCountMany', { count: stack.serviceCount })}
 											</Badge>
 										{/if}
 										{#if stack.running}
 											<Badge variant="default" class="text-xs {countsMismatch ? 'bg-amber-600' : 'bg-green-600'}">
 												<Play class="w-3 h-3 mr-1" />
-												{stack.containerCount} running
+												{$t('stacks.import.runningCount', { count: stack.containerCount ?? 0 })}
 											</Badge>
 										{/if}
 									</div>
@@ -403,12 +405,12 @@
 					{#if isRemoteEnv}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-							<span class="text-blue-700 dark:text-blue-300">These compose files are on the <span class="font-medium">Dockhand host</span>, not on {envName}. Docker commands will be sent to {envName} via Hawser, but the files are managed locally.</span>
+							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilesPrefix')} <span class="font-medium">Dockhand host</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFilesSuffix', { environment: envName })}</span>
 						</div>
 					{/if}
 					<div class="flex items-start gap-2.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2.5">
 						<Info class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-						<span><span class="font-medium text-amber-600 dark:text-amber-400">What happens when you adopt:</span> <span class="text-zinc-600 dark:text-zinc-400">Dockhand will track these compose files, letting you edit, start, and stop the stacks from the UI. Your files stay in their current location.</span></span>
+						<span><span class="font-medium text-amber-600 dark:text-amber-400">{$t('stacks.import.adoptInfoTitle')}</span> <span class="text-zinc-600 dark:text-zinc-400">{$t('stacks.import.adoptManyInfo')}</span></span>
 					</div>
 				</div>
 			</div>
@@ -421,15 +423,15 @@
 						onCheckedChange={toggleAll}
 					/>
 					<span class="text-sm text-muted-foreground">
-						<span class="font-medium text-foreground">{selectedCount}</span> of {scanResults.length} selected
+						{$t('stacks.import.selectedCount', { selected: selectedCount, total: scanResults.length })}
 					</span>
 				</div>
 				<div class="flex gap-2">
 					<Button variant="outline" onclick={goBackToBrowse}>
-						Back
+						{$t('common.actions.back')}
 					</Button>
 					<Button variant="outline" onclick={handleClose}>
-						Cancel
+						{$t('common.actions.cancel')}
 					</Button>
 					<Button
 						variant="default"
@@ -438,10 +440,10 @@
 					>
 						{#if adopting}
 							<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-							Adopting...
+							{$t('stacks.import.adopting')}
 						{:else}
 							<Import class="w-4 h-4" />
-							Adopt {selectedCount} stack(s)
+							{$t('stacks.import.adoptSelected', { count: selectedCount })}
 						{/if}
 					</Button>
 				</div>
@@ -456,10 +458,10 @@
 		<Dialog.Header class="px-5 py-4 border-b shrink-0">
 			<Dialog.Title class="flex items-center gap-2">
 				<Import class="w-5 h-5" />
-				Adopt this stack?
+				{$t('stacks.import.previewTitle')}
 			</Dialog.Title>
 			<Dialog.Description>
-				Review the compose file before adopting.
+				{$t('stacks.import.previewDescription')}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -468,11 +470,11 @@
 				<!-- Stack info bar -->
 				<div class="px-5 py-3 border-b bg-muted/30 flex items-center gap-4 shrink-0">
 					<div class="flex items-center gap-2">
-						<span class="text-sm text-muted-foreground">Stack:</span>
-						<span class="font-medium">{previewComposeName || previewFile.path.replace(/\/[^/]+$/, '').split('/').pop() || 'unknown'}</span>
+						<span class="text-sm text-muted-foreground">{$t('common.labels.stack')}:</span>
+						<span class="font-medium">{previewComposeName || previewFile.path.replace(/\/[^/]+$/, '').split('/').pop() || $t('common.states.unknown')}</span>
 						{#if previewServiceCount > 0}
 							<Badge variant="outline" class="text-xs">
-								{previewServiceCount} service{previewServiceCount !== 1 ? 's' : ''}
+								{$t(previewServiceCount === 1 ? 'stacks.import.serviceCountOne' : 'stacks.import.serviceCountMany', { count: previewServiceCount })}
 							</Badge>
 						{/if}
 					</div>
@@ -503,12 +505,12 @@
 					{#if isRemoteEnv}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-							<span class="text-blue-700 dark:text-blue-300">This compose file is on the <span class="font-medium">Dockhand host</span>, not on {envName}. Docker commands will be sent to {envName} via Hawser, but the file is managed locally.</span>
+							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilePrefix')} <span class="font-medium">Dockhand host</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFileSuffix', { environment: envName })}</span>
 						</div>
 					{/if}
 					<div class="flex items-start gap-2.5 text-xs bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2.5">
 						<Info class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-						<span><span class="font-medium text-amber-600 dark:text-amber-400">What happens when you adopt:</span> <span class="text-zinc-600 dark:text-zinc-400">Dockhand will track this compose file, letting you edit, start, and stop the stack from the UI. Your files stay in their current location.</span></span>
+						<span><span class="font-medium text-amber-600 dark:text-amber-400">{$t('stacks.import.adoptInfoTitle')}</span> <span class="text-zinc-600 dark:text-zinc-400">{$t('stacks.import.adoptOneInfo')}</span></span>
 					</div>
 				</div>
 			</div>
@@ -516,15 +518,15 @@
 
 		<div class="px-5 py-3 border-t flex justify-end gap-2 shrink-0">
 			<Button variant="outline" onclick={() => showPreview = false}>
-				Cancel
+				{$t('common.actions.cancel')}
 			</Button>
 			<Button onclick={confirmAdoptFromPreview} disabled={adopting}>
 				{#if adopting}
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-					Adopting...
+					{$t('stacks.import.adopting')}
 				{:else}
 					<Import class="w-4 h-4" />
-					Adopt stack
+					{$t('stacks.import.adoptStack')}
 				{/if}
 			</Button>
 		</div>

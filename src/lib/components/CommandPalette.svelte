@@ -33,6 +33,7 @@
 	import { currentEnvironment } from '$lib/stores/environment';
 	import { themeStore, onDarkModeChange } from '$lib/stores/theme';
 	import { lightThemes, darkThemes, fonts } from '$lib/themes';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		open?: boolean;
@@ -41,7 +42,7 @@
 	let { open = $bindable(false) }: Props = $props();
 
 	interface CommandItem {
-		name: string;
+		labelKey: string;
 		href: string;
 		icon: typeof LayoutDashboard;
 		keywords?: string[];
@@ -67,18 +68,18 @@
 	let loading = $state(false);
 
 	const navigationItems: CommandItem[] = [
-		{ name: 'Dashboard', href: '/', icon: LayoutDashboard, keywords: ['home', 'overview'] },
-		{ name: 'Containers', href: '/containers', icon: Box, keywords: ['docker', 'running'] },
-		{ name: 'Logs', href: '/logs', icon: ScrollText, keywords: ['output', 'debug'] },
-		{ name: 'Shell', href: '/terminal', icon: Terminal, keywords: ['exec', 'bash', 'sh'] },
-		{ name: 'Stacks', href: '/stacks', icon: Layers, keywords: ['compose', 'docker-compose'] },
-		{ name: 'Images', href: '/images', icon: Images, keywords: ['pull', 'build'] },
-		{ name: 'Volumes', href: '/volumes', icon: HardDrive, keywords: ['storage', 'data'] },
-		{ name: 'Networks', href: '/networks', icon: Network, keywords: ['bridge', 'host'] },
-		{ name: 'Registry', href: '/registry', icon: Download, keywords: ['hub', 'pull'] },
-		{ name: 'Activity', href: '/activity', icon: Eye, keywords: ['events', 'history'] },
-		{ name: 'Schedules', href: '/schedules', icon: Timer, keywords: ['cron', 'auto'] },
-		{ name: 'Settings', href: '/settings', icon: Settings, keywords: ['config', 'preferences'] }
+		{ labelKey: 'navigation.dashboard', href: '/', icon: LayoutDashboard, keywords: ['home', 'overview'] },
+		{ labelKey: 'navigation.containers', href: '/containers', icon: Box, keywords: ['docker', 'running'] },
+		{ labelKey: 'navigation.logs', href: '/logs', icon: ScrollText, keywords: ['output', 'debug'] },
+		{ labelKey: 'navigation.shell', href: '/terminal', icon: Terminal, keywords: ['exec', 'bash', 'sh'] },
+		{ labelKey: 'navigation.stacks', href: '/stacks', icon: Layers, keywords: ['compose', 'docker-compose'] },
+		{ labelKey: 'navigation.images', href: '/images', icon: Images, keywords: ['pull', 'build'] },
+		{ labelKey: 'navigation.volumes', href: '/volumes', icon: HardDrive, keywords: ['storage', 'data'] },
+		{ labelKey: 'navigation.networks', href: '/networks', icon: Network, keywords: ['bridge', 'host'] },
+		{ labelKey: 'navigation.registry', href: '/registry', icon: Download, keywords: ['hub', 'pull'] },
+		{ labelKey: 'navigation.activity', href: '/activity', icon: Eye, keywords: ['events', 'history'] },
+		{ labelKey: 'navigation.schedules', href: '/schedules', icon: Timer, keywords: ['cron', 'auto'] },
+		{ labelKey: 'navigation.settings', href: '/settings', icon: Settings, keywords: ['config', 'preferences'] }
 	];
 
 	// Filter items based on permissions
@@ -116,7 +117,7 @@
 				}));
 			}
 		} catch (e) {
-			console.error('Failed to load command palette data:', e);
+			console.error($t('commandPalette.errors.loadData'), e);
 		} finally {
 			loading = false;
 		}
@@ -168,7 +169,7 @@
 			try {
 				await fetch(`/api/containers/${containerId}/${action}${envParam}`, { method: 'POST' });
 			} catch (e) {
-				console.error(`Failed to ${action} container:`, e);
+				console.error($t('commandPalette.errors.containerAction', { action }), e);
 			}
 		}
 	}
@@ -193,35 +194,35 @@
 	});
 </script>
 
-<Command.Dialog bind:open title="Command Palette" description="Search for pages and actions">
-	<Command.Input placeholder="Search..." />
+<Command.Dialog bind:open title={$t('commandPalette.title')} description={$t('commandPalette.description')}>
+	<Command.Input placeholder={$t('commandPalette.placeholder')} />
 	<Command.List>
-		<Command.Empty>No results found.</Command.Empty>
-		<Command.Group heading="Navigation">
+		<Command.Empty>{$t('commandPalette.noResults')}</Command.Empty>
+		<Command.Group heading={$t('commandPalette.groups.navigation')}>
 			{#each filteredItems as item (item.href)}
 				<Command.Item
-					value={item.name + ' ' + (item.keywords?.join(' ') || '')}
+					value={$t(item.labelKey) + ' ' + (item.keywords?.join(' ') || '')}
 					onSelect={() => handleSelect(item.href)}
 				>
 					<item.icon class="mr-2 h-4 w-4" />
-					<span>{item.name}</span>
+					<span>{$t(item.labelKey)}</span>
 				</Command.Item>
 			{/each}
 		</Command.Group>
 		{#if $licenseStore.isEnterprise && $authStore.authEnabled}
 			<Command.Separator />
-			<Command.Group heading="Enterprise">
+			<Command.Group heading={$t('commandPalette.groups.enterprise')}>
 				<Command.Item
-					value="Audit log compliance"
+					value={$t('commandPalette.search.auditCompliance')}
 					onSelect={() => handleSelect('/audit')}
 				>
 					<ClipboardList class="mr-2 h-4 w-4" />
-					<span>Audit log</span>
+					<span>{$t('navigation.auditLog')}</span>
 				</Command.Item>
 			</Command.Group>
 		{/if}
 		<Command.Separator />
-		<Command.Group heading="Light theme">
+		<Command.Group heading={$t('commandPalette.groups.lightTheme')}>
 			{#each lightThemes as theme (theme.id)}
 				<Command.Item
 					value={`light theme ${theme.name}`}
@@ -242,7 +243,7 @@
 			{/each}
 		</Command.Group>
 		<Command.Separator />
-		<Command.Group heading="Dark theme">
+		<Command.Group heading={$t('commandPalette.groups.darkTheme')}>
 			{#each darkThemes as theme (theme.id)}
 				<Command.Item
 					value={`dark theme ${theme.name}`}
@@ -263,7 +264,7 @@
 			{/each}
 		</Command.Group>
 		<Command.Separator />
-		<Command.Group heading="Font">
+		<Command.Group heading={$t('commandPalette.groups.font')}>
 			{#each fonts as font (font.id)}
 				<Command.Item
 					value={`font ${font.name}`}
@@ -279,7 +280,7 @@
 		</Command.Group>
 		{#if environments.length > 0}
 			<Command.Separator />
-			<Command.Group heading="Switch environment">
+			<Command.Group heading={$t('commandPalette.groups.switchEnvironment')}>
 				{#each environments as env (env.id)}
 					<Command.Item
 						value={`environment ${env.name}`}
@@ -296,7 +297,7 @@
 		{/if}
 		{#if containers.length > 0}
 			<Command.Separator />
-			<Command.Group heading="Containers">
+			<Command.Group heading={$t('commandPalette.groups.containers')}>
 				{#each containers as container (container.id)}
 					<Command.Item
 						value={`container ${container.name} ${container.image} ${container.envName}`}
@@ -312,28 +313,28 @@
 								<button
 									class="p-1 hover:bg-muted rounded"
 									onclick={(e) => { e.stopPropagation(); handleContainerAction(container.id, 'logs'); }}
-									title="View logs"
+									title={$t('commandPalette.actions.viewLogs')}
 								>
 									<FileText class="h-3 w-3" />
 								</button>
 								<button
 									class="p-1 hover:bg-muted rounded"
 									onclick={(e) => { e.stopPropagation(); handleContainerAction(container.id, 'terminal'); }}
-									title="Open terminal"
+									title={$t('commandPalette.actions.openTerminal')}
 								>
 									<Terminal class="h-3 w-3" />
 								</button>
 								<button
 									class="p-1 hover:bg-muted rounded"
 									onclick={(e) => { e.stopPropagation(); handleContainerAction(container.id, 'restart'); }}
-									title="Restart"
+									title={$t('commandPalette.actions.restartContainer')}
 								>
 									<RotateCcw class="h-3 w-3" />
 								</button>
 								<button
 									class="p-1 hover:bg-muted rounded text-destructive"
 									onclick={(e) => { e.stopPropagation(); handleContainerAction(container.id, 'stop'); }}
-									title="Stop"
+									title={$t('commandPalette.actions.stopContainer')}
 								>
 									<Square class="h-3 w-3" />
 								</button>
@@ -341,7 +342,7 @@
 								<button
 									class="p-1 hover:bg-muted rounded text-green-500"
 									onclick={(e) => { e.stopPropagation(); handleContainerAction(container.id, 'start'); }}
-									title="Start"
+									title={$t('commandPalette.actions.startContainer')}
 								>
 									<Play class="h-3 w-3" />
 								</button>

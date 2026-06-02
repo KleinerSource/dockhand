@@ -48,6 +48,7 @@
 	import { licenseStore } from '$lib/stores/license';
 	import RoleModal from './RoleModal.svelte';
 	import EnvironmentIcon from '$lib/components/EnvironmentIcon.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	interface Role {
 		id: number;
@@ -166,7 +167,7 @@
 			}
 		} catch (error) {
 			console.error('Failed to fetch roles:', error);
-			toast.error('Failed to fetch roles');
+			toast.error(translate('settings.auth.roles.list.toasts.loadFailed'));
 		} finally {
 			rolesLoading = false;
 		}
@@ -215,13 +216,13 @@
 			const response = await fetch(`/api/roles/${roleId}`, { method: 'DELETE' });
 			if (response.ok) {
 				await fetchRoles();
-				toast.success('Role deleted');
+				toast.success(translate('settings.auth.roles.list.toasts.deleted'));
 			} else {
-				toast.error('Failed to delete role');
+				toast.error(translate('settings.auth.roles.list.toasts.deleteFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to delete role:', error);
-			toast.error('Failed to delete role');
+			toast.error(translate('settings.auth.roles.list.toasts.deleteFailed'));
 		} finally {
 			confirmDeleteRoleId = null;
 		}
@@ -252,15 +253,14 @@
 			<div class="text-center">
 				<h3 class="text-lg font-medium mb-2 flex items-center justify-center gap-2">
 					<Crown class="w-5 h-5 text-amber-500" />
-					Enterprise feature
+					{$t('settings.auth.roles.list.enterprise.title')}
 				</h3>
 				<p class="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-					Role-based access control (RBAC) is available with an enterprise license. Define custom
-					roles with granular permissions and assign them to users.
+					{$t('settings.auth.roles.list.enterprise.description')}
 				</p>
 				<Button onclick={() => onTabChange('license')}>
 					<Key class="w-4 h-4" />
-					Activate license
+					{$t('settings.auth.roles.list.enterprise.activateLicense')}
 				</Button>
 			</div>
 		</Card.Content>
@@ -273,16 +273,16 @@
 					<div>
 						<Card.Title class="text-sm font-medium flex items-center gap-2">
 							<Shield class="w-4 h-4" />
-							Roles
+							{$t('settings.auth.roles.list.title')}
 						</Card.Title>
 						<p class="text-xs text-muted-foreground mt-1">
-							Define roles with granular permissions and assign them to users for access control.
+							{$t('settings.auth.roles.list.description')}
 						</p>
 					</div>
 					{#if $canAccess('settings', 'edit')}
 						<Button size="sm" onclick={() => openRoleModal(null)}>
 							<Plus class="w-4 h-4" />
-							Add role
+							{$t('settings.auth.roles.list.addRole')}
 						</Button>
 					{/if}
 				</div>
@@ -295,8 +295,8 @@
 				{:else if roles.length === 0}
 					<div class="text-center py-8 text-sm text-muted-foreground">
 						<Shield class="w-8 h-8 mx-auto mb-2 opacity-50" />
-						<p>No roles configured</p>
-						<p class="text-xs">Create a role to define custom permissions</p>
+						<p>{$t('settings.auth.roles.list.empty.title')}</p>
+						<p class="text-xs">{$t('settings.auth.roles.list.empty.description')}</p>
 					</div>
 				{:else}
 					<div class="space-y-2 max-h-96 overflow-y-auto">
@@ -307,7 +307,7 @@
 									<div class="flex items-center gap-2 mb-1">
 										<span class="font-medium text-sm">{role.name}</span>
 										{#if role.isSystem}
-											<Badge variant="outline" class="text-xs">System</Badge>
+											<Badge variant="outline" class="text-xs">{$t('settings.auth.roles.list.badges.system')}</Badge>
 										{/if}
 									</div>
 									{#if role.description}
@@ -316,7 +316,7 @@
 									<!-- Permission Pills - System -->
 									{#if pills.system.length > 0}
 										<div class="flex flex-wrap items-center gap-1 mb-1">
-											<span class="text-2xs text-muted-foreground font-medium uppercase tracking-wide mr-1">System:</span>
+											<span class="text-2xs text-muted-foreground font-medium uppercase tracking-wide mr-1">{$t('settings.auth.roles.list.scopes.system')}:</span>
 											{#each pills.system as { category, perms }}
 												{@const CategoryIcon = categoryIcons[category]}
 												<span
@@ -327,12 +327,12 @@
 													{#if CategoryIcon}
 														<svelte:component this={CategoryIcon} class="w-3 h-3" />
 													{/if}
-													<span class="capitalize">{category}</span>
+													<span>{$t(`settings.auth.roles.categories.${category}`)}</span>
 													<span class="inline-flex items-center gap-0.5 opacity-70">
 														{#each perms as perm}
 															{@const PermIcon = permissionIcons[perm]}
 															{#if PermIcon}
-																<span title={perm}>
+																<span title={$t(`settings.auth.roles.permissions.${perm}`)}>
 																	<svelte:component this={PermIcon} class="w-2.5 h-2.5" />
 																</span>
 															{/if}
@@ -345,11 +345,11 @@
 									<!-- Permission Pills - Environment -->
 									{#if pills.env.length > 0}
 										<div class="flex flex-wrap items-center gap-1">
-											<span class="text-2xs text-muted-foreground font-medium uppercase tracking-wide mr-1">Env</span>
+											<span class="text-2xs text-muted-foreground font-medium uppercase tracking-wide mr-1">{$t('settings.auth.roles.list.scopes.environment')}</span>
 											{#if role.environmentIds === null || role.environmentIds === undefined}
 												<Badge variant="secondary" class="text-2xs gap-0.5 px-1 py-0 h-4">
 													<Globe class="w-2.5 h-2.5" />
-													All
+													{$t('settings.auth.roles.list.scopes.all')}
 												</Badge>
 											{:else if role.environmentIds.length > 0}
 												{@const envs = role.environmentIds
@@ -373,12 +373,12 @@
 													{#if CategoryIcon}
 														<svelte:component this={CategoryIcon} class="w-3 h-3" />
 													{/if}
-													<span class="capitalize">{category}</span>
+													<span>{$t(`settings.auth.roles.categories.${category}`)}</span>
 													<span class="inline-flex items-center gap-0.5 opacity-70">
 														{#each perms as perm}
 															{@const PermIcon = permissionIcons[perm]}
 															{#if PermIcon}
-																<span title={perm}>
+																<span title={$t(`settings.auth.roles.permissions.${perm}`)}>
 																	<svelte:component this={PermIcon} class="w-2.5 h-2.5" />
 																</span>
 															{/if}
@@ -393,23 +393,23 @@
 									<div class="flex items-center gap-1 flex-shrink-0">
 										{#if role.isSystem}
 											<!-- System roles: only Copy button -->
-											<Button variant="ghost" size="sm" onclick={() => copyRole(role)} title="Copy as new role">
+											<Button variant="ghost" size="sm" onclick={() => copyRole(role)} title={$t('settings.auth.roles.list.actions.copyAsNewRole')}>
 												<Copy class="w-4 h-4" />
 											</Button>
 										{:else}
 											<!-- Custom roles: Copy, Edit and Delete -->
-											<Button variant="ghost" size="sm" onclick={() => copyRole(role)} title="Copy as new role">
+											<Button variant="ghost" size="sm" onclick={() => copyRole(role)} title={$t('settings.auth.roles.list.actions.copyAsNewRole')}>
 												<Copy class="w-4 h-4" />
 											</Button>
-											<Button variant="ghost" size="sm" onclick={() => openRoleModal(role)} title="Edit role">
+											<Button variant="ghost" size="sm" onclick={() => openRoleModal(role)} title={$t('settings.auth.roles.list.actions.editRole')}>
 												<Pencil class="w-4 h-4" />
 											</Button>
 											<ConfirmPopover
 												open={confirmDeleteRoleId === role.id}
-												action="Delete"
-												itemType="role"
+												action={$t('settings.auth.roles.list.confirm.deleteAction')}
+												itemType={$t('settings.auth.roles.list.confirm.role')}
 												itemName={role.name}
-												title="Delete"
+												title={$t('settings.auth.roles.list.confirm.deleteTitle')}
 												onConfirm={() => deleteRole(role.id)}
 												onOpenChange={(open) => (confirmDeleteRoleId = open ? role.id : null)}
 											>

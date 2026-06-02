@@ -85,13 +85,14 @@
 	import EventTypesEditor from './EventTypesEditor.svelte';
 	import UpdatesTab from './tabs/UpdatesTab.svelte';
 	import ActivityTab from './tabs/ActivityTab.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	// Scanner options for ToggleGroup
-	const scannerOptions = [
+	const scannerOptions = $derived([
 		{ value: 'grype', label: 'Grype' },
 		{ value: 'trivy', label: 'Trivy' },
-		{ value: 'both', label: 'Both', icon: ShieldCheck }
-	];
+		{ value: 'both', label: $t('settings.environments.modal.scanner.both'), icon: ShieldCheck }
+	]);
 
 	// Types
 	type ConnectionType = 'socket' | 'direct' | 'hawser-standard' | 'hawser-edge';
@@ -157,75 +158,34 @@
 
 	type ScannerType = 'none' | 'grype' | 'trivy' | 'both';
 
-	// Notification event types - grouped by category
-	const NOTIFICATION_EVENT_GROUPS = [
-		{
-			id: 'container',
-			label: 'Container events',
-			events: [
-				{ id: 'container_started', label: 'Container started', description: 'When a container starts running' },
-				{ id: 'container_stopped', label: 'Container stopped', description: 'When a container is stopped' },
-				{ id: 'container_restarted', label: 'Container restarted', description: 'When a container restarts' },
-				{ id: 'container_exited', label: 'Container exited', description: 'When a container exits unexpectedly' },
-				{ id: 'container_unhealthy', label: 'Container unhealthy', description: 'When a container health check fails' },
-				{ id: 'container_oom', label: 'Container OOM killed', description: 'When a container is killed due to out of memory' },
-				{ id: 'container_updated', label: 'Container updated', description: 'When a container image is updated' }
-			]
-		},
-		{
-			id: 'auto_update',
-			label: 'Auto-update events',
-			events: [
-				{ id: 'auto_update_success', label: 'Update succeeded', description: 'Container successfully updated to new image' },
-				{ id: 'auto_update_failed', label: 'Update failed', description: 'Container auto-update failed' },
-				{ id: 'auto_update_blocked', label: 'Update blocked by vulns', description: 'Update blocked due to vulnerability criteria' },
-				{ id: 'updates_detected', label: 'Updates detected', description: 'Container image updates are available (scheduled check)' },
-				{ id: 'batch_update_success', label: 'Batch update completed', description: 'Scheduled container updates completed successfully' }
-			]
-		},
-		{
-			id: 'git_stack',
-			label: 'Git stack events',
-			events: [
-				{ id: 'git_sync_success', label: 'Git sync succeeded', description: 'Git stack synced and deployed successfully' },
-				{ id: 'git_sync_failed', label: 'Git sync failed', description: 'Git stack sync or deploy failed' },
-				{ id: 'git_sync_skipped', label: 'Git sync skipped', description: 'Git stack sync skipped (no changes)' }
-			]
-		},
-		{
-			id: 'stack',
-			label: 'Stack events',
-			events: [
-				{ id: 'stack_started', label: 'Stack started', description: 'When a compose stack starts' },
-				{ id: 'stack_stopped', label: 'Stack stopped', description: 'When a compose stack stops' },
-				{ id: 'stack_deployed', label: 'Stack deployed', description: 'Stack deployed (new or update)' },
-				{ id: 'stack_deploy_failed', label: 'Stack deploy failed', description: 'Stack deployment failed' }
-			]
-		},
-		{
-			id: 'security',
-			label: 'Security events',
-			events: [
-				{ id: 'vulnerability_critical', label: 'Critical vulns found', description: 'Critical vulnerabilities found in image scan' },
-				{ id: 'vulnerability_high', label: 'High vulns found', description: 'High severity vulnerabilities found' },
-				{ id: 'vulnerability_any', label: 'Any vulns found', description: 'Any vulnerabilities found (medium/low)' }
-			]
-		},
-		{
-			id: 'system',
-			label: 'System events',
-			events: [
-				{ id: 'image_pulled', label: 'Image pulled', description: 'When a new image is pulled' },
-				{ id: 'environment_offline', label: 'Environment offline', description: 'Environment became unreachable' },
-				{ id: 'environment_online', label: 'Environment online', description: 'Environment came back online' },
-				{ id: 'disk_space_warning', label: 'Disk space warning', description: 'Docker disk usage exceeds threshold' }
-				// Note: license_expiring is a global event configured at the notification channel level
-			]
-		}
+	const NOTIFICATION_EVENT_TYPES = [
+		'container_started',
+		'container_stopped',
+		'container_restarted',
+		'container_exited',
+		'container_unhealthy',
+		'container_oom',
+		'container_updated',
+		'auto_update_success',
+		'auto_update_failed',
+		'auto_update_blocked',
+		'updates_detected',
+		'batch_update_success',
+		'git_sync_success',
+		'git_sync_failed',
+		'git_sync_skipped',
+		'stack_started',
+		'stack_stopped',
+		'stack_deployed',
+		'stack_deploy_failed',
+		'vulnerability_critical',
+		'vulnerability_high',
+		'vulnerability_any',
+		'image_pulled',
+		'environment_offline',
+		'environment_online',
+		'disk_space_warning'
 	];
-
-	// Flat list of all event types (for backwards compatibility)
-	const NOTIFICATION_EVENT_TYPES = NOTIFICATION_EVENT_GROUPS.flatMap(g => g.events);
 
 	// Props
 	interface Props {
@@ -320,7 +280,7 @@
 				iconCacheBust = Date.now();
 				pendingIconData = null;
 			} else {
-				toast.error('Failed to upload icon');
+				toast.error(translate('settings.environments.modal.toasts.iconUploadFailed'));
 			}
 		} else {
 			// Create mode: store for later upload after environment is created
@@ -669,15 +629,15 @@
 
 			if (result.success) {
 				if (result.isEdgeMode) {
-					toast.info('Edge mode - connection will be tested when agent connects');
+					toast.info(translate('settings.environments.modal.toasts.edgeModeTestDeferred'));
 				} else {
-					toast.success(`Connected! Docker ${result.info.serverVersion} - ${result.info.containers} containers`);
+					toast.success(translate('settings.environments.modal.toasts.connected', { version: result.info.serverVersion, count: result.info.containers }));
 				}
 			} else {
-				toast.error(result.error || 'Connection failed');
+				toast.error(result.error || translate('settings.environments.modal.toasts.connectionFailed'));
 			}
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Connection test failed';
+			const message = error instanceof Error ? error.message : translate('settings.environments.modal.toasts.connectionTestFailed');
 			testResult = { success: false, error: message };
 			toast.error(message);
 		} finally {
@@ -694,18 +654,18 @@
 			detectedSockets = result.sockets || [];
 
 			if (detectedSockets.length === 0) {
-				toast.error('No Docker sockets found');
+				toast.error(translate('settings.environments.modal.toasts.noSocketsFound'));
 			} else if (detectedSockets.length === 1) {
 				// Auto-select if only one found
 				formSocketPath = detectedSockets[0].path;
-				toast.success(`Found ${detectedSockets[0].name}`);
+				toast.success(translate('settings.environments.modal.toasts.socketFound', { name: detectedSockets[0].name }));
 			} else {
 				// Show dropdown to select
 				showSocketDropdown = true;
-				toast.success(`Found ${detectedSockets.length} Docker sockets`);
+				toast.success(translate('settings.environments.modal.toasts.socketsFound', { count: detectedSockets.length }));
 			}
 		} catch (error) {
-			toast.error('Failed to detect sockets');
+			toast.error(translate('settings.environments.modal.toasts.detectSocketsFailed'));
 		} finally {
 			detectingSockets = false;
 		}
@@ -723,18 +683,18 @@
 		let hasErrors = false;
 
 		if (!formName.trim()) {
-			formErrors.name = 'Name is required';
+			formErrors.name = translate('settings.environments.modal.validation.nameRequired');
 			hasErrors = true;
 		}
 		// Host is only required for direct and hawser-standard connection types
 		if (formConnectionType === 'direct' || formConnectionType === 'hawser-standard') {
 			if (!formHost.trim()) {
-				formErrors.host = 'Host is required';
+				formErrors.host = translate('settings.environments.modal.validation.hostRequired');
 				hasErrors = true;
 			} else {
 				formHost = stripHostProtocol(formHost.trim());
 				if (!isValidHost(formHost)) {
-					formErrors.host = 'Enter an IP address or hostname only (no protocol or port)';
+					formErrors.host = translate('settings.environments.modal.validation.hostIpOnly');
 					hasErrors = true;
 				}
 			}
@@ -825,10 +785,10 @@
 				onClose();
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to create environment';
+				formError = data.error || translate('settings.environments.modal.errors.createFailed');
 			}
 		} catch (error) {
-			formError = 'Failed to create environment';
+			formError = translate('settings.environments.modal.errors.createFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -841,18 +801,18 @@
 		let hasErrors = false;
 
 		if (!formName.trim()) {
-			formErrors.name = 'Name is required';
+			formErrors.name = translate('settings.environments.modal.validation.nameRequired');
 			hasErrors = true;
 		}
 		// Host is only required for direct and hawser-standard connection types
 		if (formConnectionType === 'direct' || formConnectionType === 'hawser-standard') {
 			if (!formHost.trim()) {
-				formErrors.host = 'Host is required';
+				formErrors.host = translate('settings.environments.modal.validation.hostRequired');
 				hasErrors = true;
 			} else {
 				formHost = stripHostProtocol(formHost.trim());
 				if (!isValidHost(formHost)) {
-					formErrors.host = 'Enter an IP address or hostname only (no protocol or port)';
+					formErrors.host = translate('settings.environments.modal.validation.hostIpOnly');
 					hasErrors = true;
 				}
 			}
@@ -894,15 +854,15 @@
 				await saveImagePruneSettings(environment.id);
 				await saveTimezone(environment.id);
 				await saveDiskWarningSettings(environment.id);
-				toast.success(`Updated environment: ${formName}`);
+				toast.success(translate('settings.environments.modal.toasts.updated', { name: formName }));
 				onSaved();
 				onClose();
 			} else {
 				const data = await response.json();
-				formError = data.error || 'Failed to update environment';
+				formError = data.error || translate('settings.environments.modal.errors.updateFailed');
 			}
 		} catch (error) {
-			formError = 'Failed to update environment';
+			formError = translate('settings.environments.modal.errors.updateFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -1311,14 +1271,14 @@
 			});
 			if (response.ok) {
 				await loadEnvNotifications(envId);
-				toast.success('Notification channel added');
+				toast.success(translate('settings.environments.modal.notifications.channelAdded'));
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to add notification channel');
+				toast.error(data.error || translate('settings.environments.modal.notifications.addChannelFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to add environment notification:', error);
-			toast.error('Failed to add notification channel');
+			toast.error(translate('settings.environments.modal.notifications.addChannelFailed'));
 		}
 	}
 
@@ -1386,14 +1346,14 @@
 				const data = await response.json();
 				generatedToken = data.token;
 				await loadHawserToken(envId);
-				toast.success('Token generated successfully');
+				toast.success(translate('settings.environments.modal.hawser.tokenGenerated'));
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to generate token');
+				toast.error(data.error || translate('settings.environments.modal.hawser.generateTokenFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to generate Hawser token:', error);
-			toast.error('Failed to generate token');
+			toast.error(translate('settings.environments.modal.hawser.generateTokenFailed'));
 		} finally {
 			generatingToken = false;
 		}
@@ -1437,9 +1397,9 @@
 		<Dialog.Header class="flex-shrink-0 border-b pb-4">
 			<Dialog.Title class="flex items-center gap-2">
 				{#if !isEditing}
-					Add environment
+					{$t('settings.environments.modal.titleAdd')}
 				{:else}
-					Edit environment
+					{$t('settings.environments.modal.titleEdit')}
 				{/if}
 				{#if environment}
 					<Badge variant="secondary" class="text-xs">{environment.name}</Badge>
@@ -1455,23 +1415,23 @@
 			<Tabs.List class="flex-shrink-0 mb-0 w-full grid grid-cols-5">
 				<Tabs.Trigger value="general" class="flex items-center justify-center gap-1.5">
 					<Globe class="w-3.5 h-3.5" />
-					General
+					{$t('settings.environments.modal.tabs.general')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="updates" class="flex items-center justify-center gap-1.5">
 					<CircleFadingArrowUp class="w-3.5 h-3.5" />
-					Updates
+					{$t('settings.environments.modal.tabs.updates')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="activity" class="flex items-center justify-center gap-1.5">
 					<Activity class="w-3.5 h-3.5" />
-					Activity
+					{$t('settings.environments.modal.tabs.activity')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="security" class="flex items-center justify-center gap-1.5">
 					<ShieldCheck class="w-3.5 h-3.5" />
-					Security
+					{$t('settings.environments.modal.tabs.security')}
 				</Tabs.Trigger>
 				<Tabs.Trigger value="notifications" class="flex items-center justify-center gap-1.5">
 					<Bell class="w-3.5 h-3.5" />
-					Notifications
+					{$t('settings.environments.modal.tabs.notifications')}
 				</Tabs.Trigger>
 			</Tabs.List>
 
@@ -1480,7 +1440,7 @@
 					<Tabs.Content value="general" class="space-y-4 mt-0 h-full">
 						<!-- Name field -->
 						<div class="space-y-2">
-							<Label for="edit-env-name">Name</Label>
+							<Label for="edit-env-name">{$t('settings.environments.modal.fields.name')}</Label>
 							<div class="flex gap-2">
 								{#if isCustomIcon(formIcon) || pendingIconData}
 									<Button variant="outline" size="sm" class="h-9 w-9 p-0 relative group" type="button" onclick={() => iconFileInput?.click()}>
@@ -1490,19 +1450,19 @@
 											<EnvironmentIcon icon={formIcon} envId={environment.id} class="w-5 h-5" cacheBust={iconCacheBust} />
 										{/if}
 									</Button>
-									<Button variant="ghost" size="sm" class="h-9 w-9 p-0" type="button" title="Remove custom icon" onclick={removeCustomIcon}>
+									<Button variant="ghost" size="sm" class="h-9 w-9 p-0" type="button" title={$t('settings.environments.modal.icon.removeCustom')} onclick={removeCustomIcon}>
 										<X class="w-3.5 h-3.5 text-muted-foreground" />
 									</Button>
 								{:else}
 									<IconPicker value={formIcon} onchange={(icon) => formIcon = icon} />
-									<Button variant="ghost" size="sm" class="h-9 w-9 p-0" type="button" title="Upload custom icon" onclick={() => iconFileInput?.click()}>
+									<Button variant="ghost" size="sm" class="h-9 w-9 p-0" type="button" title={$t('settings.environments.modal.icon.uploadCustom')} onclick={() => iconFileInput?.click()}>
 										<ImageUp class="w-4 h-4 text-muted-foreground" />
 									</Button>
 								{/if}
 								<Input
 									id="edit-env-name"
 									bind:value={formName}
-									placeholder="Production"
+									placeholder={$t('settings.environments.modal.fields.namePlaceholder')}
 									class="flex-1 {formErrors.name ? 'border-destructive focus-visible:ring-destructive' : ''}"
 									oninput={() => formErrors.name = undefined}
 								/>
@@ -1522,7 +1482,7 @@
 						<!-- Labels section -->
 						<div class="space-y-2">
 							<div class="flex items-center gap-1.5">
-								<Label>Labels</Label>
+								<Label>{$t('settings.environments.modal.labels.title')}</Label>
 								<span class="text-xs text-muted-foreground">({formLabels.length}/{MAX_LABELS})</span>
 							</div>
 							{#if formLabels.length > 0}
@@ -1550,7 +1510,7 @@
 									<div class="relative flex-1">
 										<Input
 											bind:value={newLabelInput}
-											placeholder="Add label..."
+											placeholder={$t('settings.environments.modal.labels.addPlaceholder')}
 											onfocus={() => showLabelDropdown = true}
 											onblur={() => setTimeout(() => showLabelDropdown = false, 150)}
 											onkeydown={(e) => {
@@ -1606,14 +1566,14 @@
 									</Button>
 								</div>
 							{:else}
-								<p class="text-xs text-muted-foreground">Maximum labels reached</p>
+								<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.labels.maximumReached')}</p>
 							{/if}
 						</div>
 
 						<!-- Connection type selector -->
 						<div class="space-y-2">
 							<div class="flex items-center gap-1.5">
-								<Label for="edit-env-connection-type">Connection type</Label>
+								<Label for="edit-env-connection-type">{$t('settings.environments.modal.connection.type')}</Label>
 								<Popover.Root>
 									<Popover.Trigger>
 										<button type="button" class="text-muted-foreground hover:text-foreground">
@@ -1625,34 +1585,34 @@
 											<div class="flex items-start gap-2">
 												<Unplug class="w-4 h-4 mt-0.5 text-cyan-500 shrink-0" />
 												<div>
-													<p class="font-medium">Unix socket</p>
-													<p class="text-xs text-muted-foreground">Connect via Docker socket on the same machine. Default path: /var/run/docker.sock. Also works with Docker Desktop and OrbStack.</p>
+													<p class="font-medium">{$t('settings.environments.modal.connection.socket')}</p>
+													<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.connection.socketHelp')}</p>
 												</div>
 											</div>
 											<div class="flex items-start gap-2">
 												<Icon iconNode={whale} class="w-4 h-4 mt-0.5 text-blue-500 shrink-0" />
 												<div>
-													<p class="font-medium">Direct connection</p>
-													<p class="text-xs text-muted-foreground">Connect directly to Docker Engine API. Requires Docker to expose its API on a TCP port (default 2375/2376). Best for LAN environments.</p>
+													<p class="font-medium">{$t('settings.environments.modal.connection.direct')}</p>
+													<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.connection.directHelp')}</p>
 												</div>
 											</div>
 											<div class="flex items-start gap-2">
 												<Route class="w-4 h-4 mt-0.5 text-purple-500 shrink-0" />
 												<div>
-													<p class="font-medium">Hawser standard</p>
-													<p class="text-xs text-muted-foreground">Hawser agent listens on a port and Dockhand connects to it. Good for LAN with static IPs.</p>
+													<p class="font-medium">{$t('settings.environments.modal.connection.hawserStandard')}</p>
+													<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.connection.hawserStandardHelp')}</p>
 												</div>
 											</div>
 											<div class="flex items-start gap-2">
 												<UndoDot class="w-4 h-4 mt-0.5 text-green-500 shrink-0" />
 												<div>
-													<p class="font-medium">Hawser edge</p>
-													<p class="text-xs text-muted-foreground">Hawser agent initiates outbound WebSocket to Dockhand. No port forwarding needed. Perfect for VPS, NAT, or dynamic IPs.</p>
+													<p class="font-medium">{$t('settings.environments.modal.connection.hawserEdge')}</p>
+													<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.connection.hawserEdgeHelp')}</p>
 												</div>
 											</div>
 											<a href="https://github.com/Finsys/hawser" target="_blank" class="flex items-center gap-1 text-xs text-blue-500 hover:underline">
 												<ExternalLink class="w-3 h-3" />
-												Learn more about Hawser
+												{$t('settings.environments.modal.connection.learnMoreHawser')}
 											</a>
 										</div>
 									</Popover.Content>
@@ -1671,16 +1631,16 @@
 									<span class="flex items-center gap-2">
 										{#if formConnectionType === 'socket'}
 											<Unplug class="w-4 h-4 text-cyan-500" />
-											Unix socket
+											{$t('settings.environments.modal.connection.socket')}
 										{:else if formConnectionType === 'direct'}
 											<Icon iconNode={whale} class="w-4 h-4 text-blue-500" />
-											Direct connection
+											{$t('settings.environments.modal.connection.direct')}
 										{:else if formConnectionType === 'hawser-standard'}
 											<Route class="w-4 h-4 text-purple-500" />
-											Hawser agent (standard)
+											{$t('settings.environments.modal.connection.hawserStandardOption')}
 										{:else}
 											<UndoDot class="w-4 h-4 text-green-500" />
-											Hawser agent (edge)
+											{$t('settings.environments.modal.connection.hawserEdgeOption')}
 										{/if}
 									</span>
 								</Select.Trigger>
@@ -1688,25 +1648,25 @@
 									<Select.Item value="socket">
 										<span class="flex items-center gap-2">
 											<Unplug class="w-4 h-4 text-cyan-500" />
-											Unix socket
+											{$t('settings.environments.modal.connection.socket')}
 										</span>
 									</Select.Item>
 									<Select.Item value="direct">
 										<span class="flex items-center gap-2">
 											<Icon iconNode={whale} class="w-4 h-4 text-blue-500" />
-											Direct connection
+											{$t('settings.environments.modal.connection.direct')}
 										</span>
 									</Select.Item>
 									<Select.Item value="hawser-standard">
 										<span class="flex items-center gap-2">
 											<Route class="w-4 h-4 text-purple-500" />
-											Hawser agent (standard)
+											{$t('settings.environments.modal.connection.hawserStandardOption')}
 										</span>
 									</Select.Item>
 									<Select.Item value="hawser-edge">
 										<span class="flex items-center gap-2">
 											<UndoDot class="w-4 h-4 text-green-500" />
-											Hawser agent (edge)
+											{$t('settings.environments.modal.connection.hawserEdgeOption')}
 										</span>
 									</Select.Item>
 								</Select.Content>
@@ -1714,13 +1674,13 @@
 							<!-- Short description with link -->
 							<p class="text-xs text-muted-foreground">
 								{#if formConnectionType === 'socket'}
-									Connect via Unix socket on the same machine.
+									{$t('settings.environments.modal.connection.socketShort')}
 								{:else if formConnectionType === 'direct'}
-									Connect directly to Docker Engine API on TCP port.
+									{$t('settings.environments.modal.connection.directShort')}
 								{:else if formConnectionType === 'hawser-standard'}
-									<a href="https://github.com/Finsys/hawser" target="_blank" class="text-blue-500 hover:underline">Hawser</a> agent listens, Dockhand connects.
+									<a href="https://github.com/Finsys/hawser" target="_blank" class="text-blue-500 hover:underline">Hawser</a> {$t('settings.environments.modal.connection.hawserStandardShort')}
 								{:else}
-									<a href="https://github.com/Finsys/hawser" target="_blank" class="text-blue-500 hover:underline">Hawser</a> agent connects out to Dockhand. No port forwarding needed.
+									<a href="https://github.com/Finsys/hawser" target="_blank" class="text-blue-500 hover:underline">Hawser</a> {$t('settings.environments.modal.connection.hawserEdgeShort')}
 								{/if}
 							</p>
 						</div>
@@ -1728,7 +1688,7 @@
 						<!-- Socket connection settings -->
 						{#if formConnectionType === 'socket'}
 							<div class="space-y-2">
-								<Label for="edit-env-socket-path">Socket path</Label>
+								<Label for="edit-env-socket-path">{$t('settings.environments.modal.connection.socketPath')}</Label>
 								<div class="relative">
 									<div class="flex gap-2">
 										<Input
@@ -1742,7 +1702,7 @@
 											size="icon"
 											onclick={detectDockerSockets}
 											disabled={detectingSockets}
-											title="Auto-detect Docker socket"
+											title={$t('settings.environments.modal.connection.autoDetectSocket')}
 										>
 											{#if detectingSockets}
 												<Loader2 class="w-4 h-4 animate-spin" />
@@ -1774,7 +1734,7 @@
 									{/if}
 								</div>
 								<p class="text-xs text-muted-foreground">
-									Click <Pipette class="w-3 h-3 inline" /> to auto-detect available Docker sockets
+									{$t('settings.environments.modal.connection.autoDetectSocketHelpPrefix')} <Pipette class="w-3 h-3 inline" /> {$t('settings.environments.modal.connection.autoDetectSocketHelpSuffix')}
 								</p>
 							</div>
 						{/if}
@@ -1783,7 +1743,7 @@
 						{#if formConnectionType === 'direct'}
 							<div class="grid grid-cols-2 gap-4">
 								<div class="space-y-2">
-									<Label for="edit-env-host">Host</Label>
+									<Label for="edit-env-host">{$t('settings.environments.modal.fields.host')}</Label>
 									<Input
 										id="edit-env-host"
 										bind:value={formHost}
@@ -1797,12 +1757,12 @@
 									{/if}
 								</div>
 								<div class="space-y-2">
-									<Label for="edit-env-port">Port</Label>
+									<Label for="edit-env-port">{$t('settings.environments.modal.fields.port')}</Label>
 									<Input id="edit-env-port" type="number" bind:value={formPort} />
 								</div>
 							</div>
 							<div class="space-y-2">
-								<Label for="edit-env-protocol">Protocol</Label>
+								<Label for="edit-env-protocol">{$t('settings.environments.modal.fields.protocol')}</Label>
 								<Select.Root type="single" value={formProtocol} onValueChange={(v) => formProtocol = v}>
 									<Select.Trigger class="w-full">
 										<span class="flex items-center gap-2">
@@ -1833,9 +1793,9 @@
 							</div>
 							{#if formProtocol === 'https'}
 								<div class="space-y-4 pt-2 border-t">
-									<p class="text-xs text-muted-foreground">TLS certificates for mTLS authentication (RSA or ECDSA)</p>
+									<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.tls.mtlsCertificates')}</p>
 									<div class="space-y-2">
-										<Label for="edit-env-tls_ca">CA certificate</Label>
+										<Label for="edit-env-tls_ca">{$t('settings.environments.modal.tls.caCertificate')}</Label>
 										<textarea
 											id="edit-env-tls_ca"
 											bind:value={formTlsCa}
@@ -1844,7 +1804,7 @@
 										></textarea>
 									</div>
 									<div class="space-y-2">
-										<Label for="edit-env-tls_cert">Client certificate</Label>
+										<Label for="edit-env-tls_cert">{$t('settings.environments.modal.tls.clientCertificate')}</Label>
 										<textarea
 											id="edit-env-tls_cert"
 											bind:value={formTlsCert}
@@ -1853,7 +1813,7 @@
 										></textarea>
 									</div>
 									<div class="space-y-2">
-										<Label for="edit-env-tls_key">Client key</Label>
+										<Label for="edit-env-tls_key">{$t('settings.environments.modal.tls.clientKey')}</Label>
 										<textarea
 											id="edit-env-tls_key"
 											bind:value={formTlsKey}
@@ -1869,7 +1829,7 @@
 						{#if formConnectionType === 'hawser-standard'}
 							<div class="grid grid-cols-2 gap-4">
 								<div class="space-y-2">
-									<Label for="edit-env-host">Agent host</Label>
+									<Label for="edit-env-host">{$t('settings.environments.modal.hawser.agentHost')}</Label>
 									<Input
 										id="edit-env-host"
 										bind:value={formHost}
@@ -1883,12 +1843,12 @@
 									{/if}
 								</div>
 								<div class="space-y-2">
-									<Label for="edit-env-port">Agent port</Label>
+									<Label for="edit-env-port">{$t('settings.environments.modal.hawser.agentPort')}</Label>
 									<Input id="edit-env-port" type="number" bind:value={formPort} placeholder="2376" />
 								</div>
 							</div>
 							<div class="space-y-2">
-								<Label for="edit-env-protocol">Protocol</Label>
+								<Label for="edit-env-protocol">{$t('settings.environments.modal.fields.protocol')}</Label>
 								<Select.Root type="single" value={formProtocol} onValueChange={(v) => formProtocol = v}>
 									<Select.Trigger class="w-full">
 										<span class="flex items-center gap-2">
@@ -1919,7 +1879,7 @@
 							</div>
 							{#if formProtocol === 'https'}
 								<div class="space-y-2">
-									<Label for="edit-env-hawser-tls-ca">CA certificate (for self-signed)</Label>
+									<Label for="edit-env-hawser-tls-ca">{$t('settings.environments.modal.hawser.selfSignedCaCertificate')}</Label>
 									<textarea
 										id="edit-env-hawser-tls-ca"
 										bind:value={formTlsCa}
@@ -1927,19 +1887,19 @@
 										class="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono text-xs"
 										disabled={formTlsSkipVerify}
 									></textarea>
-									<p class="text-xs text-muted-foreground">Paste the CA certificate if agent uses self-signed TLS (RSA or ECDSA).</p>
+									<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.hawser.selfSignedCaHelp')}</p>
 								</div>
 								<div class="flex items-center justify-between">
 									<div>
-										<Label>Skip TLS verification</Label>
-										<p class="text-xs text-muted-foreground">Disable certificate validation (insecure)</p>
+										<Label>{$t('settings.environments.modal.hawser.skipTlsVerification')}</Label>
+										<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.hawser.skipTlsVerificationDescription')}</p>
 									</div>
 									<TogglePill bind:checked={formTlsSkipVerify} />
 								</div>
 							{/if}
 							<div class="space-y-2">
 								<div class="flex items-center justify-between">
-									<Label for="edit-env-hawser-token">Agent token (optional)</Label>
+									<Label for="edit-env-hawser-token">{$t('settings.environments.modal.hawser.agentTokenOptional')}</Label>
 									{#if !formHawserToken}
 										<Button
 											variant="outline"
@@ -1948,16 +1908,16 @@
 											onclick={generateStandardToken}
 										>
 											<Key class="w-3 h-3" />
-											Generate
+											{$t('settings.environments.modal.hawser.generate')}
 										</Button>
 									{/if}
 								</div>
-								<Input id="edit-env-hawser-token" type="password" bind:value={formHawserToken} placeholder="Token for agent authentication" oninput={() => generatedStandardToken = null} />
+								<Input id="edit-env-hawser-token" type="password" bind:value={formHawserToken} placeholder={$t('settings.environments.modal.hawser.agentTokenPlaceholder')} oninput={() => generatedStandardToken = null} />
 								{#if generatedStandardToken}
 									<div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-md space-y-2">
 										<p class="text-xs font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1">
 											<AlertTriangle class="w-3 h-3" />
-											Copy this token now — it won't be shown again!
+											{$t('settings.environments.modal.hawser.copyTokenNow')}
 										</p>
 										<div class="flex gap-2">
 											<Input
@@ -1972,7 +1932,7 @@
 														<Tooltip.Trigger>
 															<XCircle class="w-4 h-4 text-red-500" />
 														</Tooltip.Trigger>
-														<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+														<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 													</Tooltip.Root>
 												{:else if copySuccess === 'ok'}
 													<Check class="w-4 h-4 text-green-500" />
@@ -1986,13 +1946,13 @@
 										</div>
 									</div>
 								{:else}
-									<p class="text-xs text-muted-foreground">Enter a token manually or generate one. Set the same token as <code class="bg-muted px-1 rounded">TOKEN</code> env var on your Hawser agent.</p>
+									<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.hawser.manualTokenHelp')} <code class="bg-muted px-1 rounded">TOKEN</code> {$t('settings.environments.modal.hawser.manualTokenHelpSuffix')}</p>
 								{/if}
 							</div>
 							<div class="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 flex items-start gap-2">
 								<Info class="w-3 h-3 mt-0.5 shrink-0" />
 								<div class="space-y-1 flex-1">
-									<span>Run Hawser agent on the target host:</span>
+									<span>{$t('settings.environments.modal.hawser.runAgentOnTarget')}</span>
 									<div class="flex items-start gap-1.5">
 										<code class="bg-muted px-1.5 py-0.5 rounded break-all flex-1">{formHawserToken ? `TOKEN=${formHawserToken} ` : ''}hawser standard --port {formPort}</code>
 										{#if formHawserToken}
@@ -2005,14 +1965,14 @@
 														setTimeout(() => { copyCmdSuccess = null; }, 2000);
 													});
 												}}
-												title="Copy command"
+												title={$t('settings.environments.modal.hawser.copyCommand')}
 											>
 												{#if copyCmdSuccess === 'error'}
 													<Tooltip.Root open>
 														<Tooltip.Trigger>
 															<XCircle class="w-3 h-3 text-red-500" />
 														</Tooltip.Trigger>
-														<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+														<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 													</Tooltip.Root>
 												{:else if copyCmdSuccess === 'ok'}
 													<Check class="w-3 h-3 text-green-600" />
@@ -2032,16 +1992,16 @@
 								<!-- Connection status (edit mode only) -->
 								{#if isEditing && environment}
 									<div class="flex items-center justify-between">
-										<Label>Connection status</Label>
+										<Label>{$t('settings.environments.modal.hawser.connectionStatus')}</Label>
 										{#if environment.hawserAgentId}
 											<Badge variant="outline" class="bg-green-50 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700">
 												<Wifi class="w-3 h-3 mr-1" />
-												Connected
+												{$t('settings.environments.modal.hawser.connected')}
 											</Badge>
 										{:else}
 											<Badge variant="outline" class="bg-slate-50 text-slate-500 border-slate-300 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-700">
 												<WifiOff class="w-3 h-3 mr-1" />
-												Waiting for agent
+												{$t('settings.environments.modal.hawser.waitingForAgent')}
 											</Badge>
 										{/if}
 									</div>
@@ -2049,12 +2009,12 @@
 									<!-- Agent info if connected -->
 									{#if environment.hawserAgentId}
 										<div class="text-xs bg-muted/30 rounded-md p-2 space-y-1">
-											<p><span class="text-muted-foreground">Agent:</span> {environment.hawserAgentName || environment.hawserAgentId}</p>
+											<p><span class="text-muted-foreground">{$t('settings.environments.modal.hawser.agent')}:</span> {environment.hawserAgentName || environment.hawserAgentId}</p>
 											{#if environment.hawserVersion}
-												<p><span class="text-muted-foreground">Version:</span> {environment.hawserVersion}</p>
+												<p><span class="text-muted-foreground">{$t('settings.environments.modal.hawser.version')}:</span> {environment.hawserVersion}</p>
 											{/if}
 											{#if environment.hawserLastSeen}
-												<p><span class="text-muted-foreground">Last seen:</span> {formatDateTime(environment.hawserLastSeen, true)}</p>
+												<p><span class="text-muted-foreground">{$t('settings.environments.modal.hawser.lastSeen')}:</span> {formatDateTime(environment.hawserLastSeen, true)}</p>
 											{/if}
 										</div>
 									{/if}
@@ -2063,7 +2023,7 @@
 								<!-- Token section -->
 								<div class="space-y-2">
 									<div class="flex items-center justify-between">
-										<Label>Connection token</Label>
+										<Label>{$t('settings.environments.modal.hawser.connectionToken')}</Label>
 										{#if isEditing && hawserToken}
 											<Button
 												variant="outline"
@@ -2077,7 +2037,7 @@
 												{:else}
 													<RefreshCw class="w-3 h-3" />
 												{/if}
-												Regenerate
+												{$t('settings.environments.modal.hawser.regenerate')}
 											</Button>
 										{:else if isEditing && !hawserToken && !hawserTokenLoading}
 											<Button
@@ -2092,7 +2052,7 @@
 												{:else}
 													<Plus class="w-3 h-3" />
 												{/if}
-												Generate
+												{$t('settings.environments.modal.hawser.generate')}
 											</Button>
 										{/if}
 									</div>
@@ -2107,17 +2067,17 @@
 												onclick={generatePendingToken}
 											>
 												<Key class="w-3.5 h-3.5 mr-1.5" />
-												Generate connection token
+												{$t('settings.environments.modal.hawser.generateConnectionToken')}
 											</Button>
 											<p class="text-xs text-muted-foreground">
-												Generate a token now. It will be saved when you add the environment.
+												{$t('settings.environments.modal.hawser.generateConnectionTokenHelp')}
 											</p>
 										{:else}
 											<!-- Show pending token -->
 											<div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-md space-y-2">
 												<p class="text-xs font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1">
 													<AlertTriangle class="w-3 h-3" />
-													Copy this token now - you'll need it for the Hawser agent!
+													{$t('settings.environments.modal.hawser.copyTokenForAgent')}
 												</p>
 												<div class="flex gap-2">
 													<Input
@@ -2132,7 +2092,7 @@
 																<Tooltip.Trigger>
 																	<XCircle class="w-4 h-4 text-red-500" />
 																</Tooltip.Trigger>
-																<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+																<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 															</Tooltip.Root>
 														{:else if copySuccess === 'ok'}
 															<Check class="w-4 h-4 text-green-500" />
@@ -2142,20 +2102,20 @@
 													</Button>
 												</div>
 												<div class="text-xs text-amber-600 dark:text-amber-300 space-y-1">
-													<span>Run on your host:</span>
+													<span>{$t('settings.environments.modal.hawser.runOnHost')}</span>
 													<div class="flex items-start gap-1.5">
 														<code class="bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded break-all flex-1">DOCKHAND_SERVER_URL={getConnectionUrl()} TOKEN={pendingToken} hawser</code>
 														<button
 															class="shrink-0 p-0.5 rounded hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
 															onclick={() => copyCommand(pendingToken!)}
-															title="Copy command"
+															title={$t('settings.environments.modal.hawser.copyCommand')}
 														>
 															{#if copyCmdSuccess === 'error'}
 																<Tooltip.Root open>
 																	<Tooltip.Trigger>
 																		<XCircle class="w-3 h-3 text-red-500" />
 																	</Tooltip.Trigger>
-																	<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+																	<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 																</Tooltip.Root>
 															{:else if copyCmdSuccess === 'ok'}
 																<Check class="w-3 h-3 text-green-600" />
@@ -2167,7 +2127,7 @@
 												</div>
 												<Button variant="ghost" size="sm" class="h-6 text-xs" onclick={generatePendingToken}>
 													<RefreshCw class="w-3 h-3" />
-													Generate new token
+													{$t('settings.environments.modal.hawser.generateNewToken')}
 												</Button>
 											</div>
 										{/if}
@@ -2184,7 +2144,7 @@
 											<div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-md space-y-2">
 												<p class="text-xs font-medium text-amber-700 dark:text-amber-400 flex items-center gap-1">
 													<AlertTriangle class="w-3 h-3" />
-													Save this token now - it won't be shown again!
+													{$t('settings.environments.modal.hawser.saveTokenNow')}
 												</p>
 												<div class="flex gap-2">
 													<Input
@@ -2199,7 +2159,7 @@
 																<Tooltip.Trigger>
 																	<XCircle class="w-4 h-4 text-red-500" />
 																</Tooltip.Trigger>
-																<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+																<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 															</Tooltip.Root>
 														{:else if copySuccess === 'ok'}
 															<Check class="w-4 h-4 text-green-500" />
@@ -2209,20 +2169,20 @@
 													</Button>
 												</div>
 												<div class="text-xs text-amber-600 dark:text-amber-300 space-y-1">
-													<span>Run on your host:</span>
+													<span>{$t('settings.environments.modal.hawser.runOnHost')}</span>
 													<div class="flex items-start gap-1.5">
 														<code class="bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded break-all flex-1">DOCKHAND_SERVER_URL={getConnectionUrl()} TOKEN={generatedToken} hawser</code>
 														<button
 															class="shrink-0 p-0.5 rounded hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
 															onclick={() => copyCommand(generatedToken!)}
-															title="Copy command"
+															title={$t('settings.environments.modal.hawser.copyCommand')}
 														>
 															{#if copyCmdSuccess === 'error'}
 																<Tooltip.Root open>
 																	<Tooltip.Trigger>
 																		<XCircle class="w-3 h-3 text-red-500" />
 																	</Tooltip.Trigger>
-																	<Tooltip.Content>Copy requires HTTPS</Tooltip.Content>
+																	<Tooltip.Content>{$t('settings.environments.modal.hawser.copyRequiresHttps')}</Tooltip.Content>
 																</Tooltip.Root>
 															{:else if copyCmdSuccess === 'ok'}
 																<Check class="w-3 h-3 text-green-600" />
@@ -2241,12 +2201,12 @@
 												{#if hawserToken.lastUsed}
 													<span class="text-muted-foreground ml-auto flex items-center gap-1">
 														<Clock class="w-3 h-3" />
-														Last used: {formatDate(hawserToken.lastUsed)}
+														{$t('settings.environments.modal.hawser.lastUsed', { date: formatDate(hawserToken.lastUsed) })}
 													</span>
 												{/if}
 											</div>
 										{:else}
-											<p class="text-xs text-muted-foreground text-center py-2">No token generated yet. Click Generate above.</p>
+											<p class="text-xs text-muted-foreground text-center py-2">{$t('settings.environments.modal.hawser.noTokenGenerated')}</p>
 										{/if}
 									{/if}
 								</div>
@@ -2256,24 +2216,24 @@
 						<!-- Public IP field -->
 						<div class="space-y-2 pt-4 border-t">
 							<div class="flex items-center gap-2">
-								<Label for="edit-env-public-ip">Public IP</Label>
+								<Label for="edit-env-public-ip">{$t('settings.environments.modal.publicIp.label')}</Label>
 								<Tooltip.Root>
 									<Tooltip.Trigger>
 										<HelpCircle class="w-3.5 h-3.5 text-muted-foreground" />
 									</Tooltip.Trigger>
 									<Tooltip.Content side="bottom" class="w-72">
-										<p>IP address or hostname where container ports are accessible from your browser. For local Docker, use the server's LAN IP.</p>
+										<p>{$t('settings.environments.modal.publicIp.tooltip')}</p>
 									</Tooltip.Content>
 								</Tooltip.Root>
 							</div>
 							<Input
 								id="edit-env-public-ip"
 								bind:value={formPublicIp}
-								placeholder="e.g., 192.168.1.4"
+								placeholder={$t('settings.environments.modal.publicIp.placeholder')}
 								class="w-full"
 							/>
 							<p class="text-xs text-muted-foreground">
-								Used for clickable port links on the containers page
+								{$t('settings.environments.modal.publicIp.help')}
 							</p>
 						</div>
 					</Tabs.Content>
@@ -2315,15 +2275,15 @@
 					<div class="space-y-4">
 						<div class="flex items-center gap-2 text-sm font-medium">
 							<ShieldCheck class="w-4 h-4" />
-							Vulnerability scanning
+							{$t('settings.environments.modal.scanner.title')}
 						</div>
 
 						{#if !isEditing}
 							<!-- Add mode - full security settings -->
 							<div class="flex items-start gap-3">
 								<div class="flex-1">
-									<Label>Enable scanning</Label>
-									<p class="text-xs text-muted-foreground">Scan images for known security vulnerabilities</p>
+									<Label>{$t('settings.environments.modal.scanner.enableScanning')}</Label>
+									<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.scanner.enableScanningDescription')}</p>
 								</div>
 								<TogglePill bind:checked={formEnableScanner} />
 							</div>
@@ -2331,8 +2291,8 @@
 							{#if formEnableScanner}
 								<div class="flex items-start gap-3">
 									<div class="flex-1">
-										<Label>Scanner</Label>
-										<p class="text-xs text-muted-foreground">Choose vulnerability scanner</p>
+										<Label>{$t('settings.environments.modal.scanner.scanner')}</Label>
+										<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.scanner.scannerDescription')}</p>
 									</div>
 									<ToggleGroup
 										value={formScannerType}
@@ -2343,7 +2303,7 @@
 
 								<div class="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 flex items-start gap-2">
 									<Info class="w-3 h-3 mt-0.5 shrink-0" />
-									<span>Scanner images will be pulled automatically on first scan. Vulnerability databases are cached in Docker volumes for faster subsequent scans.</span>
+									<span>{$t('settings.environments.modal.scanner.autoPullInfo')}</span>
 								</div>
 							{/if}
 						{:else if scannerLoading}
@@ -2353,8 +2313,8 @@
 						{:else}
 							<div class="flex items-start gap-3">
 								<div class="flex-1">
-									<Label>Enable scanning</Label>
-									<p class="text-xs text-muted-foreground">Scan images for known security vulnerabilities</p>
+									<Label>{$t('settings.environments.modal.scanner.enableScanning')}</Label>
+									<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.scanner.enableScanningDescription')}</p>
 								</div>
 								<TogglePill bind:checked={scannerEnabled} />
 							</div>
@@ -2362,8 +2322,8 @@
 							{#if scannerEnabled}
 								<div class="flex items-start gap-3">
 									<div class="flex-1">
-										<Label>Scanner</Label>
-										<p class="text-xs text-muted-foreground">Choose vulnerability scanner</p>
+										<Label>{$t('settings.environments.modal.scanner.scanner')}</Label>
+										<p class="text-xs text-muted-foreground">{$t('settings.environments.modal.scanner.scannerDescription')}</p>
 									</div>
 									<ToggleGroup
 										value={selectedScanner}
@@ -2385,16 +2345,16 @@
 											{:else if scannerAvailability.grype && scannerVersions.grype}
 												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">v{scannerVersions.grype}</Badge>
 											{:else if scannerAvailability.grype}
-												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">Ready</Badge>
+												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">{$t('settings.environments.modal.scanner.ready')}</Badge>
 											{:else}
-												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-amber-500/10 text-amber-600 border-amber-500/30">Not installed</Badge>
+												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-amber-500/10 text-amber-600 border-amber-500/30">{$t('settings.environments.modal.scanner.notInstalled')}</Badge>
 											{/if}
 											{#if !loadingScannerVersions}
 												{#if !scannerAvailability.grype}
 													<ImagePullProgressPopover imageName={scannerGrypeImage} envId={environment?.id} onComplete={() => reloadScannerAvailability(environment?.id)}>
 														<button class="inline-flex items-center text-2xs px-1.5 py-0 h-4 rounded-full border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
 															<Download class="w-2.5 h-2.5 mr-0.5" />
-															Pull
+															{$t('settings.environments.modal.scanner.pull')}
 														</button>
 													</ImagePullProgressPopover>
 												{:else}
@@ -2408,12 +2368,12 @@
 														{:else}
 															<Trash2 class="w-2.5 h-2.5 mr-0.5" />
 														{/if}
-														Remove
+														{$t('settings.environments.modal.scanner.remove')}
 													</button>
 													{#if grypeUpdateStatus === 'up-to-date'}
 														<span class="inline-flex items-center text-2xs px-1.5 py-0 h-4 text-green-600">
 															<CheckCircle2 class="w-2.5 h-2.5 mr-0.5" />
-															Latest
+															{$t('settings.environments.modal.scanner.latest')}
 														</span>
 													{:else if grypeUpdateStatus === 'update-available' || pullingGrype}
 														<button
@@ -2423,10 +2383,10 @@
 														>
 															{#if pullingGrype}
 																<Loader2 class="w-2.5 h-2.5 mr-0.5 animate-spin" />
-																Pulling
+																{$t('settings.environments.modal.scanner.pulling')}
 															{:else}
 																<Download class="w-2.5 h-2.5 mr-0.5" />
-																Update
+																{$t('settings.environments.modal.scanner.update')}
 															{/if}
 														</button>
 													{:else}
@@ -2437,10 +2397,10 @@
 														>
 															{#if checkingGrypeUpdate}
 																<Loader2 class="w-2.5 h-2.5 mr-0.5 animate-spin" />
-																Checking
+																{$t('settings.environments.modal.scanner.checking')}
 															{:else}
 																<RefreshCw class="w-2.5 h-2.5 mr-0.5" />
-																Check
+																{$t('settings.environments.modal.scanner.check')}
 															{/if}
 														</button>
 													{/if}
@@ -2462,16 +2422,16 @@
 											{:else if scannerAvailability.trivy && scannerVersions.trivy}
 												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">v{scannerVersions.trivy}</Badge>
 											{:else if scannerAvailability.trivy}
-												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">Ready</Badge>
+												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-green-500/10 text-green-600 border-green-500/30">{$t('settings.environments.modal.scanner.ready')}</Badge>
 											{:else}
-												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-amber-500/10 text-amber-600 border-amber-500/30">Not installed</Badge>
+												<Badge variant="outline" class="text-2xs px-1 py-0 h-4 bg-amber-500/10 text-amber-600 border-amber-500/30">{$t('settings.environments.modal.scanner.notInstalled')}</Badge>
 											{/if}
 											{#if !loadingScannerVersions}
 												{#if !scannerAvailability.trivy}
 													<ImagePullProgressPopover imageName={scannerTrivyImage} envId={environment?.id} onComplete={() => reloadScannerAvailability(environment?.id)}>
 														<button class="inline-flex items-center text-2xs px-1.5 py-0 h-4 rounded-full border bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
 															<Download class="w-2.5 h-2.5 mr-0.5" />
-															Pull
+															{$t('settings.environments.modal.scanner.pull')}
 														</button>
 													</ImagePullProgressPopover>
 												{:else}
@@ -2485,12 +2445,12 @@
 														{:else}
 															<Trash2 class="w-2.5 h-2.5 mr-0.5" />
 														{/if}
-														Remove
+														{$t('settings.environments.modal.scanner.remove')}
 													</button>
 													{#if trivyUpdateStatus === 'up-to-date'}
 														<span class="inline-flex items-center text-2xs px-1.5 py-0 h-4 text-green-600">
 															<CheckCircle2 class="w-2.5 h-2.5 mr-0.5" />
-															Latest
+															{$t('settings.environments.modal.scanner.latest')}
 														</span>
 													{:else if trivyUpdateStatus === 'update-available' || pullingTrivy}
 														<button
@@ -2500,10 +2460,10 @@
 														>
 															{#if pullingTrivy}
 																<Loader2 class="w-2.5 h-2.5 mr-0.5 animate-spin" />
-																Pulling
+																{$t('settings.environments.modal.scanner.pulling')}
 															{:else}
 																<Download class="w-2.5 h-2.5 mr-0.5" />
-																Update
+																{$t('settings.environments.modal.scanner.update')}
 															{/if}
 														</button>
 													{:else}
@@ -2514,10 +2474,10 @@
 														>
 															{#if checkingTrivyUpdate}
 																<Loader2 class="w-2.5 h-2.5 mr-0.5 animate-spin" />
-																Checking
+																{$t('settings.environments.modal.scanner.checking')}
 															{:else}
 																<RefreshCw class="w-2.5 h-2.5 mr-0.5" />
-																Check
+																{$t('settings.environments.modal.scanner.check')}
 															{/if}
 														</button>
 													{/if}
@@ -2531,7 +2491,7 @@
 									{#if ((selectedScanner === 'grype' || selectedScanner === 'both') && !scannerAvailability.grype) || ((selectedScanner === 'trivy' || selectedScanner === 'both') && !scannerAvailability.trivy)}
 										<div class="text-xs text-muted-foreground bg-muted/50 rounded-md p-2 flex items-start gap-2">
 											<Info class="w-3 h-3 mt-0.5 shrink-0" />
-											<span>Scanner images will be pulled automatically on first scan. Vulnerability databases are cached in Docker volumes for faster subsequent scans.</span>
+											<span>{$t('settings.environments.modal.scanner.autoPullInfo')}</span>
 										</div>
 									{/if}
 								</div>
@@ -2544,20 +2504,20 @@
 				<Tabs.Content value="notifications" class="mt-0 h-full flex flex-col">
 					<div class="flex items-center gap-2 text-sm font-medium flex-shrink-0">
 						<Bell class="w-4 h-4" />
-						Notification channels
+						{$t('settings.environments.modal.notifications.title')}
 					</div>
 
 					{#if !isEditing}
 						<!-- Add mode - show available channels to select -->
 						<p class="text-xs text-muted-foreground mt-2 flex-shrink-0">
-							Select which notification channels should send alerts for events from this environment.
+							{$t('settings.environments.modal.notifications.addModeDescription')}
 						</p>
 
 						{#if notifications.length === 0}
 							<div class="flex-1 flex flex-col items-center justify-center py-8 text-center">
 								<Bell class="w-10 h-10 text-muted-foreground mb-3 opacity-50" />
-								<p class="text-sm text-muted-foreground">No notification channels configured yet.</p>
-								<p class="text-xs text-muted-foreground mt-1">Create notification channels in the Notifications settings tab first.</p>
+								<p class="text-sm text-muted-foreground">{$t('settings.environments.modal.notifications.noneConfiguredYet')}</p>
+								<p class="text-xs text-muted-foreground mt-1">{$t('settings.environments.modal.notifications.createInSettingsFirst')}</p>
 							</div>
 						{:else}
 							<div class="space-y-2 mt-3 flex-1 overflow-y-auto min-h-0">
@@ -2582,7 +2542,7 @@
 														if (isSelected) {
 															formSelectedNotifications = formSelectedNotifications.filter(n => n.id !== channel.id);
 														} else {
-															formSelectedNotifications = [...formSelectedNotifications, { id: channel.id, eventTypes: NOTIFICATION_EVENT_TYPES.map(e => e.id) }];
+															formSelectedNotifications = [...formSelectedNotifications, { id: channel.id, eventTypes: [...NOTIFICATION_EVENT_TYPES] }];
 														}
 													}}
 												/>
@@ -2591,7 +2551,7 @@
 										{#if !channel.enabled}
 											<p class="text-2xs text-amber-600 mt-1 flex items-center gap-1">
 												<AlertCircle class="w-2.5 h-2.5" />
-												Channel disabled globally
+												{$t('settings.environments.modal.notifications.channelDisabledGlobally')}
 											</p>
 										{/if}
 										<!-- Event Types (only show if selected) -->
@@ -2610,7 +2570,7 @@
 													{:else}
 														<ChevronDown class="w-3 h-3 text-muted-foreground" />
 													{/if}
-													<span class="text-xs text-muted-foreground">Event types ({selectedNotif.eventTypes.length})</span>
+													<span class="text-xs text-muted-foreground">{$t('settings.environments.modal.notifications.eventTypesCount', { count: selectedNotif.eventTypes.length })}</span>
 												</div>
 												{#if !isCollapsed}
 													<EventTypesEditor
@@ -2630,9 +2590,9 @@
 						{/if}
 					{:else}
 						<p class="text-xs text-muted-foreground mt-2 flex-shrink-0">
-							Configure which notification channels should send alerts for events from this environment.
+							{$t('settings.environments.modal.notifications.editModeDescription')}
 							{#if environment && !environment.collectActivity}
-								<span class="text-amber-500">Activity collection will be enabled automatically when you add a channel.</span>
+								<span class="text-amber-500">{$t('settings.environments.modal.notifications.activityAutoEnabled')}</span>
 							{/if}
 						</p>
 
@@ -2666,7 +2626,7 @@
 														<Send class="w-4 h-4 shrink-0 text-purple-500" />
 													{/if}
 													<span class="text-sm font-medium truncate">{notif.channelName}</span>
-													<span class="text-xs text-muted-foreground">({notif.eventTypes.length} events)</span>
+													<span class="text-xs text-muted-foreground">{$t('settings.environments.modal.notifications.eventsBadge', { count: notif.eventTypes.length })}</span>
 												</div>
 												<div class="flex items-center gap-1 shrink-0" role="group" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
 													<TogglePill
@@ -2688,7 +2648,7 @@
 												<div class="px-2 pb-2">
 													<p class="text-2xs text-amber-600 flex items-center gap-1">
 														<AlertCircle class="w-2.5 h-2.5" />
-														Channel disabled globally
+														{$t('settings.environments.modal.notifications.channelDisabledGlobally')}
 													</p>
 												</div>
 											{/if}
@@ -2709,8 +2669,8 @@
 							{:else}
 								<div class="text-center py-6 text-muted-foreground">
 									<Bell class="w-8 h-8 mx-auto mb-2 opacity-50" />
-									<p class="text-sm">No notification channels configured</p>
-									<p class="text-xs mt-1">Add a channel below to receive alerts for this environment</p>
+									<p class="text-sm">{$t('settings.environments.modal.notifications.noneConfigured')}</p>
+									<p class="text-xs mt-1">{$t('settings.environments.modal.notifications.addChannelBelow')}</p>
 								</div>
 							{/if}
 
@@ -2718,7 +2678,7 @@
 							{@const availableChannels = notifications.filter(n => !envNotifications.some(en => en.notificationId === n.id))}
 							{#if availableChannels.length > 0}
 								<div class="pt-3 border-t flex-shrink-0 mt-4">
-									<Label class="text-xs text-muted-foreground mb-2 block">Add notification channel:</Label>
+									<Label class="text-xs text-muted-foreground mb-2 block">{$t('settings.environments.modal.notifications.addChannelLabel')}</Label>
 									<div class="flex flex-wrap gap-2">
 										{#each availableChannels as channel}
 											<button
@@ -2740,9 +2700,9 @@
 								<div class="p-3 rounded-md bg-muted/30 text-xs text-muted-foreground flex items-start gap-2 flex-shrink-0 mt-4">
 									<Info class="w-3.5 h-3.5 mt-0.5 shrink-0" />
 									{#if !$licenseStore.isEnterprise || $canAccess('notifications', 'create')}
-										<span>No notification channels have been created yet. <a href="/settings?tab=notifications" class="text-primary hover:underline" onclick={onClose}>Go to Settings → Notifications</a> to add channels first.</span>
+										<span>{$t('settings.environments.modal.notifications.noChannelsCreatedPrefix')} <a href="/settings?tab=notifications" class="text-primary hover:underline" onclick={onClose}>{$t('settings.environments.modal.notifications.goToSettingsNotifications')}</a> {$t('settings.environments.modal.notifications.noChannelsCreatedSuffix')}</span>
 									{:else}
-										<span>No notification channels have been created yet. Contact your administrator to configure notification channels.</span>
+										<span>{$t('settings.environments.modal.notifications.contactAdmin')}</span>
 									{/if}
 								</div>
 							{/if}
@@ -2763,23 +2723,23 @@
 				>
 					{#if testingConnection}
 						<Loader2 class="w-4 h-4 animate-spin" />
-						Testing...
+						{$t('settings.environments.modal.actions.testing')}
 					{:else if testResult?.success}
 						<CheckCircle2 class="w-4 h-4 text-green-500" />
-						Test connection
+						{$t('settings.environments.modal.actions.testConnection')}
 					{:else if testResult && !testResult.success}
 						<AlertCircle class="w-4 h-4 text-red-500" />
-						Test connection
+						{$t('settings.environments.modal.actions.testConnection')}
 					{:else}
 						<Wifi class="w-4 h-4" />
-						Test connection
+						{$t('settings.environments.modal.actions.testConnection')}
 					{/if}
 				</Button>
 
 				{#if !isEditing}
 					<!-- Add mode -->
 					<Button variant="outline" onclick={onClose}>
-						Cancel
+						{$t('settings.environments.modal.actions.cancel')}
 					</Button>
 					<Button onclick={createEnvironment} disabled={formSaving}>
 						{#if formSaving}
@@ -2787,12 +2747,12 @@
 						{:else}
 							<Plus class="w-4 h-4" />
 						{/if}
-						Add
+						{$t('settings.environments.modal.actions.add')}
 					</Button>
 				{:else}
 					<!-- Edit mode -->
 					<Button variant="outline" onclick={onClose}>
-						Cancel
+						{$t('settings.environments.modal.actions.cancel')}
 					</Button>
 					<Button onclick={updateEnvironment} disabled={formSaving}>
 						{#if formSaving}
@@ -2800,7 +2760,7 @@
 						{:else}
 							<Check class="w-4 h-4" />
 						{/if}
-						Save
+						{$t('settings.environments.modal.actions.save')}
 					</Button>
 				{/if}
 			</div>
@@ -2812,8 +2772,8 @@
 			outputSize={128}
 			outputFormat="image/webp"
 			outputQuality={0.85}
-			title="Crop icon"
-			saveLabel="Save icon"
+			title={$t('settings.environments.modal.icon.cropTitle')}
+			saveLabel={$t('settings.environments.modal.icon.saveLabel')}
 			onCancel={() => showIconCropper = false}
 			onSave={handleIconCropSave}
 		/>

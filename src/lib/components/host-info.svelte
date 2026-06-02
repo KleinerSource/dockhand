@@ -10,6 +10,7 @@
 	import { themeStore, type FontSize } from '$lib/stores/theme';
 	import { getTimeFormat } from '$lib/stores/settings';
 	import { formatBytes } from '$lib/utils/format';
+	import { getIntlLocale, locale, t } from '$lib/i18n';
 
 	// Font size scaling for header
 	let fontSize = $state<FontSize>('normal');
@@ -254,7 +255,7 @@
 			if (!response.ok) {
 				offlineEnvIds.add(envId);
 				offlineEnvIds = new Set(offlineEnvIds);
-				toast.error(`Cannot switch to "${envName}" - environment is offline`);
+				toast.error($t('hostInfo.cannotSwitchOffline', { name: envName }));
 				return;
 			}
 
@@ -263,7 +264,7 @@
 			if (newHostInfo.error) {
 				offlineEnvIds.add(envId);
 				offlineEnvIds = new Set(offlineEnvIds);
-				toast.error(`Cannot switch to "${envName}" - ${newHostInfo.error}`);
+				toast.error($t('hostInfo.cannotSwitchWithError', { name: envName, error: newHostInfo.error }));
 				return;
 			}
 
@@ -292,7 +293,7 @@
 			}
 			offlineEnvIds.add(envId);
 			offlineEnvIds = new Set(offlineEnvIds);
-			toast.error(`Cannot switch to "${envName}" - connection failed`);
+			toast.error($t('hostInfo.cannotSwitchConnectionFailed', { name: envName }));
 		} finally {
 			switchingEnvId = null;
 		}
@@ -307,9 +308,9 @@
 		const days = Math.floor(seconds / 86400);
 		const hours = Math.floor((seconds % 86400) / 3600);
 		if (days > 0) {
-			return `${days}d ${hours}h`;
+			return $t('hostInfo.uptimeShort', { days, hours });
 		}
-		return `${hours}h`;
+		return $t('hostInfo.uptimeHours', { hours });
 	}
 
 	let memoryPercent = $derived(
@@ -321,7 +322,7 @@
 	);
 
 	function formatLastUpdated(date: Date, timezone: string): string {
-		return new Intl.DateTimeFormat('en-GB', {
+		return new Intl.DateTimeFormat(getIntlLocale($locale), {
 			timeZone: timezone,
 			hour: '2-digit',
 			minute: '2-digit',
@@ -369,11 +370,11 @@
 					<span class="font-medium text-foreground">{currentEnv.name}</span>
 				{:else}
 					<Globe class="{iconSizeLargeClass()} text-muted-foreground" />
-					<span class="font-medium text-foreground">Select environment</span>
+					<span class="font-medium text-foreground">{$t('hostInfo.selectEnvironment')}</span>
 				{/if}
 			{:else}
 				<Globe class="{iconSizeLargeClass()} text-muted-foreground" />
-				<span class="font-medium text-foreground">No environments</span>
+				<span class="font-medium text-foreground">{$t('hostInfo.noEnvironments')}</span>
 			{/if}
 			<ChevronDown class="{iconSizeClass()}" />
 		</button>
@@ -388,7 +389,7 @@
 								bind:this={searchInputRef}
 								bind:value={searchTerm}
 								type="text"
-								placeholder="Search environments..."
+								placeholder={$t('hostInfo.searchEnvironments')}
 								class="w-full pl-7 pr-7 py-1 text-sm bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring"
 								onclick={(e) => e.stopPropagation()}
 								onkeydown={(e) => {
@@ -431,14 +432,14 @@
 							{/if}
 							<span class="flex-1 whitespace-nowrap" class:text-muted-foreground={isOffline}>{env.name}</span>
 							{#if isOffline && !isSwitching}
-								<span class="text-xs text-destructive">offline</span>
+								<span class="text-xs text-destructive">{$t('common.states.offline')}</span>
 							{:else if Number(env.id) === Number(currentEnvId)}
 								<Check class="{iconSizeLargeClass()} text-primary shrink-0" />
 							{/if}
 						</button>
 					{:else}
 						<div class="px-3 py-2 text-sm text-muted-foreground">
-							No matching environments
+							{$t('hostInfo.noMatchingEnvironments')}
 						</div>
 					{/each}
 				</div>
@@ -469,7 +470,7 @@
 				<span>Hawser (edge){hostInfo.environment.hawserVersion ? ` ${hostInfo.environment.hawserVersion}` : ''}</span>
 			{:else}
 				<Icon iconNode={whale} class="{iconSizeClass()}" />
-				<span>Socket</span>
+				<span>{$t('dashboard.connections.socket')}</span>
 			{/if}
 		</div>
 
@@ -477,13 +478,13 @@
 
 		<!-- CPU cores -->
 		{#if hostInfo.cpus > 0}
-			<span class="hidden lg:inline">{hostInfo.cpus} cores</span>
+			<span class="hidden lg:inline">{$t('hostInfo.cores', { count: hostInfo.cpus })}</span>
 			<span class="hidden lg:inline text-border">|</span>
 		{/if}
 
 		<!-- Memory -->
 		{#if hostInfo.totalMemory > 0}
-			<span class="hidden lg:inline">{formatBytes(hostInfo.totalMemory)} RAM</span>
+			<span class="hidden lg:inline">{$t('hostInfo.ram', { memory: formatBytes(hostInfo.totalMemory) })}</span>
 			<span class="hidden lg:inline text-border">|</span>
 		{/if}
 
@@ -508,12 +509,12 @@
 		<!-- Live indicator with timestamp -->
 		<div
 			class="flex items-center gap-2 {isConnected ? 'text-emerald-500' : 'text-muted-foreground'}"
-			title={isConnected ? 'Live updates connected' : 'Live updates disconnected'}
+			title={isConnected ? $t('hostInfo.liveConnected') : $t('hostInfo.liveDisconnected')}
 		>
 			<span class="text-muted-foreground" title={currentTimezone}>{formatLastUpdated(lastUpdated, currentTimezone)}</span>
 			{#if isConnected}
 				<Wifi class="{iconSizeLargeClass()}" />
-				<span class="font-medium">Live</span>
+				<span class="font-medium">{$t('hostInfo.live')}</span>
 			{:else}
 				<WifiOff class="{iconSizeLargeClass()}" />
 			{/if}

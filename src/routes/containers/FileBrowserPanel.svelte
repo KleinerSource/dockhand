@@ -39,6 +39,7 @@
 	} from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';
 	import { formatDateTime, appSettings } from '$lib/stores/settings';
+	import { t, translate } from '$lib/i18n';
 
 	interface FileEntry {
 		name: string;
@@ -347,7 +348,7 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to read file');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.readFile'));
 			}
 
 			viewingFile = {
@@ -356,7 +357,7 @@
 				content: data.content
 			};
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to open file');
+			toast.error(err.message || translate('containers.fileBrowser.errors.openFile'));
 		} finally {
 			loadingFile = false;
 		}
@@ -380,7 +381,7 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to read file');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.readFile'));
 			}
 
 			editorContent = data.content;
@@ -390,7 +391,7 @@
 				content: data.content
 			};
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to open file');
+			toast.error(err.message || translate('containers.fileBrowser.errors.openFile'));
 		} finally {
 			loadingFile = false;
 		}
@@ -414,13 +415,13 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to save file');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.saveFile'));
 			}
 
-			toast.success('File saved');
+			toast.success(translate('containers.fileBrowser.toasts.fileSaved'));
 			closeEditor();
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to save file');
+			toast.error(err.message || translate('containers.fileBrowser.errors.saveFile'));
 		} finally {
 			savingFile = false;
 		}
@@ -434,7 +435,7 @@
 	// Create file or directory
 	async function handleCreate() {
 		if (!createName.trim()) {
-			toast.error('Name is required');
+			toast.error(translate('containers.fileBrowser.errors.nameRequired'));
 			return;
 		}
 
@@ -454,15 +455,15 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to create');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.create'));
 			}
 
-			toast.success(`${createType === 'file' ? 'File' : 'Directory'} created`);
+			toast.success(translate(createType === 'file' ? 'containers.fileBrowser.toasts.fileCreated' : 'containers.fileBrowser.toasts.directoryCreated'));
 			showCreateModal = false;
 			createName = '';
 			loadDirectory(currentPath);
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to create');
+			toast.error(err.message || translate('containers.fileBrowser.errors.create'));
 		} finally {
 			creating = false;
 		}
@@ -485,13 +486,13 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to delete');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.delete'));
 			}
 
-			toast.success(`Deleted ${entry.name}`);
+			toast.success(translate('containers.fileBrowser.toasts.deleted', { name: entry.name }));
 			loadDirectory(currentPath);
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to delete');
+			toast.error(err.message || translate('containers.fileBrowser.errors.delete'));
 		} finally {
 			deleting = null;
 		}
@@ -506,7 +507,7 @@
 
 	async function handleRename() {
 		if (!renameEntry || !renameName.trim()) {
-			toast.error('Name is required');
+			toast.error(translate('containers.fileBrowser.errors.nameRequired'));
 			return;
 		}
 
@@ -533,15 +534,15 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to rename');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.rename'));
 			}
 
-			toast.success('Renamed successfully');
+			toast.success(translate('containers.fileBrowser.toasts.renamed'));
 			showRenameModal = false;
 			renameEntry = null;
 			loadDirectory(currentPath);
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to rename');
+			toast.error(err.message || translate('containers.fileBrowser.errors.rename'));
 		} finally {
 			renaming = false;
 		}
@@ -579,7 +580,7 @@
 
 	async function handleChmod() {
 		if (!chmodEntry || !chmodMode.trim()) {
-			toast.error('Mode is required');
+			toast.error(translate('containers.fileBrowser.errors.modeRequired'));
 			return;
 		}
 
@@ -599,15 +600,15 @@
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to change permissions');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.changePermissions'));
 			}
 
-			toast.success('Permissions changed');
+			toast.success(translate('containers.fileBrowser.toasts.permissionsChanged'));
 			showChmodModal = false;
 			chmodEntry = null;
 			loadDirectory(currentPath);
 		} catch (err: any) {
-			toast.error(err.message || 'Failed to change permissions');
+			toast.error(err.message || translate('containers.fileBrowser.errors.changePermissions'));
 		} finally {
 			changingPerms = false;
 		}
@@ -689,7 +690,7 @@
 			}
 
 			if (!res.ok) {
-				throw new Error(data.error || 'Failed to load directory');
+				throw new Error(data.error || translate('containers.fileBrowser.errors.loadDirectory'));
 			}
 
 			currentPath = data.path || path;
@@ -774,17 +775,17 @@
 
 			if (!res.ok) {
 				const details = data.details?.join('; ') || '';
-				throw new Error(details || data.error || 'Upload failed');
+				throw new Error(details || data.error || translate('containers.fileBrowser.errors.upload'));
 			}
 
-			toast.success(`Uploaded ${data.uploaded.length} file(s)`);
+			toast.success(translate('containers.fileBrowser.toasts.uploaded', { count: data.uploaded.length }));
 			if (data.errors?.length) {
-				toast.error(`Failed: ${data.errors.join(', ')}`);
+				toast.error(translate('containers.fileBrowser.toasts.uploadFailures', { errors: data.errors.join(', ') }));
 			}
 
 			loadDirectory(currentPath);
 		} catch (err: any) {
-			toast.error(err.message || 'Upload failed');
+			toast.error(err.message || translate('containers.fileBrowser.errors.upload'));
 		} finally {
 			uploading = false;
 			input.value = '';
@@ -840,7 +841,7 @@
 				size="icon"
 				class="h-7 w-7"
 				onclick={() => { createType = 'file'; createName = ''; showCreateModal = true; }}
-				title="New file"
+				title={$t('containers.fileBrowser.actions.newFile')}
 			>
 				<FilePlus class="w-3.5 h-3.5" />
 			</Button>
@@ -849,7 +850,7 @@
 				size="icon"
 				class="h-7 w-7"
 				onclick={() => { createType = 'directory'; createName = ''; showCreateModal = true; }}
-				title="New directory"
+				title={$t('containers.fileBrowser.actions.newDirectory')}
 			>
 				<FolderPlus class="w-3.5 h-3.5" />
 			</Button>
@@ -866,7 +867,7 @@
 				class="h-7 w-7"
 				onclick={() => fileInput.click()}
 				disabled={uploading || loading}
-				title="Upload files"
+				title={$t('containers.fileBrowser.actions.uploadFiles')}
 			>
 				{#if uploading}
 					<Loader2 class="w-3.5 h-3.5 animate-spin" />
@@ -880,7 +881,7 @@
 			size="icon"
 			class="h-7 w-7"
 			onclick={toggleHiddenFiles}
-			title={showHiddenFiles ? 'Hide hidden files' : 'Show hidden files'}
+			title={showHiddenFiles ? $t('containers.fileBrowser.actions.hideHiddenFiles') : $t('containers.fileBrowser.actions.showHiddenFiles')}
 		>
 			{#if showHiddenFiles}
 				<Eye class="w-3.5 h-3.5" />
@@ -894,7 +895,7 @@
 			class="h-7 w-7"
 			onclick={() => loadDirectory(currentPath)}
 			disabled={loading}
-			title="Refresh"
+			title={$t('common.actions.refresh')}
 		>
 			<RefreshCw class="w-3.5 h-3.5 {loading ? 'animate-spin' : ''}" />
 		</Button>
@@ -905,23 +906,23 @@
 		{#if loading}
 			<div class="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
 				<Loader2 class="w-5 h-5 animate-spin mr-2 text-muted-foreground" />
-				<span class="text-sm text-muted-foreground">Loading...</span>
+				<span class="text-sm text-muted-foreground">{$t('common.states.loading')}</span>
 			</div>
 		{/if}
 		{#if error}
 			<div class="flex items-center justify-center p-4 h-full">
 				<div class="max-w-md bg-destructive/5 border border-destructive/20 rounded-lg p-4 text-center">
 					<AlertCircle class="w-6 h-6 text-destructive mx-auto" />
-					<p class="text-sm font-medium text-destructive mt-2">Unable to browse files</p>
+					<p class="text-sm font-medium text-destructive mt-2">{$t('containers.fileBrowser.errors.unableToBrowse')}</p>
 					<p class="text-xs text-muted-foreground mt-2 break-words font-mono bg-muted/50 rounded px-2 py-1.5">{error}</p>
 					<Button variant="outline" size="sm" class="mt-3" onclick={() => loadDirectory(currentPath)}>
-						Retry
+						{$t('common.actions.retry')}
 					</Button>
 				</div>
 			</div>
 		{:else if !loading && displayEntries().length === 0}
 			<div class="flex items-center justify-center h-32 text-muted-foreground">
-				<span class="text-sm">{showHiddenFiles ? 'Directory is empty' : 'No visible files (hidden files are hidden)'}</span>
+				<span class="text-sm">{showHiddenFiles ? $t('containers.fileBrowser.empty.directory') : $t('containers.fileBrowser.empty.noVisibleFiles')}</span>
 			</div>
 		{:else if displayEntries().length > 0}
 			<Table.Root class="text-xs">
@@ -929,26 +930,26 @@
 					<Table.Row>
 						<Table.Head class="w-[35%] py-1.5 text-xs font-medium">
 							<button type="button" class="flex items-center gap-1 hover:text-foreground" onclick={() => toggleSort('name')}>
-								Name
+								{$t('common.labels.name')}
 								<svelte:component this={getSortIcon('name')} class="w-3 h-3 opacity-50" />
 							</button>
 						</Table.Head>
 						<Table.Head class="w-[8%] py-1.5 text-xs font-medium">
 							<button type="button" class="flex items-center gap-1 hover:text-foreground" onclick={() => toggleSort('size')}>
-								Size
+								{$t('common.labels.size')}
 								<svelte:component this={getSortIcon('size')} class="w-3 h-3 opacity-50" />
 							</button>
 						</Table.Head>
 						<Table.Head class="w-[18%] py-1.5 text-xs font-medium">
-							<span class="text-muted-foreground">Permissions</span>
+							<span class="text-muted-foreground">{$t('containers.fileBrowser.labels.permissions')}</span>
 						</Table.Head>
 						<Table.Head class="w-[14%] py-1.5 text-xs font-medium">
 							<button type="button" class="flex items-center gap-1 hover:text-foreground" onclick={() => toggleSort('modified')}>
-								Modified
+								{$t('common.labels.modified')}
 								<svelte:component this={getSortIcon('modified')} class="w-3 h-3 opacity-50" />
 							</button>
 						</Table.Head>
-						<Table.Head class="w-[25%] py-1.5 text-xs font-medium text-right">Actions</Table.Head>
+						<Table.Head class="w-[25%] py-1.5 text-xs font-medium text-right">{$t('common.labels.actions')}</Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
@@ -983,10 +984,10 @@
 									{#if entry.readonly && entry.type === 'file'}
 										<span
 											class="inline-flex items-center gap-0.5 ml-1.5 px-1 py-0.5 text-2xs bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded"
-											title="Read-only file (no write permission)"
+											title={$t('containers.fileBrowser.tooltips.readOnlyFile')}
 										>
 											<Lock class="w-2.5 h-2.5" />
-											RO
+											{$t('containers.fileBrowser.labels.readOnlyShort')}
 										</span>
 									{/if}
 								</button>
@@ -1010,7 +1011,7 @@
 											class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
 											onclick={(e: MouseEvent) => { e.stopPropagation(); openFileForView(entry); }}
 											disabled={loadingFile}
-											title="View file"
+											title={$t('containers.fileBrowser.actions.viewFile')}
 										>
 											<Eye class="w-3 h-3" />
 										</Button>
@@ -1022,7 +1023,7 @@
 											class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity {entry.readonly ? 'cursor-not-allowed' : ''}"
 											onclick={(e: MouseEvent) => { e.stopPropagation(); if (!entry.readonly) openFileForEdit(entry); }}
 											disabled={loadingFile || entry.readonly}
-											title={entry.readonly ? "File is read-only" : "Edit file"}
+											title={entry.readonly ? $t('containers.fileBrowser.tooltips.fileReadOnly') : $t('containers.fileBrowser.actions.editFile')}
 										>
 											{#if loadingFile}
 												<Loader2 class="w-3 h-3 animate-spin" />
@@ -1039,7 +1040,7 @@
 											size="icon"
 											class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
 											onclick={(e: MouseEvent) => { e.stopPropagation(); openRenameModal(entry); }}
-											title="Rename"
+											title={$t('containers.fileBrowser.actions.rename')}
 										>
 											<TextCursorInput class="w-3 h-3" />
 										</Button>
@@ -1048,16 +1049,16 @@
 											size="icon"
 											class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
 											onclick={(e: MouseEvent) => { e.stopPropagation(); openChmodModal(entry); }}
-											title="Change permissions"
+											title={$t('containers.fileBrowser.actions.changePermissions')}
 										>
 											<Shield class="w-3 h-3" />
 										</Button>
 										<ConfirmPopover
 											open={confirmDeleteEntry === entry.name}
-											action="Delete"
-											itemType={entry.type === 'directory' ? 'directory' : 'file'}
+											action={$t('common.actions.delete')}
+											itemType={entry.type === 'directory' ? $t('containers.fileBrowser.labels.directory') : $t('containers.fileBrowser.labels.file')}
 											itemName={entry.name}
-											confirmText="Delete"
+											confirmText={$t('common.actions.delete')}
 											variant="destructive"
 											onConfirm={() => handleDelete(entry)}
 											onOpenChange={(open) => confirmDeleteEntry = open ? entry.name : null}
@@ -1076,7 +1077,7 @@
 										size="icon"
 										class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
 										onclick={(e: MouseEvent) => { e.stopPropagation(); downloadFile(entry); }}
-										title="Download"
+										title={$t('common.actions.download')}
 									>
 										<Download class="w-3 h-3" />
 									</Button>
@@ -1099,7 +1100,7 @@
 					<span class="text-muted-foreground">{editingFile.path}</span>
 				</div>
 				<div class="flex items-center gap-1">
-					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={toggleEditorTheme} title={editorTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}>
+					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={toggleEditorTheme} title={editorTheme === 'light' ? $t('themeSelector.darkTheme') : $t('themeSelector.lightTheme')}>
 						{#if editorTheme === 'light'}
 							<Moon class="w-3.5 h-3.5" />
 						{:else}
@@ -1112,9 +1113,9 @@
 						{:else}
 							<Save class="w-3.5 h-3.5 mr-1.5" />
 						{/if}
-						Save
+						{$t('common.actions.save')}
 					</Button>
-					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={closeEditor} title="Close editor">
+					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={closeEditor} title={$t('containers.fileBrowser.actions.closeEditor')}>
 						<X class="w-3.5 h-3.5" />
 					</Button>
 				</div>
@@ -1138,17 +1139,17 @@
 					<Eye class="w-3.5 h-3.5 text-muted-foreground" />
 					<span class="font-medium">{viewingFile.name}</span>
 					<span class="text-muted-foreground">{viewingFile.path}</span>
-					<span class="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">read-only</span>
+					<span class="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{$t('containers.fileBrowser.labels.readOnly')}</span>
 				</div>
 				<div class="flex items-center gap-1">
-					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={toggleEditorTheme} title={editorTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}>
+					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={toggleEditorTheme} title={editorTheme === 'light' ? $t('themeSelector.darkTheme') : $t('themeSelector.lightTheme')}>
 						{#if editorTheme === 'light'}
 							<Moon class="w-3.5 h-3.5" />
 						{:else}
 							<Sun class="w-3.5 h-3.5" />
 						{/if}
 					</Button>
-					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={closeViewer} title="Close viewer">
+					<Button variant="ghost" size="icon" class="h-7 w-7" onclick={closeViewer} title={$t('containers.fileBrowser.actions.closeViewer')}>
 						<X class="w-3.5 h-3.5" />
 					</Button>
 				</div>
@@ -1169,11 +1170,11 @@
 <Dialog.Root bind:open={showCreateModal}>
 	<Dialog.Content class="max-w-sm">
 		<Dialog.Header>
-			<Dialog.Title>Create {createType === 'file' ? 'File' : 'Directory'}</Dialog.Title>
+			<Dialog.Title>{createType === 'file' ? $t('containers.fileBrowser.create.titleFile') : $t('containers.fileBrowser.create.titleDirectory')}</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4 py-4">
 			<div class="space-y-2">
-				<Label for="create-name">Name</Label>
+				<Label for="create-name">{$t('common.labels.name')}</Label>
 				<Input
 					id="create-name"
 					bind:value={createName}
@@ -1182,16 +1183,16 @@
 				/>
 			</div>
 			<p class="text-xs text-muted-foreground">
-				Will be created in: {currentPath}
+				{$t('containers.fileBrowser.create.createdIn', { path: currentPath })}
 			</p>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => showCreateModal = false}>Cancel</Button>
+			<Button variant="outline" onclick={() => showCreateModal = false}>{$t('common.actions.cancel')}</Button>
 			<Button onclick={handleCreate} disabled={creating || !createName.trim()}>
 				{#if creating}
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 				{/if}
-				Create
+				{$t('common.actions.create')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
@@ -1201,11 +1202,11 @@
 <Dialog.Root bind:open={showRenameModal}>
 	<Dialog.Content class="max-w-sm">
 		<Dialog.Header>
-			<Dialog.Title>Rename</Dialog.Title>
+			<Dialog.Title>{$t('containers.fileBrowser.actions.rename')}</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4 py-4">
 			<div class="space-y-2">
-				<Label for="rename-name">New name</Label>
+				<Label for="rename-name">{$t('containers.fileBrowser.labels.newName')}</Label>
 				<Input
 					id="rename-name"
 					bind:value={renameName}
@@ -1214,12 +1215,12 @@
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => showRenameModal = false}>Cancel</Button>
+			<Button variant="outline" onclick={() => showRenameModal = false}>{$t('common.actions.cancel')}</Button>
 			<Button onclick={handleRename} disabled={renaming || !renameName.trim()}>
 				{#if renaming}
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 				{/if}
-				Rename
+				{$t('containers.fileBrowser.actions.rename')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
@@ -1229,12 +1230,12 @@
 <Dialog.Root bind:open={showChmodModal}>
 	<Dialog.Content class="max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>Change permissions</Dialog.Title>
+			<Dialog.Title>{$t('containers.fileBrowser.actions.changePermissions')}</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4 py-4">
 			{#if chmodEntry}
 				<p class="text-sm text-muted-foreground">{chmodEntry.name}</p>
-				<p class="text-xs text-muted-foreground">Current: {chmodEntry.permissions}</p>
+				<p class="text-xs text-muted-foreground">{$t('containers.fileBrowser.labels.currentPermissions', { permissions: chmodEntry.permissions })}</p>
 			{/if}
 
 			<!-- Permission checkboxes -->
@@ -1243,26 +1244,26 @@
 					<thead>
 						<tr class="text-muted-foreground text-xs">
 							<th class="text-left font-normal pb-2"></th>
-							<th class="text-center font-normal pb-2 w-16">Read</th>
-							<th class="text-center font-normal pb-2 w-16">Write</th>
-							<th class="text-center font-normal pb-2 w-16">Execute</th>
+							<th class="text-center font-normal pb-2 w-16">{$t('containers.fileBrowser.permissions.read')}</th>
+							<th class="text-center font-normal pb-2 w-16">{$t('containers.fileBrowser.permissions.write')}</th>
+							<th class="text-center font-normal pb-2 w-16">{$t('containers.fileBrowser.permissions.execute')}</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
-							<td class="py-1.5 text-muted-foreground">Owner</td>
+							<td class="py-1.5 text-muted-foreground">{$t('containers.fileBrowser.permissions.owner')}</td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOwnerR} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOwnerW} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOwnerX} onchange={checkboxesToOctal} class="rounded" /></td>
 						</tr>
 						<tr>
-							<td class="py-1.5 text-muted-foreground">Group</td>
+							<td class="py-1.5 text-muted-foreground">{$t('containers.fileBrowser.permissions.group')}</td>
 							<td class="text-center"><input type="checkbox" bind:checked={permGroupR} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permGroupW} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permGroupX} onchange={checkboxesToOctal} class="rounded" /></td>
 						</tr>
 						<tr>
-							<td class="py-1.5 text-muted-foreground">Others</td>
+							<td class="py-1.5 text-muted-foreground">{$t('containers.fileBrowser.permissions.others')}</td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOtherR} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOtherW} onchange={checkboxesToOctal} class="rounded" /></td>
 							<td class="text-center"><input type="checkbox" bind:checked={permOtherX} onchange={checkboxesToOctal} class="rounded" /></td>
@@ -1274,18 +1275,18 @@
 			<!-- Preview -->
 			<div class="flex items-center gap-4 text-sm bg-muted/50 rounded-lg p-3">
 				<div>
-					<span class="text-muted-foreground text-xs">Octal:</span>
+					<span class="text-muted-foreground text-xs">{$t('containers.fileBrowser.permissions.octal')}:</span>
 					<span class="font-mono font-medium ml-1">{chmodMode}</span>
 				</div>
 				<div>
-					<span class="text-muted-foreground text-xs">Symbolic:</span>
+					<span class="text-muted-foreground text-xs">{$t('containers.fileBrowser.permissions.symbolic')}:</span>
 					<span class="font-mono font-medium ml-1">{checkboxesToSymbolic()}</span>
 				</div>
 			</div>
 
 			<!-- Manual octal input -->
 			<div class="space-y-2">
-				<Label for="chmod-mode">Or enter octal mode directly</Label>
+				<Label for="chmod-mode">{$t('containers.fileBrowser.permissions.enterOctal')}</Label>
 				<Input
 					id="chmod-mode"
 					bind:value={chmodMode}
@@ -1299,17 +1300,17 @@
 			{#if chmodEntry?.type === 'directory'}
 				<label class="flex items-center gap-2 text-sm">
 					<input type="checkbox" bind:checked={chmodRecursive} class="rounded" />
-					Apply recursively
+					{$t('containers.fileBrowser.permissions.applyRecursively')}
 				</label>
 			{/if}
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => showChmodModal = false}>Cancel</Button>
+			<Button variant="outline" onclick={() => showChmodModal = false}>{$t('common.actions.cancel')}</Button>
 			<Button onclick={handleChmod} disabled={changingPerms || !chmodMode.trim()}>
 				{#if changingPerms}
 					<Loader2 class="w-4 h-4 mr-2 animate-spin" />
 				{/if}
-				Apply
+				{$t('common.actions.apply')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

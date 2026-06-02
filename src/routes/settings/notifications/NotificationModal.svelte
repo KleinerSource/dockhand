@@ -11,10 +11,11 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { toast } from 'svelte-sonner';
 	import { focusFirstInput } from '$lib/utils';
+	import { t, translate } from '$lib/i18n';
 
 	// System-only events (configured at channel level, not per-environment)
 	const SYSTEM_EVENTS = [
-		{ id: 'license_expiring', label: 'License expiring', description: 'Enterprise license expiring soon' }
+		{ id: 'license_expiring', labelKey: 'settings.notifications.modal.systemEvents.licenseExpiring.label', descriptionKey: 'settings.notifications.modal.systemEvents.licenseExpiring.description' }
 	] as const;
 
 	export interface NotificationSetting {
@@ -155,11 +156,11 @@
 		const config = getFormConfig();
 		if (formType === 'smtp') {
 			if (!config.host || !config.from_email || !config.to_emails?.length) {
-				return 'Host, from email, and at least one recipient are required';
+				return translate('settings.notifications.modal.validation.smtpRequired');
 			}
 		} else {
 			if (!config.urls?.length) {
-				return 'At least one Apprise URL is required';
+				return translate('settings.notifications.modal.validation.appriseUrlRequired');
 			}
 		}
 		return null;
@@ -204,16 +205,16 @@
 
 			if (data.success) {
 				testResult = 'success';
-				toast.success('Test notification sent successfully');
+				toast.success(translate('settings.notifications.modal.toasts.testSent'));
 				setTimeout(() => { testResult = 'idle'; }, 3000);
 			} else {
 				testResult = 'error';
-				formError = data.error || 'Failed to send test notification';
+				formError = data.error || translate('settings.notifications.modal.errors.sendTestFailed');
 				setTimeout(() => { testResult = 'idle'; }, 3000);
 			}
 		} catch {
 			testResult = 'error';
-			formError = 'Failed to test notification';
+			formError = translate('settings.notifications.modal.errors.testFailed');
 			setTimeout(() => { testResult = 'idle'; }, 3000);
 		} finally {
 			formTesting = false;
@@ -222,19 +223,19 @@
 
 	async function save() {
 		if (!formName.trim()) {
-			formError = 'Name is required';
+			formError = translate('settings.notifications.modal.validation.nameRequired');
 			return;
 		}
 
 		const config = getFormConfig();
 		if (formType === 'smtp') {
 			if (!config.host || !config.from_email || !config.to_emails?.length) {
-				formError = 'Host, from email, and at least one recipient are required';
+				formError = translate('settings.notifications.modal.validation.smtpRequired');
 				return;
 			}
 		} else {
 			if (!config.urls?.length) {
-				formError = 'At least one Apprise URL is required';
+				formError = translate('settings.notifications.modal.validation.appriseUrlRequired');
 				return;
 			}
 		}
@@ -269,10 +270,10 @@
 				onSaved();
 			} else {
 				const data = await response.json();
-				formError = data.error || `Failed to ${isEditing ? 'update' : 'create'} notification`;
+				formError = data.error || translate(isEditing ? 'settings.notifications.modal.errors.updateFailed' : 'settings.notifications.modal.errors.createFailed');
 			}
 		} catch {
-			formError = `Failed to ${isEditing ? 'update' : 'create'} notification`;
+			formError = translate(isEditing ? 'settings.notifications.modal.errors.updateFailed' : 'settings.notifications.modal.errors.createFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -295,7 +296,7 @@
 <Dialog.Root bind:open onOpenChange={(o) => { if (o) { formError = ''; focusFirstInput(); } }}>
 	<Dialog.Content class="max-w-3xl max-h-[90vh] overflow-y-auto">
 		<Dialog.Header>
-			<Dialog.Title>{isEditing ? 'Edit' : 'Add'} notification channel</Dialog.Title>
+			<Dialog.Title>{isEditing ? $t('settings.notifications.modal.titleEdit') : $t('settings.notifications.modal.titleAdd')}</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4">
 			{#if formError}
@@ -304,11 +305,11 @@
 
 			<div class="grid grid-cols-2 gap-4">
 				<div class="space-y-2">
-					<Label for="notif-name">Name *</Label>
-					<Input id="notif-name" bind:value={formName} placeholder="My notification channel" />
+					<Label for="notif-name">{$t('settings.notifications.modal.name')} *</Label>
+					<Input id="notif-name" bind:value={formName} placeholder={$t('settings.notifications.modal.namePlaceholder')} />
 				</div>
 				<div class="space-y-2">
-					<Label>Type</Label>
+					<Label>{$t('settings.notifications.modal.type')}</Label>
 					{#if isEditing}
 						<Badge variant="secondary" class="h-9 flex items-center justify-center">
 							{formType === 'smtp' ? 'SMTP (Email)' : 'Apprise (Webhooks)'}
@@ -342,76 +343,76 @@
 			</div>
 
 			<div class="flex items-center gap-2">
-				<Label>Status</Label>
-				<TogglePill bind:checked={formEnabled} onLabel="Enabled" offLabel="Disabled" />
+				<Label>{$t('settings.notifications.modal.status')}</Label>
+				<TogglePill bind:checked={formEnabled} onLabel={$t('settings.notifications.modal.enabled')} offLabel={$t('settings.notifications.modal.disabled')} />
 			</div>
 
 			{#if formType === 'smtp'}
 				<div class="space-y-4 border-t pt-4 min-h-[380px]">
 					<div class="flex items-center gap-2">
-						<p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">SMTP configuration</p>
+						<p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{$t('settings.notifications.modal.smtp.configuration')}</p>
 						<Tooltip.Root>
 							<Tooltip.Trigger>
 								<HelpCircle class="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
 							</Tooltip.Trigger>
 							<Tooltip.Portal>
 								<Tooltip.Content side="right" class="w-80">
-									<p class="text-xs"><span class="font-semibold">Gmail:</span> smtp.gmail.com, port 587, TLS/SSL off. Use an App Password.</p>
-									<p class="text-xs mt-1"><span class="font-semibold">Outlook:</span> smtp.office365.com, port 587, TLS/SSL off.</p>
+									<p class="text-xs"><span class="font-semibold">Gmail:</span> {$t('settings.notifications.modal.smtp.gmailHint')}</p>
+									<p class="text-xs mt-1"><span class="font-semibold">Outlook:</span> {$t('settings.notifications.modal.smtp.outlookHint')}</p>
 								</Tooltip.Content>
 							</Tooltip.Portal>
 						</Tooltip.Root>
 					</div>
 					<div class="grid grid-cols-3 gap-4">
 						<div class="space-y-2 col-span-2">
-							<Label for="notif-smtp-host">SMTP host *</Label>
+							<Label for="notif-smtp-host">{$t('settings.notifications.modal.smtp.host')} *</Label>
 							<Input id="notif-smtp-host" bind:value={formSmtpHost} placeholder="smtp.gmail.com" />
 						</div>
 						<div class="space-y-2">
-							<Label for="notif-smtp-port">Port *</Label>
+							<Label for="notif-smtp-port">{$t('settings.notifications.modal.smtp.port')} *</Label>
 							<Input id="notif-smtp-port" type="number" bind:value={formSmtpPort} />
 						</div>
 					</div>
 					<div class="flex items-center gap-4">
 						<div class="flex items-center gap-2">
 							<Label>TLS/SSL</Label>
-							<TogglePill bind:checked={formSmtpSecure} onLabel="Yes" offLabel="No" />
+							<TogglePill bind:checked={formSmtpSecure} onLabel={$t('settings.notifications.modal.yes')} offLabel={$t('settings.notifications.modal.no')} />
 						</div>
 						<div class="flex items-center gap-2">
-							<Label class="text-muted-foreground">Skip TLS verify</Label>
-							<TogglePill bind:checked={formSmtpSkipTlsVerify} onLabel="Yes" offLabel="No" />
+							<Label class="text-muted-foreground">{$t('settings.notifications.modal.smtp.skipTlsVerify')}</Label>
+							<TogglePill bind:checked={formSmtpSkipTlsVerify} onLabel={$t('settings.notifications.modal.yes')} offLabel={$t('settings.notifications.modal.no')} />
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-4">
 						<div class="space-y-2">
-							<Label for="notif-smtp-username">Username</Label>
+							<Label for="notif-smtp-username">{$t('settings.notifications.modal.smtp.username')}</Label>
 							<Input id="notif-smtp-username" bind:value={formSmtpUsername} placeholder="user@example.com" />
 						</div>
 						<div class="space-y-2">
-							<Label for="notif-smtp-password">Password</Label>
-							<Input id="notif-smtp-password" type="password" bind:value={formSmtpPassword} placeholder={isEditing ? 'Leave blank to keep existing' : 'App password or token'} />
+							<Label for="notif-smtp-password">{$t('settings.notifications.modal.smtp.password')}</Label>
+							<Input id="notif-smtp-password" type="password" bind:value={formSmtpPassword} placeholder={isEditing ? $t('settings.notifications.modal.smtp.keepExistingPassword') : $t('settings.notifications.modal.smtp.passwordPlaceholder')} />
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-4">
 						<div class="space-y-2">
-							<Label for="notif-smtp-from-email">From email *</Label>
+							<Label for="notif-smtp-from-email">{$t('settings.notifications.modal.smtp.fromEmail')} *</Label>
 							<Input id="notif-smtp-from-email" bind:value={formSmtpFromEmail} placeholder="alerts@example.com" />
 						</div>
 						<div class="space-y-2">
-							<Label for="notif-smtp-from-name">From name</Label>
+							<Label for="notif-smtp-from-name">{$t('settings.notifications.modal.smtp.fromName')}</Label>
 							<Input id="notif-smtp-from-name" bind:value={formSmtpFromName} placeholder="Dockhand Alerts" />
 						</div>
 					</div>
 					<div class="space-y-2">
-						<Label for="notif-smtp-to">Recipients * (comma-separated)</Label>
+						<Label for="notif-smtp-to">{$t('settings.notifications.modal.smtp.recipients')}</Label>
 						<Input id="notif-smtp-to" bind:value={formSmtpToEmails} placeholder="admin@example.com, ops@example.com" />
 					</div>
 				</div>
 			{:else}
 				<div class="space-y-4 border-t pt-4 min-h-[380px]">
-					<p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Apprise configuration</p>
+					<p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{$t('settings.notifications.modal.apprise.configuration')}</p>
 					<div class="space-y-2">
-						<Label for="notif-apprise-urls">Apprise URLs * (one per line)</Label>
+						<Label for="notif-apprise-urls">{$t('settings.notifications.modal.apprise.urls')}</Label>
 						<textarea
 							id="notif-apprise-urls"
 							bind:value={formAppriseUrls}
@@ -431,7 +432,7 @@ jsons://hostname/webhook/path"
 						class="flex min-h-[220px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					></textarea>
 					<p class="text-xs text-muted-foreground">
-						Supports Gotify (gotify:// or gotifys:// for HTTPS), Discord, Slack, Mattermost (mmost:// or mmosts://), Telegram, ntfy, Pushover, Workflows (for e.g. Microsoft Teams), and generic JSON webhooks.
+						{$t('settings.notifications.modal.apprise.supported')}
 						</p>
 					</div>
 				</div>
@@ -446,14 +447,14 @@ jsons://hostname/webhook/path"
 				>
 					<div class="flex items-center gap-2">
 						<Key class="w-4 h-4 text-muted-foreground" />
-						<span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Global system events</span>
+						<span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{$t('settings.notifications.modal.systemEvents.title')}</span>
 					</div>
 					<ChevronDown class="w-4 h-4 text-muted-foreground transition-transform {showSystemEvents ? 'rotate-180' : ''}" />
 				</button>
 				{#if showSystemEvents}
 					<div class="mt-3 space-y-2">
 						<p class="text-xs text-muted-foreground mb-3">
-							These events are not tied to specific environments and are configured globally here.
+							{$t('settings.notifications.modal.systemEvents.description')}
 						</p>
 						{#each SYSTEM_EVENTS as event}
 							<label class="flex items-start gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer">
@@ -462,8 +463,8 @@ jsons://hostname/webhook/path"
 									onCheckedChange={(checked) => toggleSystemEvent(event.id, !!checked)}
 								/>
 								<div class="flex-1 min-w-0">
-									<span class="text-sm font-medium">{event.label}</span>
-									<p class="text-xs text-muted-foreground">{event.description}</p>
+									<span class="text-sm font-medium">{$t(event.labelKey)}</span>
+									<p class="text-xs text-muted-foreground">{$t(event.descriptionKey)}</p>
 								</div>
 							</label>
 						{/each}
@@ -475,7 +476,7 @@ jsons://hostname/webhook/path"
 			<div class="border-t pt-4">
 				<div class="text-xs text-muted-foreground bg-muted/50 rounded-md p-3 flex items-start gap-2">
 					<Info class="w-4 h-4 mt-0.5 shrink-0" />
-					<span>Environment-specific events (containers, stacks, auto-updates) are configured in each environment's settings.</span>
+					<span>{$t('settings.notifications.modal.environmentSpecificNote')}</span>
 				</div>
 			</div>
 		</div>
@@ -483,20 +484,20 @@ jsons://hostname/webhook/path"
 			<Button variant="outline" onclick={testConfig} disabled={formTesting || formSaving}>
 				{#if formTesting}
 					<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
-					Testing...
+					{$t('settings.notifications.modal.actions.testing')}
 				{:else if testResult === 'success'}
 					<CheckCircle2 class="w-4 h-4 mr-1 text-green-500" />
-					Sent!
+					{$t('settings.notifications.modal.actions.sent')}
 				{:else if testResult === 'error'}
 					<XCircle class="w-4 h-4 mr-1 text-destructive" />
-					Failed
+					{$t('settings.notifications.modal.actions.failed')}
 				{:else}
 					<Send class="w-4 h-4" />
-					Test
+					{$t('settings.notifications.modal.actions.test')}
 				{/if}
 			</Button>
 			<div class="flex gap-2">
-				<Button variant="outline" onclick={handleClose}>Cancel</Button>
+				<Button variant="outline" onclick={handleClose}>{$t('settings.notifications.modal.actions.cancel')}</Button>
 				<Button onclick={save} disabled={formSaving || formTesting}>
 					{#if formSaving}
 						<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
@@ -505,7 +506,7 @@ jsons://hostname/webhook/path"
 					{:else}
 						<Plus class="w-4 h-4" />
 					{/if}
-					{isEditing ? 'Save' : 'Add'}
+					{isEditing ? $t('settings.notifications.modal.actions.save') : $t('settings.notifications.modal.actions.add')}
 				</Button>
 			</div>
 		</Dialog.Footer>

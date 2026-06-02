@@ -3,6 +3,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import type { Snippet } from 'svelte';
 	import { appSettings } from '$lib/stores/settings';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		open: boolean;
@@ -10,6 +11,7 @@
 		itemName?: string;
 		itemType: string;
 		confirmText?: string;
+		description?: string;
 		variant?: 'destructive' | 'secondary' | 'default';
 		autoHideMs?: number;
 		title?: string;
@@ -27,7 +29,8 @@
 		action,
 		itemName = '',
 		itemType,
-		confirmText = 'Confirm',
+		confirmText = '',
+		description = '',
 		variant = 'destructive',
 		autoHideMs = 3000,
 		title = '',
@@ -50,6 +53,7 @@
 
 	// Truncate long names
 	const displayName = $derived(itemName && itemName.length > 20 ? itemName.slice(0, 20) + '...' : itemName);
+	const displayConfirmText = $derived(confirmText || $t('common.actions.confirm'));
 
 	// Auto-hide after specified time
 	$effect(() => {
@@ -109,9 +113,12 @@
 			<div class="flex items-center gap-2">
 				<span class="text-xs whitespace-nowrap">{action} {itemType} {#if displayName}<strong>{displayName}</strong>{/if}?</span>
 				<Button size="sm" {variant} class="h-6 px-2 text-xs" onclick={handleConfirm}>
-					{confirmText}
+					{displayConfirmText}
 				</Button>
 			</div>
+			{#if description}
+				<p class="max-w-72 text-xs text-muted-foreground">{description}</p>
+			{/if}
 			{#if extraContent}
 				{@render extraContent()}
 			{/if}

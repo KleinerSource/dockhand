@@ -3,6 +3,7 @@
 	import { Loader2, Layers, ChevronDown, ChevronRight } from 'lucide-svelte';
 	import { currentEnvironment, appendEnvParam } from '$lib/stores/environment';
 	import { formatDateTime } from '$lib/stores/settings';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		imageId: string;
@@ -53,12 +54,12 @@
 			const encodedId = encodeURIComponent(imageId);
 			const response = await fetch(appendEnvParam(`/api/images/${encodedId}/history`, envId));
 			if (!response.ok) {
-				throw new Error('Failed to fetch image history');
+				throw new Error(translate('images.layers.fetchFailed'));
 			}
 			history = await response.json();
 			lastFetchedId = imageId;
 		} catch (err: any) {
-			error = err.message || 'Failed to load image history';
+			error = err.message || translate('images.layers.loadFailed');
 			console.error('Failed to fetch image history:', err);
 		} finally {
 			loading = false;
@@ -112,7 +113,7 @@
 	}
 
 	function getShortCommand(cmd: string): string {
-		if (!cmd) return 'No command';
+		if (!cmd) return translate('images.layers.noCommand');
 		// Remove /bin/sh -c prefix
 		cmd = cmd.replace(/^\/bin\/sh -c\s+/, '');
 		// Take first meaningful part
@@ -168,13 +169,13 @@
 			{error}
 		</div>
 	{:else if history.length === 0}
-		<p class="text-muted-foreground text-sm text-center py-8">No layer history found</p>
+		<p class="text-muted-foreground text-sm text-center py-8">{$t('images.layers.empty')}</p>
 	{:else}
 		<!-- Summary -->
 		<div class="flex items-center justify-between p-3 bg-muted rounded-lg">
 			<div>
-				<p class="text-sm font-medium">Total layers: <span class="text-primary">{history.length}</span></p>
-				<p class="text-sm font-medium">Total size: <span class="text-primary">{formatSize(totalSize)}</span></p>
+				<p class="text-sm font-medium">{$t('images.layers.totalLayers')}: <span class="text-primary">{history.length}</span></p>
+				<p class="text-sm font-medium">{$t('images.layers.totalSize')}: <span class="text-primary">{formatSize(totalSize)}</span></p>
 			</div>
 			<Badge variant="secondary">
 				{imageId.startsWith('sha256:') ? imageId.slice(7, 19) : imageName || imageId}
@@ -185,7 +186,7 @@
 		<div class="space-y-1">
 			<h3 class="text-sm font-semibold mb-2 pb-2 flex items-center gap-2">
 				<Layers class="w-4 h-4" />
-				Layer stack (bottom to top) - click to expand
+				{$t('images.layers.stackTitle')}
 			</h3>
 			<div class="space-y-1">
 				{#each history.slice().reverse() as layer, index}
@@ -233,7 +234,7 @@
 
 								<!-- Size Badge -->
 								<Badge variant={layer.Size > 1024 * 1024 * 100 ? 'destructive' : 'secondary'} class="text-xs shrink-0">
-									{layer.Size > 1024 * 1024 * 100 ? 'Large' : 'Normal'}
+									{layer.Size > 1024 * 1024 * 100 ? $t('images.layers.sizeLarge') : $t('images.layers.sizeNormal')}
 								</Badge>
 							</div>
 						</button>
@@ -243,18 +244,18 @@
 							<div class="px-4 pb-3 space-y-3 border-t border-border bg-muted/20">
 								<div class="grid grid-cols-2 gap-2 pt-3 text-sm">
 									<div>
-										<p class="text-xs text-muted-foreground">Created</p>
+										<p class="text-xs text-muted-foreground">{$t('common.labels.created')}</p>
 										<p class="text-xs">{formatDate(layer.Created)}</p>
 									</div>
 									<div>
-										<p class="text-xs text-muted-foreground">Size</p>
+										<p class="text-xs text-muted-foreground">{$t('common.labels.size')}</p>
 										<p class="text-xs font-mono">{formatSize(layer.Size)}</p>
 									</div>
 								</div>
 
 								{#if layer.CreatedBy}
 									<div class="space-y-1">
-										<p class="text-xs font-medium text-muted-foreground">Command</p>
+										<p class="text-xs font-medium text-muted-foreground">{$t('common.labels.command')}</p>
 										<code class="block text-xs bg-muted p-2 rounded overflow-x-auto whitespace-pre-wrap break-all">
 											{@html highlightCommand(layer.CreatedBy)}
 										</code>
@@ -263,14 +264,14 @@
 
 								{#if layer.Comment}
 									<div class="space-y-1">
-										<p class="text-xs font-medium text-muted-foreground">Comment</p>
+										<p class="text-xs font-medium text-muted-foreground">{$t('images.layers.comment')}</p>
 										<p class="text-xs">{layer.Comment}</p>
 									</div>
 								{/if}
 
 								{#if layer.Tags && layer.Tags.length > 0}
 									<div class="space-y-1">
-										<p class="text-xs font-medium text-muted-foreground">Tags</p>
+										<p class="text-xs font-medium text-muted-foreground">{$t('common.labels.tags')}</p>
 										<div class="flex flex-wrap gap-1">
 											{#each layer.Tags as tag}
 												<Badge variant="outline" class="text-xs">{tag}</Badge>

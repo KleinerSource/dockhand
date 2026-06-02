@@ -9,6 +9,7 @@
 	import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
 	import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap, type CompletionContext, type CompletionResult } from '@codemirror/autocomplete';
 	import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
+	import { translate } from '$lib/i18n';
 
 	// Simple dotenv/env file language parser
 	const dotenvParser: StreamParser<{ inValue: boolean }> = {
@@ -251,9 +252,9 @@
 			// The colored dot
 			const dot = document.createElement('span');
 			dot.className = `var-marker var-marker-${this.type}`;
-			dot.title = this.type === 'missing' ? 'Missing required variable'
-				: this.type === 'required' ? 'Required variable (defined)'
-				: 'Optional variable (has default)';
+			dot.title = this.type === 'missing' ? translate('codeEditor.missingRequiredVariable')
+				: this.type === 'required' ? translate('codeEditor.requiredVariableDefined')
+				: translate('codeEditor.optionalVariableDefault');
 			wrapper.appendChild(dot);
 
 			// Checkmark if value is provided
@@ -261,7 +262,7 @@
 				const check = document.createElement('span');
 				check.className = 'var-marker-check';
 				check.innerHTML = '✓';
-				check.title = 'Value provided';
+				check.title = translate('codeEditor.valueProvided');
 				wrapper.appendChild(check);
 			}
 
@@ -289,11 +290,11 @@
 
 			if (this.variant === 'missing') {
 				// Red MISSING badge with icon
-				span.innerHTML = '⚠ MISSING';
-				span.title = 'Required variable not defined';
+				span.innerHTML = `⚠ ${translate('codeEditor.missingBadge')}`;
+				span.title = translate('codeEditor.requiredVariableMissing');
 			} else {
 				span.textContent = this.isSecret ? '••••••' : this.value;
-				span.title = this.isSecret ? 'Secret value' : this.value;
+				span.title = this.isSecret ? translate('codeEditor.secretValue') : this.value;
 			}
 			return span;
 		}

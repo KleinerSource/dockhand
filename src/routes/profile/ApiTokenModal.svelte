@@ -6,6 +6,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import * as Alert from '$lib/components/ui/alert';
 	import { KeyRound, Copy, Check, TriangleAlert } from 'lucide-svelte';
+	import { t, translate } from '$lib/i18n';
 
 	let {
 		open = $bindable(false),
@@ -59,11 +60,11 @@
 
 	async function createToken() {
 		if (!name.trim()) {
-			error = 'Token name is required';
+			error = translate('profile.tokens.errors.nameRequired');
 			return;
 		}
 		if (isLocalUser && !password) {
-			error = 'Password is required';
+			error = translate('profile.tokens.errors.passwordRequired');
 			return;
 		}
 
@@ -90,10 +91,10 @@
 				createdToken = data.token;
 			} else {
 				const data = await response.json();
-				error = data.error || 'Failed to create token';
+				error = data.error || translate('profile.tokens.errors.createFailed');
 			}
 		} catch {
-			error = 'Failed to create token';
+			error = translate('profile.tokens.errors.createFailed');
 		} finally {
 			creating = false;
 		}
@@ -131,7 +132,7 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<KeyRound class="w-5 h-5" />
-				{createdToken ? 'Token created' : 'Generate API token'}
+				{createdToken ? $t('profile.tokens.createdTitle') : $t('profile.tokens.generateApiToken')}
 			</Dialog.Title>
 		</Dialog.Header>
 
@@ -141,7 +142,7 @@
 				<Alert.Root variant="destructive">
 					<TriangleAlert class="h-4 w-4" />
 					<Alert.Description>
-						Copy this token now. It will not be shown again.
+						{$t('profile.tokens.copyNowWarning')}
 					</Alert.Description>
 				</Alert.Root>
 
@@ -161,51 +162,51 @@
 				</div>
 
 				<div class="flex justify-end">
-					<Button onclick={handleClose}>Done</Button>
+					<Button onclick={handleClose}>{$t('common.actions.done')}</Button>
 				</div>
 			</div>
 		{:else}
 			<!-- Token creation form -->
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label for="token-name">Name</Label>
+					<Label for="token-name">{$t('common.labels.name')}</Label>
 					<Input
 						id="token-name"
 						bind:value={name}
-						placeholder="e.g., CI/CD pipeline"
+						placeholder={$t('profile.tokens.namePlaceholder')}
 						maxlength={255}
 					/>
 				</div>
 
 				{#if isLocalUser}
 					<div class="space-y-2">
-						<Label for="token-password">Password</Label>
+					<Label for="token-password">{$t('auth.password')}</Label>
 						<Input
 							id="token-password"
 							type="password"
 							bind:value={password}
-							placeholder="Confirm your password"
+							placeholder={$t('profile.tokens.confirmPasswordPlaceholder')}
 						/>
 					</div>
 				{/if}
 
 				<div class="space-y-2">
-					<Label>Expiration</Label>
+					<Label>{$t('profile.tokens.expiration')}</Label>
 					<Select.Root type="single" bind:value={expirationOption}>
 						<Select.Trigger class="w-full">
-							{#if expirationOption === 'none'}No expiration
-							{:else if expirationOption === '30d'}30 days
-							{:else if expirationOption === '90d'}90 days
-							{:else if expirationOption === '1y'}1 year
-							{:else if expirationOption === 'custom'}Custom date
+							{#if expirationOption === 'none'}{$t('profile.tokens.expirationOptions.none')}
+							{:else if expirationOption === '30d'}{$t('profile.tokens.expirationOptions.days30')}
+							{:else if expirationOption === '90d'}{$t('profile.tokens.expirationOptions.days90')}
+							{:else if expirationOption === '1y'}{$t('profile.tokens.expirationOptions.year1')}
+							{:else if expirationOption === 'custom'}{$t('profile.tokens.expirationOptions.custom')}
 							{/if}
 						</Select.Trigger>
 						<Select.Content>
-							<Select.Item value="none">No expiration</Select.Item>
-							<Select.Item value="30d">30 days</Select.Item>
-							<Select.Item value="90d">90 days</Select.Item>
-							<Select.Item value="1y">1 year</Select.Item>
-							<Select.Item value="custom">Custom date</Select.Item>
+							<Select.Item value="none">{$t('profile.tokens.expirationOptions.none')}</Select.Item>
+							<Select.Item value="30d">{$t('profile.tokens.expirationOptions.days30')}</Select.Item>
+							<Select.Item value="90d">{$t('profile.tokens.expirationOptions.days90')}</Select.Item>
+							<Select.Item value="1y">{$t('profile.tokens.expirationOptions.year1')}</Select.Item>
+							<Select.Item value="custom">{$t('profile.tokens.expirationOptions.custom')}</Select.Item>
 						</Select.Content>
 					</Select.Root>
 
@@ -226,9 +227,9 @@
 				{/if}
 
 				<div class="flex justify-end gap-2">
-					<Button variant="outline" onclick={handleClose}>Cancel</Button>
+					<Button variant="outline" onclick={handleClose}>{$t('common.actions.cancel')}</Button>
 					<Button onclick={createToken} disabled={creating || !name.trim() || (isLocalUser && !password)}>
-						{creating ? 'Creating...' : 'Generate token'}
+						{creating ? $t('profile.tokens.creating') : $t('profile.tokens.generateToken')}
 					</Button>
 				</div>
 			</div>

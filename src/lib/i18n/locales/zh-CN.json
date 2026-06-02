@@ -1,0 +1,4420 @@
+{
+	"meta": {
+		"appTitle": "Dockhand - Docker 管理",
+		"loginTitle": "登录 - Dockhand"
+	},
+	"language": {
+		"label": "语言",
+		"description": "应用界面显示语言",
+		"english": "English",
+		"simplifiedChinese": "简体中文",
+		"updated": "语言已更新"
+	},
+	"common": {
+		"actions": {
+			"add": "添加",
+			"apply": "应用",
+			"back": "返回",
+			"cancel": "取消",
+			"clear": "清除",
+			"close": "关闭",
+			"collapse": "折叠",
+			"confirm": "确认",
+			"copy": "复制",
+			"create": "创建",
+			"delete": "删除",
+			"done": "完成",
+			"deploy": "部署",
+			"disable": "禁用",
+			"download": "下载",
+			"edit": "编辑",
+			"enable": "启用",
+			"expand": "展开",
+			"export": "导出",
+			"import": "导入",
+			"inspect": "查看详情",
+			"open": "打开",
+			"ok": "确定",
+			"refresh": "刷新",
+			"remove": "移除",
+			"reset": "重置",
+			"restart": "重启",
+			"retry": "重试",
+			"run": "运行",
+			"save": "保存",
+			"search": "搜索",
+			"select": "选择",
+			"start": "启动",
+			"stop": "停止",
+			"update": "更新",
+			"upload": "上传",
+			"verify": "验证",
+			"view": "查看"
+		},
+		"states": {
+			"active": "活跃",
+			"cancelled": "已取消",
+			"completed": "已完成",
+			"connecting": "正在连接",
+			"disabled": "已禁用",
+			"enabled": "已启用",
+			"failed": "失败",
+			"loading": "正在加载...",
+			"never": "从未",
+			"offline": "离线",
+			"off": "关闭",
+			"pending": "待处理",
+			"running": "运行中",
+			"skipped": "已跳过",
+			"stopped": "已停止",
+			"succeeded": "成功",
+			"unknown": "未知",
+			"upToDate": "已是最新"
+		},
+		"labels": {
+			"actions": "操作",
+			"admin": "管理员",
+			"api": "API",
+			"attributes": "属性",
+			"auditLog": "审计日志",
+			"autoUpdate": "自动更新",
+			"changes": "变更",
+			"command": "命令",
+			"commit": "提交",
+			"connection": "连接",
+			"container": "容器",
+			"containerId": "容器 ID",
+			"containerName": "容器名称",
+			"containers": "容器",
+			"cpu": "CPU",
+			"created": "创建时间",
+			"database": "数据库",
+			"dashboard": "仪表盘",
+			"description": "描述",
+			"details": "详情",
+			"diskIo": "磁盘 I/O",
+			"driver": "驱动",
+			"duration": "耗时",
+			"edition": "版本类型",
+			"entity": "实体",
+			"entityId": "实体 ID",
+			"entityName": "实体名称",
+			"entityType": "实体类型",
+			"environment": "环境",
+			"environments": "环境",
+			"error": "错误",
+			"events": "事件",
+			"exit": "退出码",
+			"gateway": "网关",
+			"health": "健康状态",
+			"host": "主机",
+			"id": "ID",
+			"image": "镜像",
+			"images": "镜像",
+			"ip": "IP",
+			"ipAddress": "IP 地址",
+			"license": "许可证",
+			"licensedTo": "授权给",
+			"labels": "标签",
+			"lastRun": "上次运行",
+			"location": "位置",
+			"logs": "日志",
+			"memory": "内存",
+			"modified": "修改时间",
+			"name": "名称",
+			"netIo": "网络 I/O",
+			"networks": "网络",
+			"nextRun": "下次运行",
+			"osArch": "系统/架构",
+			"package": "包",
+			"ports": "端口",
+			"progress": "进度",
+			"privacy": "隐私",
+			"registry": "镜像仓库",
+			"registries": "镜像仓库",
+			"releaseNotes": "发布说明",
+			"restarts": "重启次数",
+			"runtime": "运行时",
+			"schedule": "调度",
+			"schedules": "调度",
+			"schema": "Schema",
+			"scope": "作用域",
+			"settings": "设置",
+			"shell": "终端",
+			"size": "大小",
+			"source": "来源",
+			"stack": "堆栈",
+			"stacks": "堆栈",
+			"state": "状态",
+			"status": "状态",
+			"subnet": "子网",
+			"tag": "标签",
+			"tags": "标签",
+			"terms": "条款",
+			"timestamp": "时间戳",
+			"trigger": "触发方式",
+			"updated": "更新时间",
+			"updates": "更新",
+			"uptime": "运行时长",
+			"usedBy": "使用方",
+			"userAgent": "用户代理",
+			"user": "用户",
+			"users": "用户",
+			"version": "版本",
+			"volumes": "卷"
+		},
+		"counts": {
+			"of": "{count} / {total}"
+		},
+		"liveUpdates": {
+			"active": "实时更新已启用，表格会自动刷新",
+			"connecting": "正在连接实时更新..."
+		},
+		"selection": {
+			"selectAll": "全选",
+			"deselectAll": "取消全选"
+		},
+		"errors": {
+			"unknown": "发生未知错误"
+		}
+	},
+	"filters": {
+		"allTime": "全部时间",
+		"custom": "自定义",
+		"customRange": "自定义范围...",
+		"from": "开始",
+		"to": "结束",
+		"clear": "清除",
+		"today": "今天",
+		"yesterday": "昨天",
+		"last7days": "最近 7 天",
+		"last30days": "最近 30 天",
+		"thisMonth": "本月",
+		"lastMonth": "上月",
+		"clearAllFilters": "清除全部筛选"
+	},
+	"relativeTime": {
+		"today": "今天",
+		"yesterday": "昨天",
+		"daysAgo": "{count} 天前",
+		"weeksAgo": "{count} 周前",
+		"monthsAgo": "{count} 个月前",
+		"yearsAgo": "{count} 年前"
+	},
+	"navigation": {
+		"dashboard": "仪表盘",
+		"containers": "容器",
+		"logs": "日志",
+		"shell": "终端",
+		"stacks": "堆栈",
+		"images": "镜像",
+		"volumes": "卷",
+		"networks": "网络",
+		"registry": "镜像仓库",
+		"activity": "活动",
+		"schedules": "调度",
+		"auditLog": "审计日志",
+		"settings": "设置",
+		"profile": "个人资料",
+		"signOut": "退出登录",
+		"viewProfile": "查看个人资料",
+		"collapseSidebar": "折叠侧边栏",
+		"expandSidebar": "展开侧边栏"
+	},
+	"dashboard": {
+		"pageTitle": "仪表盘 - Dockhand",
+		"environments": "环境",
+		"allLabels": "全部",
+		"searchEnvironments": "搜索环境...",
+		"resultCount": "{count} / {total}",
+		"addEnvironment": "添加环境",
+		"lockTiles": "锁定磁贴",
+		"unlockTiles": "解锁磁贴",
+		"layoutOptions": "布局选项",
+		"refresh": "刷新",
+		"loadingEnvironments": "正在加载环境...",
+		"noEnvironments": "尚未配置环境",
+		"noEnvironmentsDescription": "添加环境后即可开始管理 Docker 主机",
+		"goToSettings": "前往设置",
+		"noMatchingEnvironments": "没有匹配的环境",
+		"noMatchingEnvironmentsDescription": "没有环境匹配当前标签筛选条件",
+		"clearFilters": "清除筛选",
+		"unknownHost": "未知主机",
+		"connections": {
+			"socket": "Socket",
+			"direct": "直连",
+			"standard": "标准",
+			"edge": "边缘",
+			"edgeConnection": "边缘连接",
+			"all": "全部连接",
+			"plural": "连接",
+			"socketTitle": "Unix socket 连接",
+			"directTitle": "Docker 直连",
+			"standardTitle": "Hawser agent（标准模式）",
+			"edgeTitle": "Hawser agent（边缘模式）"
+		},
+		"layouts": {
+			"compact": "紧凑",
+			"standard": "标准",
+			"detailed": "详细",
+			"full": "完整",
+			"list": "列表"
+		},
+		"statusTitles": {
+			"autoUpdateEnabled": "已启用自动更新",
+			"updateCheckEnabled": "已启用更新检查（仅通知）",
+			"vulnerabilityScanningEnabled": "已启用漏洞扫描",
+			"activityCollectionEnabled": "已启用活动采集",
+			"metricsCollectionEnabled": "已启用指标采集",
+			"editEnvironmentSettings": "编辑环境设置",
+			"offline": "离线"
+		},
+		"stream": {
+			"connectionTimedOut": "连接超时",
+			"connectionFailed": "连接失败",
+			"connectionFailedRefresh": "连接失败，请点击刷新重试",
+			"dockerNotAccessible": "无法访问 Docker",
+			"connectionLost": "连接中断",
+			"liveUpdatesReconnected": "实时更新已重新连接",
+			"liveUpdatesDisconnected": "实时更新已断开，正在重新连接...",
+			"liveUpdatesFailed": "实时更新失败，请刷新页面重试"
+		},
+		"stats": {
+			"total": "总计",
+			"running": "运行中",
+			"stopped": "已停止",
+			"paused": "已暂停",
+			"restarting": "重启中",
+			"unhealthy": "不健康",
+			"pendingUpdates": "待更新",
+			"runningContainers": "运行中容器",
+			"stoppedContainers": "已停止容器",
+			"pausedContainers": "已暂停容器",
+			"restartingContainers": "重启中容器",
+			"unhealthyContainers": "不健康容器",
+			"totalContainers": "容器总数",
+			"unhealthyCount": "{count} 个不健康",
+			"restartingCount": "{count} 个重启中",
+			"cpuMemoryHistory": "CPU 和内存历史",
+			"diskUsage": "磁盘用量",
+			"images": "镜像",
+			"containers": "容器",
+			"volumes": "卷",
+			"buildCache": "构建缓存",
+			"recentEvents": "最近事件",
+			"topContainersByCpu": "CPU 占用最高的容器",
+			"noRunningContainers": "暂无运行中容器",
+			"metricsCollectionDisabled": "指标采集已禁用",
+			"noMetricsAvailable": "暂无指标数据",
+			"allContainersHealthy": "所有容器健康",
+			"connecting": "正在连接...",
+			"connectingToEnvironment": "正在连接环境...",
+			"environmentOffline": "环境离线"
+		}
+	},
+	"alerts": {
+		"title": "告警",
+		"empty": "尚未配置告警",
+		"comingSoon": "告警配置即将推出"
+	},
+	"terminal": {
+		"pageTitle": "终端 - Dockhand",
+		"shell": "Shell",
+		"user": "用户",
+		"terminal": "终端",
+		"removeUser": "移除用户",
+		"addUserPlaceholder": "添加用户...（Enter）",
+		"selectContainer": "选择容器以打开 Shell",
+		"detectingShells": "正在检测可用 Shell...",
+		"noShell": "此容器中没有可用 Shell",
+		"noShellDescription": "此容器可能未安装 Shell。",
+		"disconnected": "已断开",
+		"connecting": "正在连接...",
+		"loading": "正在加载终端...",
+		"copyOutput": "复制输出",
+		"clear": "清除（Cmd+L）",
+		"clearCtrl": "清除终端（Ctrl+L）",
+		"reconnect": "重新连接",
+		"close": "关闭终端",
+		"searchRunningContainers": "搜索运行中的容器...",
+		"noRunningContainers": "没有运行中的容器",
+		"noMatches": "未找到匹配项",
+		"connected": "已连接",
+		"disconnect": "断开连接",
+		"select": "选择",
+		"unavailable": "不可用",
+		"distrolessHint": "从 scratch 或 distroless 镜像构建的容器通常不包含 Shell。",
+		"connectingTo": "正在连接到 {name}...",
+		"sessionContext": "Shell：{shell}，用户：{user}",
+		"defaultUser": "默认",
+		"errorPrefix": "错误",
+		"errorWithMessage": "错误：{message}",
+		"sessionEnded": "会话已结束。",
+		"connectionError": "连接错误",
+		"disconnectedLine": "已断开。",
+		"reconnecting": "正在重新连接..."
+	},
+	"images": {
+		"pageTitle": "镜像 - Dockhand",
+		"title": "镜像",
+		"searchPlaceholder": "搜索镜像...",
+		"untagged": "<未打标签>",
+		"usageFilters": {
+			"all": "全部",
+			"inUse": "使用中",
+			"someUnused": "部分未使用",
+			"unused": "未使用"
+		},
+		"actions": {
+			"prune": "清理",
+			"pruneUnused": "清理未使用",
+			"pull": "拉取",
+			"tag": "打标签"
+		},
+		"confirm": {
+			"danglingImages": "悬空镜像",
+			"allUnusedImages": "所有未使用镜像",
+			"pruneDanglingTitle": "清理悬空镜像",
+			"pruneUnusedTitle": "清理未使用镜像"
+		},
+		"tooltips": {
+			"pruneDangling": "移除未打标签的中间层（悬空镜像）",
+			"pruneUnused": "移除所有未被容器使用的镜像，包括已打标签镜像",
+			"someTagsUnused": "部分标签未被使用",
+			"runContainer": "运行容器",
+			"scanForVulnerabilities": "扫描漏洞",
+			"pushToRegistry": "推送到镜像仓库",
+			"copied": "已复制！",
+			"copyFullId": "点击复制完整 ID",
+			"viewContainersUsingImage": "查看使用此镜像的容器",
+			"viewLayers": "查看层",
+			"exportAs": "导出为 {format}",
+			"tagImage": "为镜像打标签"
+		},
+		"selection": {
+			"selected": "已选择 {count} 项"
+		},
+		"empty": {
+			"title": "未找到镜像",
+			"description": "从镜像仓库拉取一个镜像即可开始"
+		},
+		"usage": {
+			"containers": "{count} 个容器"
+		},
+		"batch": {
+			"removingImages": "正在移除 {count} 个镜像"
+		},
+		"toasts": {
+			"exporting": "正在导出 {image}...",
+			"exportFailed": "导出 {image} 失败",
+			"loadFailed": "加载镜像失败",
+			"prunedImages": "已清理 {count} 个镜像，释放 {size}",
+			"noDanglingImages": "没有可清理的悬空镜像",
+			"pruneFailed": "清理镜像失败",
+			"noUnusedImages": "没有可清理的未使用镜像",
+			"pruneUnusedFailed": "清理未使用镜像失败",
+			"deleteFailedGeneric": "删除镜像失败",
+			"deleteFailed": "删除 {image} 失败",
+			"deleted": "已删除 {image}",
+			"taggedAs": "已打标签为 {tag}",
+			"tagFailed": "为镜像打标签失败"
+		},
+		"tagDialog": {
+			"title": "为镜像打标签",
+			"descriptionPrefix": "为以下镜像添加新标签：",
+			"repositoryName": "仓库名称",
+			"repositoryPlaceholder": "例如：myregistry/myimage",
+			"tagPlaceholder": "例如：latest, v1.0.0",
+			"tagging": "正在打标签..."
+		},
+		"layers": {
+			"modalTitle": "镜像层：",
+			"fetchFailed": "获取镜像历史失败",
+			"loadFailed": "加载镜像历史失败",
+			"noCommand": "无命令",
+			"empty": "未找到层历史",
+			"totalLayers": "层总数",
+			"totalSize": "总大小",
+			"stackTitle": "层堆栈（自下而上）- 点击展开",
+			"sizeLarge": "较大",
+			"sizeNormal": "正常",
+			"comment": "备注"
+		}
+	},
+	"imagePull": {
+		"modalTitle": "拉取镜像",
+		"modalTitleWithScan": "拉取并扫描镜像",
+		"steps": {
+			"configure": "配置",
+			"pull": "拉取",
+			"scan": "扫描"
+		},
+		"imageName": "镜像名称",
+		"dockerHubPublic": "Docker Hub（公开）",
+		"placeholders": {
+			"dockerHub": "nginx:latest 或 library/nginx:1.25",
+			"privateRegistry": "myimage:latest"
+		},
+		"imageFormatPrefix": "格式：",
+		"imageFormatOr": "或",
+		"fullReference": "完整镜像引用",
+		"processing": "处理中",
+		"removing": "正在移除...",
+		"removeImage": "移除镜像",
+		"keepImage": "保留镜像",
+		"upToDate": "镜像已是最新",
+		"idle": "输入镜像名称以开始拉取",
+		"layersProgress": "{completed} / {total} 层",
+		"downloaded": "已下载：{downloaded} / {total}",
+		"table": {
+			"layerId": "层 ID"
+		},
+		"status": {
+			"initializing": "正在初始化...",
+			"pulling": "正在拉取...",
+			"complete": "完成！",
+			"pullingLayers": "正在拉取层...",
+			"pullCompleted": "拉取完成！"
+		},
+		"output": {
+			"starting": "开始拉取 {image}",
+			"completedIn": "拉取完成，用时 {duration}",
+			"title": "输出（{count} 行）",
+			"labels": {
+				"pull": "拉取",
+				"layer": "层"
+			}
+		},
+		"errors": {
+			"startFailed": "启动拉取失败",
+			"pullFailed": "拉取镜像失败"
+		}
+	},
+	"imagePush": {
+		"modalTitle": "推送到镜像仓库",
+		"steps": {
+			"configure": "配置",
+			"push": "推送"
+		},
+		"sourceImage": "源镜像",
+		"targetRegistry": "目标镜像仓库",
+		"noTargetRegistries": "没有可用的目标镜像仓库。请在设置中添加私有镜像仓库。",
+		"imageNameTag": "镜像名称/标签",
+		"willPushAs": "将推送为：",
+		"retryPush": "重试推送",
+		"readyToPush": "准备推送到",
+		"status": {
+			"findingImage": "正在查找镜像...",
+			"pushedSuccessfully": "镜像已成功推送！",
+			"complete": "推送完成！",
+			"failed": "推送失败"
+		},
+		"errors": {
+			"imageNotFound": "未找到可推送的镜像",
+			"pushFailed": "推送镜像失败",
+			"pushFailedShort": "推送失败"
+		},
+		"output": {
+			"starting": "开始推送到 {registry}...",
+			"complete": "推送完成！",
+			"tagging": "正在为目标镜像仓库打标签...",
+			"pushingLayers": "正在推送层...",
+			"labels": {
+				"push": "推送"
+			}
+		}
+	},
+	"imageScan": {
+		"title": "漏洞扫描",
+		"retryScan": "重试扫描",
+		"startScan": "开始扫描",
+		"scanImagePrefix": "扫描",
+		"scanImageSuffix": "的漏洞",
+		"vulnerabilityCount": "{count} 个漏洞",
+		"status": {
+			"scanning": "正在扫描...",
+			"starting": "正在启动漏洞扫描...",
+			"ready": "准备扫描",
+			"scanningForVulnerabilities": "正在扫描漏洞...",
+			"vulnerabilitiesFound": "发现漏洞",
+			"someVulnerabilitiesFound": "发现部分漏洞",
+			"noVulnerabilities": "未发现漏洞！",
+			"failed": "扫描失败"
+		},
+		"tabs": {
+			"output": "输出",
+			"results": "扫描结果"
+		},
+		"output": {
+			"starting": "开始扫描 {image} 的漏洞",
+			"labels": {
+				"scan": "扫描"
+			}
+		},
+		"exports": {
+			"markdown": "Markdown 报告（.md）",
+			"csv": "CSV 表格（.csv）",
+			"json": "JSON 数据（.json）"
+		},
+		"report": {
+			"title": "漏洞扫描报告",
+			"scanner": "扫描器",
+			"cveId": "CVE ID",
+			"severity": "严重级别",
+			"package": "包",
+			"installedVersion": "已安装版本",
+			"fixedVersion": "修复版本",
+			"description": "描述",
+			"link": "链接",
+			"summary": "摘要",
+			"total": "总计",
+			"vulnerabilityCount": "{count} 个漏洞",
+			"installed": "已安装",
+			"fixedIn": "修复版本",
+			"noVulnerabilitiesFound": "未发现漏洞",
+			"noFixAvailable": "暂无可用修复",
+			"reference": "参考",
+			"generatedByDockhand": "报告由 Dockhand 生成"
+		}
+	},
+	"scanResults": {
+		"empty": "暂无扫描结果",
+		"noVulnerabilities": "未发现漏洞",
+		"total": "共 {count} 个",
+		"columns": {
+			"cveId": "CVE ID",
+			"severity": "严重级别",
+			"installed": "已安装",
+			"fixedIn": "修复版本"
+		}
+	},
+	"logs": {
+		"pageTitle": "日志 - Dockhand",
+		"title": "日志",
+		"searchContainers": "搜索容器...",
+		"filterContainers": "筛选容器...",
+		"allContainers": "全部容器",
+		"layout": {
+			"single": "单容器",
+			"multi": "多容器",
+			"grouped": "分组"
+		},
+		"empty": {
+			"noLogs": "暂无日志",
+			"noContainers": "未找到容器",
+			"selectContainer": "选择一个容器以查看日志",
+			"selectContainerFromList": "从列表中选择一个容器",
+			"selectContainersForMergedLogs": "从列表中选择容器以查看合并日志"
+		},
+		"selection": {
+			"current": "当前",
+			"selectAllContainers": "全选",
+			"selected": "已选择 {count} 项",
+			"containerCount": "{count} 个容器"
+		},
+		"merge": {
+			"mergeSelected": "合并 {count} 个容器"
+		},
+		"stream": {
+			"live": "实时",
+			"connectedTooltip": "已连接，正在实时流式输出",
+			"paused": "已暂停",
+			"pausedTooltip": "日志流已暂停",
+			"pause": "暂停",
+			"stream": "流式",
+			"ended": "日志流已结束",
+			"startFailed": "启动日志流失败",
+			"connectionError": "连接错误",
+			"reconnecting": "正在重新连接（{attempt}/{total}）...",
+			"connectingToStream": "正在连接日志流...",
+			"clickToReconnect": "点击重新连接"
+		},
+		"tooltips": {
+			"pauseStreaming": "暂停实时日志流",
+			"resumeStreaming": "恢复实时日志流",
+			"toggleAutoRefresh": "切换自动刷新",
+			"toggleAutoScroll": "切换自动滚动",
+			"toggleWordWrap": "切换自动换行",
+			"tailLines": "要加载的日志行数",
+			"hideTimestamps": "隐藏时间戳",
+			"showTimestamps": "显示时间戳",
+			"hideContainerName": "隐藏容器名称前缀",
+			"showContainerName": "显示容器名称前缀",
+			"hideLineNumbers": "隐藏行号",
+			"showLineNumbers": "显示行号",
+			"showAllLines": "显示全部行（筛选模式已启用）",
+			"hideNonMatchingLines": "隐藏不匹配的行",
+			"searchLogs": "搜索日志",
+			"copyLogs": "复制日志",
+			"downloadLogs": "下载日志",
+			"clearLogs": "清除日志",
+			"refreshLogs": "刷新日志",
+			"closeLogs": "关闭日志",
+			"selectForMerge": "选择用于合并日志",
+			"terminalBelow": "在下方打开终端",
+			"terminalOnSide": "在侧边打开终端"
+		},
+		"tail": {
+			"all": "全部",
+			"allLines": "全部行",
+			"lines": "{count} 行"
+		},
+		"timeRange": {
+			"activeTooltip": "日志时间范围：{range}",
+			"tooltip": "按时间范围筛选日志",
+			"time": "时间"
+		},
+		"search": {
+			"previous": "上一个匹配项",
+			"next": "下一个匹配项",
+			"close": "关闭搜索"
+		},
+		"groups": {
+			"savedGroups": "已保存分组",
+			"deleteGroup": "删除分组",
+			"namePlaceholder": "分组名称...",
+			"saveGroup": "保存分组"
+		},
+		"favorites": {
+			"title": "收藏",
+			"add": "添加到收藏",
+			"remove": "从收藏中移除"
+		},
+		"controls": {
+			"autoScroll": "自动滚动",
+			"wrap": "换行"
+		},
+		"loading": "正在加载日志...",
+		"errors": {
+			"fetchWithMessage": "获取日志失败：{error}"
+		}
+	},
+	"environments": {
+		"page": {
+			"title": "环境",
+			"total": "共 {count} 个",
+			"addEnvironment": "添加环境",
+			"refresh": "刷新",
+			"loading": "正在加载环境...",
+			"empty": "未找到环境",
+			"edgeConnectionOutbound": "Edge 连接（出站）",
+			"testingConnection": "正在测试连接...",
+			"connected": "已连接",
+			"failed": "失败",
+			"connectionFailed": "连接失败",
+			"test": "测试",
+			"addModalTitle": "添加环境",
+			"editModalTitle": "编辑环境",
+			"quickUrl": "快速 URL（可选）",
+			"quickUrlPlaceholder": "http://192.168.1.4:2375 或 https://docker.example.com:2376",
+			"quickUrlHelp": "粘贴完整 Docker URL 以自动填充下方字段",
+			"parse": "解析",
+			"name": "名称",
+			"namePlaceholder": "生产服务器",
+			"host": "主机",
+			"hostPlaceholder": "192.168.1.100 或 docker.example.com",
+			"hostPlaceholderShort": "192.168.1.100",
+			"port": "端口",
+			"protocol": "协议",
+			"tlsCertificatesOptional": "TLS 证书（可选）",
+			"caCertificate": "CA 证书",
+			"clientCertificate": "客户端证书",
+			"clientKey": "客户端密钥",
+			"cancel": "取消",
+			"add": "添加",
+			"save": "保存",
+			"validation": {
+				"nameHostRequired": "名称和主机为必填项"
+			},
+			"errors": {
+				"createFailed": "创建环境失败",
+				"updateFailed": "更新环境失败",
+				"deleteFailed": "删除环境失败"
+			},
+			"confirm": {
+				"deleteEnvironment": "确定要删除此环境吗？"
+			},
+			"info": {
+				"host": "主机：{name}",
+				"containersImages": "容器：{containers} | 镜像：{images}"
+			}
+		}
+	},
+	"containers": {
+		"page": {
+			"pageTitle": "容器 - Dockhand",
+			"title": "容器",
+			"searchPlaceholder": "搜索容器...",
+			"emptyTitle": "未找到容器",
+			"emptyDescription": "创建新容器后即可开始"
+		},
+		"filters": {
+			"allStatuses": "全部状态",
+			"statuses": "个状态"
+		},
+		"status": {
+			"running": "运行中",
+			"paused": "已暂停",
+			"restarting": "重启中",
+			"exited": "已退出",
+			"created": "已创建",
+			"dead": "已失效"
+		},
+		"health": {
+			"healthy": "健康",
+			"unhealthy": "不健康",
+			"starting": "启动中"
+		},
+		"actions": {
+			"checkUpdates": "检查更新",
+			"checkingProgress": "正在检查 {checked}/{total}",
+			"update": "更新",
+			"updateAll": "全部更新",
+			"updateAllWithUpdates": "更新所有有可用更新的容器",
+			"updateAllCount": "全部更新（{count}）",
+			"dismissAllUpdates": "清除所有更新提示",
+			"prune": "清理",
+			"pruneContainers": "清理容器",
+			"start": "启动",
+			"startCount": "启动 {count} 个",
+			"stop": "停止",
+			"stopCount": "停止 {count} 个",
+			"pause": "暂停",
+			"pauseCount": "暂停 {count} 个",
+			"unpause": "恢复",
+			"unpauseCount": "恢复 {count} 个",
+			"restart": "重启",
+			"restartCount": "重启 {count} 个",
+			"remove": "移除",
+			"removeCount": "移除 {count} 个",
+			"delete": "删除",
+			"updateSelectedToLatest": "将选中容器更新到最新镜像",
+			"updateCount": "更新 {count} 个",
+			"updateAvailableClick": "有可用更新，点击更新",
+			"showLogs": "显示日志",
+			"openLogs": "打开日志",
+			"showTerminal": "显示终端",
+			"browseFiles": "浏览文件",
+			"viewDetails": "查看详情"
+		},
+		"confirm": {
+			"allUpdatableContainers": "全部 {count} 个容器",
+			"stoppedContainers": "已停止容器",
+			"stoppedContainerCount": "{count} 个已停止容器",
+			"runningContainerCount": "{count} 个运行中容器",
+			"pausedContainerCount": "{count} 个已暂停容器",
+			"containerCount": "{count} 个容器",
+			"selectedContainerCount": "{count} 个选中容器"
+		},
+		"batch": {
+			"titles": {
+				"starting": "正在启动 {count} 个容器",
+				"stopping": "正在停止 {count} 个容器",
+				"restarting": "正在重启 {count} 个容器",
+				"pausing": "正在暂停 {count} 个容器",
+				"unpausing": "正在恢复 {count} 个容器",
+				"removing": "正在移除 {count} 个容器"
+			}
+		},
+		"selection": {
+			"selected": "已选择 {count} 项"
+		},
+		"layout": {
+			"switchToVertical": "切换为垂直布局（日志/终端在侧边）",
+			"switchToHorizontal": "切换为水平布局（日志/终端在下方）"
+		},
+		"update": {
+			"available": "有可用更新"
+		},
+		"system": {
+			"settingsAbout": "设置 > 关于",
+			"dockhandManagement": "Dockhand 管理容器",
+			"hawserUpdateRemoteHost": "请在 Hawser 运行的远程主机上更新。",
+			"updateInstructionsGitHub": "GitHub 上的更新说明",
+			"hawserRemoteAgent": "Hawser 远程代理"
+		},
+		"tooltips": {
+			"restarts": "重启 {count} 次",
+			"networkIo": "↓{received} 已接收 / ↑{sent} 已发送",
+			"diskIo": "↓{read} 已读取 / ↑{written} 已写入",
+			"openUrlInNewTab": "在新标签页打开 {url}",
+			"exposedInternalPort": "已暴露的内部端口"
+		},
+		"network": {
+			"noIp": "无 IP",
+			"ipv4": "IPv4",
+			"ipv6": "IPv6",
+			"mac": "MAC"
+		},
+		"terminal": {
+			"detectingShells": "正在检测 Shell...",
+			"detectingAvailableShells": "正在检测可用 Shell...",
+			"noShellAvailable": "无可用 Shell",
+			"noShellInstalled": "此容器未安装 Shell。",
+			"noShellInstalledLong": "此容器没有安装任何 Shell。",
+			"distrolessNoShellHint": "scratch 或 distroless 镜像构建的容器通常不包含 Shell。",
+			"unavailable": "不可用",
+			"removeUser": "移除用户",
+			"addUserPlaceholder": "添加用户...（Enter）",
+			"connect": "连接",
+			"connectingTo": "正在连接到 {name}...",
+			"shellUserLine": "Shell：{shell}，用户：{user}",
+			"defaultUser": "默认",
+			"sessionEnded": "会话已结束。",
+			"connected": "已连接",
+			"openSession": "打开终端会话",
+			"configureSession": "配置此会话使用的 Shell 和用户",
+			"selectShell": "选择 Shell",
+			"selectUser": "选择用户",
+			"openInNewWindow": "在新窗口打开"
+		},
+		"autoUpdate": {
+			"notAvailable": "自动更新不可用",
+			"dockhandCannotSelfUpdate": "Dockhand 无法自行更新。若要更新，请在主机上运行：",
+			"hawserUpdateRemoteHost": "Hawser 代理必须在其远程主机上更新。",
+			"viewGitHubInstructions": "查看 GitHub 上的更新说明",
+			"enableAutomatic": "启用镜像自动更新",
+			"vulnerabilityCriteria": "漏洞条件",
+			"blockByVulnerabilityCriteria": "如果新镜像存在匹配此条件的漏洞，则阻止自动更新"
+		},
+		"batchUpdate": {
+			"title": "正在更新容器",
+			"processing": "正在处理 {current}/{total} 个容器...",
+			"complete": "更新完成",
+			"failed": "更新失败",
+			"preparing": "准备更新 {count} 个容器...",
+			"updatedCount": "已更新（{count}）",
+			"failedCount": "失败（{count}）",
+			"updateAnyway": "仍然更新",
+			"hideLogs": "隐藏日志",
+			"showLogs": "显示日志",
+			"vulnerabilitiesFound": "发现 {count} 个漏洞",
+			"columns": {
+				"fixed": "修复版本"
+			}
+		},
+		"create": {
+			"title": "创建新容器",
+			"tabs": {
+				"pull": "拉取",
+				"scan": "扫描"
+			},
+			"scanDisabled": "此环境未启用漏洞扫描。",
+			"scanDisabledHelp": "可在 设置 > 环境 中启用以扫描镜像。",
+			"criticalHighFound": "镜像中发现严重/高危漏洞",
+			"creating": "正在创建...",
+			"createContainer": "创建容器",
+			"toasts": {
+				"created": "容器创建成功",
+				"createdWithImagePulled": "容器已创建（镜像 {image} 已自动拉取）"
+			},
+			"errors": {
+				"createContainer": "创建容器失败",
+				"createContainerWithDetails": "创建容器失败：{error}"
+			}
+		},
+		"edit": {
+			"title": "编辑容器",
+			"renameContainer": "重命名容器",
+			"loading": "正在加载容器数据...",
+			"updating": "正在更新...",
+			"updateContainer": "更新容器",
+			"composeRenameWarningPrefix": "此容器属于",
+			"composeRenameWarningSuffix": "compose stack。重命名可能会影响 stack 管理。",
+			"composeConfigWarningPrefix": "此容器属于",
+			"composeConfigWarningSuffix": "compose stack。重新部署 stack 时，改动可能会被覆盖。",
+			"toasts": {
+				"renamed": "容器已重命名！",
+				"updated": "容器已更新！"
+			},
+			"errors": {
+				"fetchContainer": "获取容器失败：{status}",
+				"loadContainerData": "加载容器数据失败：{error}",
+				"renameContainer": "重命名容器失败",
+				"updateContainer": "更新容器失败",
+				"updateContainerWithDetails": "更新容器失败：{error}"
+			}
+		},
+		"inspect": {
+			"title": "容器详情：",
+			"tabs": {
+				"overview": "概览",
+				"layers": "层",
+				"processes": "进程",
+				"mounts": "挂载",
+				"files": "文件"
+			},
+			"live": {
+				"receivingUpdates": "正在接收实时更新",
+				"connectionLost": "连接已中断"
+			},
+			"actions": {
+				"viewRawJson": "查看原始 JSON",
+				"leaveNetwork": "离开",
+				"joinNetwork": "加入",
+				"openUrl": "打开 {url}"
+			},
+			"sections": {
+				"basicInformation": "基础信息",
+				"dnsConfiguration": "DNS 配置",
+				"extraHosts": "额外 hosts",
+				"connectedNetworks": "已连接网络",
+				"resourceLimits": "资源限制",
+				"cgroupSettings": "Cgroup 设置",
+				"configuration": "配置",
+				"healthCheckLog": "健康检查日志"
+			},
+			"labels": {
+				"rx": "接收",
+				"tx": "发送",
+				"exitCode": "退出码",
+				"restartCount": "重启次数",
+				"platform": "平台",
+				"started": "启动时间",
+				"aliases": "别名",
+				"exposed": "已暴露",
+				"readWrite": "读/写",
+				"readOnly": "只读",
+				"destination": "目标",
+				"propagation": "传播模式",
+				"privileged": "特权模式",
+				"readOnlyRoot": "只读根文件系统",
+				"userNamespace": "用户命名空间",
+				"apparmorProfile": "AppArmor Profile",
+				"addedCapabilities": "已添加 capabilities",
+				"droppedCapabilities": "已移除 capabilities",
+				"cpus": "CPU 数量",
+				"memorySwap": "内存 Swap",
+				"pidsLimit": "PIDs 限制",
+				"oomKill": "OOM Kill",
+				"cpuPeriodQuota": "CPU Period/Quota",
+				"count": "数量",
+				"cgroupParent": "Cgroup Parent",
+				"cgroupnsMode": "Cgroupns 模式",
+				"interval": "间隔",
+				"timeout": "超时",
+				"startPeriod": "启动周期",
+				"currentStatus": "当前状态",
+				"failingStreak": "连续失败次数",
+				"yes": "是",
+				"no": "否",
+				"notAvailable": "不适用",
+				"all": "全部"
+			},
+			"empty": {
+				"notRunning": "容器未运行",
+				"paused": "容器已暂停",
+				"noProcesses": "未找到进程",
+				"noImageInfo": "暂无镜像信息",
+				"noNetworks": "未连接网络。",
+				"noMounts": "未配置挂载",
+				"noEnvVars": "无环境变量",
+				"noLabels": "无标签",
+				"defaultSecurity": "默认安全设置",
+				"waitingForHealthcheck": "正在等待第一次健康检查完成...",
+				"noHealthcheck": "未配置健康检查"
+			},
+			"network": {
+				"loadingNetworks": "正在加载网络...",
+				"joinPlaceholder": "加入网络...",
+				"noAvailable": "无可用网络"
+			},
+			"processes": {
+				"count": "{count} 个进程"
+			},
+			"copy": {
+				"copied": "已复制！",
+				"copyLabel": "复制标签",
+				"copyToClipboard": "复制到剪贴板"
+			},
+			"rawJson": {
+				"title": "原始 JSON"
+			},
+			"toasts": {
+				"connectedToNetwork": "已连接到 {name}",
+				"disconnectedFromNetwork": "已从 {name} 断开"
+			},
+			"errors": {
+				"connectNetwork": "连接到网络失败",
+				"disconnectNetwork": "从网络断开失败"
+			}
+		},
+		"settings": {
+			"notSet": "未设置",
+			"advancedHint": "高级容器选项（点击展开）",
+			"badges": {
+				"configured": "已配置"
+			},
+			"imageSummary": {
+				"pulling": "正在拉取...",
+				"scanning": "正在扫描...",
+				"ready": "镜像已拉取并可用",
+				"vulnerabilities": "{count} 个漏洞",
+				"setImageInPull": "前往“拉取”标签页设置镜像"
+			},
+			"configSet": {
+				"title": "配置集",
+				"apply": "应用配置集",
+				"selectPrefill": "选择配置集以预填充值...",
+				"selectMerge": "选择配置集以合并值...",
+				"mergeNote": "注意：配置集中的值会与现有设置合并，已有键不会被覆盖。"
+			},
+			"sections": {
+				"basic": "基础设置",
+				"portMappings": "端口映射",
+				"volumeMappings": "卷映射",
+				"environmentVariables": "环境变量",
+				"resources": "资源",
+				"security": "安全",
+				"healthcheck": "健康检查",
+				"dns": "DNS 设置",
+				"devices": "设备",
+				"gpu": "GPU",
+				"ulimits": "Ulimits"
+			},
+			"labels": {
+				"commandOptional": "命令（可选）",
+				"restartPolicy": "重启策略",
+				"maxRetryCount": "最大重试次数",
+				"networkMode": "网络模式",
+				"pullImageBeforeUpdate": "更新前拉取镜像",
+				"startAfterCreation": "创建后启动容器",
+				"startAfterUpdate": "更新后启动容器",
+				"aliasesCommaSeparated": "别名（逗号分隔）",
+				"macAddress": "MAC 地址",
+				"hostPath": "主机路径",
+				"containerPath": "容器路径",
+				"key": "键",
+				"value": "值",
+				"memoryLimit": "内存限制",
+				"memoryReservation": "内存预留",
+				"cpuLimit": "CPU 限制",
+				"cpuShares": "CPU shares",
+				"cpuQuota": "CPU quota",
+				"cpuPeriod": "CPU period",
+				"privilegedMode": "特权模式",
+				"addCapabilities": "添加 capabilities",
+				"dropCapabilities": "移除 capabilities",
+				"securityOptions": "安全选项",
+				"enableHealthcheck": "启用健康检查",
+				"intervalSeconds": "间隔（秒）",
+				"timeoutSeconds": "超时（秒）",
+				"retries": "重试次数",
+				"startSeconds": "启动延迟（秒）",
+				"dnsServers": "DNS 服务器",
+				"dnsSearchDomains": "DNS 搜索域",
+				"dnsOptions": "DNS 选项",
+				"enableGpuAccess": "启用 GPU 访问",
+				"gpuMode": "GPU 模式",
+				"gpuCount": "GPU 数量",
+				"deviceIds": "设备 ID",
+				"capabilities": "Capabilities"
+			},
+			"restartPolicies": {
+				"no": "不重启",
+				"always": "始终",
+				"onFailure": "失败时",
+				"unlessStopped": "除非手动停止"
+			},
+			"networkModes": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"none": "None"
+			},
+			"placeholders": {
+				"unlimited": "无限制",
+				"selectNetwork": "选择要添加的网络...",
+				"defaultCpuPeriod": "默认：100000",
+				"selectCapabilityAdd": "选择要添加的 capability...",
+				"selectCapabilityDrop": "选择要移除的 capability...",
+				"runtimeName": "Runtime 名称",
+				"addCapability": "添加 capability...",
+				"soft": "Soft",
+				"hard": "Hard"
+			},
+			"help": {
+				"unlimitedRetries": "留空表示无限重试",
+				"additionalNetworks": "容器会连接到选中的网络，同时保留上方网络模式",
+				"resourceLimits": "配置此容器的内存和 CPU 限制",
+				"microsecondsPerPeriod": "每个周期的微秒数",
+				"periodInMicroseconds": "周期长度，单位为微秒",
+				"commonSecurityOptions": "常用选项：no-new-privileges、seccomp=unconfined、apparmor=unconfined"
+			},
+			"portHelp": {
+				"supportedFormats": "支持的主机端口格式：",
+				"allInterfaces": "绑定到所有网络接口",
+				"specificIp": "绑定到指定 IP",
+				"portRange": "端口范围（容器端口也必须是范围）",
+				"randomAllocation": "主机端口留空则随机分配",
+				"findFreePort": "将鼠标悬停在主机端口字段上，点击搜索图标可查找下一个可用端口。"
+			},
+			"tooltips": {
+				"findFreePort": "查找下一个可用 Docker 端口"
+			},
+			"runtime": {
+				"defaultRunc": "默认（runc）",
+				"custom": "自定义：{runtime}",
+				"customOption": "自定义..."
+			},
+			"gpuModes": {
+				"all": "全部",
+				"count": "数量",
+				"specific": "指定"
+			},
+			"actions": {
+				"addDevice": "添加设备",
+				"addUlimit": "添加 ulimit"
+			}
+		},
+		"fileBrowser": {
+			"actions": {
+				"newFile": "新建文件",
+				"newDirectory": "新建目录",
+				"uploadFiles": "上传文件",
+				"hideHiddenFiles": "隐藏隐藏文件",
+				"showHiddenFiles": "显示隐藏文件",
+				"viewFile": "查看文件",
+				"editFile": "编辑文件",
+				"rename": "重命名",
+				"changePermissions": "修改权限",
+				"closeEditor": "关闭编辑器",
+				"closeViewer": "关闭查看器"
+			},
+			"empty": {
+				"directory": "目录为空",
+				"noVisibleFiles": "没有可见文件（隐藏文件已隐藏）"
+			},
+			"labels": {
+				"permissions": "权限",
+				"directory": "目录",
+				"file": "文件",
+				"readOnly": "只读",
+				"readOnlyShort": "只读",
+				"newName": "新名称",
+				"currentPermissions": "当前：{permissions}"
+			},
+			"tooltips": {
+				"readOnlyFile": "只读文件（无写入权限）",
+				"fileReadOnly": "文件为只读"
+			},
+			"create": {
+				"titleFile": "创建文件",
+				"titleDirectory": "创建目录",
+				"createdIn": "将创建在：{path}"
+			},
+			"permissions": {
+				"read": "读取",
+				"write": "写入",
+				"execute": "执行",
+				"owner": "所有者",
+				"group": "用户组",
+				"others": "其他用户",
+				"octal": "八进制",
+				"symbolic": "符号表示",
+				"enterOctal": "或直接输入八进制权限",
+				"applyRecursively": "递归应用"
+			},
+			"toasts": {
+				"fileSaved": "文件已保存",
+				"fileCreated": "文件已创建",
+				"directoryCreated": "目录已创建",
+				"deleted": "已删除 {name}",
+				"renamed": "重命名成功",
+				"permissionsChanged": "权限已修改",
+				"uploaded": "已上传 {count} 个文件",
+				"uploadFailures": "失败：{errors}"
+			},
+			"errors": {
+				"readFile": "读取文件失败",
+				"openFile": "打开文件失败",
+				"saveFile": "保存文件失败",
+				"nameRequired": "名称为必填项",
+				"create": "创建失败",
+				"delete": "删除失败",
+				"rename": "重命名失败",
+				"modeRequired": "权限模式为必填项",
+				"changePermissions": "修改权限失败",
+				"loadDirectory": "加载目录失败",
+				"upload": "上传失败",
+				"unableToBrowse": "无法浏览文件"
+			}
+		},
+		"toasts": {
+			"failedUpdateChecksSummary": "{prefix}（{count} 个检查失败）",
+			"allUpToDate": "所有容器均为最新",
+			"updatesAvailable": "有 {count} 个可用更新",
+			"clearUpdateIndicatorsFailed": "清除更新提示失败",
+			"updatedContainers": "已更新 {count} 个容器",
+			"updateContainersFailed": "更新 {count} 个容器失败",
+			"updatesBlockedByPolicy": "{count} 个更新被漏洞策略阻止",
+			"started": "已启动 {name}",
+			"startFailed": "启动 {name} 失败",
+			"stopped": "已停止 {name}",
+			"stopFailed": "停止 {name} 失败",
+			"paused": "已暂停 {name}",
+			"pauseFailed": "暂停 {name} 失败",
+			"resumed": "已恢复 {name}",
+			"unpauseFailed": "恢复 {name} 失败",
+			"restarted": "已重启 {name}",
+			"restartFailed": "重启 {name} 失败",
+			"removed": "已移除 {name}",
+			"removeFailed": "移除 {name} 失败",
+			"copiedToClipboard": "已复制到剪贴板"
+		},
+		"errors": {
+			"startContainer": "启动容器失败",
+			"stopContainer": "停止容器失败",
+			"pauseContainer": "暂停容器失败",
+			"unpauseContainer": "恢复容器失败",
+			"restartContainer": "重启容器失败",
+			"removeContainer": "移除容器失败"
+		}
+	},
+	"volumes": {
+		"pageTitle": "卷 - Dockhand",
+		"title": "卷",
+		"searchPlaceholder": "搜索卷...",
+		"notAvailable": "不适用",
+		"filters": {
+			"drivers": "个驱动",
+			"usage": "使用情况",
+			"usages": "个使用状态"
+		},
+		"usage": {
+			"inUse": "使用中",
+			"unused": "未使用"
+		},
+		"actions": {
+			"prune": "清理",
+			"pruneVolumes": "清理卷",
+			"deleteSelected": "删除 {count} 项",
+			"clone": "克隆"
+		},
+		"confirm": {
+			"unusedVolumes": "未使用卷",
+			"volume": "卷"
+		},
+		"selection": {
+			"selected": "已选择 {count} 项",
+			"volumeCount": "{count} 个卷"
+		},
+		"batch": {
+			"removing": "正在移除 {count} 个卷"
+		},
+		"empty": {
+			"title": "未找到卷",
+			"description": "创建卷以持久化容器数据"
+		},
+		"tooltips": {
+			"viewDetails": "查看详情",
+			"browseFiles": "浏览文件",
+			"exportAs": "导出卷为 {format}",
+			"cloneVolume": "克隆卷"
+		},
+		"toasts": {
+			"loadFailed": "加载卷失败",
+			"removeFailedGeneric": "移除卷失败",
+			"removeFailed": "移除 {name} 失败",
+			"removed": "已移除 {name}",
+			"exporting": "正在导出 {name}...",
+			"exportFailed": "导出 {name} 失败",
+			"pruned": "未使用卷已清理",
+			"pruneFailed": "清理卷失败"
+		},
+		"inspect": {
+			"title": "卷详情",
+			"sections": {
+				"basicInformation": "基本信息",
+				"mountpoint": "挂载点",
+				"driverOptions": "驱动选项"
+			},
+			"mountpointDescription": "卷数据在主机上的存储位置",
+			"noDriverOptions": "未配置驱动选项",
+			"warningLabel": "注意：",
+			"warningText": "移除此卷会永久删除其中存储的所有数据。移除前请确认没有容器正在使用此卷。",
+			"errors": {
+				"fetchDetails": "获取卷详情失败",
+				"loadDetails": "加载卷详情失败"
+			}
+		},
+		"clone": {
+			"title": "克隆卷",
+			"description": "创建一个与“{name}”使用相同驱动和选项的新卷。",
+			"newName": "新卷名称",
+			"newNamePlaceholder": "输入新卷名称",
+			"note": "注意：这会创建一个配置相同的空卷。若要复制数据，请使用源卷的导出功能，再导入到新卷。",
+			"errors": {
+				"nameRequired": "请输入新卷名称",
+				"cloneFailed": "克隆卷失败"
+			},
+			"toasts": {
+				"clonedAs": "卷已克隆为“{name}”"
+			}
+		},
+		"browser": {
+			"title": "浏览卷 - {name}",
+			"readOnly": "只读",
+			"inUseBy": "卷正在被以下容器使用：",
+			"editingDisabled": "- 已禁用编辑",
+			"description": "浏览、编辑和管理卷中的文件。"
+		},
+		"create": {
+			"title": "创建卷",
+			"volumeName": "卷名称",
+			"selectDriver": "选择驱动",
+			"driverHelp": "要使用的卷驱动（local 为默认值）",
+			"serverIp": "服务器 / IP",
+			"sharePath": "共享路径",
+			"smbVersion": "SMB 版本",
+			"nfsVersion": "NFS 版本",
+			"selectVersion": "选择版本",
+			"domain": "域",
+			"domainHelp": "可选的 AD/工作组域",
+			"additionalOptions": "附加选项",
+			"addOption": "添加选项",
+			"addLabel": "添加标签",
+			"keyPlaceholder": "键",
+			"valuePlaceholder": "值",
+			"valueOptionalPlaceholder": "值（可选）",
+			"extraMountOptions": "追加到挂载字符串的额外挂载选项",
+			"exportPath": "导出路径",
+			"soft": "软挂载",
+			"hard": "硬挂载",
+			"mount": "挂载",
+			"noLock": "不加锁",
+			"noLabels": "未配置标签",
+			"creating": "正在创建...",
+			"createVolume": "创建卷",
+			"drivers": {
+				"local": "本地",
+				"nfs": "NFS",
+				"cifs": "CIFS"
+			},
+			"driverDescriptions": {
+				"local": "默认本地驱动",
+				"nfs": "网络文件系统",
+				"cifs": "Windows/SMB 共享"
+			},
+			"errors": {
+				"nameRequired": "卷名称为必填项",
+				"serverRequired": "服务器为必填项",
+				"shareRequired": "共享路径为必填项",
+				"exportPathRequired": "导出路径为必填项",
+				"createFailed": "创建卷失败"
+			}
+		}
+	},
+	"networks": {
+		"pageTitle": "网络 - Dockhand",
+		"title": "网络",
+		"searchPlaceholder": "搜索网络...",
+		"filters": {
+			"drivers": "个驱动",
+			"scopes": "个作用域"
+		},
+		"actions": {
+			"prune": "清理",
+			"pruneNetworks": "清理网络",
+			"viewGraph": "查看拓扑",
+			"deleteSelected": "删除 {count} 项"
+		},
+		"confirm": {
+			"unusedNetworks": "未使用网络",
+			"network": "网络"
+		},
+		"selection": {
+			"selected": "已选择 {count} 项",
+			"networkCount": "{count} 个网络"
+		},
+		"batch": {
+			"removing": "正在移除 {count} 个网络"
+		},
+		"empty": {
+			"title": "未找到网络",
+			"description": "创建网络以连接容器"
+		},
+		"badges": {
+			"builtIn": "内置",
+			"internal": "内部"
+		},
+		"tooltips": {
+			"viewDetails": "查看详情",
+			"connectContainer": "连接容器",
+			"copyNetworkId": "复制网络 ID",
+			"duplicateNetwork": "复制网络"
+		},
+		"graph": {
+			"modalTitle": "查看网络图",
+			"modalDescription": "查看容器之间的网络连接",
+			"toolbar": {
+				"switchToDarkTheme": "切换到深色主题",
+				"switchToLightTheme": "切换到浅色主题"
+			},
+			"layout": {
+				"changeLayout": "更改布局",
+				"tree": "树形",
+				"grid": "网格",
+				"circle": "环形",
+				"radial": "径向",
+				"force": "力导向"
+			},
+			"legend": {
+				"service": "服务",
+				"network": "网络"
+			},
+			"nodeTypes": {
+				"service": "服务",
+				"network": "网络"
+			},
+			"nodeCaptions": {
+				"networkPrefix": "网络"
+			},
+			"panel": {
+				"closePanel": "关闭面板"
+			},
+			"fields": {
+				"containerId": "容器 ID",
+				"driver": "驱动",
+				"ipamConfiguration": "IPAM 配置",
+				"subnet": "子网",
+				"gateway": "网关"
+			},
+			"flags": {
+				"externalNetwork": "外部网络",
+				"internalNetwork": "内部网络",
+				"attachable": "可附加"
+			},
+			"edges": {
+				"networkConnection": "网络连接",
+				"networkConnectionDescription": "服务已连接到此网络。"
+			}
+		},
+		"connect": {
+			"title": "将容器连接到 {network}",
+			"description": "选择要连接到此网络的容器。",
+			"containerLabel": "容器",
+			"selectContainer": "选择容器...",
+			"containerFallback": "容器",
+			"cancel": "取消",
+			"connect": "连接",
+			"empty": {
+				"title": "没有可连接的容器。",
+				"description": "所有容器都已连接到此网络。"
+			},
+			"toasts": {
+				"connected": "已将 {container} 连接到 {network}",
+				"connectFailed": "连接容器失败"
+			}
+		},
+		"toasts": {
+			"loadFailed": "加载网络失败",
+			"cannotRemoveBuiltin": "无法移除内置网络“{name}”",
+			"removeFailedGeneric": "移除网络失败",
+			"removeFailed": "移除 {name} 失败",
+			"removed": "已移除 {name}",
+			"disconnected": "已将 {container} 从 {network} 断开",
+			"disconnectFailed": "断开容器连接失败",
+			"idCopied": "网络 ID 已复制到剪贴板",
+			"copyIdFailed": "复制 ID 失败",
+			"created": "已创建 {name}",
+			"duplicateFailed": "复制网络失败",
+			"pruned": "未使用网络已清理",
+			"pruneFailed": "清理网络失败"
+		},
+		"inspect": {
+			"title": "网络详情",
+			"notAvailable": "不适用",
+			"yes": "是",
+			"no": "否",
+			"defaultDriver": "默认",
+			"ipRange": "IP 范围",
+			"connectedContainers": "已连接容器（{count}）",
+			"noConnectedContainers": "没有容器连接到此网络",
+			"sections": {
+				"basicInformation": "基本信息",
+				"ipamConfiguration": "IPAM 配置",
+				"driverOptions": "驱动选项"
+			},
+			"errors": {
+				"fetchDetails": "获取网络详情失败",
+				"loadDetails": "加载网络详情失败"
+			}
+		},
+		"create": {
+			"title": "创建网络",
+			"description": "使用自定义设置配置新的 Docker 网络。",
+			"tabs": {
+				"basic": "基础",
+				"options": "选项",
+				"labels": "标签"
+			},
+			"networkName": "网络名称",
+			"selectDriver": "选择驱动",
+			"parentConfigRequired": "{driver} 配置（必填）",
+			"parentInterface": "父接口",
+			"mode": "模式",
+			"internalNetwork": "内部网络",
+			"internalNetworkDescription": "限制对此网络的外部访问",
+			"attachable": "允许手动连接",
+			"attachableDescription": "允许手动附加容器（overlay 网络）",
+			"enableIpv6": "启用 IPv6",
+			"enableIpv6Description": "启用 IPv6 网络",
+			"ipamDriver": "IPAM 驱动",
+			"ipamDriverHelp": "IP 地址管理驱动（默认：default）",
+			"ipRange": "IP 范围",
+			"ipRangeHelp": "从子网的子范围中分配容器 IP",
+			"auxiliaryAddresses": "辅助地址",
+			"auxiliaryAddressesHelp": "为网络设备保留 IP 地址（例如：host=192.168.1.1）",
+			"hostname": "主机名",
+			"ipamOptions": "IPAM 选项",
+			"driverOptionsHelp": "设置驱动专用选项（-o key=value）",
+			"commonOptionsForDriver": "{driver} 驱动的常用选项：",
+			"labelsHelp": "为网络设置元数据标签",
+			"creating": "正在创建...",
+			"createNetwork": "创建网络",
+			"drivers": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"overlay": "Overlay",
+				"macvlan": "Macvlan",
+				"ipvlan": "IPvlan",
+				"none": "None"
+			},
+			"driverDescriptions": {
+				"bridge": "默认网络驱动",
+				"host": "直接使用主机网络",
+				"overlay": "Swarm 多主机网络",
+				"macvlan": "为容器分配 MAC 地址",
+				"ipvlan": "IPvlan L2/L3 网络",
+				"none": "禁用网络"
+			},
+			"modes": {
+				"bridgeDefault": "Bridge（默认）",
+				"private": "Private",
+				"passthru": "Passthru",
+				"l2Default": "L2（默认）"
+			},
+			"commonDriverOptions": {
+				"bridgeName": "Bridge 设备名称",
+				"ipMasquerade": "启用 IP 伪装（true/false）",
+				"interContainerCommunication": "启用容器间通信（true/false）",
+				"hostBindingIpv4": "主机绑定 IPv4 地址",
+				"mtu": "MTU 大小",
+				"parentInterface": "父接口（例如：eth0）",
+				"macvlanMode": "模式：bridge、private、vepa、passthru",
+				"ipvlanMode": "模式：l2、l3、l3s",
+				"ipvlanFlag": "标志：bridge、private、vepa",
+				"encryption": "启用加密（true/false）"
+			},
+			"errors": {
+				"nameRequired": "网络名称为必填项",
+				"parentInterfaceRequired": "{driver} 网络需要父接口",
+				"subnetRequired": "{driver} 网络需要子网",
+				"createFailed": "创建网络失败",
+				"fixValidation": "请先修复上方校验错误"
+			}
+		}
+	},
+	"roles": {
+		"admin": "管理员",
+		"user": "用户"
+	},
+	"profile": {
+		"pageTitle": "个人资料 - Dockhand",
+		"title": "个人资料",
+		"description": "管理你的账户设置",
+		"account": {
+			"title": "账户信息",
+			"removePhoto": "移除照片",
+			"role": "角色",
+			"lastLogin": "上次登录"
+		},
+		"details": {
+			"title": "个人资料详情",
+			"displayName": "显示名称",
+			"displayNamePlaceholder": "输入显示名称",
+			"email": "邮箱",
+			"emailPlaceholder": "输入邮箱",
+			"saveChanges": "保存更改"
+		},
+		"security": {
+			"title": "安全",
+			"changePassword": "修改密码",
+			"changePasswordDescription": "修改你的密码",
+			"managedBySso": "由你的 SSO 提供方管理",
+			"mfaTitle": "双因素认证",
+			"mfaEnabledDescription": "你的账户已启用 MFA",
+			"mfaDisabledDescription": "添加额外一层安全保护",
+			"disableMfa": "禁用 MFA",
+			"setupMfa": "设置 MFA"
+		},
+		"tokens": {
+			"title": "API 令牌",
+			"description": "为 CI/CD 流水线和脚本创建令牌",
+			"generateToken": "生成令牌",
+			"generateApiToken": "生成 API 令牌",
+			"createdTitle": "令牌已创建",
+			"copyNowWarning": "请立即复制此令牌。它不会再次显示。",
+			"namePlaceholder": "例如：CI/CD 流水线",
+			"confirmPasswordPlaceholder": "确认你的密码",
+			"expiration": "过期时间",
+			"creating": "正在创建...",
+			"loading": "正在加载令牌...",
+			"empty": "尚未创建 API 令牌。",
+			"prefix": "前缀",
+			"lastUsed": "上次使用",
+			"expires": "过期时间",
+			"expired": "已过期",
+			"revokeToken": "撤销令牌",
+			"revokeDescription": "此令牌会立即停止工作。",
+			"revoke": "撤销",
+			"expirationOptions": {
+				"none": "永不过期",
+				"days30": "30 天",
+				"days90": "90 天",
+				"year1": "1 年",
+				"custom": "自定义日期"
+			},
+			"errors": {
+				"nameRequired": "令牌名称为必填项",
+				"passwordRequired": "密码为必填项",
+				"createFailed": "创建令牌失败"
+			}
+		},
+		"appearance": {
+			"title": "外观",
+			"description": "自定义应用外观"
+		},
+		"toasts": {
+			"profileUpdated": "个人资料已更新",
+			"mfaEnabled": "MFA 已启用",
+			"mfaDisabled": "MFA 已禁用",
+			"avatarUpdated": "头像已更新",
+			"avatarRemoved": "头像已移除"
+		},
+		"errors": {
+			"selectImageFile": "请选择图片文件",
+			"loadProfile": "加载个人资料失败",
+			"updateProfile": "更新个人资料失败",
+			"setupMfa": "设置 MFA 失败",
+			"uploadAvatar": "上传头像失败",
+			"removeAvatar": "移除头像失败"
+		},
+		"password": {
+			"currentPassword": "当前密码",
+			"currentPasswordPlaceholder": "输入当前密码",
+			"newPassword": "新密码",
+			"newPasswordPlaceholder": "输入新密码",
+			"repeatNewPassword": "重复新密码",
+			"repeatNewPasswordPlaceholder": "再次输入新密码",
+			"changedSuccessfully": "密码已修改",
+			"errors": {
+				"allFieldsRequired": "所有字段均为必填项",
+				"passwordsDoNotMatch": "两次输入的密码不一致",
+				"tooShort": "密码至少需要 8 个字符",
+				"changeFailed": "修改密码失败"
+			}
+		},
+		"mfa": {
+			"enabledTitle": "MFA 已成功启用",
+			"setupTitle": "设置双因素认证",
+			"disableTitle": "禁用双因素认证",
+			"disableDescription": "确定要禁用双因素认证吗？这会降低你的账户安全性。",
+			"backupCodesWarning": "请将这些备用码保存在安全位置。如果你无法访问认证器应用，每个备用码可用于登录一次。",
+			"copyRequiresHttps": "复制需要 HTTPS",
+			"copyCodes": "复制备用码",
+			"scanQrHelp": "使用你的认证器应用扫描此二维码（Google Authenticator、Authy 等）",
+			"qrCodeAlt": "MFA 二维码",
+			"manualCodeLabel": "或手动输入此代码：",
+			"verificationCode": "验证码",
+			"codePlaceholder": "输入 6 位验证码",
+			"verifySetupHelp": "输入认证器应用中的验证码以验证设置",
+			"enableMfa": "启用 MFA",
+			"backupFileTitle": "Dockhand MFA 备用码",
+			"backupFileDescription": "如果你无法访问认证器应用，可使用这些备用码登录。",
+			"backupFileSingleUse": "每个备用码只能使用一次。",
+			"generatedAt": "生成时间",
+			"errors": {
+				"codeRequired": "请输入验证码",
+				"invalidCode": "验证码无效",
+				"verifyFailed": "验证 MFA 失败"
+			}
+		}
+	},
+	"license": {
+		"expired": "许可证已过期",
+		"expiresTomorrow": "许可证明天过期",
+		"expiresInDays": "许可证将在 {days} 天后过期"
+	},
+	"commandPalette": {
+		"title": "命令面板",
+		"description": "搜索页面和操作",
+		"placeholder": "搜索...",
+		"noResults": "未找到结果。",
+		"groups": {
+			"navigation": "导航",
+			"enterprise": "企业版",
+			"lightTheme": "浅色主题",
+			"darkTheme": "深色主题",
+			"font": "字体",
+			"switchEnvironment": "切换环境",
+			"containers": "容器"
+		},
+		"actions": {
+			"viewLogs": "查看日志",
+			"openTerminal": "打开终端",
+			"restartContainer": "重启",
+			"stopContainer": "停止",
+			"startContainer": "启动"
+		},
+		"search": {
+			"auditCompliance": "审计日志 合规"
+		},
+		"errors": {
+			"loadData": "加载命令面板数据失败",
+			"containerAction": "{action}容器失败"
+		}
+	},
+	"auth": {
+		"welcomeBack": "欢迎回来",
+		"signInDescription": "登录你的 Dockhand 账户",
+		"mfaDescription": "输入双因素认证验证码",
+		"continueWith": "使用 {provider} 继续",
+		"orContinueWith": "或继续使用",
+		"signInWith": "登录方式",
+		"username": "用户名",
+		"usernamePlaceholder": "输入用户名",
+		"password": "密码",
+		"passwordPlaceholder": "输入密码",
+		"mfaRequired": "需要双因素认证",
+		"authenticationCode": "认证码",
+		"codePlaceholder": "输入验证码",
+		"codeHelp": "输入认证器应用中的 6 位验证码，或使用备用码",
+		"verifying": "正在验证...",
+		"signingIn": "正在登录...",
+		"verify": "验证",
+		"signIn": "登录",
+		"backToLogin": "返回登录",
+		"footer": "Dockhand Docker 管理",
+		"providers": {
+			"localAccount": "本地账户",
+			"ldapDirectory": "LDAP 目录",
+			"singleSignOn": "单点登录"
+		},
+		"errors": {
+			"loginFailed": "登录失败",
+			"unexpected": "发生意外错误",
+			"sso": "发起 SSO 登录失败"
+		}
+	},
+	"settings": {
+		"page": {
+			"title": "设置",
+			"pageTitle": "设置 - Dockhand"
+		},
+		"tabs": {
+			"general": "常规",
+			"environments": "环境",
+			"labels": "标签",
+			"registries": "镜像仓库",
+			"git": "Git",
+			"configSets": "配置集",
+			"notifications": "通知",
+			"authentication": "认证",
+			"license": "许可证",
+			"about": "关于"
+		},
+		"general": {
+			"appearance": "外观",
+			"appearanceAuthHint": "这些设置会用于登录页和默认值。个人偏好可在个人资料中配置。",
+			"appearanceGlobalHint": "禁用身份认证时，主题和字体设置为全局设置。",
+			"personalThemeHint": "个人主题偏好可在个人资料中配置。",
+			"showStoppedContainers": "显示已停止容器",
+			"showStoppedContainersDescription": "在列表中显示已停止和已退出的容器",
+			"stoppedContainersShown": "已显示已停止容器",
+			"stoppedContainersHidden": "已隐藏已停止容器",
+			"highlightUpdates": "高亮可用更新",
+			"highlightUpdatesDescription": "当容器有可用更新时，用琥珀色高亮容器行",
+			"updateHighlightingEnabled": "已启用更新高亮",
+			"updateHighlightingDisabled": "已禁用更新高亮",
+			"compactPortDisplay": "紧凑端口显示",
+			"compactPortDisplayDescription": "仅显示第一个端口，并用 +N 表示更多端口",
+			"compactPortDisplayEnabled": "已启用紧凑端口显示",
+			"showingAllPorts": "正在显示全部端口",
+			"showExposedPorts": "显示暴露端口",
+			"showExposedPortsTooltip": "显示容器内部端口（来自 EXPOSE 指令），这些端口未发布到主机。它们会在容器列表中以琥珀色徽标显示，以区别于已发布端口映射。",
+			"showExposedPortsDescription": "在容器列表中显示容器内部端口",
+			"showingExposedPorts": "正在容器列表中显示暴露端口",
+			"exposedPortsHidden": "已从容器列表隐藏暴露端口",
+			"timeFormat": "时间格式",
+			"timeFormatDescription": "以 12 小时制（AM/PM）或 24 小时制显示时间戳",
+			"timeFormatUpdated": "时间格式已设为 {format}",
+			"time12h": "12 小时制（AM/PM）",
+			"time24h": "24 小时制",
+			"dateFormat": "日期格式",
+			"dateFormatDescription": "应用中日期的显示方式",
+			"dateFormatUpdated": "日期格式已设为 {format}",
+			"scheduling": "调度",
+			"defaultTimezone": "默认时区",
+			"defaultTimezoneDescription": "新环境的默认时区。用于自动更新等计划任务。",
+			"defaultTimezoneUpdated": "默认时区已设为 {timezone}",
+			"confirmations": "确认",
+			"confirmDestructiveActions": "确认破坏性操作",
+			"confirmDestructiveActionsDescription": "删除资源前显示确认对话框",
+			"confirmationsEnabled": "已启用确认",
+			"confirmationsDisabled": "已禁用确认",
+			"logsAndFiles": "日志和文件",
+			"logBufferSize": "日志缓冲大小（KB）",
+			"logBufferSizeDescription": "每个容器面板的最大日志缓冲。超出后会截断较早日志。",
+			"logBufferSizeUpdated": "日志缓冲大小已更新",
+			"highLogBufferWarning": "较高数值可能降低浏览器处理高频日志容器时的性能。建议：250-1000 KB。",
+			"downloadFormat": "下载格式",
+			"downloadFormatDescription": "从容器下载文件时使用的归档格式",
+			"downloadFormatUpdated": "下载格式已设为 {format}",
+			"formatLogTimestamps": "格式化日志时间戳",
+			"formatLogTimestampsDescription": "将日志中的 ISO 时间戳转换为你配置的日期/时间格式",
+			"formatLogTimestampsHelp": "Docker 日志默认使用 UTC 时间戳。启用后，类似 {example} 的时间戳会按你的日期/时间设置转换为本地时间。",
+			"logTimestampFormattingEnabled": "已启用日志时间戳格式化",
+			"logTimestampFormattingDisabled": "已禁用日志时间戳格式化",
+			"composeTemplate": "Compose 模板",
+			"composeTemplateDescription": "创建新堆栈时的默认 YAML 内容。",
+			"composeTemplateUpdated": "Compose 模板已更新",
+			"templateReverted": "模板已还原为默认值",
+			"saveTemplate": "保存模板",
+			"revertToDefault": "还原为默认值",
+			"vulnerabilityScanners": "漏洞扫描器",
+			"grypeImage": "Grype 镜像",
+			"grypeImageDescription": "Grype 扫描器使用的 Docker 镜像。建议固定到具体版本以保证供应链安全。",
+			"trivyImage": "Trivy 镜像",
+			"trivyImageDescription": "Trivy 扫描器使用的 Docker 镜像。建议固定到具体版本以保证供应链安全。",
+			"defaultGrypeArguments": "默认 Grype 参数",
+			"defaultTrivyArguments": "默认 Trivy 参数",
+			"imagePlaceholderHelp": "使用 {placeholder} 作为镜像名称占位符",
+			"grypeImageUpdated": "Grype 镜像已更新",
+			"trivyImageUpdated": "Trivy 镜像已更新",
+			"grypeArgsUpdated": "默认 Grype 参数已更新",
+			"trivyArgsUpdated": "默认 Trivy 参数已更新",
+			"scannerCache": "扫描器缓存",
+			"scannerCacheDescription": "移除缓存的漏洞数据库以释放磁盘空间。下次扫描会重新下载最新数据（约 200MB）。",
+			"scannerCacheCleared": "扫描器缓存已清理（移除 {count} 项）",
+			"scannerCacheEmpty": "扫描器缓存已经为空",
+			"scannerCacheFailed": "清理扫描器缓存失败",
+			"clearing": "正在清理...",
+			"clearCache": "清理缓存",
+			"systemJobs": "系统任务",
+			"activityEventCollectionMode": "活动事件采集模式",
+			"activityEventCollectionModeTooltip": "Stream：从 Docker 持续接收事件流，通知即时但 CPU 占用更高。Poll：定期检查新事件，通知略有延迟但 CPU 占用更低。",
+			"stream": "流式",
+			"poll": "轮询",
+			"every": "每",
+			"eventCollectionModeUpdated": "事件采集模式：{mode}",
+			"eventPollIntervalUpdated": "事件轮询间隔：{seconds}s",
+			"metricsCollectionInterval": "指标采集间隔",
+			"metricsCollectionIntervalTooltip": "运行中容器 CPU/内存指标的采集频率。较低间隔更新更频繁，但会增加 CPU 占用。",
+			"metricsIntervalUpdated": "指标间隔：{seconds}s",
+			"scheduleExecutionCleanup": "调度执行清理",
+			"scheduleExecutionCleanupDescription": "删除超过指定天数的执行记录",
+			"scheduleRetentionUpdated": "调度保留时间已更新",
+			"scheduleCleanupCronUpdated": "调度清理 cron 已更新",
+			"scheduleCleanupEnabled": "已启用调度清理",
+			"scheduleCleanupDisabled": "已禁用调度清理",
+			"containerEventCleanup": "容器事件清理",
+			"containerEventCleanupDescription": "删除超过指定天数的事件",
+			"eventRetentionUpdated": "事件保留时间已更新",
+			"eventCleanupCronUpdated": "事件清理 cron 已更新",
+			"eventCleanupEnabled": "已启用事件清理",
+			"eventCleanupDisabled": "已禁用事件清理",
+			"days": "天",
+			"volumeHelperCleanup": "卷辅助容器清理",
+			"alwaysEnabled": "始终启用",
+			"volumeHelperCleanupDescription": "自动移除用于浏览卷内容的临时容器。每 30 分钟运行一次，并会在启动时运行。",
+			"scannerCacheCleanup": "扫描器缓存清理",
+			"scannerCacheCleanupDescription": "移除缓存的漏洞数据库以回收磁盘空间",
+			"scannerCleanupCronUpdated": "扫描器清理 cron 已更新",
+			"scannerCleanupEnabled": "已启用扫描器清理",
+			"scannerCleanupDisabled": "已禁用扫描器清理",
+			"dashboard": "仪表盘",
+			"labelFilterMatching": "标签过滤匹配",
+			"labelFilterMatchingTooltip": "控制在仪表盘上选择多个标签时如何过滤环境。Any：显示至少包含一个所选标签的环境。All：仅显示包含所有所选标签的环境。",
+			"any": "任一",
+			"all": "全部",
+			"scanResults": {
+				"title": "外部堆栈扫描结果",
+				"description": "已扫描 {count} 个配置路径以查找 Docker Compose 文件",
+				"selectEnvironment": "选择环境",
+				"failedToAdoptFallback": "采用失败",
+				"summary": {
+					"found": "找到 {count} 个",
+					"new": "{count} 个可采用",
+					"adopted": "已采用 {count} 个",
+					"alreadyAdopted": "{count} 个已采用",
+					"errors": "{count} 个错误"
+				},
+				"adoptTo": "采用到：",
+				"loading": "正在加载...",
+				"noEnvironments": "未配置环境",
+				"applyToAll": "应用到全部",
+				"availableForAdoption": "可采用的堆栈",
+				"selectAll": "全选",
+				"deselectAll": "取消全选",
+				"runningOn": "运行于 {environments}",
+				"runningTooltipBefore": "此堆栈已在运行（通过 Docker 的",
+				"runningTooltipAfter": "标签检测到）。采用后即可通过 Dockhand 管理它。",
+				"envFileDetected": "检测到 .env 文件",
+				"runningElsewhere": "在其他环境运行",
+				"runningElsewhereTooltip": "此堆栈正在其他环境（{environments}）中运行。你仍可在此处采用它，但不会影响正在运行的容器。",
+				"select": "选择",
+				"adoptedStacks": "已采用的堆栈",
+				"alreadyAdopted": "已采用",
+				"errors": "错误",
+				"empty": {
+					"title": "在配置路径中未找到 Docker Compose 文件。",
+					"description": "请确认这些路径包含 compose.yaml、compose.yml 或类似文件。"
+				},
+				"scannedPaths": "已扫描路径",
+				"selectedCount": "已选择 {count} 个堆栈",
+				"close": "关闭",
+				"adopting": "正在采用...",
+				"adoptSelected": "采用所选",
+				"viewStacks": "查看堆栈",
+				"toasts": {
+					"adopted": "已采用 {count} 个堆栈",
+					"failedCount": "{count} 个堆栈采用失败",
+					"failed": "采用堆栈失败"
+				}
+			}
+		},
+		"auth": {
+			"general": {
+				"authentication": "认证",
+				"enabledDescription": "用户必须登录后才能访问应用",
+				"disabledDescription": "认证已禁用，当前为开放访问",
+				"auditActive": "审计日志已启用，所有操作都会被记录",
+				"auditEnableHint": "启用认证后可激活审计日志",
+				"tabs": {
+					"general": "常规",
+					"users": "用户",
+					"sso": "SSO / OIDC",
+					"ldap": "LDAP / AD",
+					"roles": "角色"
+				},
+				"session": {
+					"title": "会话设置",
+					"timeoutLabel": "会话超时",
+					"timeoutDescription": "非活动会话多久后过期",
+					"seconds": "秒",
+					"hours": "（{count} 小时）",
+					"save": "保存设置",
+					"enableFirst": "启用认证后即可配置会话设置"
+				},
+				"toasts": {
+					"enabled": "认证已启用",
+					"disabled": "认证已禁用",
+					"updateFailed": "更新认证设置失败",
+					"settingsSaved": "设置已保存",
+					"saveFailed": "保存设置失败"
+				}
+			},
+			"users": {
+				"list": {
+					"title": "用户",
+					"description": "管理本地认证、SSO 和 LDAP 的用户账户。",
+					"addUser": "添加用户",
+					"searchPlaceholder": "搜索用户...",
+					"count": "{visible} / {total} 个用户",
+					"providerLocal": "本地",
+					"mfaEnabled": "已启用",
+					"moreRoles": "另有 {count} 个",
+					"noResults": "未找到匹配“{query}”的用户",
+					"table": {
+						"user": "用户",
+						"email": "邮箱",
+						"mfa": "MFA",
+						"roles": "角色",
+						"provider": "提供方"
+					},
+					"status": {
+						"disabled": "已禁用"
+					},
+					"empty": {
+						"title": "未配置用户",
+						"description": "创建第一个用户以启用登录"
+					},
+					"confirm": {
+						"deleteAction": "删除",
+						"user": "用户"
+					},
+					"lastAdmin": {
+						"title": "删除最后一个管理员？",
+						"description": "这是唯一的管理员账户。删除它会<strong>禁用认证</strong>，并允许任何人无需登录即可访问 Dockhand。",
+						"cancel": "取消",
+						"confirm": "删除并禁用认证"
+					},
+					"toasts": {
+						"loadFailed": "获取用户失败",
+						"deleted": "用户已删除",
+						"deletedAuthDisabled": "用户已删除，认证已禁用。",
+						"deleteFailed": "删除用户失败"
+					}
+				},
+				"modal": {
+					"titleAdd": "添加用户",
+					"titleEdit": "编辑用户",
+					"ssoNotice": "SSO 用户，资料由身份提供商同步",
+					"userDetails": "用户详情",
+					"username": "用户名",
+					"email": "邮箱",
+					"displayName": "显示名称",
+					"passwordSection": "密码",
+					"newPassword": "新密码",
+					"keepPasswordHint": "（留空则保留当前密码）",
+					"password": "密码",
+					"enterNewPassword": "输入新密码",
+					"enterPassword": "输入密码",
+					"confirmPassword": "确认密码",
+					"repeatNewPassword": "再次输入新密码",
+					"repeatPassword": "再次输入密码",
+					"cancel": "取消",
+					"save": "保存",
+					"createUser": "创建用户",
+					"mfa": {
+						"title": "双因素认证",
+						"status": "MFA 状态",
+						"configured": "此用户已配置 MFA",
+						"notConfigured": "此用户尚未配置 MFA"
+					},
+					"roles": {
+						"title": "角色",
+						"description": "为此用户分配角色。环境范围在角色自身配置。",
+						"systemRoles": "系统角色",
+						"customRoles": "自定义角色",
+						"allEnvironments": "所有环境",
+						"environmentCountOne": "{count} 个环境",
+						"environmentCountMany": "{count} 个环境",
+						"noRoles": "尚未定义角色",
+						"fullAccess": "所有用户都可以访问所有环境。",
+						"upgrade": "升级到 Enterprise 以使用基于角色的访问控制。"
+					},
+					"validation": {
+						"usernameRequired": "用户名为必填项",
+						"passwordRequired": "密码为必填项",
+						"passwordsMismatch": "两次输入的密码不一致"
+					},
+					"errors": {
+						"createFailed": "创建用户失败",
+						"updateFailed": "更新用户失败"
+					},
+					"toasts": {
+						"mfaDisabled": "已为用户禁用 MFA",
+						"disableMfaFailed": "禁用 MFA 失败",
+						"fetchRolesFailed": "获取用户角色失败",
+						"syncRolesFailed": "同步用户角色失败",
+						"created": "用户已创建",
+						"updated": "用户已更新"
+					}
+				}
+			},
+			"ldap": {
+				"list": {
+					"title": "LDAP 配置",
+					"description": "连接 LDAP 或 Active Directory 服务器，用于集中式用户认证。",
+					"addLdap": "添加 LDAP",
+					"enterprise": {
+						"title": "Enterprise 功能",
+						"description": "LDAP / Active Directory 集成需要 Enterprise 许可证。连接组织的目录服务以实现集中式认证。",
+						"activateLicense": "激活许可证"
+					},
+					"empty": {
+						"title": "未配置 LDAP 提供商",
+						"description": "点击“添加 LDAP”配置新的 LDAP 服务器"
+					},
+					"status": {
+						"enabled": "已启用",
+						"disabled": "已禁用"
+					},
+					"actions": {
+						"test": "测试",
+						"enable": "启用",
+						"disable": "禁用"
+					},
+					"confirm": {
+						"deleteAction": "删除",
+						"config": "LDAP 配置"
+					},
+					"test": {
+						"connectionSuccessful": "连接成功！找到 {count} 个用户。",
+						"connectionFailed": "连接失败：{error}",
+						"testFailed": "测试连接失败"
+					},
+					"toasts": {
+						"loadFailed": "获取 LDAP 配置失败",
+						"deleted": "LDAP 配置已删除",
+						"deleteFailed": "删除 LDAP 配置失败",
+						"connectionSuccessful": "LDAP 连接成功，找到 {count} 个用户",
+						"connectionFailedWithError": "LDAP 连接失败：{error}",
+						"testFailed": "测试 LDAP 连接失败",
+						"enabled": "LDAP 已启用",
+						"disabled": "LDAP 已禁用",
+						"toggleFailed": "切换 LDAP 配置失败"
+					}
+				},
+				"modal": {
+					"titleAdd": "添加 LDAP 配置",
+					"titleEdit": "编辑 LDAP 配置",
+					"tabs": {
+						"connection": "连接",
+						"groups": "组设置"
+					},
+					"basicSettings": "基础设置",
+					"name": "名称",
+					"namePlaceholder": "公司 LDAP",
+					"serverUrl": "服务器 URL",
+					"enableConfiguration": "启用此 LDAP 配置",
+					"bindCredentials": "绑定凭据（可选）",
+					"bindCredentialsDescription": "用于搜索用户的服务账户。留空则使用匿名绑定。",
+					"bindDn": "绑定 DN",
+					"bindPassword": "绑定密码",
+					"keepExistingPassword": "留空则保留现有密码",
+					"enterPassword": "输入密码",
+					"userSearchSettings": "用户搜索设置",
+					"baseDn": "Base DN",
+					"baseDnHelp": "用于搜索用户的 Base DN。",
+					"userFilter": "用户过滤器",
+					"userFilterHelpBefore": "用于查找用户的 LDAP 过滤器。使用",
+					"userFilterHelpAfter": "作为占位符。",
+					"attributeMapping": "属性映射",
+					"usernameAttribute": "用户名属性",
+					"emailAttribute": "邮箱属性",
+					"displayNameAttribute": "显示名称属性",
+					"tlsSettings": "TLS 设置",
+					"enableTls": "启用 TLS（LDAPS 或 StartTLS）",
+					"caCertificateOptional": "CA 证书（可选）",
+					"groupSettings": "组设置",
+					"groupSettingsDescription": "配置基于组的访问控制。这些设置是可选的。",
+					"groupBaseDn": "组 Base DN",
+					"groupBaseDnHelp": "用于搜索组的 Base DN。",
+					"adminGroup": "管理员组",
+					"adminGroupHelp": "此组成员将成为管理员。",
+					"memberFilter": "成员过滤器",
+					"memberFilterHelpBefore": "用于查找用户所属组的过滤器。使用",
+					"memberFilterHelpAfter": "作为占位符。",
+					"groupRoleMappings": "组到角色映射",
+					"groupRoleMappingsDescription": "将 LDAP 组映射到 Dockhand 角色。这些组中的用户会被分配对应角色。",
+					"selectRole": "选择角色",
+					"addMapping": "添加映射",
+					"cancel": "取消",
+					"save": "保存",
+					"addConfiguration": "添加配置",
+					"validation": {
+						"nameRequired": "名称为必填项",
+						"serverUrlRequired": "服务器 URL 为必填项",
+						"baseDnRequired": "Base DN 为必填项"
+					},
+					"errors": {
+						"createFailed": "创建 LDAP 配置失败",
+						"updateFailed": "更新 LDAP 配置失败"
+					}
+				}
+			},
+			"oidc": {
+				"list": {
+					"title": "SSO 提供商",
+					"description": "使用 Okta、Auth0、Azure AD 或 Google Workspace 等 OpenID Connect 提供商启用 SSO。",
+					"addProvider": "添加提供商",
+					"empty": {
+						"title": "未配置 SSO 提供商",
+						"description": "添加 OIDC 提供商以启用单点登录"
+					},
+					"status": {
+						"enabled": "已启用",
+						"disabled": "已禁用"
+					},
+					"actions": {
+						"testConnection": "测试连接",
+						"enableProvider": "启用提供商",
+						"disableProvider": "禁用提供商",
+						"editProvider": "编辑提供商"
+					},
+					"confirm": {
+						"deleteAction": "删除",
+						"provider": "OIDC 提供商",
+						"deleteTitle": "删除"
+					},
+					"test": {
+						"connectionSuccessful": "连接成功",
+						"issuer": "Issuer：{issuer}",
+						"connectionFailed": "连接失败：{error}",
+						"testFailed": "测试连接失败"
+					},
+					"toasts": {
+						"loadFailed": "获取 OIDC 配置失败",
+						"deleted": "OIDC 提供商已删除",
+						"deleteFailed": "删除 OIDC 提供商失败",
+						"connectionSuccessful": "OIDC 连接成功",
+						"connectionFailedWithError": "OIDC 连接失败：{error}",
+						"testFailed": "测试 OIDC 连接失败",
+						"enabled": "OIDC 提供商已启用",
+						"disabled": "OIDC 提供商已禁用",
+						"toggleFailed": "切换 OIDC 提供商失败"
+					}
+				},
+				"modal": {
+					"titleAdd": "添加 OIDC 提供商",
+					"titleEdit": "编辑 OIDC 提供商",
+					"tabs": {
+						"general": "常规",
+						"roleMapping": "角色映射"
+					},
+					"basicSettings": "基础设置",
+					"name": "名称",
+					"issuerUrl": "Issuer URL",
+					"enableProvider": "启用此 OIDC 提供商",
+					"clientCredentials": "客户端凭据",
+					"clientCredentialsDescription": "从身份提供商的应用设置中获取这些信息。",
+					"clientId": "Client ID",
+					"clientSecret": "Client secret",
+					"clientSecretPlaceholder": "your-client-secret",
+					"keepExistingSecret": "留空则保留现有密钥",
+					"redirectSettings": "重定向设置",
+					"redirectUri": "Redirect URI",
+					"redirectUriHelp": "将此 URI 添加到身份提供商允许的回调 URL 中。",
+					"scopes": "Scopes",
+					"claimMapping": "Claim 映射",
+					"claimMappingDescription": "将 OIDC claims 映射到用户属性。",
+					"usernameClaim": "用户名 claim",
+					"emailClaim": "邮箱 claim",
+					"displayNameClaim": "显示名称 claim",
+					"enterpriseFeature": "Enterprise 功能",
+					"enterpriseFeatureDescription": "角色映射可根据身份提供商的组或 claims 自动分配 Dockhand 角色。此功能需要 Enterprise 许可证。",
+					"activateLicense": "激活许可证",
+					"groupsRolesClaim": "组/角色 claim",
+					"groupsRolesClaimDescription": "根据身份提供商中的 claim 值授予管理员访问权限。",
+					"groupsRolesClaimPlaceholder": "groups、roles 等",
+					"claimName": "Claim 名称",
+					"claimNameHelp": "包含角色/组的 claim 名称",
+					"adminValues": "管理员值",
+					"adminValuesHelp": "授予 Admin 角色的逗号分隔值",
+					"claimRoleMappings": "Claim 到角色映射",
+					"claimRoleMappingsDescription": "将身份提供商中的 claim 值映射到 Dockhand 角色。",
+					"addMapping": "添加映射",
+					"noRoleMappings": "未配置角色映射。点击“添加映射”创建一个。",
+					"claimValue": "Claim 值",
+					"claimValuePlaceholder": "例如 developers、admins",
+					"dockhandRole": "Dockhand 角色",
+					"selectRole": "选择角色...",
+					"cancel": "取消",
+					"save": "保存",
+					"addProvider": "添加提供商",
+					"validation": {
+						"nameRequired": "名称为必填项",
+						"issuerUrlRequired": "Issuer URL 为必填项",
+						"clientIdRequired": "Client ID 为必填项",
+						"clientSecretRequired": "Client secret 为必填项",
+						"redirectUriRequired": "Redirect URI 为必填项"
+					},
+					"errors": {
+						"createFailed": "创建 OIDC 配置失败",
+						"updateFailed": "更新 OIDC 配置失败"
+					}
+				}
+			},
+			"roles": {
+				"categories": {
+					"containers": "容器",
+					"images": "镜像",
+					"volumes": "卷",
+					"networks": "网络",
+					"stacks": "堆栈",
+					"environments": "环境",
+					"registries": "镜像仓库",
+					"notifications": "通知",
+					"configsets": "配置集",
+					"settings": "设置",
+					"users": "用户",
+					"git": "Git",
+					"license": "许可证",
+					"audit_logs": "审计日志",
+					"activity": "活动",
+					"schedules": "调度"
+				},
+				"permissions": {
+					"view": "查看",
+					"create": "创建",
+					"start": "启动",
+					"stop": "停止",
+					"restart": "重启",
+					"remove": "移除",
+					"delete": "删除",
+					"exec": "执行终端",
+					"logs": "查看日志",
+					"inspect": "检查",
+					"pull": "拉取",
+					"push": "推送",
+					"build": "构建",
+					"edit": "编辑",
+					"manage": "管理",
+					"send": "发送",
+					"test": "测试",
+					"connect": "连接",
+					"disconnect": "断开连接",
+					"activate": "激活",
+					"run": "运行"
+				},
+				"list": {
+					"title": "角色",
+					"description": "定义包含细粒度权限的角色，并将其分配给用户以控制访问。",
+					"addRole": "添加角色",
+					"enterprise": {
+						"title": "Enterprise 功能",
+						"description": "基于角色的访问控制（RBAC）需要 Enterprise 许可证。你可以定义包含细粒度权限的自定义角色，并分配给用户。",
+						"activateLicense": "激活许可证"
+					},
+					"empty": {
+						"title": "未配置角色",
+						"description": "创建角色以定义自定义权限"
+					},
+					"badges": {
+						"system": "系统"
+					},
+					"scopes": {
+						"system": "系统",
+						"environment": "环境",
+						"all": "全部"
+					},
+					"actions": {
+						"copyAsNewRole": "复制为新角色",
+						"editRole": "编辑角色"
+					},
+					"confirm": {
+						"deleteAction": "删除",
+						"role": "角色",
+						"deleteTitle": "删除"
+					},
+					"toasts": {
+						"loadFailed": "获取角色失败",
+						"deleted": "角色已删除",
+						"deleteFailed": "删除角色失败"
+					}
+				},
+				"modal": {
+					"titleCreate": "创建角色",
+					"titleEdit": "编辑角色",
+					"titleCopy": "复制角色",
+					"descriptionCreate": "定义包含特定权限的新角色",
+					"descriptionEdit": "更新角色权限",
+					"descriptionCopy": "基于“{name}”创建新角色",
+					"copyName": "{name}（副本）",
+					"name": "角色名称",
+					"namePlaceholder": "开发者",
+					"descriptionOptional": "描述（可选）",
+					"descriptionPlaceholder": "访问开发资源",
+					"systemPermissions": "系统权限",
+					"alwaysGlobal": "（始终全局生效）",
+					"environmentPermissions": "环境权限",
+					"allEnvironmentsIncludingNew": "所有环境（包括新环境）",
+					"selectEnvironmentWarning": "请选择至少一个环境，否则这些权限不会生效。",
+					"permissionsApplyToAllFuture": "权限适用于所有环境，包括未来新增的环境。",
+					"permissionsApplyToAll": "权限适用于所有环境。",
+					"selectAll": "全选",
+					"clear": "清除",
+					"cancel": "取消",
+					"save": "保存",
+					"createRole": "创建角色",
+					"validation": {
+						"nameRequired": "角色名称为必填项",
+						"nameExists": "角色名称已存在"
+					},
+					"errors": {
+						"createFailed": "创建角色失败",
+						"updateFailed": "更新角色失败"
+					},
+					"permissions": {
+						"users": {
+							"view": "查看用户",
+							"create": "创建用户",
+							"edit": "编辑用户",
+							"delete": "删除用户"
+						},
+						"settings": {
+							"view": "查看设置",
+							"edit": "编辑设置"
+						},
+						"environments": {
+							"view": "查看环境",
+							"create": "创建环境",
+							"edit": "编辑环境",
+							"delete": "删除环境"
+						},
+						"registries": {
+							"view": "查看镜像仓库",
+							"create": "创建镜像仓库",
+							"edit": "编辑镜像仓库",
+							"delete": "删除镜像仓库"
+						},
+						"notifications": {
+							"view": "查看通知",
+							"create": "创建通知",
+							"edit": "编辑通知",
+							"delete": "删除通知",
+							"test": "测试通知"
+						},
+						"configsets": {
+							"view": "查看配置集",
+							"create": "创建配置集",
+							"edit": "编辑配置集",
+							"delete": "删除配置集"
+						},
+						"git": {
+							"view": "查看凭据和仓库",
+							"create": "创建凭据和仓库",
+							"edit": "编辑凭据和仓库",
+							"delete": "删除凭据和仓库"
+						},
+						"license": {
+							"manage": "管理许可证"
+						},
+						"audit_logs": {
+							"view": "查看审计日志"
+						},
+						"schedules": {
+							"view": "查看调度",
+							"edit": "编辑调度",
+							"run": "运行调度"
+						},
+						"activity": {
+							"view": "查看活动"
+						},
+						"containers": {
+							"view": "查看容器",
+							"create": "创建容器",
+							"start": "启动容器",
+							"stop": "停止容器",
+							"restart": "重启容器",
+							"remove": "移除容器",
+							"exec": "执行终端",
+							"logs": "查看日志",
+							"inspect": "检查容器"
+						},
+						"images": {
+							"view": "查看镜像",
+							"pull": "拉取镜像",
+							"push": "推送镜像",
+							"remove": "移除镜像",
+							"build": "构建镜像",
+							"inspect": "检查镜像"
+						},
+						"volumes": {
+							"view": "查看卷",
+							"create": "创建卷",
+							"remove": "移除卷",
+							"inspect": "检查卷"
+						},
+						"networks": {
+							"view": "查看网络",
+							"create": "创建网络",
+							"remove": "移除网络",
+							"inspect": "检查网络",
+							"connect": "连接容器",
+							"disconnect": "断开容器连接"
+						},
+						"stacks": {
+							"view": "查看堆栈",
+							"create": "创建堆栈",
+							"start": "启动堆栈",
+							"stop": "停止堆栈",
+							"remove": "移除堆栈",
+							"edit": "编辑堆栈"
+						}
+					}
+				}
+			}
+		},
+		"notifications": {
+			"list": {
+				"title": "通知渠道",
+				"description": "配置通知渠道以接收 Docker 事件告警。支持 SMTP 邮件和 Apprise URL（Discord、Slack、Telegram、ntfy 等）。",
+				"environmentSettingsNote": "详细通知设置（事件类型、启用/禁用）在各环境的环境设置中配置。",
+				"count": "{count} 个渠道",
+				"addChannel": "添加渠道",
+				"refresh": "刷新",
+				"loading": "正在加载通知渠道...",
+				"empty": {
+					"title": "未配置通知渠道",
+					"description": "添加渠道后即可开始接收 Docker 事件告警"
+				},
+				"status": {
+					"enabled": "已启用",
+					"disabled": "已禁用",
+					"sendingTest": "正在发送测试...",
+					"testSent": "测试已发送成功",
+					"testFailed": "测试失败"
+				},
+				"actions": {
+					"test": "测试"
+				},
+				"confirm": {
+					"deleteAction": "删除",
+					"channel": "渠道",
+					"removeTitle": "移除"
+				},
+				"toasts": {
+					"loadFailed": "获取通知渠道失败",
+					"deleted": "通知渠道已删除",
+					"deleteFailed": "删除通知渠道失败",
+					"enabled": "渠道已启用",
+					"disabled": "渠道已禁用",
+					"toggleFailed": "切换通知渠道失败",
+					"testSent": "测试通知已发送成功",
+					"testFailed": "测试通知失败",
+					"testFailedWithError": "测试失败：{error}"
+				}
+			},
+			"modal": {
+				"titleAdd": "添加通知渠道",
+				"titleEdit": "编辑通知渠道",
+				"name": "名称",
+				"namePlaceholder": "我的通知渠道",
+				"type": "类型",
+				"status": "状态",
+				"enabled": "已启用",
+				"disabled": "已禁用",
+				"yes": "是",
+				"no": "否",
+				"smtp": {
+					"configuration": "SMTP 配置",
+					"gmailHint": "smtp.gmail.com，端口 587，关闭 TLS/SSL。使用应用专用密码。",
+					"outlookHint": "smtp.office365.com，端口 587，关闭 TLS/SSL。",
+					"host": "SMTP 主机",
+					"port": "端口",
+					"skipTlsVerify": "跳过 TLS 验证",
+					"username": "用户名",
+					"password": "密码",
+					"keepExistingPassword": "留空则保留现有密码",
+					"passwordPlaceholder": "应用密码或 token",
+					"fromEmail": "发件邮箱",
+					"fromName": "发件人名称",
+					"recipients": "收件人 *（用逗号分隔）"
+				},
+				"apprise": {
+					"configuration": "Apprise 配置",
+					"urls": "Apprise URL *（每行一个）",
+					"supported": "支持 Gotify（gotify:// 或 HTTPS 使用 gotifys://）、Discord、Slack、Mattermost（mmost:// 或 mmosts://）、Telegram、ntfy、Pushover、Workflows（例如 Microsoft Teams）以及通用 JSON webhook。"
+				},
+				"systemEvents": {
+					"title": "全局系统事件",
+					"description": "这些事件不绑定到特定环境，在此处进行全局配置。",
+					"licenseExpiring": {
+						"label": "许可证即将到期",
+						"description": "Enterprise 许可证即将到期"
+					}
+				},
+				"environmentSpecificNote": "特定环境事件（容器、堆栈、自动更新）在各环境设置中配置。",
+				"actions": {
+					"testing": "正在测试...",
+					"sent": "已发送！",
+					"failed": "失败",
+					"test": "测试",
+					"cancel": "取消",
+					"save": "保存",
+					"add": "添加"
+				},
+				"validation": {
+					"nameRequired": "名称为必填项",
+					"smtpRequired": "主机、发件邮箱以及至少一个收件人为必填项",
+					"appriseUrlRequired": "至少需要一个 Apprise URL"
+				},
+				"errors": {
+					"sendTestFailed": "发送测试通知失败",
+					"testFailed": "测试通知失败",
+					"createFailed": "创建通知失败",
+					"updateFailed": "更新通知失败"
+				},
+				"toasts": {
+					"testSent": "测试通知已发送成功"
+				}
+			}
+		},
+		"configSets": {
+			"list": {
+				"infoTitle": "什么是配置集？",
+				"infoDescription": "配置集是可复用的容器配置模板。你可以一次性定义常用环境变量、标签、端口和卷，并在创建或编辑容器时应用。创建容器时仍可覆盖配置集中的值。",
+				"totalCount": "共 {count} 个",
+				"addConfigSet": "添加配置集",
+				"refresh": "刷新",
+				"loading": "正在加载配置集...",
+				"edit": "编辑",
+				"network": "网络：{mode}",
+				"restart": "重启策略：{policy}",
+				"badges": {
+					"envVars": "{count} 个环境变量",
+					"labels": "{count} 个标签",
+					"ports": "{count} 个端口",
+					"volumes": "{count} 个卷"
+				},
+				"empty": {
+					"title": "未找到配置集",
+					"description": "创建一个可复用配置集开始使用"
+				},
+				"confirm": {
+					"deleteAction": "删除",
+					"configSet": "配置集",
+					"removeTitle": "移除"
+				},
+				"toasts": {
+					"loadFailed": "获取配置集失败",
+					"deleted": "配置集已删除",
+					"deleteFailed": "删除配置集失败"
+				}
+			},
+			"modal": {
+				"titleAdd": "添加配置集",
+				"titleEdit": "编辑配置集",
+				"name": "名称",
+				"description": "描述",
+				"descriptionPlaceholder": "Web 服务的通用设置",
+				"networkMode": "网络模式",
+				"restartPolicy": "重启策略",
+				"envVars": "环境变量",
+				"labels": "标签",
+				"portMappings": "端口映射",
+				"volumeMappings": "卷映射",
+				"addRow": "添加",
+				"valuePlaceholder": "值",
+				"hostPort": "主机端口",
+				"containerPort": "容器端口",
+				"invalidPort": "端口无效（1-65535）",
+				"hostPath": "主机路径",
+				"containerPath": "容器路径",
+				"cancel": "取消",
+				"save": "保存",
+				"add": "添加",
+				"networkOptions": {
+					"bridge": "Bridge",
+					"host": "Host",
+					"none": "无"
+				},
+				"restartOptions": {
+					"no": "无",
+					"always": "Always",
+					"on-failure": "On failure",
+					"unless-stopped": "Unless stopped"
+				},
+				"validation": {
+					"nameRequired": "名称为必填项",
+					"nameExists": "配置集名称已存在"
+				},
+				"errors": {
+					"createFailed": "创建配置集失败",
+					"updateFailed": "更新配置集失败"
+				}
+			}
+		},
+		"labels": {
+			"title": "环境标签",
+			"description": "管理所有环境中的标签。重命名或删除标签会应用到所有使用该标签的环境。",
+			"count": "{count} 个标签",
+			"addLabel": "添加标签",
+			"loading": "正在加载标签...",
+			"preview": "预览：",
+			"renameAcrossEnvironments": "在所有环境中重命名",
+			"empty": {
+				"title": "未找到标签",
+				"description": "点击“添加标签”创建标签并分配给环境"
+			},
+			"table": {
+				"label": "标签",
+				"color": "颜色",
+				"environments": "环境",
+				"usedBy": "使用者",
+				"actions": "操作"
+			},
+			"color": {
+				"change": "更改颜色",
+				"pick": "选择颜色",
+				"resetDefault": "重置为默认值"
+			},
+			"confirm": {
+				"removeAction": "移除",
+				"label": "标签",
+				"removeConfirm": "移除"
+			},
+			"rename": {
+				"title": "重命名标签",
+				"description": "这会在 {count} 个环境中重命名“{label}”。",
+				"currentName": "当前名称",
+				"newName": "新名称",
+				"placeholder": "输入新的标签名称",
+				"alreadyExists": "标签“{label}”已存在。同时拥有两个标签的环境会被合并。"
+			},
+			"add": {
+				"title": "添加标签",
+				"description": "创建新标签并分配给一个或多个环境。",
+				"name": "标签名称",
+				"placeholder": "例如：production、staging、critical",
+				"alreadyExists": "此标签已存在。它会被添加到尚未拥有该标签的已选环境。",
+				"environments": "环境",
+				"selectAll": "全选",
+				"clear": "清空",
+				"noEnvironments": "没有可用环境",
+				"selectedCount": "已选择 {count} 个环境"
+			},
+			"actions": {
+				"cancel": "取消",
+				"rename": "重命名",
+				"addLabel": "添加标签"
+			},
+			"toasts": {
+				"renamed": "已在 {count} 个环境中将“{oldLabel}”重命名为“{newLabel}”",
+				"renameFailed": "重命名标签失败",
+				"added": "已将“{label}”添加到 {count} 个环境",
+				"addFailed": "添加标签失败",
+				"removed": "已从 {count} 个环境移除“{label}”",
+				"deleteFailed": "删除标签失败",
+				"colorSet": "已为“{label}”设置颜色",
+				"colorReset": "已重置“{label}”的颜色",
+				"colorFailed": "设置颜色失败"
+			}
+		},
+		"license": {
+			"management": "许可证管理",
+			"managementDescriptionBefore": "激活许可证以验证商业用途。",
+			"managementDescriptionAfter": "许可证可解锁 RBAC、LDAP 和审计日志等高级功能。",
+			"loading": "正在加载许可证信息...",
+			"activeEnterprise": "Enterprise 许可证已激活",
+			"activeSmb": "SMB 许可证已激活",
+			"licensedTo": "授权给",
+			"licenseType": "许可证类型",
+			"licensedHost": "授权主机",
+			"issued": "签发日期",
+			"expires": "到期日期",
+			"neverPerpetual": "永不过期（永久）",
+			"currentHostname": "当前主机名",
+			"currentHostnameValidation": "当前主机名（用于许可证验证）",
+			"deactivate": "停用许可证",
+			"activate": "激活许可证",
+			"licenseName": "许可证名称",
+			"licenseNamePlaceholder": "你的公司名称",
+			"licenseNameHelp": "请输入许可证中提供的准确名称",
+			"licenseKey": "许可证密钥",
+			"licenseKeyPlaceholder": "在此粘贴许可证密钥...",
+			"validation": {
+				"nameKeyRequired": "名称和许可证密钥为必填项"
+			},
+			"errors": {
+				"fetchFailed": "获取许可证信息失败",
+				"activateFailed": "激活许可证失败",
+				"deactivateFailed": "停用许可证失败"
+			},
+			"toasts": {
+				"activated": "许可证已成功激活",
+				"deactivated": "许可证已停用"
+			}
+		},
+		"environments": {
+			"list": {
+				"total": "共 {count} 个",
+				"addEnvironment": "添加环境",
+				"testAll": "全部测试",
+				"refresh": "刷新",
+				"loading": "正在加载环境...",
+				"empty": "未找到环境",
+				"environmentFallback": "环境",
+				"connectionFailed": "连接失败",
+				"table": {
+					"name": "名称",
+					"connection": "连接",
+					"labels": "标签",
+					"timezone": "时区",
+					"features": "功能",
+					"status": "状态",
+					"actions": "操作"
+				},
+				"connectionTypes": {
+					"socketTitle": "Unix socket 连接",
+					"directTitle": "直接 Docker 连接",
+					"hawserStandardTitle": "Hawser agent（标准模式）",
+					"hawserEdgeTitle": "Hawser agent（Edge 模式）",
+					"edgeOutbound": "Edge 连接（出站）"
+				},
+				"features": {
+					"autoUpdateEnabled": "已启用自动更新",
+					"updateCheckNotifyOnly": "已启用更新检查（仅通知）",
+					"scanningEnabled": "已启用漏洞扫描",
+					"activityEnabled": "已启用活动采集",
+					"metricsEnabled": "已启用指标采集",
+					"imagePruningEnabled": "已启用自动镜像清理"
+				},
+				"status": {
+					"connected": "已连接",
+					"failed": "失败",
+					"testing": "正在测试...",
+					"notTested": "未测试"
+				},
+				"actions": {
+					"testConnection": "测试连接",
+					"editEnvironment": "编辑环境",
+					"pruneSystem": "清理系统",
+					"deleteEnvironment": "删除环境"
+				},
+				"confirm": {
+					"pruneAction": "清理",
+					"systemOn": "环境系统",
+					"systemPruneTitle": "系统清理",
+					"deleteAction": "删除",
+					"environment": "环境",
+					"removeTitle": "移除"
+				},
+				"toasts": {
+					"deleted": "已删除 {name}",
+					"deleteFailed": "删除环境失败"
+				}
+			},
+			"modal": {
+				"titleAdd": "添加环境",
+				"titleEdit": "编辑环境",
+				"tabs": {
+					"general": "常规",
+					"updates": "更新",
+					"activity": "活动",
+					"security": "安全",
+					"notifications": "通知"
+				},
+				"fields": {
+					"name": "名称",
+					"namePlaceholder": "生产环境",
+					"host": "主机",
+					"port": "端口",
+					"protocol": "协议"
+				},
+				"labels": {
+					"title": "标签",
+					"addPlaceholder": "添加标签...",
+					"maximumReached": "已达到最大标签数量"
+				},
+				"icon": {
+					"removeCustom": "移除自定义图标",
+					"uploadCustom": "上传自定义图标",
+					"cropTitle": "裁剪图标",
+					"saveLabel": "保存图标"
+				},
+				"connection": {
+					"type": "连接类型",
+					"socket": "Unix socket",
+					"socketHelp": "通过同一台机器上的 Docker socket 连接。默认路径：/var/run/docker.sock。也适用于 Docker Desktop 和 OrbStack。",
+					"socketShort": "通过同一台机器上的 Unix socket 连接。",
+					"socketPath": "Socket 路径",
+					"autoDetectSocket": "自动检测 Docker socket",
+					"autoDetectSocketHelpPrefix": "点击",
+					"autoDetectSocketHelpSuffix": "自动检测可用 Docker socket",
+					"direct": "直接连接",
+					"directHelp": "直接连接 Docker Engine API。需要 Docker 在 TCP 端口暴露 API（默认 2375/2376）。适合局域网环境。",
+					"directShort": "通过 TCP 端口直接连接 Docker Engine API。",
+					"hawserStandard": "Hawser 标准模式",
+					"hawserStandardOption": "Hawser agent（标准）",
+					"hawserStandardHelp": "Hawser agent 监听端口，Dockhand 主动连接。适合有静态 IP 的局域网。",
+					"hawserStandardShort": "agent 监听连接，Dockhand 主动连接。",
+					"hawserEdge": "Hawser Edge 模式",
+					"hawserEdgeOption": "Hawser agent（Edge）",
+					"hawserEdgeHelp": "Hawser agent 主动发起出站 WebSocket 到 Dockhand。不需要端口转发，适合 VPS、NAT 或动态 IP。",
+					"hawserEdgeShort": "agent 主动连接到 Dockhand。不需要端口转发。",
+					"learnMoreHawser": "了解更多 Hawser 信息"
+				},
+				"tls": {
+					"mtlsCertificates": "用于 mTLS 认证的 TLS 证书（RSA 或 ECDSA）",
+					"caCertificate": "CA 证书",
+					"clientCertificate": "客户端证书",
+					"clientKey": "客户端密钥"
+				},
+				"hawser": {
+					"agentHost": "Agent 主机",
+					"agentPort": "Agent 端口",
+					"selfSignedCaCertificate": "CA 证书（用于自签名）",
+					"selfSignedCaHelp": "如果 agent 使用自签名 TLS，请粘贴 CA 证书（RSA 或 ECDSA）。",
+					"skipTlsVerification": "跳过 TLS 验证",
+					"skipTlsVerificationDescription": "禁用证书校验（不安全）",
+					"agentTokenOptional": "Agent token（可选）",
+					"agentTokenPlaceholder": "用于 agent 认证的 token",
+					"generate": "生成",
+					"regenerate": "重新生成",
+					"generateConnectionToken": "生成连接 token",
+					"generateConnectionTokenHelp": "现在生成 token。添加环境时会保存它。",
+					"generateNewToken": "生成新 token",
+					"copyTokenNow": "请立即复制此 token - 它不会再次显示！",
+					"copyTokenForAgent": "请立即复制此 token - Hawser agent 需要使用它！",
+					"saveTokenNow": "请立即保存此 token - 它不会再次显示！",
+					"copyRequiresHttps": "复制功能需要 HTTPS",
+					"manualTokenHelp": "手动输入或生成 token。请在 Hawser agent 上把相同 token 设置为",
+					"manualTokenHelpSuffix": "环境变量。",
+					"runAgentOnTarget": "在目标主机上运行 Hawser agent：",
+					"runOnHost": "在你的主机上运行：",
+					"copyCommand": "复制命令",
+					"connectionStatus": "连接状态",
+					"connected": "已连接",
+					"waitingForAgent": "正在等待 agent",
+					"agent": "Agent",
+					"version": "版本",
+					"lastSeen": "最后在线",
+					"connectionToken": "连接 token",
+					"lastUsed": "最后使用：{date}",
+					"noTokenGenerated": "尚未生成 token。请点击上方的生成按钮。",
+					"tokenGenerated": "Token 已生成",
+					"generateTokenFailed": "生成 token 失败"
+				},
+				"publicIp": {
+					"label": "公网 IP",
+					"tooltip": "容器端口可从浏览器访问的 IP 地址或主机名。本地 Docker 可使用服务器的局域网 IP。",
+					"placeholder": "例如：192.168.1.4",
+					"help": "用于容器页面中的可点击端口链接"
+				},
+				"scanner": {
+					"title": "漏洞扫描",
+					"both": "两者",
+					"enableScanning": "启用扫描",
+					"enableScanningDescription": "扫描镜像中的已知安全漏洞",
+					"scanner": "扫描器",
+					"scannerDescription": "选择漏洞扫描器",
+					"autoPullInfo": "首次扫描时会自动拉取扫描器镜像。漏洞数据库会缓存在 Docker 卷中，以便后续扫描更快。",
+					"ready": "就绪",
+					"notInstalled": "未安装",
+					"pull": "拉取",
+					"remove": "移除",
+					"latest": "最新",
+					"pulling": "正在拉取",
+					"update": "更新",
+					"checking": "正在检查",
+					"check": "检查"
+				},
+				"notifications": {
+					"title": "通知渠道",
+					"addModeDescription": "选择哪些通知渠道应发送此环境事件的告警。",
+					"editModeDescription": "配置哪些通知渠道应发送此环境事件的告警。",
+					"noneConfiguredYet": "尚未配置通知渠道。",
+					"createInSettingsFirst": "请先在通知设置页创建通知渠道。",
+					"channelDisabledGlobally": "该渠道已在全局禁用",
+					"eventTypesCount": "事件类型（{count}）",
+					"activityAutoEnabled": "添加渠道时会自动启用活动采集。",
+					"eventsBadge": "（{count} 个事件）",
+					"noneConfigured": "未配置通知渠道",
+					"addChannelBelow": "在下方添加渠道以接收此环境的告警",
+					"addChannelLabel": "添加通知渠道：",
+					"noChannelsCreatedPrefix": "尚未创建通知渠道。",
+					"goToSettingsNotifications": "前往设置 -> 通知",
+					"noChannelsCreatedSuffix": "先添加渠道。",
+					"contactAdmin": "尚未创建通知渠道。请联系管理员配置通知渠道。",
+					"channelAdded": "通知渠道已添加",
+					"addChannelFailed": "添加通知渠道失败"
+				},
+				"actions": {
+					"testConnection": "测试连接",
+					"testing": "正在测试...",
+					"cancel": "取消",
+					"add": "添加",
+					"save": "保存"
+				},
+				"validation": {
+					"nameRequired": "名称为必填项",
+					"hostRequired": "主机为必填项",
+					"hostIpOnly": "仅输入 IP 地址或主机名（不要包含协议或端口）"
+				},
+				"errors": {
+					"createFailed": "创建环境失败",
+					"updateFailed": "更新环境失败"
+				},
+				"toasts": {
+					"iconUploadFailed": "上传图标失败",
+					"edgeModeTestDeferred": "Edge 模式会在 agent 连接后测试连接",
+					"connected": "已连接！Docker {version} - {count} 个容器",
+					"connectionFailed": "连接失败",
+					"connectionTestFailed": "连接测试失败",
+					"noSocketsFound": "未找到 Docker socket",
+					"socketFound": "已找到 {name}",
+					"socketsFound": "已找到 {count} 个 Docker socket",
+					"detectSocketsFailed": "检测 socket 失败",
+					"updated": "环境已更新：{name}"
+				}
+			},
+			"activity": {
+				"collectActivity": "采集容器活动",
+				"collectActivityDescription": "实时跟踪此环境中的容器事件（启动、停止、重启等）",
+				"collectMetrics": "采集系统指标",
+				"collectMetricsDescription": "采集此环境的 CPU 和内存使用统计",
+				"highlightChanges": "高亮数值变化",
+				"highlightChangesDescription": "容器列表中的容器数值变化时显示琥珀色高亮",
+				"diskWarnings": "磁盘空间告警",
+				"diskWarningsDescription": "当 Docker 磁盘使用量超过阈值时发送通知",
+				"thresholdPercentage": "百分比",
+				"thresholdAbsolute": "绝对值（GB）"
+			},
+			"updates": {
+				"scheduledUpdateCheck": "定时更新检查",
+				"scheduledUpdateCheckDescription": "定期检查此环境中所有容器是否有可用镜像更新。",
+				"enableScheduledCheck": "启用定时更新检查",
+				"enableScheduledCheckDescription": "按计划自动检查容器更新",
+				"schedule": "计划",
+				"autoUpdateContainers": "自动更新容器",
+				"autoUpdateContainersDescription": "启用后，发现新镜像时会自动更新容器。禁用后，只发送可用更新通知。",
+				"blockVulnerableUpdates": "阻止有漏洞的更新",
+				"blockVulnerableUpdatesDescription": "如果新镜像漏洞超过此条件，则阻止自动更新",
+				"autoUpdateWithScanInfo": "新镜像会先拉取到临时标签、扫描，验证通过后再部署。被阻止的镜像会自动删除。",
+				"autoUpdateInfo": "有可用新镜像时会自动更新容器。",
+				"notifyOnlyInfo": "有可用更新时你会收到通知。容器不会被修改。",
+				"automaticImagePruning": "自动镜像清理",
+				"automaticImagePruningDescription": "按计划自动移除未使用的 Docker 镜像以释放磁盘空间。",
+				"enableImagePruning": "启用自动镜像清理",
+				"enableImagePruningDescription": "按计划自动移除未使用镜像",
+				"pruneMode": "清理模式",
+				"danglingImagesOnly": "仅 dangling 镜像",
+				"allUnusedImages": "全部未使用镜像",
+				"danglingImagesDescription": "仅移除未标记的镜像层（最安全选项）",
+				"allUnusedImagesDescription": "移除所有未被任何容器使用的镜像（更激进）",
+				"lastPruned": "上次清理：{date}",
+				"pruneResult": " - 已移除 {count} 个镜像，回收 {bytes}",
+				"usedImagesPreserved": "运行中或已停止容器正在使用的镜像绝不会被移除。",
+				"timezone": "时区",
+				"timezoneDescription": "用于自动更新、Git 同步和镜像清理的调度"
+			},
+			"events": {
+				"groups": {
+					"container": "容器事件",
+					"autoUpdate": "自动更新事件",
+					"gitStack": "Git 堆栈事件",
+					"stack": "堆栈事件",
+					"security": "安全事件",
+					"system": "系统事件"
+				},
+				"selection": {
+					"all": "全部",
+					"some": "部分",
+					"none": "无"
+				},
+				"types": {
+					"containerStarted": { "label": "容器已启动", "description": "容器开始运行时" },
+					"containerStopped": { "label": "容器已停止", "description": "容器停止时" },
+					"containerRestarted": { "label": "容器已重启", "description": "容器重启时" },
+					"containerExited": { "label": "容器已退出", "description": "容器意外退出时" },
+					"containerUnhealthy": { "label": "容器不健康", "description": "容器健康检查失败时" },
+					"containerHealthy": { "label": "容器恢复健康", "description": "容器健康检查恢复时" },
+					"containerOom": { "label": "容器因 OOM 被终止", "description": "容器因内存不足被终止时" },
+					"containerUpdated": { "label": "容器已更新", "description": "容器镜像更新时" },
+					"autoUpdateSuccess": { "label": "更新成功", "description": "容器成功更新到新镜像" },
+					"autoUpdateFailed": { "label": "更新失败", "description": "容器自动更新失败" },
+					"autoUpdateBlocked": { "label": "更新被阻止", "description": "由于漏洞条件，更新被阻止" },
+					"updatesDetected": { "label": "检测到更新", "description": "容器镜像有可用更新" },
+					"batchUpdateSuccess": { "label": "批量更新完成", "description": "计划容器更新已完成" },
+					"gitSyncSuccess": { "label": "Git 同步成功", "description": "Git 堆栈同步并部署成功" },
+					"gitSyncFailed": { "label": "Git 同步失败", "description": "Git 堆栈同步或部署失败" },
+					"gitSyncSkipped": { "label": "Git 同步已跳过", "description": "Git 堆栈同步已跳过（无变更）" },
+					"stackStarted": { "label": "堆栈已启动", "description": "Compose 堆栈启动时" },
+					"stackStopped": { "label": "堆栈已停止", "description": "Compose 堆栈停止时" },
+					"stackDeployed": { "label": "堆栈已部署", "description": "堆栈部署时（新建或更新）" },
+					"stackDeployFailed": { "label": "堆栈部署失败", "description": "堆栈部署失败时" },
+					"vulnerabilityCritical": { "label": "发现严重漏洞", "description": "镜像扫描发现严重漏洞" },
+					"vulnerabilityHigh": { "label": "发现高危漏洞", "description": "发现高危漏洞" },
+					"vulnerabilityAny": { "label": "发现任意漏洞", "description": "发现任意漏洞（中危/低危）" },
+					"imagePulled": { "label": "镜像已拉取", "description": "新镜像被拉取时" },
+					"imagePruneSuccess": { "label": "镜像清理完成", "description": "计划镜像清理成功完成" },
+					"imagePruneFailed": { "label": "镜像清理失败", "description": "计划镜像清理失败" },
+					"environmentOffline": { "label": "环境离线", "description": "环境变为不可达时" },
+					"environmentOnline": { "label": "环境上线", "description": "环境恢复在线时" },
+					"diskSpaceWarning": { "label": "磁盘空间告警", "description": "Docker 磁盘使用量超过阈值时" }
+				}
+			}
+		},
+		"registries": {
+			"total": "共 {count} 个",
+			"addRegistry": "添加镜像仓库",
+			"refresh": "刷新",
+			"loading": "正在加载镜像仓库...",
+			"setDefault": "设为默认",
+			"empty": {
+				"title": "未找到镜像仓库",
+				"description": "添加 Docker 镜像仓库，用于拉取和推送镜像"
+			},
+			"badges": {
+				"default": "默认",
+				"auth": "认证"
+			},
+			"confirm": {
+				"deleteAction": "删除",
+				"registry": "镜像仓库",
+				"removeTitle": "移除"
+			},
+			"toasts": {
+				"loadFailed": "获取镜像仓库失败",
+				"deleted": "镜像仓库已删除",
+				"deleteFailed": "删除镜像仓库失败",
+				"defaultUpdated": "默认镜像仓库已更新",
+				"defaultFailed": "设置默认镜像仓库失败"
+			},
+			"modal": {
+				"titleAdd": "添加镜像仓库",
+				"titleEdit": "编辑镜像仓库",
+				"name": "名称",
+				"namePlaceholder": "我的私有镜像仓库",
+				"url": "URL",
+				"credentialsOptional": "凭据（可选）",
+				"credentialsKeepExisting": "凭据（密码留空则保留现有密码）",
+				"username": "用户名",
+				"usernamePlaceholder": "用户名",
+				"passwordToken": "密码 / Token",
+				"keepExistingPlaceholder": "留空则保留现有值",
+				"passwordPlaceholder": "密码或访问 token",
+				"cancel": "取消",
+				"save": "保存",
+				"add": "添加",
+				"validation": {
+					"nameUrlRequired": "名称和 URL 为必填项"
+				},
+				"errors": {
+					"createFailed": "创建镜像仓库失败",
+					"updateFailed": "更新镜像仓库失败"
+				}
+			}
+		},
+		"git": {
+			"auth": {
+				"sshKey": "SSH 密钥",
+				"password": "密码",
+				"none": "无"
+			},
+			"repositories": {
+				"title": "Git 仓库",
+				"description": "管理可用于部署堆栈的 Git 仓库",
+				"addRepository": "添加仓库",
+				"loading": "正在加载仓库...",
+				"usingCredential": "使用凭据：{credential}",
+				"publicRepository": "公开仓库",
+				"public": "公开",
+				"testConnection": "测试连接",
+				"editRepository": "编辑仓库",
+				"empty": {
+					"title": "未配置 Git 仓库",
+					"description": "添加仓库后即可从 Git 部署堆栈"
+				},
+				"test": {
+					"connectedMessage": "已连接！分支：{branch}，最后提交：{commit}",
+					"connectionFailed": "连接失败",
+					"testFailed": "测试连接失败"
+				},
+				"confirm": {
+					"deleteAction": "删除",
+					"repository": "仓库",
+					"deleteTitle": "删除"
+				},
+				"toasts": {
+					"loadFailed": "获取 Git 仓库失败",
+					"deleted": "仓库已删除",
+					"deleteFailed": "删除仓库失败",
+					"connectionSuccessful": "仓库连接成功",
+					"connectionFailedWithError": "连接失败：{error}",
+					"testFailed": "测试仓库连接失败"
+				}
+			},
+			"repositoryModal": {
+				"titleAdd": "添加 Git 仓库",
+				"titleEdit": "编辑 Git 仓库",
+				"descriptionAdd": "添加可用于部署堆栈的 Git 仓库",
+				"descriptionEdit": "更新仓库设置",
+				"name": "名称",
+				"nameHelp": "用于识别此仓库的友好名称",
+				"url": "仓库 URL",
+				"branch": "分支",
+				"credentialOptional": "凭据（可选）",
+				"nonePublicRepository": "无（公开仓库）",
+				"addCredentials": "添加凭据",
+				"forPrivateRepositories": "用于私有仓库",
+				"cancel": "取消",
+				"test": "测试",
+				"saving": "正在保存...",
+				"saveChanges": "保存更改",
+				"addRepository": "添加仓库",
+				"validation": {
+					"urlRequiredToTest": "测试连接需要填写仓库 URL",
+					"nameRequired": "名称为必填项",
+					"urlRequired": "仓库 URL 为必填项",
+					"nameExists": "仓库名称已存在"
+				},
+				"errors": {
+					"saveFailed": "保存仓库失败"
+				},
+				"toasts": {
+					"connectionSuccessful": "连接成功！分支：{branch}，提交：{commit}",
+					"connectionTestFailed": "连接测试失败",
+					"testFailed": "测试连接失败",
+					"updated": "仓库已更新",
+					"added": "仓库已添加"
+				}
+			},
+			"credentials": {
+				"title": "Git 凭据",
+				"description": "管理访问 Git 仓库所需的凭据",
+				"addCredential": "添加凭据",
+				"loading": "正在加载凭据...",
+				"usernameLabel": "用户名：{username}",
+				"noUsername": "无用户名",
+				"empty": {
+					"title": "未配置 Git 凭据",
+					"description": "添加凭据以连接私有 Git 仓库"
+				},
+				"confirm": {
+					"deleteAction": "删除",
+					"credential": "凭据",
+					"deleteTitle": "删除"
+				},
+				"toasts": {
+					"loadFailed": "获取 Git 凭据失败",
+					"deleted": "凭据已删除",
+					"deleteFailed": "删除凭据失败"
+				}
+			},
+			"credentialModal": {
+				"titleAdd": "添加 Git 凭据",
+				"titleEdit": "编辑 Git 凭据",
+				"descriptionAdd": "创建用于访问 Git 仓库的新凭据",
+				"descriptionEdit": "更新凭据设置",
+				"name": "名称",
+				"nameHelp": "用于识别此凭据的友好名称",
+				"authType": "认证类型",
+				"passwordToken": "密码/Token",
+				"username": "用户名",
+				"usernamePlaceholder": "用户名或邮箱",
+				"passwordOrToken": "密码或 token",
+				"keepCurrentPlaceholder": "留空则保留当前值",
+				"passwordPlaceholder": "密码或个人访问 token",
+				"currentPasswordSet": "当前已设置密码。留空则保留现有密码。",
+				"sshPrivateKey": "SSH 私钥",
+				"currentSshKeySet": "当前已设置 SSH 密钥。留空则保留现有密钥。",
+				"sshPassphraseOptional": "SSH 密钥短语（可选）",
+				"sshPassphrasePlaceholder": "加密密钥的短语",
+				"cancel": "取消",
+				"saving": "正在保存...",
+				"saveChanges": "保存更改",
+				"addCredential": "添加凭据",
+				"validation": {
+					"nameRequired": "名称为必填项",
+					"passwordRequired": "密码为必填项",
+					"sshKeyRequired": "SSH 私钥为必填项"
+				},
+				"errors": {
+					"saveFailed": "保存凭据失败"
+				},
+				"toasts": {
+					"updated": "凭据已更新",
+					"created": "凭据已创建"
+				}
+			}
+		},
+		"about": {
+			"dockhandLogo": "Dockhand 标志",
+			"version": "版本 {version}",
+			"checkingForUpdates": "正在检查更新...",
+			"updateAvailable": "有可用更新，点击查看新内容",
+			"upToDate": "已是最新",
+			"checkForUpdates": "检查更新",
+			"systemInformation": "系统信息",
+			"unreleased": "未发布",
+			"development": "开发版本",
+			"systemLoading": "正在加载...",
+			"latest": "最新",
+			"changes": "{count} 项变更",
+			"changeNew": "新增",
+			"changeFix": "修复",
+			"loadingReleases": "正在加载发布说明...",
+			"loadingDependencies": "正在加载依赖...",
+			"searchDependencies": "搜索包或许可证...",
+			"viewOnGithub": "在 GitHub 查看",
+			"submitIssue": "提交问题或想法",
+			"buyCoffee": "赞助一杯咖啡",
+			"communityNote": "Dockhand 社区版永久免费，没有附加条件。觉得好用的话，可以请开发者喝杯咖啡。",
+			"easterEgg": "别点啦。你是从 r/selfhosted 来的吗？",
+			"licenseTitle": "许可证条款与条件",
+			"privacyTitle": "隐私政策",
+			"failedToFetchLicense": "获取许可证失败",
+			"failedToFetchPrivacy": "获取隐私政策失败",
+			"selfUpdate": {
+				"updateDockhand": "更新 Dockhand",
+				"updatingDockhand": "正在更新 Dockhand",
+				"updateComplete": "更新完成",
+				"updateFailed": "更新失败",
+				"preparing": "正在准备...",
+				"container": "容器",
+				"currentImage": "当前镜像",
+				"newImage": "新镜像",
+				"image": "镜像",
+				"currentDigest": "当前摘要",
+				"newDigest": "新摘要",
+				"loadingReleaseNotes": "正在加载发布说明...",
+				"whatsNew": "新内容",
+				"composeNoteLabel": "注意：",
+				"composeNoteBefore": "此容器由 Docker Compose 管理。更新后仍可继续工作，但可能丢失 Compose 跟踪。请使用",
+				"composeNoteAfter": "进行 Compose 感知的更新。",
+				"updateNow": "立即更新",
+				"progress": "进度",
+				"reload": "重新加载",
+				"updating": "正在更新...",
+				"noResponseBody": "没有响应内容",
+				"connectionLost": "连接中断：{error}",
+				"updaterExited": "更新器退出，代码 {code}",
+				"backOnline": "Dockhand 已恢复在线",
+				"steps": {
+					"pulling_image": "正在拉取新镜像",
+					"building_config": "正在构建容器配置",
+					"pulling_updater": "正在拉取更新器",
+					"creating_container": "正在创建新容器",
+					"launching_updater": "正在启动更新器",
+					"stopping": "正在停止 Dockhand",
+					"removing": "正在移除旧容器",
+					"renaming": "正在重命名容器",
+					"connecting": "正在连接网络",
+					"starting": "正在启动 Dockhand",
+					"reconnecting": "正在等待 Dockhand"
+				}
+			},
+			"taglines": [
+				"简化操作。轻松部署。保持微笑。",
+				"少敲命令，多做交付。",
+				"零摩擦，只管容器。",
+				"Docker 管理，浓缩成一个清爽界面。",
+				"构建。发布。放松。",
+				"少想一点，部署快一点。",
+				"给仍然喜欢按钮的人类准备的自动化。",
+				"认真管理容器，不认真制造痛苦。",
+				"通往稳定交付的捷径。",
+				"终于有一个尊重你时间和终端的工具。"
+			]
+		}
+	},
+	"dataGrid": {
+		"actions": "操作",
+		"selectAll": "全选",
+		"deselectAll": "取消全选",
+		"collapseRow": "折叠",
+		"expandRow": "展开"
+	},
+	"columnSettings": {
+		"title": "列设置",
+		"columns": "列",
+		"resetToDefaults": "重置为默认值"
+	},
+	"executionLog": {
+		"title": "日志",
+		"toggleTheme": "切换日志主题",
+		"empty": "暂无日志"
+	},
+	"hostInfo": {
+		"selectEnvironment": "选择环境",
+		"noEnvironments": "暂无环境",
+		"searchEnvironments": "搜索环境...",
+		"noMatchingEnvironments": "没有匹配的环境",
+		"cannotSwitchOffline": "无法切换到“{name}”：环境离线",
+		"cannotSwitchWithError": "无法切换到“{name}”：{error}",
+		"cannotSwitchConnectionFailed": "无法切换到“{name}”：连接失败",
+		"liveConnected": "实时更新已连接",
+		"liveDisconnected": "实时更新已断开",
+		"live": "实时",
+		"cores": "{count} 核",
+		"ram": "{memory} 内存",
+		"uptimeShort": "{days} 天 {hours} 小时",
+		"uptimeHours": "{hours} 小时"
+	},
+	"activity": {
+		"title": "活动",
+		"stream": "流式",
+		"poll": "轮询",
+		"containerPlaceholder": "容器...",
+		"actionPlaceholder": "操作",
+		"actionsSelected": "项操作",
+		"environmentPlaceholder": "环境",
+		"allEnvironments": "全部环境",
+		"clearTitle": "清除全部",
+		"clearConfirm": "清除",
+		"activityLog": "活动日志",
+		"logCleared": "活动日志已清除",
+		"failedToClear": "清除活动失败",
+		"failedToFetch": "获取事件失败",
+		"empty": "未找到容器事件",
+		"emptyDescription": "容器启动、停止等事件会显示在这里。",
+		"loadingMore": "正在加载更多...",
+		"endOfResults": "已到结果末尾（{count} 个事件）",
+		"detailsTitle": "事件详情",
+		"actions": {
+			"create": "创建",
+			"start": "启动",
+			"stop": "停止",
+			"die": "退出",
+			"kill": "强制结束",
+			"restart": "重启",
+			"pause": "暂停",
+			"unpause": "恢复",
+			"destroy": "销毁",
+			"rename": "重命名",
+			"update": "更新",
+			"oom": "内存不足",
+			"health_status": "健康状态"
+		}
+	},
+	"audit": {
+		"title": "审计日志",
+		"detailsTitle": "审计日志详情",
+		"enterpriseFeature": "企业版功能",
+		"enterpriseDescription": "审计日志是企业版功能，用于跟踪所有用户操作，满足合规和安全监控需求。",
+		"activateLicense": "激活许可证",
+		"userPlaceholder": "用户",
+		"entityPlaceholder": "实体",
+		"actionPlaceholder": "操作",
+		"allEnvironments": "全部环境",
+		"usersSelected": "{count} 个用户",
+		"entitiesSelected": "{count} 个实体",
+		"actionsSelected": "{count} 项操作",
+		"liveActive": "实时更新已启用",
+		"connecting": "正在连接...",
+		"empty": "未找到审计日志记录",
+		"loadingMore": "正在加载更多...",
+		"endOfResults": "已到结果末尾（{count} 条记录）",
+		"failedToFetch": "获取审计日志失败",
+		"actions": {
+			"create": "创建",
+			"update": "更新",
+			"delete": "删除",
+			"start": "启动",
+			"stop": "停止",
+			"restart": "重启",
+			"pause": "暂停",
+			"unpause": "恢复",
+			"pull": "拉取",
+			"push": "推送",
+			"prune": "清理",
+			"exec": "执行命令",
+			"connect": "连接",
+			"disconnect": "断开连接",
+			"login": "登录",
+			"logout": "登出",
+			"sync": "同步"
+		},
+		"entityTypes": {
+			"container": "容器",
+			"image": "镜像",
+			"volume": "卷",
+			"network": "网络",
+			"stack": "堆栈",
+			"environment": "环境",
+			"registry": "镜像仓库",
+			"user": "用户",
+			"role": "角色",
+			"settings": "设置",
+			"git_repository": "Git 仓库",
+			"git_credential": "Git 凭据"
+		}
+	},
+	"registry": {
+		"title": "镜像仓库",
+		"manageRegistries": "管理镜像仓库",
+		"selectRegistry": "选择镜像仓库",
+		"authBadge": "认证",
+		"searchPlaceholder": "在 {registry} 中搜索镜像...",
+		"searchPlaceholderGeneric": "搜索镜像...",
+		"search": "搜索",
+		"browse": "浏览",
+		"loadingCatalog": "正在加载目录...",
+		"searching": "正在搜索...",
+		"searchFailed": "搜索失败",
+		"failedToSearch": "搜索镜像失败",
+		"failedToBrowse": "浏览镜像仓库失败",
+		"noImagesInRegistry": "此镜像仓库中未找到镜像",
+		"noImagesForQuery": "未找到“{query}”相关镜像",
+		"browseTip": "提示：大型镜像仓库可能不支持搜索。请尝试{action}，再用筛选查找镜像。",
+		"browseTipBefore": "提示：大型镜像仓库可能不支持搜索。请尝试",
+		"browseTipAfter": "，再用筛选查找镜像。",
+		"filterResults": "筛选结果...",
+		"imageCount": "{count} 个镜像",
+		"imageCountOf": "{count} / {total} 个镜像",
+		"stars": "星标",
+		"type": "类型",
+		"official": "官方",
+		"auto": "自动",
+		"loadingTags": "正在加载标签...",
+		"pull": "拉取",
+		"pullAndScan": "拉取并扫描",
+		"pullThisTag": "拉取此标签",
+		"pullAndScanThisTag": "拉取并扫描此标签",
+		"runThisTag": "使用此标签运行容器",
+		"copyToAnotherRegistry": "复制到其他镜像仓库",
+		"deleteTag": "删除标签",
+		"deleteTagDescription": "确定要删除 {image}:{tag} 吗？此操作无法撤销。",
+		"deleteThisTag": "删除此标签",
+		"deletedImage": "已删除 {image}:{tag}",
+		"failedToDeleteImage": "删除镜像失败",
+		"tagsLoaded": "已加载 {count} / {total} 个标签",
+		"noTags": "未找到标签",
+		"loadMoreImages": "加载更多镜像",
+		"searchOrBrowseHint": "搜索或浏览 {registry} 来查找镜像",
+		"searchHint": "搜索 {registry} 来查找并拉取镜像",
+		"copy": {
+			"title": "复制到镜像仓库",
+			"steps": {
+				"configure": "配置",
+				"pull": "拉取",
+				"scan": "扫描",
+				"push": "推送"
+			},
+			"sourceImage": "源镜像",
+			"targetRegistry": "目标镜像仓库",
+			"selectRegistry": "选择镜像仓库",
+			"noTargetRegistries": "没有可用的目标镜像仓库。请在设置中添加私有镜像仓库。",
+			"imageNameTag": "镜像名称/标签",
+			"willPushAs": "将推送为：",
+			"copyToClipboard": "复制到剪贴板",
+			"copyRequiresHttps": "复制需要 HTTPS",
+			"retryPull": "重试拉取",
+			"retryScan": "重试扫描",
+			"retryPush": "重试推送",
+			"done": "完成",
+			"cancel": "取消",
+			"startCopy": "开始复制",
+			"criticalHighFound": "发现严重/高危漏洞",
+			"vulnerabilitiesFound": "发现 {count} 个漏洞",
+			"pushAnyway": "仍然推送",
+			"continueToPush": "继续推送"
+		}
+	},
+	"stacks": {
+		"page": {
+			"pageTitle": "堆栈 - Dockhand",
+			"title": "Compose 堆栈",
+			"searchPlaceholder": "搜索堆栈...",
+			"emptyTitle": "未找到 Compose 堆栈",
+			"emptyDescription": "创建堆栈或从 Git 部署即可开始"
+		},
+		"filters": {
+			"allStatuses": "全部状态",
+			"statuses": "个状态"
+		},
+		"status": {
+			"running": "运行中",
+			"partial": "部分运行",
+			"stopped": "已停止",
+			"created": "已创建",
+			"notDeployed": "未部署"
+		},
+		"source": {
+			"git": "Git",
+			"internal": "内部",
+			"untracked": "未跟踪",
+			"notSet": "未设置"
+		},
+		"actions": {
+			"fromGit": "从 Git",
+			"adopt": "接管",
+			"collapseAll": "全部折叠",
+			"expandAll": "全部展开",
+			"startCount": "启动 {count} 个",
+			"restartCount": "重启 {count} 个",
+			"stopCount": "停止 {count} 个",
+			"removeCount": "移除 {count} 个",
+			"down": "Down",
+			"downCount": "Down {count} 个",
+			"downRemoveContainers": "Down（移除容器）",
+			"recreate": "重新创建（stop & up）",
+			"deploy": "部署",
+			"syncFromGit": "从 Git 同步",
+			"editGitStack": "编辑 Git 堆栈",
+			"viewLogs": "查看日志",
+			"openLogsInline": "内嵌打开日志",
+			"openLogsFullView": "在完整视图中打开日志",
+			"alsoDeleteVolumes": "同时删除卷"
+		},
+		"redeploy": {
+			"title": "重新部署堆栈",
+			"pullImages": "拉取镜像",
+			"buildImages": "构建镜像",
+			"forceRecreate": "强制重新创建"
+		},
+		"pathBar": {
+			"defaultLocation": "默认位置",
+			"browseFor": "浏览 {label}",
+			"changeLocation": "更改位置",
+			"copyPath": "复制路径",
+			"copyRequiresHttps": "复制需要 HTTPS"
+		},
+		"recentLocations": {
+			"title": "位置",
+			"dockhandDefault": "Dockhand 默认",
+			"removeFromRecent": "从最近位置移除",
+			"empty": "还没有位置。浏览文件夹后会添加到这里。"
+		},
+		"gitDeploy": {
+			"title": "Git 部署",
+			"complete": "完成",
+			"failed": "失败",
+			"deploying": "正在部署...",
+			"confirmTitle": "从 Git 同步？",
+			"confirmPrefix": "这会拉取最新变更：",
+			"confirmSuffix": "只有配置发生变化时，容器才会重启。",
+			"initializing": "正在初始化...",
+			"copied": "已复制！",
+			"copyLogs": "复制日志",
+			"steps": {
+				"connecting": "正在连接",
+				"cloning": "正在克隆仓库",
+				"fetching": "正在拉取最新变更",
+				"reading": "正在读取 Compose 文件",
+				"env": "正在加载环境变量",
+				"secrets": "正在准备密钥",
+				"deploying": "正在部署堆栈"
+			},
+			"errors": {
+				"startFailed": "启动部署失败",
+				"deployFailed": "部署失败"
+			}
+		},
+		"gitModal": {
+			"titleCreate": "从 Git 部署",
+			"titleEdit": "编辑 Git 堆栈",
+			"descriptionCreate": "从 Git 仓库部署 Compose 堆栈",
+			"descriptionEdit": "更新 Git 堆栈设置",
+			"repository": "仓库",
+			"selectExisting": "选择已有",
+			"addNew": "新增",
+			"selectRepositoryPlaceholder": "选择仓库...",
+			"noRepositories": "尚未配置仓库。点击“新增”来添加一个。",
+			"repositoryName": "仓库名称",
+			"repositoryNamePlaceholder": "例如：my-stacks",
+			"repositoryUrl": "仓库 URL",
+			"branch": "分支",
+			"credential": "凭据",
+			"nonePublic": "无（公开）",
+			"stackName": "堆栈名称",
+			"stackNamePlaceholder": "例如：my-app",
+			"stackNameHelp": "这将作为部署后的堆栈名称",
+			"composePath": "Compose 文件路径",
+			"composePathHelp": "仓库内 Compose 文件的路径",
+			"additionalEnvFile": "附加 env 文件（可选）",
+			"envFileTooltipDefault": "如果存在，Compose 目录中的 .env 文件始终会自动加载。",
+			"envFileTooltipAdditional": "此字段用于非标准名称的附加 env 文件，例如 .env.production。它的值会覆盖默认 .env。",
+			"envFileTooltipOverrides": "右侧环境变量编辑器中的覆盖值始终拥有最高优先级。",
+			"additionalEnvFileHelp": "传递给 Docker Compose 的附加 env 文件",
+			"contextDirectory": "上下文目录（可选）",
+			"contextTooltipWorkingDirectory": "Docker Compose 的工作目录，相对于仓库根目录。此目录中的所有文件都可用于卷挂载和构建上下文。",
+			"contextTooltipRoot": "当 Compose 文件引用同级目录中的文件时，可使用 . 表示仓库根目录。",
+			"contextTooltipDefault": "默认为 Compose 文件所在目录。",
+			"contextPlaceholder": "默认使用 Compose 文件所在目录",
+			"contextHelp": "相对于仓库根目录，例如 . 表示根目录",
+			"enableScheduledSync": "启用计划同步",
+			"enableScheduledSyncHelp": "仓库有变更时自动同步并重新部署堆栈。",
+			"enableWebhook": "启用 Webhook",
+			"enableWebhookHelp": "接收 Git 提供商的 push 事件以触发同步和重新部署。",
+			"webhookUrl": "Webhook URL",
+			"copyUrl": "复制 URL",
+			"webhookSecret": "Webhook 密钥（可选）",
+			"webhookSecretPlaceholder": "留空表示不做签名验证",
+			"copySecret": "复制密钥",
+			"generateSecret": "生成密钥",
+			"webhookUrlAfterCreate": "创建堆栈后会显示 Webhook URL。",
+			"webhookConfigureHelp": "请在你的 Git 提供商中配置此 URL。密钥用于签名验证。",
+			"deployOptions": "部署选项",
+			"buildImagesOnDeploy": "部署时构建镜像",
+			"buildImagesOnDeployHelp": "运行 --build，在启动容器前从 Dockerfile 构建镜像。",
+			"disableBuildCache": "禁用构建缓存",
+			"disableBuildCacheHelp": "传入 --no-cache，强制执行不使用缓存层的干净构建。",
+			"repullImages": "重新拉取镜像",
+			"repullImagesHelp": "部署前始终拉取最新镜像，即使 Compose 文件没有变化。适用于使用 :latest 等静态标签的 CI/CD 工作流。",
+			"forceRedeployment": "强制重新部署",
+			"forceRedeploymentHelp": "Webhook 或计划同步触发时，即使没有检测到 Git 变更，也始终重新部署堆栈。",
+			"deployNow": "立即部署",
+			"deployNowHelp": "立即克隆并部署堆栈",
+			"envOverridesInfo": "覆盖仓库 env 文件中的变量。非密钥会保存到堆栈目录的 <code class='bg-muted px-1 rounded'>.env.dockhand</code>。密钥会存储在数据库中，并在部署时通过 shell 环境注入。<br/><br/>变量可通过 <code class='bg-muted px-1 rounded'>${VAR_NAME}</code> 语法用于 <strong>Compose 文件插值</strong>。它们不会自动注入到容器中；如需传递给容器，请使用 <code class='bg-muted px-1 rounded'>environment:</code>，或在 <code class='bg-muted px-1 rounded'>env_file:</code> 中引用 <code class='bg-muted px-1 rounded'>.env.dockhand</code>。",
+			"populate": "填充",
+			"populateTooltip": "克隆仓库，并从 Compose 目录中的 .env 文件和指定的附加 env 文件加载环境变量，方便你查看可覆盖的值。",
+			"saveAndDeploy": "保存并部署",
+			"saving": "正在保存...",
+			"saveChanges": "保存更改",
+			"creating": "正在创建...",
+			"existsTitle": "堆栈已存在",
+			"existsDescription": "名为“{name}”的堆栈已存在。请选择其他名称。",
+			"auth": {
+				"sshKey": "SSH 密钥",
+				"password": "密码",
+				"none": "无"
+			},
+			"validation": {
+				"stackNameRequired": "堆栈名称为必填项",
+				"stackNameInvalid": "堆栈名称必须以字母或数字开头，且只能包含字母、数字、连字符和下划线",
+				"repositoryRequired": "请选择仓库",
+				"repoNameRequired": "仓库名称为必填项",
+				"repoUrlRequired": "仓库 URL 为必填项"
+			},
+			"errors": {
+				"saveFailed": "保存 Git 堆栈失败"
+			},
+			"toasts": {
+				"selectRepositoryFirst": "请先选择仓库",
+				"enterRepositoryUrlFirst": "请先输入仓库 URL",
+				"loadEnvFailed": "加载环境变量失败",
+				"noEnvFound": "未找到环境变量",
+				"noEnvFoundDescription": "仓库中未找到 .env 文件。你仍然可以手动添加变量。",
+				"loadedVariableOne": "已加载 {count} 个变量",
+				"loadedVariableMany": "已加载 {count} 个变量",
+				"loadedVariablesDescription": "你现在可以在部署前自定义这些值",
+				"deploymentFailed": "部署失败"
+			}
+		},
+		"modal": {
+			"titleCreate": "创建 Compose 堆栈",
+			"descriptionCreate": "创建新的 Docker Compose 堆栈",
+			"descriptionEdit": "编辑 Compose 文件和环境变量",
+			"editorTab": "编辑器",
+			"graphTab": "图形",
+			"loadingCompose": "正在加载 Compose 文件...",
+			"pathWillCreateIn": "将创建于 {path}",
+			"customLocation": "自定义位置",
+			"usingDefaultLocation": "使用默认位置",
+			"selectComposeFile": "选择 Compose 文件",
+			"selectComposeFileOrDirectory": "选择 Compose 文件或目录",
+			"selectEnvFileOrDirectory": "选择环境文件或目录",
+			"relocateTitle": "迁移 {name}",
+			"untrackedStackTitle": "未跟踪堆栈",
+			"untrackedStackDescription": "- 此堆栈正在 Docker 中运行，但 Dockhand 不知道它的 Compose 文件存储在磁盘上的哪个位置。请浏览并定位该文件，以开始编辑和管理。",
+			"runningContainers": "运行中的容器：",
+			"composeFile": "Compose 文件",
+			"envFile": "Env 文件",
+			"enterStackNameAbove": "请先在上方输入堆栈名称",
+			"notSpecified": "未指定",
+			"noComposeSelected": "尚未选择 Compose 文件",
+			"noComposeSelectedDescription": "请浏览并定位此堆栈的 Compose 文件。选择后，编辑器会加载文件内容。",
+			"browseForComposeFile": "浏览 Compose 文件",
+			"selectFileInfoTitle": "选择文件后会发生什么：",
+			"copied": "已复制",
+			"envVarsInfo": "这些变量会写入堆栈目录中的 .env 文件，并传递给 compose 命令。",
+			"unsavedChanges": "未保存的更改",
+			"noChanges": "无更改",
+			"starting": "正在启动...",
+			"createAndStart": "创建并启动",
+			"saveAndRedeploy": "保存并重新部署",
+			"unsavedDescription": "你有未保存的更改。确定要不保存并关闭吗？",
+			"continueEditing": "继续编辑",
+			"discardChanges": "放弃更改",
+			"moveStackFilesTitle": "移动堆栈文件？",
+			"moveStackFilesDescriptionOne": "你已更改堆栈位置。旧位置中有 {count} 个文件可以移动到新位置。",
+			"moveStackFilesDescriptionMany": "你已更改堆栈位置。旧位置中有 {count} 个文件可以移动到新位置。",
+			"moveFilesQuestion": "要将所有文件移动到新位置，还是保留在原位置？",
+			"leaveFiles": "保留文件",
+			"moveFiles": "移动文件",
+			"replaceContentTitle": "替换编辑器内容？",
+			"replaceContentDescription": "加载其他 Compose 文件会替换当前编辑器内容。",
+			"currentLabel": "当前：",
+			"newLabel": "新文件：",
+			"unsavedPlaceholder": "（未保存）",
+			"replaceContent": "替换内容",
+			"relocateStackTitle": "迁移堆栈？",
+			"relocateStackDescriptionOne": "堆栈文件夹中的 {count} 个文件将被移动。",
+			"relocateStackDescriptionMany": "堆栈文件夹中的 {count} 个文件将被移动。",
+			"fromLabel": "来源",
+			"toLabel": "目标",
+			"moving": "正在移动...",
+			"validation": {
+				"stackNameInvalid": "必须为小写，以字母或数字开头，且只能包含字母、数字、连字符和下划线",
+				"composeContentRequired": "Compose 文件内容为必填项",
+				"composeContentOrPathRequired": "必须提供 Compose 文件内容或路径",
+				"composeLocationRequired": "请选择 Compose 文件位置"
+			},
+			"toasts": {
+				"created": "已创建堆栈“{name}”",
+				"applied": "堆栈已应用",
+				"saved": "堆栈已保存"
+			},
+			"errors": {
+				"moveFiles": "移动文件失败",
+				"moveFilesMessage": "移动文件时发生错误",
+				"loadCompose": "加载 Compose 文件失败",
+				"createStack": "创建堆栈失败",
+				"createStackMessage": "创建堆栈时发生错误",
+				"saveEnvironmentFile": "保存环境文件失败",
+				"saveCompose": "保存 Compose 文件失败",
+				"applyStack": "应用堆栈失败",
+				"applyStackMessage": "应用堆栈时发生错误",
+				"saveStack": "保存堆栈失败",
+				"saveStackMessage": "保存堆栈时发生错误"
+			}
+		},
+		"fileBrowser": {
+			"selectFile": "选择文件",
+			"goUp": "返回上级",
+			"folderName": "文件夹名称",
+			"createFolder": "创建文件夹",
+			"newFolder": "新建文件夹",
+			"scanning": "正在扫描...",
+			"scanThisFolder": "扫描此文件夹",
+			"unableToBrowse": "无法浏览文件",
+			"noSubdirectories": "没有子目录",
+			"directoryEmpty": "目录为空",
+			"composeFile": "Compose 文件",
+			"selectedLabel": "已选择：",
+			"fileOrFolderHint": "点击选择文件或文件夹，双击进入文件夹",
+			"fileHint": "点击文件进行选择",
+			"errors": {
+				"loadDirectory": "加载目录失败",
+				"createFolder": "创建文件夹失败"
+			}
+		},
+		"graph": {
+			"toolbar": {
+				"addElement": "添加",
+				"cancelMode": "取消",
+				"dependencyMode": "依赖",
+				"mountMode": "挂载",
+				"switchToDarkTheme": "切换到深色主题",
+				"switchToLightTheme": "切换到浅色主题"
+			},
+			"hints": {
+				"clickSourceService": "点击源服务",
+				"clickTargetService": "点击目标服务",
+				"clickMountSource": "点击卷、网络、配置或密钥",
+				"configSource": "请指定其中一种来源：file、content 或 environment",
+				"secretSource": "请指定其中一种来源：file 或 environment"
+			},
+			"layout": {
+				"changeLayout": "更改布局",
+				"tree": "树形",
+				"grid": "网格",
+				"circle": "环形",
+				"radial": "径向",
+				"force": "力导向"
+			},
+			"legend": {
+				"service": "服务",
+				"network": "网络",
+				"volume": "卷",
+				"config": "配置",
+				"secret": "密钥"
+			},
+			"nodeTypes": {
+				"service": "服务",
+				"network": "网络",
+				"volume": "卷",
+				"config": "配置",
+				"secret": "密钥"
+			},
+			"nodeCaptions": {
+				"build": "构建",
+				"custom": "自定义",
+				"missing": "缺失",
+				"config": "配置",
+				"secret": "密钥"
+			},
+			"edgeLabels": {
+				"dependsOn": "依赖于",
+				"links": "链接"
+			},
+			"panel": {
+				"saveAndClose": "保存并关闭",
+				"deleteNode": "删除节点",
+				"closePanel": "关闭面板",
+				"removeConnection": "移除连接",
+				"removeDependency": "移除依赖"
+			},
+			"fields": {
+				"serviceImage": "服务镜像",
+				"serviceCommand": "服务命令",
+				"restartPolicy": "重启策略",
+				"portMappings": "端口映射",
+				"hostPort": "主机端口",
+				"containerPort": "容器端口",
+				"serviceVolumes": "服务卷挂载",
+				"hostPath": "主机路径",
+				"containerPath": "容器路径",
+				"environmentVariables": "环境变量",
+				"serviceLabels": "服务标签",
+				"key": "键",
+				"value": "值",
+				"dependsOn": "服务依赖",
+				"networkDriver": "网络驱动",
+				"ipamConfiguration": "IPAM 配置",
+				"subnet": "子网",
+				"gateway": "网关",
+				"networkLabels": "网络标签",
+				"networkDriverOptions": "网络驱动选项",
+				"volumeDriver": "卷驱动",
+				"volumeLabels": "卷标签",
+				"volumeDriverOptions": "卷驱动选项",
+				"externalNameOptional": "外部名称（可选）",
+				"filePath": "文件路径",
+				"inlineContent": "内联内容",
+				"environmentVariable": "环境变量"
+			},
+			"restartPolicy": {
+				"no": "不重启",
+				"always": "始终",
+				"onFailure": "失败时",
+				"unlessStopped": "除非手动停止"
+			},
+			"networkDrivers": {
+				"bridge": "Bridge",
+				"host": "Host",
+				"overlay": "Overlay",
+				"macvlan": "Macvlan",
+				"ipvlan": "IPvlan",
+				"none": "无（none）"
+			},
+			"flags": {
+				"externalNetwork": "外部网络",
+				"internalNetwork": "内部网络",
+				"attachableNetwork": "可附加网络",
+				"externalVolume": "外部卷",
+				"externalConfig": "外部配置",
+				"externalSecret": "外部密钥"
+			},
+			"edges": {
+				"dependency": "依赖",
+				"link": "链接",
+				"networkConnection": "网络连接",
+				"volumeMount": "卷挂载",
+				"configMount": "配置挂载",
+				"secretMount": "密钥挂载",
+				"dependencyDescription": "此服务依赖 {source}，并会在它启动后启动。",
+				"volumeMountDescription": "卷已挂载到此服务。",
+				"networkConnectionDescription": "服务已连接到此网络。",
+				"configMountDescription": "配置已挂载到此服务。",
+				"secretMountDescription": "密钥已挂载到此服务。"
+			},
+			"addDialog": {
+				"title": "添加{type}",
+				"name": "元素名称",
+				"serviceImage": "服务镜像",
+				"servicePorts": "服务端口（逗号分隔）",
+				"cancel": "取消",
+				"addElement": "添加{type}",
+				"closeMenu": "关闭添加菜单"
+			},
+			"errors": {
+				"yamlParse": "YAML 解析错误",
+				"showingPartialGraph": "{message}（正在显示部分图形）"
+			}
+		},
+		"import": {
+			"browserTitle": "接管堆栈",
+			"browserTitleWithEnvironment": "接管堆栈到 {environment}",
+			"browserDescription": "浏览 Compose 文件，或扫描目录查找堆栈。",
+			"remoteDescription": "浏览 Dockhand 主机文件系统以查找 Compose 文件。文件在本地管理；Hawser 只代理 Docker API 调用，不代理文件系统访问。",
+			"selectStacksTitle": "选择要接管到的堆栈",
+			"foundDescription": "找到 {count} 个堆栈。请选择要接管到 {environment} 的堆栈。",
+			"serviceCountOne": "{count} 个服务",
+			"serviceCountMany": "{count} 个服务",
+			"runningCount": "{count} 个运行中",
+			"remoteFilesPrefix": "这些 Compose 文件位于",
+			"remoteFilePrefix": "此 Compose 文件位于",
+			"remoteFilesMiddle": "不在 {environment} 上。",
+			"remoteFilesSuffix": "Docker 命令会通过 Hawser 发送到 {environment}，但文件在本地管理。",
+			"remoteFileSuffix": "Docker 命令会通过 Hawser 发送到 {environment}，但文件在本地管理。",
+			"adoptInfoTitle": "接管后会发生什么：",
+			"adoptManyInfo": "Dockhand 会跟踪这些 Compose 文件，让你可以从界面编辑、启动和停止堆栈。文件会保留在当前位置。",
+			"adoptOneInfo": "Dockhand 会跟踪此 Compose 文件，让你可以从界面编辑、启动和停止堆栈。文件会保留在当前位置。",
+			"selectedCount": "已选择 {selected} / {total} 个",
+			"adopting": "正在接管...",
+			"adoptSelected": "接管 {count} 个堆栈",
+			"previewTitle": "接管此堆栈？",
+			"previewDescription": "接管前请检查 Compose 文件。",
+			"adoptStack": "接管堆栈",
+			"toasts": {
+				"scanFailed": "扫描目录失败",
+				"allAlreadyAdopted": "此目录中的 {count} 个堆栈都已接管",
+				"noneFound": "此目录中未找到 Compose 堆栈",
+				"noEnvironment": "未选择环境",
+				"adoptFailed": "接管堆栈失败",
+				"adoptManyFailed": "接管堆栈失败",
+				"adoptedStack": "已接管堆栈“{name}”",
+				"adoptedStacks": "已接管 {count} 个堆栈",
+				"failedWithMessage": "失败：{error}",
+				"failedCount": "{count} 个堆栈接管失败"
+			}
+		},
+		"layout": {
+			"switchToVertical": "切换为垂直布局（日志在侧边）",
+			"switchToHorizontal": "切换为水平布局（日志在下方）"
+		},
+		"selection": {
+			"selected": "已选择 {count} 项",
+			"stackCountOne": "{count} 个堆栈",
+			"stackCountMany": "{count} 个堆栈"
+		},
+		"confirm": {
+			"stack": "堆栈",
+			"container": "容器",
+			"restartStack": "重启堆栈"
+		},
+		"batch": {
+			"startingOne": "正在启动 {count} 个堆栈",
+			"startingMany": "正在启动 {count} 个堆栈",
+			"stoppingOne": "正在停止 {count} 个堆栈",
+			"stoppingMany": "正在停止 {count} 个堆栈",
+			"downOne": "正在 Down {count} 个堆栈",
+			"downMany": "正在 Down {count} 个堆栈",
+			"restartingOne": "正在重启 {count} 个堆栈",
+			"restartingMany": "正在重启 {count} 个堆栈",
+			"removingOne": "正在移除 {count} 个堆栈",
+			"removingMany": "正在移除 {count} 个堆栈"
+		},
+		"metrics": {
+			"memoryShort": "内存",
+			"networkShort": "网络",
+			"diskShort": "磁盘",
+			"networkTooltip": "已接收 {received} / 已发送 {sent}",
+			"diskTooltip": "已读取 {read} / 已写入 {written}"
+		},
+		"containers": {
+			"empty": "没有容器",
+			"noIp": "无 IP",
+			"restartCountOne": "{count} 次重启",
+			"restartCountMany": "{count} 次重启",
+			"volumeMountedOne": "已挂载 {count} 个卷",
+			"volumeMountedMany": "已挂载 {count} 个卷"
+		},
+		"tooltips": {
+			"dockhandSystem": "Dockhand 管理容器",
+			"hawserSystem": "Hawser 远程代理",
+			"envVarCountOne": "已配置 {count} 个环境变量",
+			"envVarCountMany": "已配置 {count} 个环境变量",
+			"deployedFromGit": "从 Git 仓库部署",
+			"managedByDockhand": "由 Dockhand 管理",
+			"untrackedStack": "Compose 文件位置未知。点击堆栈名称或编辑按钮以定位文件。",
+			"openInNewTab": "在新标签页打开 {url}"
+		},
+		"toasts": {
+			"loadFailed": "加载堆栈失败",
+			"started": "已启动 {name}",
+			"stopped": "已停止 {name}",
+			"restarted": "已重启 {name}",
+			"recreated": "已重新创建 {name}",
+			"redeployed": "已重新部署 {name}",
+			"broughtDown": "已 Down {name}",
+			"removed": "已移除 {name}",
+			"removedWithVolumes": "已移除 {name}（卷已删除）",
+			"containerStarted": "容器已启动",
+			"containerStopped": "容器已停止",
+			"containerRestarted": "容器已重启",
+			"containerPaused": "容器已暂停",
+			"containerUnpaused": "容器已恢复",
+			"containerRemoved": "容器已移除"
+		},
+		"errors": {
+			"startTitle": "启动 {name} 失败",
+			"startStack": "启动堆栈失败",
+			"stopTitle": "停止 {name} 失败",
+			"stopStack": "停止堆栈失败",
+			"restartTitle": "重启 {name} 失败",
+			"restartStack": "重启堆栈失败",
+			"redeployTitle": "重新部署 {name} 失败",
+			"redeployStack": "重新部署堆栈失败",
+			"downTitle": "Down {name} 失败",
+			"downStack": "Down 堆栈失败",
+			"removeTitle": "移除 {name} 失败",
+			"removeStack": "移除堆栈失败"
+		}
+	},
+	"schedules": {
+		"title": "调度",
+		"searchPlaceholder": "搜索调度...",
+		"allTypes": "全部类型",
+		"typesSelected": "{count} 个类型",
+		"allEnvironmentsShort": "全部环境",
+		"environmentFallback": "环境",
+		"environmentsSelected": "{count} 个环境",
+		"allStatuses": "全部状态",
+		"statusesSelected": "{count} 个状态",
+		"hideSystemJobs": "隐藏系统任务",
+		"showSystemJobs": "显示系统任务",
+		"showSystemJobsCount": "显示系统任务（{count}）",
+		"hideSystemJobsShort": "隐藏系统任务",
+		"systemBadge": "系统",
+		"executionHistory": "执行历史",
+		"removeAll": "全部移除",
+		"removeAllExecutions": "移除全部执行记录",
+		"triggered": "触发时间",
+		"viewLogs": "查看日志",
+		"viewLastExecutionLogs": "查看上次执行日志",
+		"deleteExecution": "删除执行记录",
+		"pauseSchedule": "暂停调度",
+		"resumeSchedule": "恢复调度",
+		"runNow": "立即运行",
+		"removeSchedule": "移除调度",
+		"scheduleItemType": "调度",
+		"noRuns": "无运行记录",
+		"noExecutions": "未找到执行记录",
+		"noSchedules": "未找到调度",
+		"emptyDescription": "为容器启用自动更新，或为 Git 堆栈启用自动同步后会显示在这里",
+		"executionDetails": "执行详情",
+		"containerUpdate": "容器更新",
+		"environmentUpdate": "环境更新",
+		"gitStackSync": "Git 堆栈同步",
+		"systemJob": "系统任务",
+		"blockedContainers": "被阻止的容器",
+		"blocked": "已阻止",
+		"updateBlocked": "由于发现漏洞，更新已被阻止",
+		"updateBlockCriteria": "更新阻止条件",
+		"blockReason": "阻止原因",
+		"vulnerabilityScanResults": "漏洞扫描结果",
+		"scannedWith": "扫描器：{scanners}",
+		"scannedAt": "时间：{time}",
+		"scannerFallback": "扫描器",
+		"loadMore": "加载更多",
+		"overdue": "已逾期",
+		"lessThanOneMinute": "少于 1 分钟",
+		"inMinutes": "{count} 分钟后",
+		"inHours": "{count} 小时后",
+		"triggeredToast": "已触发：{name}",
+		"failedToLoadSchedules": "加载调度失败：{error}",
+		"failedToLoadExecutions": "加载执行记录失败：{error}",
+		"failedToTrigger": "触发调度失败",
+		"failedToToggle": "切换调度状态失败",
+		"schedulePaused": "调度已暂停",
+		"scheduleResumed": "调度已恢复",
+		"failedToDeleteSchedule": "删除调度失败",
+		"scheduleRemoved": "调度已移除：{name}",
+		"failedToLoadExecution": "加载执行详情失败：{error}",
+		"failedToDeleteExecution": "删除执行记录失败",
+		"executionDeleted": "执行记录已删除",
+		"noExecutionsToDelete": "没有可删除的执行记录",
+		"deletedExecutions": "已删除 {count} 条执行记录",
+		"failedToDeleteExecutions": "删除执行记录失败：{error}",
+		"partiallyBlocked": "部分被阻止",
+		"descriptions": {
+			"checkScanAutoUpdate": "检查、扫描并自动更新",
+			"checkAutoUpdate": "检查并自动更新",
+			"gitSync": "Git 同步",
+			"pruneUnusedImages": "清理未使用镜像"
+		},
+		"status": {
+			"queued": "排队中",
+			"running": "运行中",
+			"success": "成功",
+			"failed": "失败",
+			"skipped": "已是最新",
+			"blocked": "已阻止"
+		},
+		"trigger": {
+			"cron": "计划触发",
+			"webhook": "Webhook",
+			"manual": "手动"
+		},
+		"types": {
+			"container_update": "容器更新",
+			"git_stack_sync": "Git 堆栈同步",
+			"system_cleanup": "系统清理",
+			"env_update_check": "环境更新检查",
+			"image_prune": "镜像清理"
+		}
+	},
+	"timezone": {
+		"select": "选择时区...",
+		"search": "搜索时区...",
+		"empty": "未找到时区。",
+		"common": "常用",
+		"all": "全部时区"
+	},
+	"cron": {
+		"daily": "每天",
+		"weekly": "每周",
+		"custom": "自定义",
+		"at": "于",
+		"on": "在",
+		"invalid": "无效",
+		"days": {
+			"monday": "星期一",
+			"tuesday": "星期二",
+			"wednesday": "星期三",
+			"thursday": "星期四",
+			"friday": "星期五",
+			"saturday": "星期六",
+			"sunday": "星期日"
+		}
+	},
+	"batchOperation": {
+		"runningCloseConfirm": "操作仍在运行。要取消并关闭吗？",
+		"succeeded": "成功",
+		"failed": "失败",
+		"cancelled": "已取消",
+		"pending": "待处理",
+		"cancel": "取消"
+	},
+	"updateSteps": {
+		"pulling": "正在拉取镜像",
+		"scanning": "正在扫描漏洞",
+		"stopping": "正在停止",
+		"removing": "正在移除",
+		"creating": "正在创建",
+		"starting": "正在启动",
+		"done": "完成",
+		"updated": "已更新",
+		"failed": "失败",
+		"blocked": "因漏洞被阻止",
+		"checked": "已检查",
+		"skipped": "已是最新"
+	},
+	"updateSummary": {
+		"checked": "已检查",
+		"updated": "已更新",
+		"blocked": "已阻止",
+		"failed": "失败",
+		"updatedLabel": "已更新",
+		"blockedLabel": "已阻止",
+		"failedLabel": "失败"
+	},
+	"vulnerabilityCriteria": {
+		"labels": {
+			"never": "从不阻止",
+			"any": "任意漏洞",
+			"critical_high": "严重或高危",
+			"critical": "仅严重",
+			"more_than_current": "多于当前镜像"
+		},
+		"selectorLabels": {
+			"any": "任意漏洞"
+		},
+		"titles": {
+			"never": "不按漏洞阻止",
+			"any": "发现任意漏洞即阻止",
+			"critical_high": "发现严重或高危漏洞即阻止",
+			"critical": "仅发现严重漏洞时阻止",
+			"more_than_current": "漏洞数量多于当前镜像时阻止"
+		}
+	},
+	"vulnerabilitySeverity": {
+		"critical": "严重",
+		"high": "高危",
+		"medium": "中危",
+		"low": "低危",
+		"negligible": "可忽略",
+		"unknown": "未知"
+	},
+	"avatarCropper": {
+		"cropAvatar": "裁剪头像",
+		"cropHelp": "拖动以调整位置，使用滑块缩放。",
+		"saveAvatar": "保存头像",
+		"cancel": "取消",
+		"uploading": "正在上传...",
+		"loading": "正在加载...",
+		"errors": {
+			"noCropData": "没有可用的裁剪数据",
+			"canvasContext": "获取画布上下文失败",
+			"loadImage": "加载图片失败",
+			"cropImage": "裁剪图片失败"
+		}
+	},
+	"codeEditor": {
+		"valueProvided": "已提供值",
+		"requiredVariableMissing": "必填变量未定义",
+		"missingRequiredVariable": "缺少必填变量",
+		"requiredVariableDefined": "必填变量已定义",
+		"optionalVariableDefault": "可选变量（有默认值）",
+		"missingBadge": "缺失",
+		"secretValue": "密钥值"
+	},
+	"diffViewer": {
+		"noChangesRecorded": "没有记录到变更",
+		"yes": "是",
+		"no": "否",
+		"empty": "（空）"
+	},
+	"iconPicker": {
+		"searchPlaceholder": "搜索图标...",
+		"empty": "未找到图标"
+	},
+	"ui": {
+		"dialog": {
+			"close": "关闭"
+		},
+		"sidebar": {
+			"title": "侧边栏",
+			"description": "显示移动端侧边栏。",
+			"toggle": "切换侧边栏"
+		},
+		"errorDialog": {
+			"copyError": "复制错误",
+			"copyRequiresHttps": "复制需要 HTTPS",
+			"ok": "确定"
+		}
+	},
+	"whatsNewModal": {
+		"title": "Dockhand 已更新到 {version}",
+		"dismiss": "知道了"
+	},
+	"stackEnvVarsEditor": {
+		"fromEnvFile": "来自仓库中的 env 文件",
+		"revertToFileValue": "恢复为文件中的值",
+		"manualOverride": "手动覆盖（不在文件中）",
+		"requiredVariableDefined": "必填变量已定义",
+		"optionalVariableDefault": "可选变量（有默认值）",
+		"unusedVariable": "未使用的变量",
+		"name": "变量名",
+		"value": "变量值",
+		"secretValueCannotUnhide": "密钥值（不可显示）",
+		"markedAsSecret": "已标记为密钥",
+		"markAsSecret": "标记为密钥",
+		"noVariables": "尚未定义环境变量。",
+		"addFirstVariable": "添加第一个变量"
+	},
+	"stackEnvVarsPanel": {
+		"title": "环境变量",
+		"view": {
+			"form": "表单视图",
+			"text": "文本视图（原始 .env 文件）"
+		},
+		"validation": {
+			"missing": "个缺失",
+			"defined": "个已定义",
+			"optional": "个可选"
+		},
+		"actions": {
+			"load": "加载",
+			"add": "添加",
+			"clear": "清除",
+			"clearTitle": "清除所有变量？",
+			"clearAction": "清除",
+			"clearItemType": "环境变量",
+			"clearConfirm": "全部清除"
+		},
+		"interpolation": {
+			"full": "这些变量可通过 <strong>Compose 文件插值</strong> 使用 <code class=\"bg-blue-100 dark:bg-blue-800/40 px-1 rounded\">${VAR_NAME}</code> 语法。要传递给容器，请在 Compose 文件的 <code class=\"bg-blue-100 dark:bg-blue-800/40 px-1 rounded\">environment:</code> 段中引用。"
+		},
+		"syntax": {
+			"required": "必填",
+			"optional": "可选",
+			"requiredWithError": "必填并带错误提示"
+		},
+		"secrets": {
+			"hiddenOne": "{count} 个密钥未显示。",
+			"hiddenMany": "{count} 个密钥未显示。",
+			"storage": "密钥永远不会写入磁盘，并会在堆栈启动时通过 shell 环境注入。"
+		},
+		"parse": {
+			"noEquals": "第 {line} 行：“{value}”（未找到 =）",
+			"invalidName": "第 {line} 行：“{key}”（变量名无效）"
+		},
+		"parseWarnings": {
+			"title": "部分行无法解析：",
+			"more": "...另有 {count} 行",
+			"switchToText": "切换到文本视图以编辑这些行。"
+		},
+		"missing": {
+			"addMissing": "添加缺失项："
+		}
+	},
+	"themeSelector": {
+		"lightTheme": "浅色主题",
+		"darkTheme": "深色主题",
+		"themeSystem": "主题：跟随系统",
+		"toggleTheme": "切换主题",
+		"font": "字体",
+		"fontSize": "字体大小",
+		"gridFontSize": "表格字体大小",
+		"terminalFont": "终端字体",
+		"editorFont": "编辑器字体",
+		"fontSizes": {
+			"xsmall": "特小",
+			"small": "小",
+			"normal": "标准",
+			"medium": "中等",
+			"large": "大",
+			"xlarge": "特大"
+		}
+	}
+}

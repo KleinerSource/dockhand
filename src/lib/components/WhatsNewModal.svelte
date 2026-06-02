@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Sparkles, Bug, Zap, CheckCircle, ScrollText } from 'lucide-svelte';
 	import { compareVersions } from '$lib/utils/version';
+	import { t } from '$lib/i18n';
 
 	interface ChangelogEntry {
 		version: string;
@@ -50,7 +51,7 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<ScrollText class="w-5 h-5 text-muted-foreground" />
-				Dockhand has been updated to {version}
+				{$t('whatsNewModal.title', { version })}
 			</Dialog.Title>
 		</Dialog.Header>
 
@@ -75,7 +76,7 @@
 		</div>
 
 		<Dialog.Footer>
-			<Button onclick={onDismiss}>Got it</Button>
+			<Button onclick={onDismiss}>{$t('whatsNewModal.dismiss')}</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

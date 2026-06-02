@@ -52,9 +52,10 @@
 
 	const canEditSchedules = $derived($canAccess('schedules', 'edit'));
 	const canRunSchedules = $derived($canAccess('schedules', 'run'));
-	import { vulnerabilityCriteriaIcons, vulnerabilityCriteriaLabels } from '$lib/utils/update-steps';
+	import { vulnerabilityCriteriaIcons } from '$lib/utils/update-steps';
 	import type { VulnerabilityCriteria } from '$lib/server/db';
 	import cronstrue from 'cronstrue';
+	import { getIntlLocale, locale, t } from '$lib/i18n';
 
 	// Scanner result per scanner
 	interface ScannerResult {
@@ -414,7 +415,7 @@
 					console.error('[Schedules] Server error:', errorData.error);
 					if (errorData.fatal) {
 						// Fatal error - server couldn't get initial data after retries
-						toast.error('Failed to load schedules: ' + errorData.error);
+						toast.error($t('schedules.failedToLoadSchedules', { error: errorData.error }));
 					}
 				} catch {
 					// Not a JSON error event, treat as connection error
@@ -515,7 +516,7 @@
 			const res = await fetch(
 				`/api/schedules/executions?scheduleType=${schedule.type}&scheduleId=${schedule.id}&limit=${EXECUTIONS_BATCH_SIZE}&offset=${offset}`
 			);
-			if (!res.ok) throw new Error('Failed to load executions');
+			if (!res.ok) throw new Error($t('schedules.failedToLoadExecutions', { error: '' }));
 			const data = await res.json();
 
 			const executions = data.executions || [];
@@ -531,7 +532,7 @@
 			newHasMoreMap.set(scheduleKey, executions.length === EXECUTIONS_BATCH_SIZE);
 			hasMoreExecutions = newHasMoreMap;
 		} catch (error: any) {
-			toast.error('Failed to load executions: ' + error.message);
+			toast.error($t('schedules.failedToLoadExecutions', { error: error.message }));
 		} finally {
 			// Remove loading state - create new Set to trigger reactivity
 			const loadingSet = new Set(loadingMoreExecutions);
@@ -579,9 +580,9 @@
 			});
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || 'Failed to trigger schedule');
+				throw new Error(data.error || $t('schedules.failedToTrigger'));
 			}
-			toast.success(`Triggered: ${schedule.name}`);
+			toast.success($t('schedules.triggeredToast', { name: schedule.name }));
 
 			// Refresh schedules from REST after a short delay to show running status
 			// This doesn't disrupt the SSE stream but ensures spinner appears quickly
@@ -641,9 +642,9 @@
 			});
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || 'Failed to toggle schedule');
+				throw new Error(data.error || $t('schedules.failedToToggle'));
 			}
-			toast.success(`Schedule ${schedule.enabled ? 'paused' : 'resumed'}`);
+			toast.success(schedule.enabled ? $t('schedules.schedulePaused') : $t('schedules.scheduleResumed'));
 			loadSchedules();
 		} catch (error: any) {
 			toast.error(error.message);
@@ -657,9 +658,9 @@
 			});
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || 'Failed to delete schedule');
+				throw new Error(data.error || $t('schedules.failedToDeleteSchedule'));
 			}
-			toast.success(`Schedule removed: ${entityName}`);
+			toast.success($t('schedules.scheduleRemoved', { name: entityName }));
 			confirmDeleteId = null;
 			loadSchedules();
 		} catch (error: any) {
@@ -671,11 +672,11 @@
 		loadingExecutionDetail = true;
 		try {
 			const res = await fetch(`/api/schedules/executions/${executionId}`);
-			if (!res.ok) throw new Error('Failed to load execution');
+			if (!res.ok) throw new Error($t('schedules.failedToLoadExecution', { error: '' }));
 			selectedExecution = await res.json();
 			showExecutionDialog = true;
 		} catch (error: any) {
-			toast.error('Failed to load execution: ' + error.message);
+			toast.error($t('schedules.failedToLoadExecution', { error: error.message }));
 		} finally {
 			loadingExecutionDetail = false;
 		}
@@ -688,10 +689,10 @@
 			});
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || 'Failed to delete execution');
+				throw new Error(data.error || $t('schedules.failedToDeleteExecution'));
 			}
 
-			toast.success('Execution deleted');
+			toast.success($t('schedules.executionDeleted'));
 
 			// Remove from the expanded executions list
 			const scheduleKey = schedule.type + '-' + schedule.id;
@@ -715,7 +716,7 @@
 			const executions = expandedExecutions.get(scheduleKey) || [];
 
 			if (executions.length === 0) {
-				toast.error('No executions to delete');
+				toast.error($t('schedules.noExecutionsToDelete'));
 				return;
 			}
 
@@ -726,7 +727,7 @@
 
 			await Promise.all(deletePromises);
 
-			toast.success(`Deleted ${executions.length} execution(s)`);
+			toast.success($t('schedules.deletedExecutions', { count: executions.length }));
 
 			// Clear from the expanded executions list
 			const newExecutionsMap = new Map(expandedExecutions);
@@ -741,7 +742,7 @@
 			// Refresh schedules to update the last execution badge
 			loadSchedules();
 		} catch (error: any) {
-			toast.error('Failed to delete executions: ' + error.message);
+			toast.error($t('schedules.failedToDeleteExecutions', { error: error.message }));
 		}
 	}
 
@@ -750,7 +751,7 @@
 		if (!tz) return formatDateTime(iso, true);
 		const d = new Date(iso);
 		if (isNaN(d.getTime())) return iso;
-		return new Intl.DateTimeFormat('en-GB', {
+		return new Intl.DateTimeFormat(getIntlLocale($locale), {
 			timeZone: tz,
 			year: 'numeric',
 			month: '2-digit',
@@ -775,10 +776,10 @@
 		const now = new Date();
 		const diff = date.getTime() - now.getTime();
 
-		if (diff < 0) return 'Overdue';
-		if (diff < 60000) return 'Less than 1 min';
-		if (diff < 3600000) return `In ${Math.floor(diff / 60000)} min`;
-		if (diff < 86400000) return `In ${Math.floor(diff / 3600000)} hours`;
+		if (diff < 0) return $t('schedules.overdue');
+		if (diff < 60000) return $t('schedules.lessThanOneMinute');
+		if (diff < 3600000) return $t('schedules.inMinutes', { count: Math.floor(diff / 60000) });
+		if (diff < 86400000) return $t('schedules.inHours', { count: Math.floor(diff / 3600000) });
 		return formatTimestamp(iso);
 	}
 
@@ -811,7 +812,7 @@
 			// Some updated, some blocked
 			return {
 				status: 'partial',
-				label: 'Partially blocked',
+				label: $t('schedules.partiallyBlocked'),
 				icon: Bug,
 				class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 			};
@@ -819,7 +820,7 @@
 			// All blocked, none updated
 			return {
 				status: 'blocked',
-				label: 'Blocked',
+				label: $t('schedules.blocked'),
 				icon: Bug,
 				class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 			};
@@ -832,19 +833,19 @@
 			case 'cron':
 				return {
 					icon: Timer,
-					label: 'Scheduled',
+					label: $t('schedules.trigger.cron'),
 					class: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
 				};
 			case 'webhook':
 				return {
 					icon: Webhook,
-					label: 'Webhook',
+					label: $t('schedules.trigger.webhook'),
 					class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 				};
 			case 'manual':
 				return {
 					icon: Hand,
-					label: 'Manual',
+					label: $t('schedules.trigger.manual'),
 					class: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
 				};
 			default:
@@ -853,6 +854,27 @@
 					label: trigger,
 					class: 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400'
 				};
+		}
+	}
+
+	function getScheduleTypeLabel(type: string): string {
+		return $t(`schedules.types.${type}`);
+	}
+
+	function getScheduleStatusLabel(status: string): string {
+		return $t(`schedules.status.${status}`);
+	}
+
+	function getExecutionTypeLabel(type: ScheduleExecution['scheduleType']): string {
+		switch (type) {
+			case 'container_update':
+				return $t('schedules.containerUpdate');
+			case 'env_update_check':
+				return $t('schedules.environmentUpdate');
+			case 'git_stack_sync':
+				return $t('schedules.gitStackSync');
+			default:
+				return $t('schedules.systemJob');
 		}
 	}
 
@@ -910,19 +932,19 @@
 </script>
 
 <svelte:head>
-	<title>Schedules - Dockhand</title>
+	<title>{$t('schedules.title')} - Dockhand</title>
 </svelte:head>
 
 <div class="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
 	<!-- Header with filters -->
 	<div class="shrink-0 flex flex-wrap justify-between items-center gap-3 min-h-8">
-		<PageHeader icon={Timer} title="Schedules" count={filteredSchedules.length} />
+		<PageHeader icon={Timer} title={$t('schedules.title')} count={filteredSchedules.length} />
 		<div class="flex flex-wrap items-center gap-2">
 			<div class="relative">
 				<Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 				<Input
 					type="text"
-					placeholder="Search schedules..."
+					placeholder={$t('schedules.searchPlaceholder')}
 					class="pl-9 w-48 h-8 text-sm"
 					bind:value={searchQuery}
 					onkeydown={(e) => e.key === 'Escape' && (searchQuery = '')}
@@ -934,21 +956,11 @@
 				<Select.Trigger size="sm" class="w-40 text-sm">
 					<span class="truncate">
 						{#if filterTypes.length === 0}
-							All types
+							{$t('schedules.allTypes')}
 						{:else if filterTypes.length === 1}
-							{#if filterTypes[0] === 'container_update'}
-								Container updates
-							{:else if filterTypes[0] === 'git_stack_sync'}
-								Git stack syncs
-							{:else if filterTypes[0] === 'env_update_check'}
-								Env update checks
-							{:else if filterTypes[0] === 'image_prune'}
-								Image prune
-							{:else}
-								System jobs
-							{/if}
+							{getScheduleTypeLabel(filterTypes[0])}
 						{:else}
-							{filterTypes.length} types
+							{$t('schedules.typesSelected', { count: filterTypes.length })}
 						{/if}
 					</span>
 				</Select.Trigger>
@@ -959,29 +971,29 @@
 							class="w-full px-2 py-1 text-xs text-left text-muted-foreground/60 hover:text-muted-foreground"
 							onclick={() => filterTypes = []}
 						>
-							Clear
+							{$t('filters.clear')}
 						</button>
 					{/if}
 					<Select.Item value="container_update">
 						<CircleArrowUp class="w-4 h-4 mr-2 inline text-green-500 drop-shadow-[0_0_3px_rgba(34,197,94,0.4)]" />
-						Container updates
+						{$t('schedules.types.container_update')}
 					</Select.Item>
 					<Select.Item value="git_stack_sync">
 						<GitBranch class="w-4 h-4 mr-2 inline text-purple-500 drop-shadow-[0_0_3px_rgba(168,85,247,0.4)]" />
-						Git stack syncs
+						{$t('schedules.types.git_stack_sync')}
 					</Select.Item>
 					<Select.Item value="env_update_check">
 						<CircleFadingArrowUp class="w-4 h-4 mr-2 inline text-green-500/50 drop-shadow-[0_0_3px_rgba(34,197,94,0.3)]" />
-						Env update checks
+						{$t('schedules.types.env_update_check')}
 					</Select.Item>
 					<Select.Item value="image_prune">
 						<Trash2 class="w-4 h-4 mr-2 inline text-amber-500 drop-shadow-[0_0_3px_rgba(245,158,11,0.4)]" />
-						Image prune
+						{$t('schedules.types.image_prune')}
 					</Select.Item>
 					{#if !hideSystemJobs}
 						<Select.Item value="system_cleanup">
 							<Wrench class="w-4 h-4 mr-2 inline text-amber-500 drop-shadow-[0_0_3px_rgba(245,158,11,0.4)]" />
-							System jobs
+							{$t('schedules.types.system_cleanup')}
 						</Select.Item>
 					{/if}
 				</Select.Content>
@@ -993,11 +1005,11 @@
 					<Server class="w-3.5 h-3.5 mr-2 shrink-0" />
 					<span class="truncate">
 						{#if filterEnvironments.length === 0}
-							All envs
+							{$t('schedules.allEnvironmentsShort')}
 						{:else if filterEnvironments.length === 1}
-							{environments.find(e => String(e.id) === filterEnvironments[0])?.name || 'Environment'}
+							{environments.find(e => String(e.id) === filterEnvironments[0])?.name || $t('schedules.environmentFallback')}
 						{:else}
-							{filterEnvironments.length} envs
+							{$t('schedules.environmentsSelected', { count: filterEnvironments.length })}
 						{/if}
 					</span>
 				</Select.Trigger>
@@ -1008,7 +1020,7 @@
 							class="w-full px-2 py-1 text-xs text-left text-muted-foreground/60 hover:text-muted-foreground"
 							onclick={() => filterEnvironments = []}
 						>
-							Clear
+							{$t('filters.clear')}
 						</button>
 					{/if}
 					{#each environments as env}
@@ -1025,21 +1037,11 @@
 				<Select.Trigger size="sm" class="w-36 text-sm">
 					<span class="truncate">
 						{#if filterStatuses.length === 0}
-							All statuses
+							{$t('schedules.allStatuses')}
 						{:else if filterStatuses.length === 1}
-							{#if filterStatuses[0] === 'success'}
-								Success
-							{:else if filterStatuses[0] === 'failed'}
-								Failed
-							{:else if filterStatuses[0] === 'skipped'}
-								Up-to-date
-							{:else if filterStatuses[0] === 'running'}
-								Running
-							{:else}
-								{filterStatuses[0]}
-							{/if}
+							{getScheduleStatusLabel(filterStatuses[0])}
 						{:else}
-							{filterStatuses.length} statuses
+							{$t('schedules.statusesSelected', { count: filterStatuses.length })}
 						{/if}
 					</span>
 				</Select.Trigger>
@@ -1050,24 +1052,24 @@
 							class="w-full px-2 py-1 text-xs text-left text-muted-foreground/60 hover:text-muted-foreground"
 							onclick={() => filterStatuses = []}
 						>
-							Clear
+							{$t('filters.clear')}
 						</button>
 					{/if}
 					<Select.Item value="success">
 						<Check class="w-4 h-4 mr-2 inline text-green-500" />
-						Success
+						{$t('schedules.status.success')}
 					</Select.Item>
 					<Select.Item value="failed">
 						<X class="w-4 h-4 mr-2 inline text-red-500" />
-						Failed
+						{$t('schedules.status.failed')}
 					</Select.Item>
 					<Select.Item value="skipped">
 						<CheckCheck class="w-4 h-4 mr-2 inline text-green-500" />
-						Up-to-date
+						{$t('schedules.status.skipped')}
 					</Select.Item>
 					<Select.Item value="running">
 						<Loader2 class="w-4 h-4 mr-2 inline text-sky-500 animate-spin" />
-						Running
+						{$t('schedules.status.running')}
 					</Select.Item>
 				</Select.Content>
 			</Select.Root>
@@ -1082,10 +1084,10 @@
 				>
 					{#if hideSystemJobs}
 						<Eye class="w-3.5 h-3.5" />
-						Show system ({systemJobCount})
+						{$t('schedules.showSystemJobsCount', { count: systemJobCount })}
 					{:else}
 						<EyeOff class="w-3.5 h-3.5" />
-						Hide system
+						{$t('schedules.hideSystemJobsShort')}
 					{/if}
 				</Button>
 			{/if}
@@ -1097,7 +1099,7 @@
 				class="h-8 px-2"
 				onclick={clearFilters}
 				disabled={!hasActiveFilters}
-				title="Clear all filters"
+				title={$t('filters.clearAllFilters')}
 			>
 				<X class="w-3.5 h-3.5" />
 			</Button>
@@ -1166,7 +1168,7 @@
 						<div class="font-medium flex items-center gap-2 truncate">
 							<span class="truncate">{schedule.name}</span>
 							{#if schedule.isSystem}
-								<Badge variant="outline" class="text-xs shrink-0">System</Badge>
+								<Badge variant="outline" class="text-xs shrink-0">{$t('schedules.systemBadge')}</Badge>
 							{/if}
 						</div>
 						<div class="text-xs text-muted-foreground flex items-center gap-1 truncate">
@@ -1175,29 +1177,29 @@
 									{@const criteria = (schedule.vulnerabilityCriteria || 'never') as VulnerabilityCriteria}
 									{@const icon = vulnerabilityCriteriaIcons[criteria]}
 									{@const IconComponent = icon.component}
-									<span class="cursor-default shrink-0" title={icon.title}>
+									<span class="cursor-default shrink-0" title={$t(`vulnerabilityCriteria.titles.${criteria}`)}>
 										<IconComponent class={icon.class} />
 									</span>
-									Check, scan & auto-update
+									{$t('schedules.descriptions.checkScanAutoUpdate')}
 								{:else}
-									Check & auto-update
+									{$t('schedules.descriptions.checkAutoUpdate')}
 								{/if}
 							{:else if schedule.type === 'git_stack_sync'}
-								Git sync
+								{$t('schedules.descriptions.gitSync')}
 							{:else if schedule.type === 'env_update_check'}
 								{#if schedule.autoUpdate && schedule.envHasScanning && schedule.vulnerabilityCriteria}
 									{@const criteria = schedule.vulnerabilityCriteria as VulnerabilityCriteria}
 									{@const icon = vulnerabilityCriteriaIcons[criteria]}
 									{@const IconComponent = icon.component}
-									<span class="cursor-default shrink-0" title={icon.title}>
+									<span class="cursor-default shrink-0" title={$t(`vulnerabilityCriteria.titles.${criteria}`)}>
 										<IconComponent class={icon.class} />
 									</span>
 								{/if}
-								<span class="truncate">{schedule.description || 'Env update check'}</span>
+								<span class="truncate">{schedule.description || $t('schedules.types.env_update_check')}</span>
 							{:else if schedule.type === 'image_prune'}
-								<span class="truncate">{schedule.description || 'Prune unused images'}</span>
+								<span class="truncate">{schedule.description || $t('schedules.descriptions.pruneUnusedImages')}</span>
 							{:else}
-								<span class="truncate">{schedule.description || 'System job'}</span>
+								<span class="truncate">{schedule.description || $t('schedules.systemJob')}</span>
 							{/if}
 						</div>
 					</div>
@@ -1218,6 +1220,7 @@
 						{#if schedule.cronExpression}
 							{(() => {
 								try {
+									if ($locale !== 'en') return schedule.cronExpression;
 									const is12Hour = $appSettings.timeFormat === '12h';
 									return cronstrue.toString(schedule.cronExpression, {
 										use24HourTimeFormat: !is12Hour,
@@ -1243,7 +1246,7 @@
 						</div>
 					{/if}
 				{:else}
-					<span class="text-muted-foreground text-xs">Never</span>
+					<span class="text-muted-foreground text-xs">{$t('common.states.never')}</span>
 				{/if}
 			{:else if column.id === 'nextRun'}
 				<span class="text-xs">{formatNextRun(schedule.nextRun)}</span>
@@ -1275,11 +1278,11 @@
 								{#if envUpdateStatus}
 									{envUpdateStatus.label}
 								{:else if isBlockedByVuln}
-									Update blocked due to vulnerabilities
+									{$t('schedules.updateBlocked')}
 								{:else if schedule.lastExecution.status === 'skipped'}
-									Up-to-date
+									{$t('schedules.status.skipped')}
 								{:else}
-									<span class="capitalize">{schedule.lastExecution.status}</span>
+									<span>{getScheduleStatusLabel(schedule.lastExecution.status)}</span>
 								{/if}
 							</p>
 						</Tooltip.Content>
@@ -1292,7 +1295,7 @@
 							</Badge>
 						</Tooltip.Trigger>
 						<Tooltip.Content>
-							<p class="whitespace-nowrap">No runs</p>
+							<p class="whitespace-nowrap">{$t('schedules.noRuns')}</p>
 						</Tooltip.Content>
 					</Tooltip.Root>
 				{/if}
@@ -1302,7 +1305,7 @@
 						<button
 							type="button"
 							onclick={(e) => { e.stopPropagation(); loadExecutionDetail(schedule.lastExecution!.id); }}
-							title="View last execution logs"
+							title={$t('schedules.viewLastExecutionLogs')}
 							class="p-0.5 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<FileText class="w-3 h-3 text-muted-foreground hover:text-blue-500" />
@@ -1312,7 +1315,7 @@
 						<button
 							type="button"
 							onclick={(e) => { e.stopPropagation(); toggleScheduleEnabled(schedule); }}
-							title={schedule.enabled ? 'Pause schedule' : 'Resume schedule'}
+							title={schedule.enabled ? $t('schedules.pauseSchedule') : $t('schedules.resumeSchedule')}
 							class="p-0.5 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							{#if schedule.enabled}
@@ -1326,7 +1329,7 @@
 						<button
 							type="button"
 							onclick={(e) => { e.stopPropagation(); triggerSchedule(schedule); }}
-							title="Run now"
+							title={$t('schedules.runNow')}
 							class="p-0.5 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<Play class="w-3 h-3 text-muted-foreground hover:text-green-500" />
@@ -1336,10 +1339,10 @@
 						{@const scheduleKey = getScheduleKey(schedule)}
 						<ConfirmPopover
 							open={confirmDeleteId === scheduleKey}
-							action="Remove"
-							itemType="schedule"
+							action={$t('common.actions.remove')}
+							itemType={$t('schedules.scheduleItemType')}
 							itemName={schedule.entityName}
-							title="Remove schedule"
+							title={$t('schedules.removeSchedule')}
 							onConfirm={() => deleteSchedule(schedule.type, schedule.id, schedule.entityName)}
 							onOpenChange={(open) => confirmDeleteId = open ? scheduleKey : null}
 						>
@@ -1359,16 +1362,16 @@
 			{@const canLoadMore = hasMoreExecutions.get(scheduleKey) ?? false}
 			<div class="p-4 pl-12 shadow-inner bg-muted isolate sticky left-0 max-w-[calc(100vw-18rem)]">
 				<div class="flex items-center justify-between mb-2">
-					<h4 class="text-xs font-medium">Execution history</h4>
+					<h4 class="text-xs font-medium">{$t('schedules.executionHistory')}</h4>
 					{#if executions.length > 0 && canEditSchedules}
 						<button
 							type="button"
 							onclick={() => deleteAllExecutions(schedule)}
-							title="Remove all executions"
+							title={$t('schedules.removeAllExecutions')}
 							class="text-xs text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1"
 						>
 							<Trash2 class="w-3 h-3" />
-							Remove all
+							{$t('schedules.removeAll')}
 						</button>
 					{/if}
 				</div>
@@ -1377,11 +1380,11 @@
 						<table class="w-full table-fixed">
 							<thead class="sticky top-0 bg-muted z-20">
 								<tr class="text-xs text-muted-foreground">
-									<th class="text-left px-2 py-1 w-36">Triggered</th>
-									<th class="text-center px-2 py-1 w-20">Trigger</th>
-									<th class="text-left px-2 py-1 w-20">Duration</th>
-									<th class="text-center px-2 py-1 w-14">Status</th>
-									<th class="text-left px-2 py-1">Error</th>
+									<th class="text-left px-2 py-1 w-36">{$t('schedules.triggered')}</th>
+									<th class="text-center px-2 py-1 w-20">{$t('common.labels.trigger')}</th>
+									<th class="text-left px-2 py-1 w-20">{$t('common.labels.duration')}</th>
+									<th class="text-center px-2 py-1 w-14">{$t('common.labels.status')}</th>
+									<th class="text-left px-2 py-1">{$t('common.labels.error')}</th>
 									<th class="text-left px-2 py-1 w-14"></th>
 								</tr>
 							</thead>
@@ -1420,7 +1423,7 @@
 													{/if}
 												</Tooltip.Trigger>
 												<Tooltip.Content side="left">
-													<p class="whitespace-nowrap">{exec.details?.reason === 'vulnerabilities_found' ? 'Update blocked due to vulnerabilities' : (exec.status === 'skipped' ? 'Up-to-date' : exec.status)}</p>
+													<p class="whitespace-nowrap">{exec.details?.reason === 'vulnerabilities_found' ? $t('schedules.updateBlocked') : getScheduleStatusLabel(exec.status)}</p>
 												</Tooltip.Content>
 											</Tooltip.Root>
 										</td>
@@ -1432,7 +1435,7 @@
 												<button
 													type="button"
 													onclick={() => loadExecutionDetail(exec.id)}
-													title="View logs"
+													title={$t('schedules.viewLogs')}
 													class="p-0.5 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 												>
 													<FileText class="w-3 h-3 text-muted-foreground hover:text-blue-500" />
@@ -1441,7 +1444,7 @@
 													<button
 														type="button"
 														onclick={() => deleteExecution(schedule, exec.id)}
-														title="Delete execution"
+														title={$t('schedules.deleteExecution')}
 														class="p-0.5 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 													>
 														<Trash2 class="w-3 h-3 text-muted-foreground hover:text-red-500" />
@@ -1463,9 +1466,9 @@
 								>
 									{#if isLoading}
 										<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-										Loading...
+										{$t('common.states.loading')}
 									{:else}
-										Load more
+										{$t('schedules.loadMore')}
 									{/if}
 								</Button>
 							</div>
@@ -1476,7 +1479,7 @@
 						<Loader2 class="w-6 h-6 animate-spin text-muted-foreground" />
 					</div>
 				{:else}
-					<p class="text-xs text-muted-foreground py-4">No executions found</p>
+					<p class="text-xs text-muted-foreground py-4">{$t('schedules.noExecutions')}</p>
 				{/if}
 			</div>
 		{/snippet}
@@ -1484,8 +1487,8 @@
 		{#snippet emptyState()}
 			<div class="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
 				<Calendar class="w-12 h-12" />
-				<p>No schedules found</p>
-				<p class="text-xs">Enable auto-update on containers or auto-sync on git stacks to see them here</p>
+				<p>{$t('schedules.noSchedules')}</p>
+				<p class="text-xs">{$t('schedules.emptyDescription')}</p>
 			</div>
 		{/snippet}
 	</DataGrid>
@@ -1509,10 +1512,10 @@
 				{:else}
 					<Wrench class="w-5 h-5 text-amber-500 drop-shadow-[0_0_3px_rgba(245,158,11,0.4)]" />
 				{/if}
-				Execution details
+				{$t('schedules.executionDetails')}
 				{#if selectedExecution}
 					<span class="text-muted-foreground font-normal">
-						({#if selectedExecution.scheduleType === 'container_update'}Container update{:else if selectedExecution.scheduleType === 'env_update_check'}Environment update{:else if selectedExecution.scheduleType === 'git_stack_sync'}Git stack sync{:else}System job{/if})
+						({getExecutionTypeLabel(selectedExecution.scheduleType)})
 					</span>
 				{/if}
 			</Dialog.Title>
@@ -1542,7 +1545,7 @@
 				<!-- Blocked containers list (scrollable) -->
 				{#if selectedExecution.details?.blockedContainers?.length > 0}
 					<div class="shrink-0">
-						<div class="text-xs text-muted-foreground mb-1.5">Blocked containers</div>
+						<div class="text-xs text-muted-foreground mb-1.5">{$t('schedules.blockedContainers')}</div>
 						<div class="bg-amber-500/5 border border-amber-500/20 rounded-lg max-h-48 overflow-auto">
 							<div class="divide-y divide-amber-500/10">
 								{#each selectedExecution.details.blockedContainers as bc}
@@ -1565,7 +1568,7 @@
 				<!-- Execution info -->
 				<div class="flex flex-wrap items-center gap-4 text-xs shrink-0">
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="text-muted-foreground">Status</span>
+						<span class="text-muted-foreground">{$t('common.labels.status')}</span>
 						{#if selectedExecution.status}
 							{@const badge = getStatusBadge(selectedExecution.status)}
 							{@const envUpdateStatus = getEnvUpdateStatus(selectedExecution)}
@@ -1579,19 +1582,19 @@
 							{:else if isBlockedByVuln}
 								<Badge variant="default" class="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
 									<Bug class="w-3 h-3 mr-1" />
-									<span>Blocked</span>
+									<span>{$t('schedules.blocked')}</span>
 								</Badge>
 							{:else}
 								{@const SelBadgeIcon = badge.icon}
 								<Badge variant={badge.variant} class={badge.class}>
 									<SelBadgeIcon class="w-3 h-3 mr-1" />
-									<span class="capitalize">{selectedExecution.status === 'skipped' ? 'Up-to-date' : selectedExecution.status}</span>
+									<span>{getScheduleStatusLabel(selectedExecution.status)}</span>
 								</Badge>
 							{/if}
 						{/if}
 					</div>
 					<div class="flex flex-wrap items-center gap-2">
-						<span class="text-muted-foreground">Trigger</span>
+						<span class="text-muted-foreground">{$t('common.labels.trigger')}</span>
 						{#if selectedExecution.triggeredBy}
 							{@const trigger = getTriggerBadge(selectedExecution.triggeredBy)}
 							{@const SelTriggerIcon = trigger.icon}
@@ -1603,7 +1606,7 @@
 					</div>
 					{#if selectedExecution.details?.vulnerabilityCriteria}
 						<div class="flex flex-wrap items-center gap-2">
-							<span class="text-muted-foreground">Update block criteria</span>
+							<span class="text-muted-foreground">{$t('schedules.updateBlockCriteria')}</span>
 							<VulnerabilityCriteriaBadge criteria={selectedExecution.details.vulnerabilityCriteria} showLabel />
 						</div>
 					{/if}
@@ -1612,10 +1615,10 @@
 				<!-- Block reason if update was blocked due to vulnerabilities -->
 				{#if selectedExecution.details?.reason === 'vulnerabilities_found'}
 					<div class="shrink-0">
-						<div class="text-xs text-muted-foreground mb-1">Block reason</div>
+						<div class="text-xs text-muted-foreground mb-1">{$t('schedules.blockReason')}</div>
 						<div class="bg-amber-500/10 border border-amber-500/30 rounded p-3 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
 							<Bug class="w-4 h-4 shrink-0" />
-							<span>{selectedExecution.details.blockReason || 'Update blocked due to vulnerabilities'}</span>
+							<span>{selectedExecution.details.blockReason || $t('schedules.updateBlocked')}</span>
 						</div>
 					</div>
 				{/if}
@@ -1625,15 +1628,15 @@
 					{@const summary = selectedExecution.details.scanResult.summary}
 					{@const scannerResults = selectedExecution.details.scanResult.scannerResults}
 					<div class="shrink-0">
-						<div class="text-xs text-muted-foreground mb-1">Vulnerability scan results</div>
+						<div class="text-xs text-muted-foreground mb-1">{$t('schedules.vulnerabilityScanResults')}</div>
 						<div class="border border-muted-foreground/20 rounded p-3">
 							<div class="mb-2">
 								<ScannerSeverityPills results={scannerResults ?? []} />
 							</div>
 							<div class="text-xs text-muted-foreground">
-								Scanned with {selectedExecution.details.scanResult.scanners?.join(', ') || 'scanner'}
+								{$t('schedules.scannedWith', { scanners: selectedExecution.details.scanResult.scanners?.join(', ') || $t('schedules.scannerFallback') })}
 								{#if selectedExecution.details.scanResult.scannedAt}
-									at {formatDateTime(selectedExecution.details.scanResult.scannedAt)}
+									{$t('schedules.scannedAt', { time: formatDateTime(selectedExecution.details.scanResult.scannedAt) })}
 								{/if}
 							</div>
 						</div>
@@ -1643,7 +1646,7 @@
 				<!-- Error message -->
 				{#if selectedExecution.errorMessage}
 					<div class="shrink-0">
-						<div class="text-xs text-muted-foreground mb-1">Error</div>
+						<div class="text-xs text-muted-foreground mb-1">{$t('common.labels.error')}</div>
 						<div class="bg-destructive/10 border border-destructive/20 rounded p-3 text-xs text-destructive">
 							{selectedExecution.errorMessage}
 						</div>
@@ -1663,7 +1666,7 @@
 			</div>
 		{/if}
 		<Dialog.Footer class="flex justify-end border-t pt-4">
-			<Button onclick={() => showExecutionDialog = false}>OK</Button>
+			<Button onclick={() => showExecutionDialog = false}>{$t('common.actions.confirm')}</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

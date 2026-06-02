@@ -6,6 +6,7 @@
 	import ConfirmPopover from '$lib/components/ConfirmPopover.svelte';
 	import { Plus, Upload, Trash2, List, FileText, AlertTriangle, ShieldAlert, HelpCircle, Info } from 'lucide-svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		variables: EnvVar[]; // Bindable - ALL variables (secrets + non-secrets)
@@ -109,7 +110,10 @@
 
 			const eqIndex = trimmed.indexOf('=');
 			if (eqIndex === -1) {
-				warnings.push(`Line ${lineNum}: "${trimmed.slice(0, 30)}${trimmed.length > 30 ? '...' : ''}" (no = found)`);
+				warnings.push(translate('stackEnvVarsPanel.parse.noEquals', {
+					line: lineNum,
+					value: `${trimmed.slice(0, 30)}${trimmed.length > 30 ? '...' : ''}`
+				}));
 				continue;
 			}
 
@@ -118,7 +122,7 @@
 
 			if (key) {
 				if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
-					warnings.push(`Line ${lineNum}: "${key}" (invalid variable name)`);
+					warnings.push(translate('stackEnvVarsPanel.parse.invalidName', { line: lineNum, key }));
 					continue;
 				}
 				result.push({ key, value, isSecret: false });
@@ -300,7 +304,7 @@
 		<!-- Header row: title + info + view toggle + validation pills + actions -->
 		<div class="flex items-center gap-2 justify-between">
 			<div class="flex items-center gap-2 flex-wrap min-w-0">
-				<span class="text-xs text-zinc-500 dark:text-zinc-400 shrink-0">Environment variables</span>
+				<span class="text-xs text-zinc-500 dark:text-zinc-400 shrink-0">{$t('stackEnvVarsPanel.title')}</span>
 			{#if infoText}
 				<Tooltip.Root>
 					<Tooltip.Trigger>
@@ -319,7 +323,7 @@
 					type="button"
 					class="flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs transition-colors {viewMode === 'form' ? 'bg-white dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
 					onclick={() => handleViewModeChange('form')}
-					title="Form view"
+					title={$t('stackEnvVarsPanel.view.form')}
 				>
 					<List class="w-3 h-3" />
 				</button>
@@ -327,7 +331,7 @@
 					type="button"
 					class="flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs transition-colors {viewMode === 'text' ? 'bg-white dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
 					onclick={() => handleViewModeChange('text')}
-					title="Text view (raw .env file)"
+					title={$t('stackEnvVarsPanel.view.text')}
 				>
 					<FileText class="w-3 h-3" />
 				</button>
@@ -337,17 +341,17 @@
 				<div class="flex gap-1 flex-wrap">
 					{#if validation.missing.length > 0}
 						<span class="inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-							{validation.missing.length} missing
+							{validation.missing.length} {$t('stackEnvVarsPanel.validation.missing')}
 						</span>
 					{/if}
 					{#if validation.required.length > 0}
 						<span class="inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
-							{validation.required.length - validation.missing.length} defined
+							{validation.required.length - validation.missing.length} {$t('stackEnvVarsPanel.validation.defined')}
 						</span>
 					{/if}
 					{#if validation.optional.length > 0}
 						<span class="inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-							{validation.optional.length} optional
+							{validation.optional.length} {$t('stackEnvVarsPanel.validation.optional')}
 						</span>
 					{/if}
 				</div>
@@ -361,20 +365,20 @@
 					{/if}
 					<Button type="button" size="sm" variant="ghost" onclick={handleLoadFromFile} class="h-6 text-xs px-2">
 						<Upload class="w-3.5 h-3.5" />
-						Load
+						{$t('stackEnvVarsPanel.actions.load')}
 					</Button>
 					{#if viewMode === 'form'}
 						<Button type="button" size="sm" variant="ghost" onclick={addEnvVariable} class="h-6 text-xs px-2">
 							<Plus class="w-3.5 h-3.5" />
-							Add
+							{$t('stackEnvVarsPanel.actions.add')}
 						</Button>
 					{/if}
 					<ConfirmPopover
 						bind:open={confirmClearOpen}
-						title="Clear all variables?"
-						action="clear"
-						itemType="environment variables"
-						confirmText="Clear all"
+						title={$t('stackEnvVarsPanel.actions.clearTitle')}
+						action={$t('stackEnvVarsPanel.actions.clearAction')}
+						itemType={$t('stackEnvVarsPanel.actions.clearItemType')}
+						confirmText={$t('stackEnvVarsPanel.actions.clearConfirm')}
 						onConfirm={clearAll}
 						onOpenChange={(o) => confirmClearOpen = o}
 					>
@@ -387,7 +391,7 @@
 								disabled={!hasContent}
 							>
 								<Trash2 class="w-3.5 h-3.5" />
-								Clear
+								{$t('stackEnvVarsPanel.actions.clear')}
 							</Button>
 						{/snippet}
 					</ConfirmPopover>
@@ -407,15 +411,14 @@
 				<div class="flex items-start gap-2 px-2.5 py-2 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
 					<Info class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
 					<p class="text-xs text-blue-700 dark:text-blue-300">
-						These variables are available for <strong>compose file interpolation</strong> using <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">${'{VAR_NAME}'}</code> syntax.
-						To pass them to containers, reference them in the compose file's <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">environment:</code> section.
+						{@html $t('stackEnvVarsPanel.interpolation.full')}
 					</p>
 				</div>
 			{/if}
 			<div class="flex flex-wrap gap-x-3 gap-y-0.5 text-2xs text-zinc-400 dark:text-zinc-500 font-mono">
-				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR}`}</span> required</span>
-				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR:-default}`}</span> optional</span>
-				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR:?error}`}</span> required w/ error</span>
+				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR}`}</span> {$t('stackEnvVarsPanel.syntax.required')}</span>
+				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR:-default}`}</span> {$t('stackEnvVarsPanel.syntax.optional')}</span>
+				<span><span class="text-zinc-500 dark:text-zinc-400">${`{VAR:?error}`}</span> {$t('stackEnvVarsPanel.syntax.requiredWithError')}</span>
 			</div>
 		{:else if showInterpolationHint && secretCount > 0}
 			<!-- Interpolation hint + secrets hint combined for text view -->
@@ -423,15 +426,14 @@
 				<div class="flex items-start gap-2 px-2.5 py-2 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
 					<Info class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
 					<p class="text-xs text-blue-700 dark:text-blue-300">
-						These variables are available for <strong>compose file interpolation</strong> using <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">${'{VAR_NAME}'}</code> syntax.
-						To pass them to containers, reference them in the compose file's <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">environment:</code> section.
+						{@html $t('stackEnvVarsPanel.interpolation.full')}
 					</p>
 				</div>
 				<div class="flex items-start gap-2 px-2.5 py-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
 					<ShieldAlert class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
 					<div class="text-xs text-amber-700 dark:text-amber-300">
-						<span class="font-medium">{secretCount} secret{secretCount === 1 ? '' : 's'} not shown.</span>
-						<span class="text-amber-600 dark:text-amber-400">Secrets are never written to disk and are injected via shell environment when the stack starts.</span>
+						<span class="font-medium">{$t(secretCount === 1 ? 'stackEnvVarsPanel.secrets.hiddenOne' : 'stackEnvVarsPanel.secrets.hiddenMany', { count: secretCount })}</span>
+						<span class="text-amber-600 dark:text-amber-400">{$t('stackEnvVarsPanel.secrets.storage')}</span>
 					</div>
 				</div>
 			</div>
@@ -440,8 +442,7 @@
 			<div class="flex items-start gap-2 px-2.5 py-2 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
 				<Info class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
 				<p class="text-xs text-blue-700 dark:text-blue-300">
-					These variables are available for <strong>compose file interpolation</strong> using <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">${'{VAR_NAME}'}</code> syntax.
-					To pass them to containers, reference them in the compose file's <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">environment:</code> section.
+					{@html $t('stackEnvVarsPanel.interpolation.full')}
 				</p>
 			</div>
 		{:else if secretCount > 0}
@@ -449,8 +450,8 @@
 			<div class="flex items-start gap-2 px-2.5 py-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
 				<ShieldAlert class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
 				<div class="text-xs text-amber-700 dark:text-amber-300">
-					<span class="font-medium">{secretCount} secret{secretCount === 1 ? '' : 's'} not shown.</span>
-					<span class="text-amber-600 dark:text-amber-400">Secrets are never written to disk and are injected via shell environment when the stack starts.</span>
+					<span class="font-medium">{$t(secretCount === 1 ? 'stackEnvVarsPanel.secrets.hiddenOne' : 'stackEnvVarsPanel.secrets.hiddenMany', { count: secretCount })}</span>
+					<span class="text-amber-600 dark:text-amber-400">{$t('stackEnvVarsPanel.secrets.storage')}</span>
 				</div>
 			</div>
 		{/if}
@@ -459,23 +460,23 @@
 			<div class="flex items-start gap-2 px-2 py-1.5 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
 				<AlertTriangle class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
 				<div class="text-2xs text-amber-700 dark:text-amber-300">
-					<span class="font-medium">Some lines couldn't be parsed:</span>
+					<span class="font-medium">{$t('stackEnvVarsPanel.parseWarnings.title')}</span>
 					<ul class="mt-0.5 list-disc list-inside">
 						{#each parseWarnings.slice(0, 3) as warning}
 							<li>{warning}</li>
 						{/each}
 						{#if parseWarnings.length > 3}
-							<li>...and {parseWarnings.length - 3} more</li>
+							<li>{$t('stackEnvVarsPanel.parseWarnings.more', { count: parseWarnings.length - 3 })}</li>
 						{/if}
 					</ul>
-					<p class="mt-1 text-amber-600 dark:text-amber-400">Switch to text view to edit these lines.</p>
+					<p class="mt-1 text-amber-600 dark:text-amber-400">{$t('stackEnvVarsPanel.parseWarnings.switchToText')}</p>
 				</div>
 			</div>
 		{/if}
 		<!-- Add missing variables (form mode only) -->
 		{#if viewMode === 'form' && validation && validation.missing.length > 0 && !readonly}
 			<div class="flex flex-wrap gap-1 items-center">
-				<span class="text-xs text-muted-foreground mr-1">Add missing:</span>
+				<span class="text-xs text-muted-foreground mr-1">{$t('stackEnvVarsPanel.missing.addMissing')}</span>
 				{#each validation.missing as missing}
 					<button
 						type="button"

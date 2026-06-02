@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Popover from '$lib/components/ui/popover';
 	import { iconMap, getIconComponent } from '$lib/utils/icons';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		value: string;
@@ -41,7 +42,7 @@
 		<div class="space-y-3">
 			<Input
 				bind:value={searchQuery}
-				placeholder="Search icons..."
+				placeholder={$t('iconPicker.searchPlaceholder')}
 				class="h-8"
 			/>
 			<div class="grid grid-cols-8 gap-1 max-h-48 overflow-y-auto">
@@ -58,7 +59,7 @@
 				{/each}
 			</div>
 			{#if filteredIcons.length === 0}
-				<p class="text-sm text-muted-foreground text-center py-2">No icons found</p>
+				<p class="text-sm text-muted-foreground text-center py-2">{$t('iconPicker.empty')}</p>
 			{/if}
 		</div>
 	</Popover.Content>

@@ -7,6 +7,7 @@
 	import { appendEnvParam } from '$lib/stores/environment';
 	import { watchJob } from '$lib/utils/sse-fetch';
 	import ScanResultsView from '../../routes/images/ScanResultsView.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	export interface ScanResult {
 		scanner: 'grype' | 'trivy';
@@ -132,12 +133,12 @@
 
 		status = 'scanning';
 		errorMessage = '';
-		scanMessage = 'Starting vulnerability scan...';
+		scanMessage = translate('imageScan.status.starting');
 		outputLines = [];
 		startTime = Date.now();
 		results = [];
 
-		addOutputLine(`[dockhand] Starting vulnerability scan for ${imageName}`);
+		addOutputLine(`[dockhand] ${translate('imageScan.output.starting', { image: imageName })}`);
 
 		try {
 			const url = appendEnvParam('/api/images/scan', envId);
@@ -202,7 +203,7 @@
 				// Global error
 				duration = Date.now() - startTime;
 				status = 'error';
-				errorMessage = data.error || data.message || 'Scan failed';
+				errorMessage = data.error || data.message || translate('imageScan.status.failed');
 				onError?.(errorMessage);
 			}
 		}
@@ -226,30 +227,30 @@
 			<div class="flex items-center gap-2">
 				{#if status === 'idle'}
 					<Shield class="w-4 h-4 text-muted-foreground" />
-					<span class="text-sm text-muted-foreground">Ready to scan</span>
+					<span class="text-sm text-muted-foreground">{$t('imageScan.status.ready')}</span>
 				{:else if status === 'scanning'}
 					<Loader2 class="w-4 h-4 animate-spin text-blue-600" />
-					<span class="text-sm">Scanning for vulnerabilities...</span>
+					<span class="text-sm">{$t('imageScan.status.scanningForVulnerabilities')}</span>
 				{:else if status === 'complete'}
 					{#if hasCriticalOrHigh}
 						<ShieldX class="w-4 h-4 text-red-500" />
-						<span class="text-sm text-red-500">Vulnerabilities found</span>
+						<span class="text-sm text-red-500">{$t('imageScan.status.vulnerabilitiesFound')}</span>
 					{:else if totalVulnerabilities > 0}
 						<ShieldAlert class="w-4 h-4 text-yellow-500" />
-						<span class="text-sm text-yellow-500">Some vulnerabilities found</span>
+						<span class="text-sm text-yellow-500">{$t('imageScan.status.someVulnerabilitiesFound')}</span>
 					{:else}
 						<ShieldCheck class="w-4 h-4 text-green-600" />
-						<span class="text-sm text-green-600">No vulnerabilities!</span>
+						<span class="text-sm text-green-600">{$t('imageScan.status.noVulnerabilities')}</span>
 					{/if}
 				{:else if status === 'error'}
 					<ShieldX class="w-4 h-4 text-red-600" />
-					<span class="text-sm text-red-600">Scan failed</span>
+					<span class="text-sm text-red-600">{$t('imageScan.status.failed')}</span>
 				{/if}
 			</div>
 			<div class="flex items-center gap-3">
 				{#if status === 'complete' && results.length > 0}
 					<Badge variant={hasCriticalOrHigh ? 'destructive' : totalVulnerabilities > 0 ? 'secondary' : 'outline'} class="text-xs">
-						{totalVulnerabilities} vulnerabilities
+						{$t('imageScan.vulnerabilityCount', { count: totalVulnerabilities })}
 					</Badge>
 				{/if}
 				<span class="text-xs text-muted-foreground min-w-12">
@@ -278,10 +279,10 @@
 	{#if status === 'idle'}
 		<div class="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
 			<Shield class="w-12 h-12 opacity-50" />
-			<p class="text-sm">Scan <code class="bg-muted px-1.5 py-0.5 rounded">{imageName}</code> for vulnerabilities</p>
+			<p class="text-sm">{$t('imageScan.scanImagePrefix')} <code class="bg-muted px-1.5 py-0.5 rounded">{imageName}</code> {$t('imageScan.scanImageSuffix')}</p>
 			<Button onclick={startScan}>
 				<Shield class="w-4 h-4" />
-				Start scan
+				{$t('imageScan.startScan')}
 			</Button>
 		</div>
 	{/if}
@@ -296,7 +297,7 @@
 					onclick={() => activeTab = 'output'}
 				>
 					<Terminal class="w-3 h-3 inline mr-1" />
-					Output
+					{$t('imageScan.tabs.output')}
 				</button>
 				<button
 					class="px-3 py-1.5 text-xs font-medium border-b-2 transition-colors cursor-pointer {activeTab === 'results' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}"
@@ -309,7 +310,7 @@
 					{:else}
 						<ShieldCheck class="w-3 h-3 inline mr-1 text-green-500" />
 					{/if}
-					Scan results
+					{$t('imageScan.tabs.results')}
 					<Badge variant={hasCriticalOrHigh ? 'destructive' : 'secondary'} class="ml-1 text-2xs py-0">
 						{totalVulnerabilities}
 					</Badge>
@@ -324,9 +325,9 @@
 				<div class="flex items-center justify-between text-xs text-muted-foreground mb-2 shrink-0">
 					<div class="flex items-center gap-2">
 						<Terminal class="w-3.5 h-3.5" />
-						<span>Output ({outputLines.length} lines)</span>
+						<span>{$t('imagePull.output.title', { count: outputLines.length })}</span>
 					</div>
-					<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title="Toggle log theme">
+					<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title={$t('executionLog.toggleTheme')}>
 						{#if logDarkMode}
 							<Sun class="w-3.5 h-3.5" />
 						{:else}
@@ -350,10 +351,10 @@
 								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-slate-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">dockhand</span>
 								<span>{line.slice(11)}</span>
 							{:else if line.startsWith('[scan]')}
-								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-violet-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">scan</span>
+								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-violet-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('imageScan.output.labels.scan')}</span>
 								<span>{line.slice(7)}</span>
 							{:else if line.startsWith('[error]')}
-								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">error</span>
+								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('common.labels.error')}</span>
 								<span class="text-red-400">{line.slice(8)}</span>
 							{:else}
 								<span>{line}</span>

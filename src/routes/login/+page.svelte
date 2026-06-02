@@ -12,6 +12,7 @@
 	import { appSettings } from '$lib/stores/settings';
 	import * as Alert from '$lib/components/ui/alert';
 	import { themeStore, applyTheme } from '$lib/stores/theme';
+	import { t } from '$lib/i18n';
 
 	interface AuthProvider {
 		id: string;
@@ -110,7 +111,7 @@
 			}
 
 			if (!result.success) {
-				error = result.error || 'Login failed';
+				error = result.error || $t('auth.errors.loginFailed');
 				loading = false;
 				return;
 			}
@@ -120,7 +121,7 @@
 			await environments.refresh();
 			goto(redirectUrl);
 		} catch (e) {
-			error = 'An unexpected error occurred';
+			error = $t('auth.errors.unexpected');
 			loading = false;
 		}
 	}
@@ -136,7 +137,7 @@
 			const initiateUrl = `${provider.initiateUrl}?redirect=${encodeURIComponent(redirectUrl)}`;
 			window.location.href = initiateUrl;
 		} catch (e) {
-			error = 'Failed to initiate SSO login';
+			error = $t('auth.errors.sso');
 			ssoLoading = null;
 		}
 	}
@@ -149,7 +150,7 @@
 </script>
 
 <svelte:head>
-	<title>Login - Dockhand</title>
+	<title>{$t('meta.loginTitle')}</title>
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-background p-4">
@@ -167,12 +168,12 @@
 					class="h-16 w-auto object-contain hidden dark:block"
 				/>
 			</div>
-			<Card.Title class="text-2xl font-bold">Welcome back</Card.Title>
+			<Card.Title class="text-2xl font-bold">{$t('auth.welcomeBack')}</Card.Title>
 			<Card.Description>
 				{#if requiresMfa}
-					Enter your two-factor authentication code
+					{$t('auth.mfaDescription')}
 				{:else}
-					Sign in to your Dockhand account
+					{$t('auth.signInDescription')}
 				{/if}
 			</Card.Description>
 		</Card.Header>
@@ -200,7 +201,7 @@
 							{:else}
 								<KeyRound class="h-5 w-5" />
 							{/if}
-							<span>Continue with {provider.name}</span>
+							<span>{$t('auth.continueWith', { provider: provider.name })}</span>
 						</Button>
 					{/each}
 				</div>
@@ -211,7 +212,7 @@
 							<span class="w-full border-t"></span>
 						</div>
 						<div class="relative flex justify-center text-xs uppercase">
-							<span class="bg-card px-2 text-muted-foreground">or continue with</span>
+							<span class="bg-card px-2 text-muted-foreground">{$t('auth.orContinueWith')}</span>
 						</div>
 					</div>
 				{/if}
@@ -222,7 +223,7 @@
 					{#if !requiresMfa}
 						{#if credentialProviders.length > 1}
 							<div class="space-y-2">
-								<Label>Sign in with</Label>
+								<Label>{$t('auth.signInWith')}</Label>
 								<div class="grid gap-2">
 									{#each credentialProviders as provider}
 										{@const Icon = getProviderIcon(provider.type)}
@@ -239,11 +240,11 @@
 												<div class="font-medium text-sm">{provider.name}</div>
 												<div class="text-xs text-muted-foreground">
 													{#if provider.type === 'local'}
-														Local account
+														{$t('auth.providers.localAccount')}
 													{:else if provider.type === 'ldap'}
-														LDAP directory
+														{$t('auth.providers.ldapDirectory')}
 													{:else}
-														Single sign-on
+														{$t('auth.providers.singleSignOn')}
 													{/if}
 												</div>
 											</div>
@@ -257,11 +258,11 @@
 						{/if}
 
 						<div class="space-y-2">
-							<Label for="username">Username</Label>
+							<Label for="username">{$t('auth.username')}</Label>
 							<Input
 								id="username"
 								type="text"
-								placeholder="Enter your username"
+								placeholder={$t('auth.usernamePlaceholder')}
 								bind:value={username}
 								required
 								disabled={loading}
@@ -271,11 +272,11 @@
 						</div>
 
 						<div class="space-y-2">
-							<Label for="password">Password</Label>
+							<Label for="password">{$t('auth.password')}</Label>
 							<Input
 								id="password"
 								type="password"
-								placeholder="Enter your password"
+								placeholder={$t('auth.passwordPlaceholder')}
 								bind:value={password}
 								required
 								disabled={loading}
@@ -286,14 +287,14 @@
 						<div class="space-y-2">
 							<div class="flex items-center gap-2 text-sm text-muted-foreground mb-4">
 								<Shield class="h-4 w-4" />
-								<span>Two-factor authentication required</span>
+								<span>{$t('auth.mfaRequired')}</span>
 							</div>
-							<Label for="mfaToken">Authentication code</Label>
+							<Label for="mfaToken">{$t('auth.authenticationCode')}</Label>
 							<Input
 								id="mfaToken"
 								name="totp"
 								type="text"
-								placeholder="Enter code"
+								placeholder={$t('auth.codePlaceholder')}
 								bind:value={mfaToken}
 								required
 								disabled={loading}
@@ -301,7 +302,7 @@
 								autofocus
 							/>
 							<p class="text-xs text-muted-foreground">
-								Enter the 6-digit code from your authenticator app, or use a backup code
+								{$t('auth.codeHelp')}
 							</p>
 						</div>
 					{/if}
@@ -309,10 +310,10 @@
 					<Button type="submit" class="w-full" disabled={loading}>
 						{#if loading}
 							<Loader2 class="mr-2 h-4 w-4 animate-spin" />
-							{requiresMfa ? 'Verifying...' : 'Signing in...'}
+							{requiresMfa ? $t('auth.verifying') : $t('auth.signingIn')}
 						{:else}
 							<LogIn class="mr-2 h-4 w-4" />
-							{requiresMfa ? 'Verify' : 'Sign in'}
+							{requiresMfa ? $t('auth.verify') : $t('auth.signIn')}
 						{/if}
 					</Button>
 
@@ -327,7 +328,7 @@
 								error = null;
 							}}
 						>
-							Back to login
+							{$t('auth.backToLogin')}
 						</Button>
 					{/if}
 				</form>
@@ -335,7 +336,7 @@
 		</Card.Content>
 
 		<Card.Footer class="flex flex-col space-y-2 text-center text-sm text-muted-foreground">
-			<p>Dockhand Docker Management</p>
+			<p>{$t('auth.footer')}</p>
 		</Card.Footer>
 	</Card.Root>
 </div>

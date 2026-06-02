@@ -40,9 +40,11 @@ export type TimeFormat = '12h' | '24h';
 export type DateFormat = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD' | 'DD.MM.YYYY';
 export type DownloadFormat = 'tar' | 'tar.gz';
 export type EventCollectionMode = 'stream' | 'poll';
+export type Locale = 'en' | 'zh-CN';
 
 export interface GeneralSettings {
 	confirmDestructive: boolean;
+	language: Locale;
 	showStoppedContainers: boolean;
 	highlightUpdates: boolean;
 	timeFormat: TimeFormat;
@@ -93,6 +95,7 @@ export interface GeneralSettings {
 
 const DEFAULT_SETTINGS: Omit<GeneralSettings, 'scheduleRetentionDays' | 'eventRetentionDays' | 'scheduleCleanupCron' | 'eventCleanupCron' | 'scheduleCleanupEnabled' | 'eventCleanupEnabled' | 'scannerCleanupCron' | 'scannerCleanupEnabled'> = {
 	confirmDestructive: true,
+	language: 'en',
 	showStoppedContainers: true,
 	highlightUpdates: true,
 	timeFormat: '24h',
@@ -147,6 +150,7 @@ const VALID_FONT_SIZES = ['xsmall', 'small', 'normal', 'medium', 'large', 'xlarg
 const VALID_TERMINAL_FONTS = ['system-mono', 'jetbrains-mono', 'fira-code', 'source-code-pro', 'cascadia-code', 'ibm-plex-mono', 'roboto-mono', 'ubuntu-mono', 'space-mono', 'inconsolata', 'hack', 'anonymous-pro', 'dm-mono', 'red-hat-mono', 'menlo', 'consolas', 'sf-mono'];
 const VALID_EDITOR_FONTS = VALID_TERMINAL_FONTS;
 
+const VALID_LOCALES: Locale[] = ['en', 'zh-CN'];
 const VALID_DATE_FORMATS: DateFormat[] = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'];
 
 export const GET: RequestHandler = async ({ cookies }) => {
@@ -161,6 +165,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		// Fetch all settings in parallel for better performance
 		const [
 			confirmDestructive,
+			language,
 			showStoppedContainers,
 			highlightUpdates,
 			timeFormat,
@@ -199,6 +204,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			labelFilterMode
 		] = await Promise.all([
 			getSetting('confirm_destructive'),
+			getSetting('language'),
 			getSetting('show_stopped_containers'),
 			getSetting('highlight_updates'),
 			getSetting('time_format'),
@@ -239,6 +245,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
 		const settings: GeneralSettings = {
 			confirmDestructive: confirmDestructive ?? DEFAULT_SETTINGS.confirmDestructive,
+			language: (VALID_LOCALES.includes(language as Locale) ? language : DEFAULT_SETTINGS.language) as Locale,
 			showStoppedContainers: showStoppedContainers ?? DEFAULT_SETTINGS.showStoppedContainers,
 			highlightUpdates: highlightUpdates ?? DEFAULT_SETTINGS.highlightUpdates,
 			timeFormat: timeFormat ?? DEFAULT_SETTINGS.timeFormat,
@@ -292,10 +299,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 	try {
 		const body = await request.json();
-		const { confirmDestructive, showStoppedContainers, highlightUpdates, timeFormat, dateFormat, downloadFormat, defaultGrypeArgs, defaultTrivyArgs, scheduleRetentionDays, eventRetentionDays, scheduleCleanupCron, eventCleanupCron, scheduleCleanupEnabled, eventCleanupEnabled, scannerCleanupCron, scannerCleanupEnabled, logBufferSizeKb, defaultTimezone, eventCollectionMode, eventPollInterval, metricsCollectionInterval, lightTheme, darkTheme, font, fontSize, gridFontSize, terminalFont, editorFont, compactPorts, showExposedPorts, formatLogTimestamps, externalStackPaths, primaryStackLocation, defaultGrypeImage, defaultTrivyImage, defaultComposeTemplate, labelFilterMode } = body;
+		const { confirmDestructive, language, showStoppedContainers, highlightUpdates, timeFormat, dateFormat, downloadFormat, defaultGrypeArgs, defaultTrivyArgs, scheduleRetentionDays, eventRetentionDays, scheduleCleanupCron, eventCleanupCron, scheduleCleanupEnabled, eventCleanupEnabled, scannerCleanupCron, scannerCleanupEnabled, logBufferSizeKb, defaultTimezone, eventCollectionMode, eventPollInterval, metricsCollectionInterval, lightTheme, darkTheme, font, fontSize, gridFontSize, terminalFont, editorFont, compactPorts, showExposedPorts, formatLogTimestamps, externalStackPaths, primaryStackLocation, defaultGrypeImage, defaultTrivyImage, defaultComposeTemplate, labelFilterMode } = body;
 
 		if (confirmDestructive !== undefined) {
 			await setSetting('confirm_destructive', confirmDestructive);
+		}
+		if (language !== undefined && VALID_LOCALES.includes(language)) {
+			await setSetting('language', language);
 		}
 		if (showStoppedContainers !== undefined) {
 			await setSetting('show_stopped_containers', showStoppedContainers);
@@ -432,6 +442,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Fetch all settings in parallel for the response
 		const [
 			confirmDestructiveVal,
+			languageVal,
 			showStoppedContainersVal,
 			highlightUpdatesVal,
 			timeFormatVal,
@@ -470,6 +481,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			labelFilterModeVal
 		] = await Promise.all([
 			getSetting('confirm_destructive'),
+			getSetting('language'),
 			getSetting('show_stopped_containers'),
 			getSetting('highlight_updates'),
 			getSetting('time_format'),
@@ -510,6 +522,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		const settings: GeneralSettings = {
 			confirmDestructive: confirmDestructiveVal ?? DEFAULT_SETTINGS.confirmDestructive,
+			language: (VALID_LOCALES.includes(languageVal as Locale) ? languageVal : DEFAULT_SETTINGS.language) as Locale,
 			showStoppedContainers: showStoppedContainersVal ?? DEFAULT_SETTINGS.showStoppedContainers,
 			highlightUpdates: highlightUpdatesVal ?? DEFAULT_SETTINGS.highlightUpdates,
 			timeFormat: timeFormatVal ?? DEFAULT_SETTINGS.timeFormat,

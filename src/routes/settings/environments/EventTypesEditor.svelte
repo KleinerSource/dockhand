@@ -10,16 +10,17 @@
 		ChevronDown,
 		ChevronRight
 	} from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	interface EventType {
 		id: string;
-		label: string;
-		description: string;
+		labelKey: string;
+		descriptionKey: string;
 	}
 
 	interface EventGroup {
 		id: string;
-		label: string;
+		labelKey: string;
 		icon: typeof Box;
 		events: EventType[];
 	}
@@ -47,73 +48,73 @@
 	const NOTIFICATION_EVENT_GROUPS: EventGroup[] = [
 		{
 			id: 'container',
-			label: 'Container events',
+			labelKey: 'settings.environments.events.groups.container',
 			icon: Box,
 			events: [
-				{ id: 'container_started', label: 'Container started', description: 'When a container starts running' },
-				{ id: 'container_stopped', label: 'Container stopped', description: 'When a container is stopped' },
-				{ id: 'container_restarted', label: 'Container restarted', description: 'When a container restarts' },
-				{ id: 'container_exited', label: 'Container exited', description: 'When a container exits unexpectedly' },
-				{ id: 'container_unhealthy', label: 'Container unhealthy', description: 'When a container health check fails' },
-				{ id: 'container_healthy', label: 'Container healthy', description: 'When a container health check recovers' },
-				{ id: 'container_oom', label: 'Container OOM killed', description: 'When a container is killed due to out of memory' },
-				{ id: 'container_updated', label: 'Container updated', description: 'When a container image is updated' }
+				{ id: 'container_started', labelKey: 'settings.environments.events.types.containerStarted.label', descriptionKey: 'settings.environments.events.types.containerStarted.description' },
+				{ id: 'container_stopped', labelKey: 'settings.environments.events.types.containerStopped.label', descriptionKey: 'settings.environments.events.types.containerStopped.description' },
+				{ id: 'container_restarted', labelKey: 'settings.environments.events.types.containerRestarted.label', descriptionKey: 'settings.environments.events.types.containerRestarted.description' },
+				{ id: 'container_exited', labelKey: 'settings.environments.events.types.containerExited.label', descriptionKey: 'settings.environments.events.types.containerExited.description' },
+				{ id: 'container_unhealthy', labelKey: 'settings.environments.events.types.containerUnhealthy.label', descriptionKey: 'settings.environments.events.types.containerUnhealthy.description' },
+				{ id: 'container_healthy', labelKey: 'settings.environments.events.types.containerHealthy.label', descriptionKey: 'settings.environments.events.types.containerHealthy.description' },
+				{ id: 'container_oom', labelKey: 'settings.environments.events.types.containerOom.label', descriptionKey: 'settings.environments.events.types.containerOom.description' },
+				{ id: 'container_updated', labelKey: 'settings.environments.events.types.containerUpdated.label', descriptionKey: 'settings.environments.events.types.containerUpdated.description' }
 			]
 		},
 		{
 			id: 'auto_update',
-			label: 'Auto-update events',
+			labelKey: 'settings.environments.events.groups.autoUpdate',
 			icon: RefreshCw,
 			events: [
-				{ id: 'auto_update_success', label: 'Update succeeded', description: 'Container successfully updated to new image' },
-				{ id: 'auto_update_failed', label: 'Update failed', description: 'Container auto-update failed' },
-				{ id: 'auto_update_blocked', label: 'Update blocked', description: 'Update blocked due to vulnerability criteria' },
-				{ id: 'updates_detected', label: 'Updates detected', description: 'Container image updates are available' },
-				{ id: 'batch_update_success', label: 'Batch update completed', description: 'Scheduled container updates completed' }
+				{ id: 'auto_update_success', labelKey: 'settings.environments.events.types.autoUpdateSuccess.label', descriptionKey: 'settings.environments.events.types.autoUpdateSuccess.description' },
+				{ id: 'auto_update_failed', labelKey: 'settings.environments.events.types.autoUpdateFailed.label', descriptionKey: 'settings.environments.events.types.autoUpdateFailed.description' },
+				{ id: 'auto_update_blocked', labelKey: 'settings.environments.events.types.autoUpdateBlocked.label', descriptionKey: 'settings.environments.events.types.autoUpdateBlocked.description' },
+				{ id: 'updates_detected', labelKey: 'settings.environments.events.types.updatesDetected.label', descriptionKey: 'settings.environments.events.types.updatesDetected.description' },
+				{ id: 'batch_update_success', labelKey: 'settings.environments.events.types.batchUpdateSuccess.label', descriptionKey: 'settings.environments.events.types.batchUpdateSuccess.description' }
 			]
 		},
 		{
 			id: 'git_stack',
-			label: 'Git stack events',
+			labelKey: 'settings.environments.events.groups.gitStack',
 			icon: GitBranch,
 			events: [
-				{ id: 'git_sync_success', label: 'Git sync succeeded', description: 'Git stack synced and deployed successfully' },
-				{ id: 'git_sync_failed', label: 'Git sync failed', description: 'Git stack sync or deploy failed' },
-				{ id: 'git_sync_skipped', label: 'Git sync skipped', description: 'Git stack sync skipped (no changes)' }
+				{ id: 'git_sync_success', labelKey: 'settings.environments.events.types.gitSyncSuccess.label', descriptionKey: 'settings.environments.events.types.gitSyncSuccess.description' },
+				{ id: 'git_sync_failed', labelKey: 'settings.environments.events.types.gitSyncFailed.label', descriptionKey: 'settings.environments.events.types.gitSyncFailed.description' },
+				{ id: 'git_sync_skipped', labelKey: 'settings.environments.events.types.gitSyncSkipped.label', descriptionKey: 'settings.environments.events.types.gitSyncSkipped.description' }
 			]
 		},
 		{
 			id: 'stack',
-			label: 'Stack events',
+			labelKey: 'settings.environments.events.groups.stack',
 			icon: Layers,
 			events: [
-				{ id: 'stack_started', label: 'Stack started', description: 'When a compose stack starts' },
-				{ id: 'stack_stopped', label: 'Stack stopped', description: 'When a compose stack stops' },
-				{ id: 'stack_deployed', label: 'Stack deployed', description: 'Stack deployed (new or update)' },
-				{ id: 'stack_deploy_failed', label: 'Stack deploy failed', description: 'Stack deployment failed' }
+				{ id: 'stack_started', labelKey: 'settings.environments.events.types.stackStarted.label', descriptionKey: 'settings.environments.events.types.stackStarted.description' },
+				{ id: 'stack_stopped', labelKey: 'settings.environments.events.types.stackStopped.label', descriptionKey: 'settings.environments.events.types.stackStopped.description' },
+				{ id: 'stack_deployed', labelKey: 'settings.environments.events.types.stackDeployed.label', descriptionKey: 'settings.environments.events.types.stackDeployed.description' },
+				{ id: 'stack_deploy_failed', labelKey: 'settings.environments.events.types.stackDeployFailed.label', descriptionKey: 'settings.environments.events.types.stackDeployFailed.description' }
 			]
 		},
 		{
 			id: 'security',
-			label: 'Security events',
+			labelKey: 'settings.environments.events.groups.security',
 			icon: Shield,
 			events: [
-				{ id: 'vulnerability_critical', label: 'Critical vulns found', description: 'Critical vulnerabilities found in image scan' },
-				{ id: 'vulnerability_high', label: 'High vulns found', description: 'High severity vulnerabilities found' },
-				{ id: 'vulnerability_any', label: 'Any vulns found', description: 'Any vulnerabilities found (medium/low)' }
+				{ id: 'vulnerability_critical', labelKey: 'settings.environments.events.types.vulnerabilityCritical.label', descriptionKey: 'settings.environments.events.types.vulnerabilityCritical.description' },
+				{ id: 'vulnerability_high', labelKey: 'settings.environments.events.types.vulnerabilityHigh.label', descriptionKey: 'settings.environments.events.types.vulnerabilityHigh.description' },
+				{ id: 'vulnerability_any', labelKey: 'settings.environments.events.types.vulnerabilityAny.label', descriptionKey: 'settings.environments.events.types.vulnerabilityAny.description' }
 			]
 		},
 		{
 			id: 'system',
-			label: 'System events',
+			labelKey: 'settings.environments.events.groups.system',
 			icon: HardDrive,
 			events: [
-				{ id: 'image_pulled', label: 'Image pulled', description: 'When a new image is pulled' },
-				{ id: 'image_prune_success', label: 'Image prune completed', description: 'Scheduled image prune completed successfully' },
-				{ id: 'image_prune_failed', label: 'Image prune failed', description: 'Scheduled image prune failed' },
-				{ id: 'environment_offline', label: 'Environment offline', description: 'Environment became unreachable' },
-				{ id: 'environment_online', label: 'Environment online', description: 'Environment came back online' },
-				{ id: 'disk_space_warning', label: 'Disk space warning', description: 'Docker disk usage exceeds threshold' }
+				{ id: 'image_pulled', labelKey: 'settings.environments.events.types.imagePulled.label', descriptionKey: 'settings.environments.events.types.imagePulled.description' },
+				{ id: 'image_prune_success', labelKey: 'settings.environments.events.types.imagePruneSuccess.label', descriptionKey: 'settings.environments.events.types.imagePruneSuccess.description' },
+				{ id: 'image_prune_failed', labelKey: 'settings.environments.events.types.imagePruneFailed.label', descriptionKey: 'settings.environments.events.types.imagePruneFailed.description' },
+				{ id: 'environment_offline', labelKey: 'settings.environments.events.types.environmentOffline.label', descriptionKey: 'settings.environments.events.types.environmentOffline.description' },
+				{ id: 'environment_online', labelKey: 'settings.environments.events.types.environmentOnline.label', descriptionKey: 'settings.environments.events.types.environmentOnline.description' },
+				{ id: 'disk_space_warning', labelKey: 'settings.environments.events.types.diskSpaceWarning.label', descriptionKey: 'settings.environments.events.types.diskSpaceWarning.description' }
 			]
 		}
 	];
@@ -174,7 +175,7 @@
 						<ChevronDown class="w-4 h-4 text-muted-foreground" />
 					{/if}
 					<GroupIcon class="w-4 h-4 text-muted-foreground" />
-					<span class="text-sm font-medium">{group.label}</span>
+					<span class="text-sm font-medium">{$t(group.labelKey)}</span>
 					<span class="text-xs text-muted-foreground">
 						({selectedCount}/{group.events.length})
 					</span>
@@ -185,7 +186,7 @@
 					onclick={(e) => { e.stopPropagation(); toggleGroupAll(group); }}
 					{disabled}
 				>
-					{allSelected ? 'All' : someSelected ? 'Some' : 'None'}
+					{allSelected ? $t('settings.environments.events.selection.all') : someSelected ? $t('settings.environments.events.selection.some') : $t('settings.environments.events.selection.none')}
 				</button>
 			</div>
 
@@ -196,8 +197,8 @@
 						{@const isSelected = selectedEventTypes.includes(event.id)}
 						<div class="flex items-center justify-between pl-3 pr-1 py-1.5 hover:bg-muted/40 transition-colors border-b border-border/30 last:border-b-0">
 							<div class="flex-1 min-w-0 pr-2">
-								<div class="text-xs font-medium">{event.label}</div>
-								<div class="text-2xs text-muted-foreground truncate">{event.description}</div>
+								<div class="text-xs font-medium">{$t(event.labelKey)}</div>
+								<div class="text-2xs text-muted-foreground truncate">{$t(event.descriptionKey)}</div>
 							</div>
 							<TogglePill
 								checked={isSelected}

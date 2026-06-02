@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { translate } from '$lib/i18n';
 	import { themeStore } from '$lib/stores/theme';
 	import { getMonospaceFont } from '$lib/themes';
 
@@ -75,7 +76,7 @@
 			ws = null;
 		}
 		connected = false;
-		terminal?.writeln('\x1b[90m\r\nReconnecting...\x1b[0m');
+		terminal?.writeln(`\x1b[90m\r\n${translate('terminal.reconnecting')}\x1b[0m`);
 		connect();
 	}
 
@@ -183,8 +184,8 @@
 			wsUrl += `&envId=${envId}`;
 		}
 
-		terminal.writeln(`\x1b[90mConnecting to ${containerName}...\x1b[0m`);
-		terminal.writeln(`\x1b[90mShell: ${shell}, User: ${user || 'default'}\x1b[0m`);
+		terminal.writeln(`\x1b[90m${translate('terminal.connectingTo', { name: containerName })}\x1b[0m`);
+		terminal.writeln(`\x1b[90m${translate('terminal.sessionContext', { shell, user: user || translate('terminal.defaultUser') })}\x1b[0m`);
 		terminal.writeln('');
 
 		ws = new WebSocket(wsUrl);
@@ -207,9 +208,9 @@
 					terminal?.write(msg.data);
 				} else if (msg.type === 'error') {
 					error = msg.message;
-					terminal?.writeln(`\x1b[31mError: ${msg.message}\x1b[0m`);
+					terminal?.writeln(`\x1b[31m${translate('terminal.errorWithMessage', { message: msg.message })}\x1b[0m`);
 				} else if (msg.type === 'exit') {
-					terminal?.writeln('\x1b[90m\r\nSession ended.\x1b[0m');
+					terminal?.writeln(`\x1b[90m\r\n${translate('terminal.sessionEnded')}\x1b[0m`);
 					connected = false;
 				}
 			} catch {
@@ -218,13 +219,13 @@
 		};
 
 		ws.onerror = () => {
-			error = 'Connection error';
-			terminal?.writeln('\x1b[31mConnection error\x1b[0m');
+			error = translate('terminal.connectionError');
+			terminal?.writeln(`\x1b[31m${translate('terminal.connectionError')}\x1b[0m`);
 		};
 
 		ws.onclose = () => {
 			connected = false;
-			terminal?.writeln('\x1b[90mDisconnected.\x1b[0m');
+			terminal?.writeln(`\x1b[90m${translate('terminal.disconnectedLine')}\x1b[0m`);
 		};
 	}
 

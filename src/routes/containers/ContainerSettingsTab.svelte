@@ -13,6 +13,7 @@
 	import AutoUpdateSettings from './AutoUpdateSettings.svelte';
 	import type { VulnerabilityCriteria } from '$lib/components/VulnerabilityCriteriaSelector.svelte';
 	import type { SystemContainerType } from '$lib/types';
+	import { t } from '$lib/i18n';
 
 	// Detect system containers (must match server-side logic in update-utils.ts)
 	function detectSystemContainer(imageName: string): SystemContainerType | null {
@@ -554,24 +555,24 @@
 			<div class="flex items-center gap-3">
 				<Package class="w-5 h-5 text-muted-foreground" />
 				<div>
-					<p class="text-sm font-medium">Image: <code class="bg-muted px-1.5 py-0.5 rounded">{image || 'Not set'}</code></p>
+					<p class="text-sm font-medium">{$t('common.labels.image')}: <code class="bg-muted px-1.5 py-0.5 rounded">{image || $t('containers.settings.notSet')}</code></p>
 					{#if imageSummary.isPulling || imageSummary.isScanning}
 						<p class="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
 							<Loader2 class="w-3 h-3 animate-spin" />
-							{imageSummary.isScanning ? 'Scanning...' : 'Pulling...'}
+							{imageSummary.isScanning ? $t('containers.settings.imageSummary.scanning') : $t('containers.settings.imageSummary.pulling')}
 						</p>
 					{:else if imageSummary.imageReady}
 						<p class="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
 							<CheckCircle2 class="w-3 h-3" />
-							Image pulled and ready
+							{$t('containers.settings.imageSummary.ready')}
 							{#if imageSummary.scanResults && imageSummary.scanResults.length > 0}
-								• <span class="{imageSummary.hasCriticalOrHigh ? 'text-red-600' : (imageSummary.totalVulnerabilities ?? 0) > 0 ? 'text-amber-600' : 'text-green-600'}">{imageSummary.totalVulnerabilities ?? 0} vulnerabilities</span>
+								• <span class="{imageSummary.hasCriticalOrHigh ? 'text-red-600' : (imageSummary.totalVulnerabilities ?? 0) > 0 ? 'text-amber-600' : 'text-green-600'}">{$t('containers.settings.imageSummary.vulnerabilities', { count: imageSummary.totalVulnerabilities ?? 0 })}</span>
 							{/if}
 						</p>
 					{:else if !image}
 						<p class="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
 							<AlertTriangle class="w-3 h-3" />
-							Go to "Pull" tab to set the image
+							{$t('containers.settings.imageSummary.setImageInPull')}
 						</p>
 					{/if}
 				</div>
@@ -584,13 +585,13 @@
 		<div class="space-y-2">
 			<div class="flex items-center gap-2 pb-2 border-b">
 				<Settings2 class="w-4 h-4 text-muted-foreground" />
-				<h3 class="text-sm font-semibold text-foreground">{mode === 'edit' ? 'Apply config set' : 'Config set'}</h3>
+				<h3 class="text-sm font-semibold text-foreground">{mode === 'edit' ? $t('containers.settings.configSet.apply') : $t('containers.settings.configSet.title')}</h3>
 			</div>
 			<div class="flex gap-2 items-end">
 				<div class="flex-1">
 					<Select.Root type="single" value={selectedConfigSetId} onValueChange={applyConfigSet}>
 						<Select.Trigger class="w-full h-9">
-							<span>{selectedConfigSetId ? configSets.find(c => c.id === parseInt(selectedConfigSetId))?.name : (mode === 'edit' ? 'Select a config set to merge values...' : 'Select a config set to pre-fill values...')}</span>
+							<span>{selectedConfigSetId ? configSets.find(c => c.id === parseInt(selectedConfigSetId))?.name : (mode === 'edit' ? $t('containers.settings.configSet.selectMerge') : $t('containers.settings.configSet.selectPrefill'))}</span>
 						</Select.Trigger>
 						<Select.Content>
 							{#each configSets as configSet}
@@ -608,7 +609,7 @@
 				</div>
 			</div>
 			{#if mode === 'edit'}
-				<p class="text-xs text-muted-foreground">Note: Values from the config set will be merged with existing settings. Existing keys won't be overwritten.</p>
+				<p class="text-xs text-muted-foreground">{$t('containers.settings.configSet.mergeNote')}</p>
 			{/if}
 		</div>
 	{/if}
@@ -616,12 +617,12 @@
 	<!-- Basic Settings -->
 	<div class="space-y-3">
 		<div class="flex items-center gap-2 pb-2 border-b">
-			<h3 class="text-sm font-semibold text-foreground">Basic settings</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('containers.settings.sections.basic')}</h3>
 		</div>
 
 		<div class="grid grid-cols-2 gap-3">
 			<div class="space-y-1.5">
-				<Label for="name" class="text-xs font-medium">Container name *</Label>
+				<Label for="name" class="text-xs font-medium">{$t('common.labels.containerName')} *</Label>
 				<Input
 					id="name"
 					bind:value={name}
@@ -636,7 +637,7 @@
 			</div>
 			{#if mode === 'edit'}
 				<div class="space-y-1.5">
-					<Label for="image" class="text-xs font-medium">Image *</Label>
+					<Label for="image" class="text-xs font-medium">{$t('common.labels.image')} *</Label>
 					<Input
 						id="image"
 						bind:value={image}
@@ -653,13 +654,13 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<Label for="command" class="text-xs font-medium">Command (optional)</Label>
+			<Label for="command" class="text-xs font-medium">{$t('containers.settings.labels.commandOptional')}</Label>
 			<Input id="command" bind:value={command} placeholder="/bin/sh -c 'echo hello'" class="h-9" />
 		</div>
 
 		<div class="grid grid-cols-2 gap-3">
 			<div class="space-y-1.5">
-				<Label class="text-xs font-medium">Restart policy</Label>
+				<Label class="text-xs font-medium">{$t('containers.settings.labels.restartPolicy')}</Label>
 				<Select.Root type="single" bind:value={restartPolicy}>
 					<Select.Trigger id="restartPolicy" tabindex={0} class="w-full h-9">
 						<span class="flex items-center">
@@ -672,53 +673,53 @@
 							{:else}
 								<PauseCircle class="w-3.5 h-3.5 mr-2 text-blue-500" />
 							{/if}
-							{restartPolicy === 'no' ? 'No' : restartPolicy === 'always' ? 'Always' : restartPolicy === 'on-failure' ? 'On failure' : 'Unless stopped'}
+							{restartPolicy === 'no' ? $t('containers.settings.restartPolicies.no') : restartPolicy === 'always' ? $t('containers.settings.restartPolicies.always') : restartPolicy === 'on-failure' ? $t('containers.settings.restartPolicies.onFailure') : $t('containers.settings.restartPolicies.unlessStopped')}
 						</span>
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="no">
 							{#snippet children()}
 								<Ban class="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-								No
+								{$t('containers.settings.restartPolicies.no')}
 							{/snippet}
 						</Select.Item>
 						<Select.Item value="always">
 							{#snippet children()}
 								<RotateCw class="w-3.5 h-3.5 mr-2 text-green-500" />
-								Always
+								{$t('containers.settings.restartPolicies.always')}
 							{/snippet}
 						</Select.Item>
 						<Select.Item value="on-failure">
 							{#snippet children()}
 								<AlertTriangle class="w-3.5 h-3.5 mr-2 text-amber-500" />
-								On failure
+								{$t('containers.settings.restartPolicies.onFailure')}
 							{/snippet}
 						</Select.Item>
 						<Select.Item value="unless-stopped">
 							{#snippet children()}
 								<PauseCircle class="w-3.5 h-3.5 mr-2 text-blue-500" />
-								Unless stopped
+								{$t('containers.settings.restartPolicies.unlessStopped')}
 							{/snippet}
 						</Select.Item>
 					</Select.Content>
 				</Select.Root>
 				{#if restartPolicy === 'on-failure'}
 					<div class="space-y-1.5 mt-2">
-						<Label class="text-xs font-medium">Max retry count</Label>
+						<Label class="text-xs font-medium">{$t('containers.settings.labels.maxRetryCount')}</Label>
 						<Input
 							type="number"
 							bind:value={restartMaxRetries}
-							placeholder="Unlimited"
+							placeholder={$t('containers.settings.placeholders.unlimited')}
 							min="0"
 							class="h-9"
 						/>
-						<p class="text-xs text-muted-foreground">Leave empty for unlimited retries</p>
+						<p class="text-xs text-muted-foreground">{$t('containers.settings.help.unlimitedRetries')}</p>
 					</div>
 				{/if}
 			</div>
 
 			<div class="space-y-1.5">
-				<Label class="text-xs font-medium">Network mode</Label>
+				<Label class="text-xs font-medium">{$t('containers.settings.labels.networkMode')}</Label>
 				<Select.Root type="single" bind:value={networkMode}>
 					<Select.Trigger id="networkMode" tabindex={0} class="w-full h-9">
 						<span class="flex items-center">
@@ -729,26 +730,26 @@
 							{:else}
 								<CircleOff class="w-3.5 h-3.5 mr-2 text-muted-foreground" />
 							{/if}
-							{networkMode === 'bridge' ? 'Bridge' : networkMode === 'host' ? 'Host' : 'None'}
+							{networkMode === 'bridge' ? $t('containers.settings.networkModes.bridge') : networkMode === 'host' ? $t('containers.settings.networkModes.host') : $t('containers.settings.networkModes.none')}
 						</span>
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="bridge">
 							{#snippet children()}
 								<Share2 class="w-3.5 h-3.5 mr-2 text-emerald-500" />
-								Bridge
+								{$t('containers.settings.networkModes.bridge')}
 							{/snippet}
 						</Select.Item>
 						<Select.Item value="host">
 							{#snippet children()}
 								<Server class="w-3.5 h-3.5 mr-2 text-sky-500" />
-								Host
+								{$t('containers.settings.networkModes.host')}
 							{/snippet}
 						</Select.Item>
 						<Select.Item value="none">
 							{#snippet children()}
 								<CircleOff class="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-								None
+								{$t('containers.settings.networkModes.none')}
 							{/snippet}
 						</Select.Item>
 					</Select.Content>
@@ -757,12 +758,12 @@
 		</div>
 
 		<div class="flex items-center gap-3 pt-1">
-			<Label class="text-xs font-normal">Pull image before update</Label>
+			<Label class="text-xs font-normal">{$t('containers.settings.labels.pullImageBeforeUpdate')}</Label>
 			<TogglePill bind:checked={repullImage} />
 		</div>
 
 		<div class="flex items-center gap-3 pt-1">
-			<Label class="text-xs font-normal">Start container after {mode === 'create' ? 'creation' : 'update'}</Label>
+			<Label class="text-xs font-normal">{$t(mode === 'create' ? 'containers.settings.labels.startAfterCreation' : 'containers.settings.labels.startAfterUpdate')}</Label>
 			<TogglePill bind:checked={startAfterCreate} />
 		</div>
 	</div>
@@ -773,14 +774,14 @@
 			<div class="flex justify-between items-center pb-2 border-b">
 				<div class="flex items-center gap-2">
 					<Network class="w-4 h-4 text-muted-foreground" />
-					<h3 class="text-sm font-semibold text-foreground">Networks</h3>
+					<h3 class="text-sm font-semibold text-foreground">{$t('common.labels.networks')}</h3>
 				</div>
 			</div>
 
 			<div class="space-y-2">
 				<Select.Root type="single" value="" onValueChange={addNetwork}>
 					<Select.Trigger tabindex={0} class="w-full h-9">
-						<span class="text-muted-foreground">Select network to add...</span>
+						<span class="text-muted-foreground">{$t('containers.settings.placeholders.selectNetwork')}</span>
 					</Select.Trigger>
 					<Select.Content>
 						{#each availableNetworks.filter(n => !selectedNetworks.includes(n.name) && !['bridge', 'host', 'none'].includes(n.name)) as network}
@@ -818,7 +819,7 @@
 											<span class={getDriverBadgeClasses(network.driver)}>{network.driver}</span>
 										{/if}
 										{#if hasNetworkConfig(networkName)}
-											<Badge variant="secondary" class="text-2xs">configured</Badge>
+											<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 										{/if}
 									</button>
 									<button
@@ -833,7 +834,7 @@
 									<div class="px-2.5 pb-2.5 pt-1 border-t space-y-2">
 										<div class="grid grid-cols-2 gap-2">
 											<div class="space-y-1">
-												<Label class="text-2xs font-medium text-muted-foreground">IPv4 address</Label>
+												<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.network.ipv4')} {$t('common.labels.ipAddress')}</Label>
 												<Input
 													bind:value={networkConfigs[networkName].ipv4Address}
 													placeholder="e.g., 172.28.0.100"
@@ -844,7 +845,7 @@
 												{/if}
 											</div>
 											<div class="space-y-1">
-												<Label class="text-2xs font-medium text-muted-foreground">IPv6 address</Label>
+												<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.network.ipv6')} {$t('common.labels.ipAddress')}</Label>
 												<Input
 													bind:value={networkConfigs[networkName].ipv6Address}
 													placeholder="e.g., fd00::100"
@@ -856,7 +857,7 @@
 											</div>
 										</div>
 										<div class="space-y-1">
-											<Label class="text-2xs font-medium text-muted-foreground">Aliases (comma-separated)</Label>
+											<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.settings.labels.aliasesCommaSeparated')}</Label>
 											<Input
 												bind:value={networkConfigs[networkName].aliases}
 												placeholder="e.g., myalias, web"
@@ -872,7 +873,7 @@
 
 				<!-- MAC Address -->
 				<div class="space-y-1 pt-1">
-					<Label class="text-xs font-medium">MAC address</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.macAddress')}</Label>
 					<Input
 						bind:value={macAddress}
 						placeholder="e.g., 02:42:ac:11:00:02"
@@ -884,7 +885,7 @@
 				</div>
 
 				{#if mode === 'edit'}
-					<p class="text-xs text-muted-foreground">Container will be connected to selected networks in addition to the network mode above</p>
+					<p class="text-xs text-muted-foreground">{$t('containers.settings.help.additionalNetworks')}</p>
 				{/if}
 			</div>
 		</div>
@@ -893,10 +894,10 @@
 	<!-- Port Mappings -->
 	<div class="space-y-2">
 		<div class="flex justify-between items-center pb-2 border-b">
-			<h3 class="text-sm font-semibold text-foreground">Port mappings</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('containers.settings.sections.portMappings')}</h3>
 			<Button type="button" size="sm" variant="ghost" onclick={addPortMapping} class="h-7 text-xs">
 				<Plus class="w-3.5 h-3.5" />
-				Add
+				{$t('common.actions.add')}
 			</Button>
 		</div>
 
@@ -909,14 +910,14 @@
 				<div class="flex flex-col gap-1">
 					<div class="flex gap-2 items-center">
 						<div class="flex-1 relative group/port">
-							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Host</span>
+							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('common.labels.host')}</span>
 							<Input bind:value={mapping.hostPort} type="text" placeholder="e.g. 8080 or 127.0.0.1:8080" class="h-9 {(hostPortError || hostIpError) && mapping.hostPort ? 'border-destructive' : ''}" />
 							<button
 								type="button"
 								class="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-primary transition-colors opacity-0 group-hover/port:opacity-100"
 								onclick={() => findFreePort(index)}
 								disabled={findingFreePort}
-								title="Find next available Docker port"
+								title={$t('containers.settings.tooltips.findFreePort')}
 							>
 								{#if findingFreePort}
 									<Loader2 class="w-3.5 h-3.5 animate-spin" />
@@ -926,7 +927,7 @@
 							</button>
 						</div>
 						<div class="flex-1 relative">
-							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Container</span>
+							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('common.labels.container')}</span>
 							<Input bind:value={mapping.containerPort} type="text" placeholder="e.g. 8080 or 8000-8005" class="h-9 {containerPortError && mapping.containerPort ? 'border-destructive' : ''}" />
 						</div>
 					<ToggleGroup
@@ -958,27 +959,27 @@
 						<CircleHelp class="w-3.5 h-3.5 text-muted-foreground/70 cursor-help shrink-0" />
 					</Tooltip.Trigger>
 					<Tooltip.Content class="max-w-xs text-xs" side="right">
-						<p class="font-medium mb-1">Supported host port formats:</p>
+						<p class="font-medium mb-1">{$t('containers.settings.portHelp.supportedFormats')}</p>
 						<ul class="space-y-0.5 text-muted-foreground">
-							<li><code class="text-foreground">8080</code> — bind to all interfaces</li>
-							<li><code class="text-foreground">127.0.0.1:8080</code> — bind to specific IP</li>
-							<li><code class="text-foreground">8000-8005</code> — port range (container port must also be a range)</li>
-							<li>Leave host port empty for random allocation</li>
+							<li><code class="text-foreground">8080</code> - {$t('containers.settings.portHelp.allInterfaces')}</li>
+							<li><code class="text-foreground">127.0.0.1:8080</code> - {$t('containers.settings.portHelp.specificIp')}</li>
+							<li><code class="text-foreground">8000-8005</code> - {$t('containers.settings.portHelp.portRange')}</li>
+							<li>{$t('containers.settings.portHelp.randomAllocation')}</li>
 						</ul>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			</Tooltip.Provider>
-			Hover the host port field and click the search icon to find the next available port.
+			{$t('containers.settings.portHelp.findFreePort')}
 		</p>
 	</div>
 
 	<!-- Volume Mappings -->
 	<div class="space-y-2">
 		<div class="flex justify-between items-center pb-2 border-b">
-			<h3 class="text-sm font-semibold text-foreground">Volume mappings</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('containers.settings.sections.volumeMappings')}</h3>
 			<Button type="button" size="sm" variant="ghost" onclick={addVolumeMapping} class="h-7 text-xs">
 				<Plus class="w-3.5 h-3.5" />
-				Add
+				{$t('common.actions.add')}
 			</Button>
 		</div>
 
@@ -986,11 +987,11 @@
 			{#each volumeMappings as mapping, index}
 				<div class="flex gap-2 items-center">
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Host path</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.hostPath')}</span>
 						<Input bind:value={mapping.hostPath} class="h-9" />
 					</div>
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Container path</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.containerPath')}</span>
 						<Input bind:value={mapping.containerPath} class="h-9" />
 					</div>
 					<ToggleGroup
@@ -1016,10 +1017,10 @@
 	<!-- Environment Variables -->
 	<div class="space-y-2">
 		<div class="flex justify-between items-center pb-2 border-b">
-			<h3 class="text-sm font-semibold text-foreground">Environment variables</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('containers.settings.sections.environmentVariables')}</h3>
 			<Button type="button" size="sm" variant="ghost" onclick={addEnvVar} class="h-7 text-xs">
 				<Plus class="w-3.5 h-3.5" />
-				Add
+				{$t('common.actions.add')}
 			</Button>
 		</div>
 
@@ -1027,11 +1028,11 @@
 			{#each envVars as envVar, index}
 				<div class="flex gap-2 items-center">
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Key</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.key')}</span>
 						<Input bind:value={envVar.key} class="h-9" />
 					</div>
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Value</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.value')}</span>
 						<Input bind:value={envVar.value} class="h-9" />
 					</div>
 					<Button
@@ -1052,10 +1053,10 @@
 	<!-- Labels -->
 	<div class="space-y-2">
 		<div class="flex justify-between items-center pb-2 border-b">
-			<h3 class="text-sm font-semibold text-foreground">Labels</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('common.labels.labels')}</h3>
 			<Button type="button" size="sm" variant="ghost" onclick={addLabel} class="h-7 text-xs">
 				<Plus class="w-3.5 h-3.5" />
-				Add
+				{$t('common.actions.add')}
 			</Button>
 		</div>
 
@@ -1063,11 +1064,11 @@
 			{#each labels as label, index}
 				<div class="flex gap-2 items-center">
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Key</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.key')}</span>
 						<Input bind:value={label.key} class="h-9" />
 					</div>
 					<div class="flex-1 relative">
-						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">Value</span>
+						<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('containers.settings.labels.value')}</span>
 						<Input bind:value={label.value} class="h-9" />
 					</div>
 					<Button
@@ -1087,7 +1088,7 @@
 
 	<!-- Advanced Options Header -->
 	<div class="pt-2">
-		<p class="text-xs text-muted-foreground mb-3">Advanced container options (click to expand)</p>
+		<p class="text-xs text-muted-foreground mb-3">{$t('containers.settings.advancedHint')}</p>
 	</div>
 
 	<!-- Resources Section (Collapsible) -->
@@ -1099,9 +1100,9 @@
 		>
 			<div class="flex items-center gap-2">
 				<Cpu class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">Resources</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.resources')}</span>
 				{#if memoryLimit || nanoCpus || cpuShares}
-					<Badge variant="secondary" class="text-2xs">configured</Badge>
+					<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 				{/if}
 			</div>
 			{#if showResources}
@@ -1112,37 +1113,37 @@
 		</button>
 		{#if showResources}
 			<div class="px-3 pb-3 space-y-3 border-t">
-				<p class="text-xs text-muted-foreground pt-2">Configure memory and CPU limits for this container</p>
+				<p class="text-xs text-muted-foreground pt-2">{$t('containers.settings.help.resourceLimits')}</p>
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
-						<Label for="memoryLimit" class="text-xs font-medium">Memory limit</Label>
+						<Label for="memoryLimit" class="text-xs font-medium">{$t('containers.settings.labels.memoryLimit')}</Label>
 						<Input id="memoryLimit" bind:value={memoryLimit} placeholder="e.g., 512m, 1g" class="h-9" />
 					</div>
 					<div class="space-y-1.5">
-						<Label for="memoryReservation" class="text-xs font-medium">Memory reservation</Label>
+						<Label for="memoryReservation" class="text-xs font-medium">{$t('containers.settings.labels.memoryReservation')}</Label>
 						<Input id="memoryReservation" bind:value={memoryReservation} placeholder="e.g., 256m" class="h-9" />
 					</div>
 				</div>
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
-						<Label for="nanoCpus" class="text-xs font-medium">CPU limit</Label>
+						<Label for="nanoCpus" class="text-xs font-medium">{$t('containers.settings.labels.cpuLimit')}</Label>
 						<Input id="nanoCpus" bind:value={nanoCpus} placeholder="e.g., 0.5, 1.5, 2" class="h-9" />
 					</div>
 					<div class="space-y-1.5">
-						<Label for="cpuShares" class="text-xs font-medium">CPU shares</Label>
+						<Label for="cpuShares" class="text-xs font-medium">{$t('containers.settings.labels.cpuShares')}</Label>
 						<Input id="cpuShares" bind:value={cpuShares} type="number" placeholder="1024" class="h-9" />
 					</div>
 				</div>
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
-						<Label for="cpuQuota" class="text-xs font-medium">CPU quota</Label>
+						<Label for="cpuQuota" class="text-xs font-medium">{$t('containers.settings.labels.cpuQuota')}</Label>
 						<Input id="cpuQuota" bind:value={cpuQuota} type="number" placeholder="e.g., 50000" class="h-9" />
-						<p class="text-xs text-muted-foreground">Microseconds per period</p>
+						<p class="text-xs text-muted-foreground">{$t('containers.settings.help.microsecondsPerPeriod')}</p>
 					</div>
 					<div class="space-y-1.5">
-						<Label for="cpuPeriod" class="text-xs font-medium">CPU period</Label>
-						<Input id="cpuPeriod" bind:value={cpuPeriod} type="number" placeholder="Default: 100000" class="h-9" />
-						<p class="text-xs text-muted-foreground">Period in microseconds</p>
+						<Label for="cpuPeriod" class="text-xs font-medium">{$t('containers.settings.labels.cpuPeriod')}</Label>
+						<Input id="cpuPeriod" bind:value={cpuPeriod} type="number" placeholder={$t('containers.settings.placeholders.defaultCpuPeriod')} class="h-9" />
+						<p class="text-xs text-muted-foreground">{$t('containers.settings.help.periodInMicroseconds')}</p>
 					</div>
 				</div>
 			</div>
@@ -1158,9 +1159,9 @@
 		>
 			<div class="flex items-center gap-2">
 				<Shield class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">Security</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.security')}</span>
 				{#if privilegedMode || containerUser || capAdd.length > 0 || capDrop.length > 0 || securityOptions.length > 0}
-					<Badge variant="secondary" class="text-2xs">configured</Badge>
+					<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 				{/if}
 			</div>
 			{#if showSecurity}
@@ -1173,7 +1174,7 @@
 			<div class="px-3 pb-3 space-y-3 border-t">
 				<div class="grid grid-cols-2 gap-3 pt-2">
 					<div class="space-y-1.5">
-						<Label for="containerUser" class="text-xs font-medium">User</Label>
+						<Label for="containerUser" class="text-xs font-medium">{$t('common.labels.user')}</Label>
 						<Input id="containerUser" bind:value={containerUser} placeholder="user:group or UID:GID" class="h-9" />
 					</div>
 					<div class="space-y-1.5 flex flex-col justify-center pt-4">
@@ -1181,17 +1182,17 @@
 							<Checkbox id="privilegedMode" bind:checked={privilegedMode} />
 							<Label for="privilegedMode" class="text-xs font-normal flex items-center gap-1">
 								<Lock class="w-3 h-3 text-amber-500" />
-								Privileged mode
+								{$t('containers.settings.labels.privilegedMode')}
 							</Label>
 						</div>
 					</div>
 				</div>
 
 				<div class="space-y-2">
-					<Label class="text-xs font-medium">Add capabilities</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.addCapabilities')}</Label>
 					<Select.Root type="single" value="" onValueChange={(v) => { addCapability('add', v); }}>
 						<Select.Trigger class="h-9">
-							<span class="text-muted-foreground">Select capability to add...</span>
+							<span class="text-muted-foreground">{$t('containers.settings.placeholders.selectCapabilityAdd')}</span>
 						</Select.Trigger>
 						<Select.Content>
 							{#each commonCapabilities.filter(c => !capAdd.includes(c)) as cap}
@@ -1214,10 +1215,10 @@
 				</div>
 
 				<div class="space-y-2">
-					<Label class="text-xs font-medium">Drop capabilities</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.dropCapabilities')}</Label>
 					<Select.Root type="single" value="" onValueChange={(v) => { addCapability('drop', v); }}>
 						<Select.Trigger class="h-9">
-							<span class="text-muted-foreground">Select capability to drop...</span>
+							<span class="text-muted-foreground">{$t('containers.settings.placeholders.selectCapabilityDrop')}</span>
 						</Select.Trigger>
 						<Select.Content>
 							{#each commonCapabilities.filter(c => !capDrop.includes(c)) as cap}
@@ -1240,7 +1241,7 @@
 				</div>
 
 				<div class="space-y-2 pt-2 border-t">
-					<Label class="text-xs font-medium">Security options</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.securityOptions')}</Label>
 					<div class="flex gap-2">
 						<Input
 							bind:value={securityOptionInput}
@@ -1264,7 +1265,7 @@
 							{/each}
 						</div>
 					{/if}
-					<p class="text-xs text-muted-foreground">Common options: no-new-privileges, seccomp=unconfined, apparmor=unconfined</p>
+					<p class="text-xs text-muted-foreground">{$t('containers.settings.help.commonSecurityOptions')}</p>
 				</div>
 			</div>
 		{/if}
@@ -1279,9 +1280,9 @@
 		>
 			<div class="flex items-center gap-2">
 				<HeartPulse class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">Healthcheck</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.healthcheck')}</span>
 				{#if healthcheckEnabled}
-					<Badge variant="secondary" class="text-2xs">enabled</Badge>
+					<Badge variant="secondary" class="text-2xs">{$t('common.states.enabled')}</Badge>
 				{/if}
 			</div>
 			{#if showHealth}
@@ -1294,28 +1295,28 @@
 			<div class="px-3 pb-3 space-y-3 border-t">
 				<div class="flex items-center space-x-2 pt-2">
 					<Checkbox id="healthcheckEnabled" bind:checked={healthcheckEnabled} />
-					<Label for="healthcheckEnabled" class="text-xs font-normal">Enable healthcheck</Label>
+					<Label for="healthcheckEnabled" class="text-xs font-normal">{$t('containers.settings.labels.enableHealthcheck')}</Label>
 				</div>
 				{#if healthcheckEnabled}
 					<div class="space-y-1.5">
-						<Label for="healthcheckCommand" class="text-xs font-medium">Command</Label>
+						<Label for="healthcheckCommand" class="text-xs font-medium">{$t('common.labels.command')}</Label>
 						<Input id="healthcheckCommand" bind:value={healthcheckCommand} placeholder="e.g., curl -f http://localhost/ || exit 1" class="h-9" />
 					</div>
 					<div class="grid grid-cols-4 gap-3">
 						<div class="space-y-1.5">
-							<Label for="healthcheckInterval" class="text-xs font-medium">Interval (s)</Label>
+							<Label for="healthcheckInterval" class="text-xs font-medium">{$t('containers.settings.labels.intervalSeconds')}</Label>
 							<Input id="healthcheckInterval" type="number" bind:value={healthcheckInterval} min="1" class="h-9" />
 						</div>
 						<div class="space-y-1.5">
-							<Label for="healthcheckTimeout" class="text-xs font-medium">Timeout (s)</Label>
+							<Label for="healthcheckTimeout" class="text-xs font-medium">{$t('containers.settings.labels.timeoutSeconds')}</Label>
 							<Input id="healthcheckTimeout" type="number" bind:value={healthcheckTimeout} min="1" class="h-9" />
 						</div>
 						<div class="space-y-1.5">
-							<Label for="healthcheckRetries" class="text-xs font-medium">Retries</Label>
+							<Label for="healthcheckRetries" class="text-xs font-medium">{$t('containers.settings.labels.retries')}</Label>
 							<Input id="healthcheckRetries" type="number" bind:value={healthcheckRetries} min="1" class="h-9" />
 						</div>
 						<div class="space-y-1.5">
-							<Label for="healthcheckStartPeriod" class="text-xs font-medium">Start (s)</Label>
+							<Label for="healthcheckStartPeriod" class="text-xs font-medium">{$t('containers.settings.labels.startSeconds')}</Label>
 							<Input id="healthcheckStartPeriod" type="number" bind:value={healthcheckStartPeriod} min="0" class="h-9" />
 						</div>
 					</div>
@@ -1333,9 +1334,9 @@
 		>
 			<div class="flex items-center gap-2">
 				<Wifi class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">DNS settings</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.dns')}</span>
 				{#if dnsServers.length > 0 || dnsSearch.length > 0}
-					<Badge variant="secondary" class="text-2xs">configured</Badge>
+					<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 				{/if}
 			</div>
 			{#if showDns}
@@ -1347,7 +1348,7 @@
 		{#if showDns}
 			<div class="px-3 pb-3 space-y-3 border-t">
 				<div class="space-y-2 pt-2">
-					<Label class="text-xs font-medium">DNS servers</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.dnsServers')}</Label>
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsInput}
@@ -1375,7 +1376,7 @@
 
 				<!-- DNS Search domains -->
 				<div class="space-y-2">
-					<Label class="text-xs font-medium">DNS search domains</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.dnsSearchDomains')}</Label>
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsSearchInput}
@@ -1403,7 +1404,7 @@
 
 				<!-- DNS Options -->
 				<div class="space-y-2">
-					<Label class="text-xs font-medium">DNS options</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.dnsOptions')}</Label>
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsOptionInput}
@@ -1441,7 +1442,7 @@
 		>
 			<div class="flex items-center gap-2">
 				<HardDrive class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">Devices</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.devices')}</span>
 				{#if deviceMappings.length > 0}
 					<Badge variant="secondary" class="text-2xs">{deviceMappings.length}</Badge>
 				{/if}
@@ -1457,7 +1458,7 @@
 				<div class="flex justify-end pt-2">
 					<Button type="button" size="sm" variant="ghost" onclick={addDeviceMapping} class="h-7 text-xs">
 						<Plus class="w-3.5 h-3.5" />
-						Add device
+						{$t('containers.settings.actions.addDevice')}
 					</Button>
 				</div>
 				{#each deviceMappings as mapping, index}
@@ -1488,9 +1489,9 @@
 		>
 			<div class="flex items-center gap-2">
 				<Gpu class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">GPU</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.gpu')}</span>
 				{#if gpuEnabled}
-					<Badge variant="secondary" class="text-2xs">configured</Badge>
+					<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 				{/if}
 			</div>
 			{#if showGpu}
@@ -1502,12 +1503,12 @@
 		{#if showGpu}
 			<div class="px-3 pb-3 space-y-3 border-t">
 				<div class="flex items-center justify-between pt-2">
-					<Label class="text-xs font-medium">Enable GPU access</Label>
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.enableGpuAccess')}</Label>
 					<TogglePill bind:checked={gpuEnabled} />
 				</div>
 
 				<div class="space-y-1.5">
-					<Label class="text-xs font-medium">Runtime</Label>
+					<Label class="text-xs font-medium">{$t('common.labels.runtime')}</Label>
 					<div class="flex gap-2">
 						<Select.Root type="single" value={runtime === '' ? '' : runtime === 'nvidia' ? 'nvidia' : 'custom'} onValueChange={(v) => {
 							if (v === '') runtime = '';
@@ -1515,18 +1516,18 @@
 							else if (v === 'custom') runtime = customRuntimeInput || '';
 						}}>
 							<Select.Trigger class="h-9 flex-1">
-								<span>{runtime === '' ? 'Default (runc)' : runtime === 'nvidia' ? 'NVIDIA' : `Custom: ${runtime}`}</span>
+								<span>{runtime === '' ? $t('containers.settings.runtime.defaultRunc') : runtime === 'nvidia' ? 'NVIDIA' : $t('containers.settings.runtime.custom', { runtime })}</span>
 							</Select.Trigger>
 							<Select.Content>
-								<Select.Item value="" label="Default (runc)" />
+								<Select.Item value="" label={$t('containers.settings.runtime.defaultRunc')} />
 								<Select.Item value="nvidia" label="NVIDIA" />
-								<Select.Item value="custom" label="Custom..." />
+								<Select.Item value="custom" label={$t('containers.settings.runtime.customOption')} />
 							</Select.Content>
 						</Select.Root>
 						{#if runtime !== '' && runtime !== 'nvidia'}
 							<Input
 								bind:value={customRuntimeInput}
-								placeholder="Runtime name"
+								placeholder={$t('containers.settings.placeholders.runtimeName')}
 								class="h-9 w-40"
 								oninput={() => { runtime = customRuntimeInput; }}
 							/>
@@ -1536,13 +1537,13 @@
 
 				{#if gpuEnabled}
 					<div class="space-y-1.5">
-						<Label class="text-xs font-medium">GPU mode</Label>
+						<Label class="text-xs font-medium">{$t('containers.settings.labels.gpuMode')}</Label>
 						<ToggleGroup
 							value={gpuMode}
 							options={[
-								{ value: 'all', label: 'All' },
-								{ value: 'count', label: 'Count' },
-								{ value: 'specific', label: 'Specific' }
+								{ value: 'all', label: $t('containers.settings.gpuModes.all') },
+								{ value: 'count', label: $t('containers.settings.gpuModes.count') },
+								{ value: 'specific', label: $t('containers.settings.gpuModes.specific') }
 							]}
 							onchange={(v) => { gpuMode = v as 'all' | 'count' | 'specific'; }}
 						/>
@@ -1550,14 +1551,14 @@
 
 					{#if gpuMode === 'count'}
 						<div class="space-y-1.5">
-							<Label class="text-xs font-medium">GPU count</Label>
+							<Label class="text-xs font-medium">{$t('containers.settings.labels.gpuCount')}</Label>
 							<Input type="number" bind:value={gpuCount} min="1" placeholder="1" class="h-9 w-24" />
 						</div>
 					{/if}
 
 					{#if gpuMode === 'specific'}
 						<div class="space-y-2">
-							<Label class="text-xs font-medium">Device IDs</Label>
+							<Label class="text-xs font-medium">{$t('containers.settings.labels.deviceIds')}</Label>
 							<div class="flex gap-2">
 								<Input
 									bind:value={gpuDeviceIdInput}
@@ -1585,15 +1586,15 @@
 					{/if}
 
 					<div class="space-y-1.5">
-						<Label class="text-xs font-medium">Driver</Label>
+						<Label class="text-xs font-medium">{$t('common.labels.driver')}</Label>
 						<Input bind:value={gpuDriver} placeholder="nvidia" class="h-9" />
 					</div>
 
 					<div class="space-y-2">
-						<Label class="text-xs font-medium">Capabilities</Label>
+						<Label class="text-xs font-medium">{$t('containers.settings.labels.capabilities')}</Label>
 						<Select.Root type="single" value="" onValueChange={(v) => { addGpuCapability(v); }}>
 							<Select.Trigger class="h-9">
-								<span class="text-muted-foreground">Add capability...</span>
+								<span class="text-muted-foreground">{$t('containers.settings.placeholders.addCapability')}</span>
 							</Select.Trigger>
 							<Select.Content>
 								{#each commonGpuCapabilities.filter(c => !gpuCapabilities.includes(c)) as cap}
@@ -1628,7 +1629,7 @@
 		>
 			<div class="flex items-center gap-2">
 				<Settings2 class="w-4 h-4 text-muted-foreground" />
-				<span class="text-sm font-medium">Ulimits</span>
+				<span class="text-sm font-medium">{$t('containers.settings.sections.ulimits')}</span>
 				{#if ulimits.length > 0}
 					<Badge variant="secondary" class="text-2xs">{ulimits.length}</Badge>
 				{/if}
@@ -1644,7 +1645,7 @@
 				<div class="flex justify-end pt-2">
 					<Button type="button" size="sm" variant="ghost" onclick={addUlimit} class="h-7 text-xs">
 						<Plus class="w-3.5 h-3.5" />
-						Add ulimit
+						{$t('containers.settings.actions.addUlimit')}
 					</Button>
 				</div>
 				{#each ulimits as ulimit, index}
@@ -1659,8 +1660,8 @@
 								{/each}
 							</Select.Content>
 						</Select.Root>
-						<Input bind:value={ulimit.soft} type="number" placeholder="Soft" class="h-9 flex-1" />
-						<Input bind:value={ulimit.hard} type="number" placeholder="Hard" class="h-9 flex-1" />
+						<Input bind:value={ulimit.soft} type="number" placeholder={$t('containers.settings.placeholders.soft')} class="h-9 flex-1" />
+						<Input bind:value={ulimit.hard} type="number" placeholder={$t('containers.settings.placeholders.hard')} class="h-9 flex-1" />
 						<Button
 							type="button"
 							size="icon"
@@ -1680,7 +1681,7 @@
 	<div class="space-y-3">
 		<div class="flex items-center gap-2 pb-2 border-b">
 			<RefreshCw class="w-4 h-4 text-muted-foreground" />
-			<h3 class="text-sm font-semibold text-foreground">Auto-update</h3>
+			<h3 class="text-sm font-semibold text-foreground">{$t('common.labels.autoUpdate')}</h3>
 		</div>
 		<AutoUpdateSettings
 			bind:enabled={autoUpdateEnabled}

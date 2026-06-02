@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { t } from '$lib/i18n';
 
 	let currentPath = $derived($page.url.pathname);
 
@@ -23,7 +24,7 @@
 						fill="currentColor"
 					/>
 				</svg>
-				<span>Dashboard</span>
+				<span>{$t('navigation.dashboard')}</span>
 			</a>
 		</li>
 		<li>
@@ -41,7 +42,7 @@
 					<rect x="13" y="3" width="7" height="7" rx="1" fill="currentColor" />
 					<rect x="13" y="13" width="7" height="7" rx="1" fill="currentColor" />
 				</svg>
-				<span>Containers</span>
+				<span>{$t('navigation.containers')}</span>
 			</a>
 		</li>
 		<li>
@@ -63,7 +64,7 @@
 					/>
 					<path d="M7 12l3 3 6-6" stroke="currentColor" stroke-width="2" fill="none" />
 				</svg>
-				<span>Compose stacks</span>
+				<span>{$t('stacks.page.title')}</span>
 			</a>
 		</li>
 		<li>
@@ -83,7 +84,7 @@
 						stroke-linecap="round"
 					/>
 				</svg>
-				<span>Images</span>
+				<span>{$t('navigation.images')}</span>
 			</a>
 		</li>
 		<li>
@@ -99,7 +100,7 @@
 					<rect x="3" y="12" width="14" height="2" rx="1" fill="currentColor" opacity="0.5" />
 					<rect x="3" y="16" width="16" height="2" rx="1" fill="currentColor" />
 				</svg>
-				<span>Logs</span>
+				<span>{$t('navigation.logs')}</span>
 			</a>
 		</li>
 	</ul>

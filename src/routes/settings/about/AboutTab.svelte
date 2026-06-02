@@ -13,6 +13,7 @@
 	import LicenseModal from './LicenseModal.svelte';
 	import PrivacyModal from './PrivacyModal.svelte';
 	import SelfUpdateDialog from './SelfUpdateDialog.svelte';
+	import { getIntlLocale, locale, t, translateStringArray } from '$lib/i18n';
 
 	interface Dependency {
 		name: string;
@@ -69,10 +70,10 @@
 	async function fetchDependencies() {
 		try {
 			const res = await fetch('/api/dependencies');
-			if (!res.ok) throw new Error('Failed to fetch dependencies');
+			if (!res.ok) throw new Error($t('settings.about.loadingDependencies'));
 			dependencies = await res.json();
 		} catch (e) {
-			depsError = e instanceof Error ? e.message : 'Unknown error';
+			depsError = e instanceof Error ? e.message : $t('common.states.unknown');
 		} finally {
 			loadingDeps = false;
 		}
@@ -81,27 +82,27 @@
 	async function fetchChangelog() {
 		try {
 			const res = await fetch('/api/changelog');
-			if (!res.ok) throw new Error('Failed to fetch changelog');
+			if (!res.ok) throw new Error($t('settings.about.loadingReleases'));
 			changelog = await res.json();
 		} catch (e) {
-			changelogError = e instanceof Error ? e.message : 'Unknown error';
+			changelogError = e instanceof Error ? e.message : $t('common.states.unknown');
 		} finally {
 			loadingChangelog = false;
 		}
 	}
 
 	function formatChangelogDate(dateStr: string): string {
-		if (!dateStr) return 'Unreleased';
+		if (!dateStr) return $t('settings.about.unreleased');
 		try {
 			const date = new Date(dateStr);
-			if (isNaN(date.getTime())) return 'Unreleased';
-			return date.toLocaleDateString('en-US', {
+			if (isNaN(date.getTime())) return $t('settings.about.unreleased');
+			return date.toLocaleDateString(getIntlLocale($locale), {
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric'
 			});
 		} catch {
-			return 'Unreleased';
+			return $t('settings.about.unreleased');
 		}
 	}
 
@@ -182,6 +183,10 @@
 		"Containers behave. Developers rejoice.",
 		"Finally, a tool that respects your time and your terminal."
 	];
+	const localizedTaglines = $derived.by(() => {
+		const items = translateStringArray('settings.about.taglines', $locale);
+		return items.length > 0 ? items : TAGLINES;
+	});
 
 	interface SystemInfo {
 		docker: {
@@ -319,7 +324,7 @@
 				};
 			}
 		} catch (err) {
-			updateCheckError = 'Check failed: ' + String(err);
+			updateCheckError = `${$t('settings.about.checkForUpdates')}: ${String(err)}`;
 		} finally {
 			checkingUpdate = false;
 		}
@@ -341,10 +346,10 @@
 	}
 
 	function formatBuildDate(dateStr: string | null): string {
-		if (!dateStr) return 'Development';
+		if (!dateStr) return $t('settings.about.development');
 		try {
 			const date = new Date(dateStr);
-			return date.toLocaleDateString('en-US', {
+			return date.toLocaleDateString(getIntlLocale($locale), {
 				year: 'numeric',
 				month: 'short',
 				day: 'numeric'
@@ -358,7 +363,7 @@
 		if (browser) {
 			const saved = localStorage.getItem('dockhand-tagline-index');
 			if (saved !== null) {
-				taglineIndex = parseInt(saved, 10) % TAGLINES.length;
+				taglineIndex = parseInt(saved, 10) % localizedTaglines.length;
 			}
 		}
 	}
@@ -383,7 +388,7 @@
 		// Change tagline every 3 clicks (after the big jump)
 		if (totalClicks % 3 === 0) {
 			taglineAnimating = true;
-			taglineIndex = (taglineIndex + 1) % TAGLINES.length;
+			taglineIndex = (taglineIndex + 1) % localizedTaglines.length;
 			saveTaglineIndex();
 			setTimeout(() => {
 				taglineAnimating = false;
@@ -410,7 +415,7 @@
 				fetch('/api/system'),
 				fetch('/api/host')
 			]);
-			if (!systemRes.ok) throw new Error('Failed to fetch system info');
+			if (!systemRes.ok) throw new Error($t('settings.about.systemInformation'));
 			systemInfo = await systemRes.json();
 
 			if (hostRes.ok) {
@@ -418,7 +423,7 @@
 				serverUptime = hostData.uptime;
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Unknown error';
+			error = e instanceof Error ? e.message : $t('common.states.unknown');
 		} finally {
 			loading = false;
 		}
@@ -445,6 +450,12 @@
 			clearInterval(uptimeInterval);
 		}
 	});
+
+	$effect(() => {
+		if (taglineIndex >= localizedTaglines.length) {
+			taglineIndex = 0;
+		}
+	});
 </script>
 
 <div class="flex flex-col items-center py-4 px-4 max-w-5xl mx-auto">
@@ -460,13 +471,13 @@
 					<div class="animate-speedy {isJumping ? (clickCount >= 10 ? 'crazy-jumping' : `jumping-${jumpLevel}`) : ''} {hasClicked && !isJumping ? 'clicked' : ''}" onclick={handleLogoClick}>
 						<img
 							src="/logo-light.webp"
-							alt="Dockhand Logo"
+							alt={$t('settings.about.dockhandLogo')}
 							class="h-36 w-auto object-contain dark:hidden"
 							style="filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)) drop-shadow(-1px -1px 1px rgba(255,255,255,0.9));"
 						/>
 						<img
 							src="/logo-dark.webp"
-							alt="Dockhand Logo"
+							alt={$t('settings.about.dockhandLogo')}
 							class="h-36 w-auto object-contain hidden dark:block"
 							style="filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.6)) drop-shadow(-1px -1px 1px rgba(255,255,255,0.2));"
 						/>
@@ -482,32 +493,32 @@
 						<!-- Easter Egg Popup -->
 						{#if showEasterEgg}
 							<div class="easter-egg-popup">
-								Stop already, will you? Coming from r/selfhosted?
+								{$t('settings.about.easterEgg')}
 							</div>
 						{/if}
 					</div>
 
 					<!-- Version Badge + Update Check -->
 					<div class="flex flex-col items-center gap-1">
-						<Badge variant="secondary" class="text-xs">Version {currentVersion}</Badge>
+						<Badge variant="secondary" class="text-xs">{$t('settings.about.version', { version: currentVersion })}</Badge>
 						{#if checkingUpdate}
 							<span class="flex items-center gap-1 text-xs text-muted-foreground">
 								<Loader2 class="w-3.5 h-3.5 animate-spin" />
-								Checking for updates...
+								{$t('settings.about.checkingForUpdates')}
 							</span>
 						{:else if updateAvailable && updateInfo}
 							<button class="flex items-center gap-1 text-xs text-amber-500 hover:text-amber-400 transition-colors" onclick={() => showSelfUpdateDialog = true}>
 								<CircleArrowUp class="w-3.5 h-3.5" />
-								Update available — click to see what's new
+								{$t('settings.about.updateAvailable')}
 							</button>
 						{:else if updateCheckDone && !updateAvailable}
 							<button class="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors" onclick={checkForUpdates}>
 								<CheckCircle2 class="w-3.5 h-3.5" />
-								Up to date
+								{$t('settings.about.upToDate')}
 							</button>
 						{:else if updateCheckError}
 							<button class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors" onclick={checkForUpdates} title={updateCheckError}>
-								Check for updates
+								{$t('settings.about.checkForUpdates')}
 							</button>
 						{/if}
 					</div>
@@ -529,14 +540,14 @@
 						{#if serverUptime !== null}
 							<div class="flex items-center gap-1 min-w-[8.5rem]">
 								<Clock class="w-3 h-3 shrink-0" />
-								<span class="tabular-nums">Uptime {formatUptime(serverUptime)}</span>
+								<span class="tabular-nums">{$t('common.labels.uptime')} {formatUptime(serverUptime)}</span>
 							</div>
 						{/if}
 					</div>
 
 					<!-- Description -->
 					<p class="text-sm text-muted-foreground tagline-text {taglineAnimating ? 'tagline-zoom' : ''}">
-						{TAGLINES[taglineIndex]}
+						{localizedTaglines[taglineIndex]}
 					</p>
 
 					<!-- Website Link -->
@@ -550,12 +561,12 @@
 		<!-- System Stats Card (Right) -->
 		<Card.Root class="w-full h-full">
 			<Card.Header class="pb-2">
-				<Card.Title class="text-sm font-medium">System information</Card.Title>
+				<Card.Title class="text-sm font-medium">{$t('settings.about.systemInformation')}</Card.Title>
 			</Card.Header>
 			<Card.Content>
 				{#if loading}
 					<div class="flex items-center justify-center py-6">
-						<div class="text-sm text-muted-foreground">Loading...</div>
+						<div class="text-sm text-muted-foreground">{$t('settings.about.systemLoading')}</div>
 					</div>
 				{:else if error}
 					<div class="flex items-center justify-center py-6">
@@ -572,13 +583,13 @@
 							</div>
 							<div class="text-sm pl-5 space-y-0.5">
 								<div class="flex items-center gap-2">
-									<span class="text-muted-foreground">Version</span>
+									<span class="text-muted-foreground">{$t('common.labels.version')}</span>
 									<span>{systemInfo.docker.version}</span>
 									<span class="text-muted-foreground/50">|</span>
-									<span class="text-muted-foreground">API</span>
+									<span class="text-muted-foreground">{$t('common.labels.api')}</span>
 									<span>{systemInfo.docker.apiVersion}</span>
 									<span class="text-muted-foreground/50">|</span>
-									<span class="text-muted-foreground">OS/Arch</span>
+									<span class="text-muted-foreground">{$t('common.labels.osArch')}</span>
 									<span>{systemInfo.docker.os}/{systemInfo.docker.arch}</span>
 								</div>
 							</div>
@@ -588,7 +599,7 @@
 						<div class="space-y-1.5">
 							<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 								<Plug class="w-3.5 h-3.5" />
-								Connection
+								{$t('common.labels.connection')}
 							</div>
 							<div class="text-sm pl-5">
 								<div class="flex items-center gap-2 flex-wrap">
@@ -616,17 +627,17 @@
 						<div class="space-y-1.5">
 							<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 								<Cpu class="w-3.5 h-3.5" />
-								Host
+								{$t('common.labels.host')}
 							</div>
 							<div class="text-sm pl-5">
 								<div class="flex items-center gap-2">
-									<span class="text-muted-foreground">Name</span>
+									<span class="text-muted-foreground">{$t('common.labels.name')}</span>
 									<span>{systemInfo.host.name}</span>
 									<span class="text-muted-foreground/50">|</span>
-									<span class="text-muted-foreground">CPUs</span>
+									<span class="text-muted-foreground">{$t('common.labels.cpu')}</span>
 									<span>{systemInfo.host.cpus}</span>
 									<span class="text-muted-foreground/50">|</span>
-									<span class="text-muted-foreground">Memory</span>
+									<span class="text-muted-foreground">{$t('common.labels.memory')}</span>
 									<span>{formatBytes(systemInfo.host.memory)}</span>
 								</div>
 							</div>
@@ -637,7 +648,7 @@
 						<div class="space-y-1.5">
 							<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 								<Cpu class="w-3.5 h-3.5" />
-								Runtime
+								{$t('common.labels.runtime')}
 							</div>
 							<div class="text-sm pl-5">
 								<div class="flex items-center gap-2 flex-wrap">
@@ -678,7 +689,7 @@
 						<div class="space-y-1.5">
 							<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 								<Database class="w-3.5 h-3.5" />
-								Database
+								{$t('common.labels.database')}
 							</div>
 							<div class="text-sm pl-5 space-y-1">
 								<div class="flex items-center gap-2 flex-wrap">
@@ -698,7 +709,7 @@
 								</div>
 								{#if systemInfo.database.schemaVersion}
 									<div class="flex items-center gap-2">
-										<span class="text-muted-foreground">Schema</span>
+										<span class="text-muted-foreground">{$t('common.labels.schema')}</span>
 										<span class="font-mono text-xs">{systemInfo.database.schemaVersion}</span>
 										{#if systemInfo.database.schemaDate}
 											<span class="text-muted-foreground/60 text-xs">({systemInfo.database.schemaDate})</span>
@@ -718,11 +729,11 @@
 								{:else}
 									<Crown class="w-3.5 h-3.5" />
 								{/if}
-								License
+								{$t('common.labels.license')}
 							</div>
 							<div class="text-sm pl-5">
 								<div class="flex items-center gap-2 flex-wrap">
-									<span class="text-muted-foreground">Edition</span>
+									<span class="text-muted-foreground">{$t('common.labels.edition')}</span>
 									{#if $licenseStore.licenseType === 'enterprise'}
 										<span class="text-amber-500 font-medium flex items-center gap-1">
 											<Crown class="w-3.5 h-3.5 fill-current" />
@@ -738,18 +749,18 @@
 									{/if}
 									{#if $licenseStore.isLicensed && $licenseStore.licensedTo}
 										<span class="text-muted-foreground/50">|</span>
-										<span class="text-muted-foreground">Licensed to</span>
+										<span class="text-muted-foreground">{$t('common.labels.licensedTo')}</span>
 										<span>{$licenseStore.licensedTo}</span>
 									{/if}
 									<span class="text-muted-foreground/50">|</span>
-									<button class="text-primary hover:underline cursor-pointer" onclick={() => showLicenseModal = true}>Terms</button>
+									<button class="text-primary hover:underline cursor-pointer" onclick={() => showLicenseModal = true}>{$t('common.labels.terms')}</button>
 									<span class="text-muted-foreground/50">|</span>
-									<button class="text-primary hover:underline cursor-pointer" onclick={() => showPrivacyModal = true}>Privacy</button>
+									<button class="text-primary hover:underline cursor-pointer" onclick={() => showPrivacyModal = true}>{$t('common.labels.privacy')}</button>
 								</div>
 								<div class="flex items-center gap-2 flex-wrap mt-3 pt-2 border-t border-border/50">
 									<a href="https://github.com/Finsys/dockhand/issues" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline inline-flex items-center gap-1.5 font-medium">
 										<MessageSquarePlus class="w-4 h-4" />
-										Submit issue or idea
+										{$t('settings.about.submitIssue')}
 									</a>
 									<span class="text-muted-foreground/50">|</span>
 									<a href="https://discord.gg/rMxW9Y5cQw" target="_blank" rel="noopener noreferrer" class="hover:underline inline-flex items-center gap-1.5 font-medium text-indigo-500 dark:text-indigo-400">
@@ -760,12 +771,12 @@
 										<span class="text-muted-foreground/50">|</span>
 										<a href="https://buymeacoffee.com/dockhand" target="_blank" rel="noopener noreferrer" class="hover:underline inline-flex items-center gap-1.5 font-medium text-amber-600 dark:text-yellow-400">
 											<Coffee class="w-4 h-4" />
-											Buy me a coffee
+											{$t('settings.about.buyCoffee')}
 										</a>
 									{/if}
 								</div>
 								{#if !$licenseStore.isLicensed}
-									<p class="text-xs text-muted-foreground mt-2">Dockhand Community Edition is free and always will be. No strings attached. Like it? Fuel the dev with caffeine.</p>
+									<p class="text-xs text-muted-foreground mt-2">{$t('settings.about.communityNote')}</p>
 								{/if}
 							</div>
 						</div>
@@ -778,35 +789,35 @@
 									<Box class="w-4 h-4 text-blue-500" />
 								</div>
 								<div class="text-lg font-bold">{systemInfo.stats.containers.total}</div>
-								<div class="text-2xs text-muted-foreground font-medium">Containers</div>
+								<div class="text-2xs text-muted-foreground font-medium">{$t('common.labels.containers')}</div>
 							</div>
 							<div class="stat-box stat-box-cyan">
 								<div class="stat-icon-wrapper bg-cyan-500/10">
 									<Layers class="w-4 h-4 text-cyan-500" />
 								</div>
 								<div class="text-lg font-bold">{systemInfo.stats.stacks}</div>
-								<div class="text-2xs text-muted-foreground font-medium">Stacks</div>
+								<div class="text-2xs text-muted-foreground font-medium">{$t('common.labels.stacks')}</div>
 							</div>
 							<div class="stat-box stat-box-purple">
 								<div class="stat-icon-wrapper bg-purple-500/10">
 									<Images class="w-4 h-4 text-purple-500" />
 								</div>
 								<div class="text-lg font-bold">{systemInfo.stats.images}</div>
-								<div class="text-2xs text-muted-foreground font-medium">Images</div>
+								<div class="text-2xs text-muted-foreground font-medium">{$t('common.labels.images')}</div>
 							</div>
 							<div class="stat-box stat-box-green">
 								<div class="stat-icon-wrapper bg-green-500/10">
 									<HardDrive class="w-4 h-4 text-green-500" />
 								</div>
 								<div class="text-lg font-bold">{systemInfo.stats.volumes}</div>
-								<div class="text-2xs text-muted-foreground font-medium">Volumes</div>
+								<div class="text-2xs text-muted-foreground font-medium">{$t('common.labels.volumes')}</div>
 							</div>
 							<div class="stat-box stat-box-orange">
 								<div class="stat-icon-wrapper bg-orange-500/10">
 									<Network class="w-4 h-4 text-orange-500" />
 								</div>
 								<div class="text-lg font-bold">{systemInfo.stats.networks}</div>
-								<div class="text-2xs text-muted-foreground font-medium">Networks</div>
+								<div class="text-2xs text-muted-foreground font-medium">{$t('common.labels.networks')}</div>
 							</div>
 						</div>
 						{/if}
@@ -823,12 +834,12 @@
 				<Tabs.List class="w-full grid grid-cols-2">
 					<Tabs.Trigger value="releases" class="flex items-center gap-2">
 						<FileText class="w-4 h-4" />
-						<span>Release notes</span>
+						<span>{$t('common.labels.releaseNotes')}</span>
 						<Badge variant="secondary" class="text-2xs">{changelog.length}</Badge>
 					</Tabs.Trigger>
 					<Tabs.Trigger value="dependencies" class="flex items-center gap-2">
 						<Package class="w-4 h-4" />
-						<span>Dependencies</span>
+						<span>{$t('common.labels.dependencies')}</span>
 						<Badge variant="secondary" class="text-2xs">{dependencies.length}</Badge>
 					</Tabs.Trigger>
 				</Tabs.List>
@@ -837,7 +848,7 @@
 			<Tabs.Content value="releases" class="px-4 pb-4">
 				{#if loadingChangelog}
 					<div class="flex items-center justify-center py-8">
-						<div class="text-sm text-muted-foreground">Loading releases...</div>
+						<div class="text-sm text-muted-foreground">{$t('settings.about.loadingReleases')}</div>
 					</div>
 				{:else if changelogError}
 					<div class="flex items-center justify-center py-8">
@@ -863,9 +874,9 @@
 										<Tag class="w-4 h-4 text-primary" />
 										<span class="font-semibold">v{release.version}</span>
 										{#if index === 0}
-											<Badge variant="default" class="text-2xs">Latest</Badge>
+											<Badge variant="default" class="text-2xs">{$t('settings.about.latest')}</Badge>
 										{/if}
-										<Badge variant="secondary" class="text-2xs">{release.changes.length} changes</Badge>
+										<Badge variant="secondary" class="text-2xs">{$t('settings.about.changes', { count: release.changes.length })}</Badge>
 									</div>
 									<span class="text-xs text-muted-foreground">{formatChangelogDate(release.date)}</span>
 								</div>
@@ -877,12 +888,12 @@
 													{#if change.type === 'feature'}
 														<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shrink-0">
 															<Sparkles class="w-3 h-3" />
-															New
+															{$t('settings.about.changeNew')}
 														</span>
 													{:else if change.type === 'fix'}
 														<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
 															<Bug class="w-3 h-3" />
-															Fix
+															{$t('settings.about.changeFix')}
 														</span>
 													{/if}
 													<span>{change.text}</span>
@@ -906,7 +917,7 @@
 						<Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
 						<Input
 							type="text"
-							placeholder="Search packages or licenses..."
+							placeholder={$t('settings.about.searchDependencies')}
 							class="h-7 text-xs pl-7"
 							bind:value={depsSearch}
 						/>
@@ -914,7 +925,7 @@
 				</div>
 				{#if loadingDeps}
 					<div class="flex items-center justify-center py-8">
-						<div class="text-sm text-muted-foreground">Loading dependencies...</div>
+						<div class="text-sm text-muted-foreground">{$t('settings.about.loadingDependencies')}</div>
 					</div>
 				{:else if depsError}
 					<div class="flex items-center justify-center py-8">
@@ -923,9 +934,9 @@
 				{:else}
 					<div class="space-y-1">
 						<div class="grid grid-cols-[1fr_auto_auto_auto] gap-2 text-2xs font-medium text-muted-foreground px-2 py-1 border-b">
-							<div>Package</div>
-							<div class="w-20 text-center">Version</div>
-							<div class="w-24 text-center">License</div>
+							<div>{$t('common.labels.package')}</div>
+							<div class="w-20 text-center">{$t('common.labels.version')}</div>
+							<div class="w-24 text-center">{$t('common.labels.license')}</div>
 							<div class="w-8"></div>
 						</div>
 						<div class="max-h-[300px] overflow-y-auto">
@@ -945,7 +956,7 @@
 												target="_blank"
 												rel="noopener noreferrer"
 												class="text-muted-foreground hover:text-foreground transition-colors"
-												title="View on GitHub"
+												title={$t('settings.about.viewOnGithub')}
 											>
 												<ExternalLink class="w-3.5 h-3.5" />
 											</a>

@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Networks - Dockhand</title>
+	<title>{$t('networks.pageTitle')}</title>
 </svelte:head>
 
 <script lang="ts">
@@ -26,6 +26,7 @@
 	import { DataGrid } from '$lib/components/data-grid';
 	import { ipToNumber } from '$lib/utils/ip';
 	import NetworkGraphModal from './NetworkGraphModal.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	type SortField = 'name' | 'driver' | 'containers' | 'subnet' | 'gateway';
 	type SortDirection = 'asc' | 'desc';
@@ -127,7 +128,7 @@
 	let batchOpItems = $state<Array<{ id: string; name: string }>>([]);
 
 	function bulkRemove() {
-		batchOpTitle = `Removing ${selectedInFilter.length} network${selectedInFilter.length !== 1 ? 's' : ''}`;
+		batchOpTitle = translate('networks.batch.removing', { count: selectedInFilter.length });
 		batchOpOperation = 'remove';
 		batchOpItems = selectedInFilter.map(n => ({ id: n.id, name: n.name }));
 		showBatchOpModal = true;
@@ -268,7 +269,7 @@
 			networks = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch networks:', error);
-			toast.error('Failed to load networks');
+			toast.error(translate('networks.toasts.loadFailed'));
 		} finally {
 			loading = false;
 		}
@@ -277,8 +278,8 @@
 	async function removeNetwork(id: string, name: string) {
 		deleteError = null;
 		if (protectedNetworks.includes(name)) {
-			deleteError = { id, message: `Cannot remove built-in network "${name}"` };
-			toast.error(`Cannot remove built-in network "${name}"`);
+			deleteError = { id, message: translate('networks.toasts.cannotRemoveBuiltin', { name }) };
+			toast.error(translate('networks.toasts.cannotRemoveBuiltin', { name }));
 			clearErrorAfterDelay(id);
 			return;
 		}
@@ -286,17 +287,17 @@
 			const response = await fetch(appendEnvParam(`/api/networks/${id}`, envId), { method: 'DELETE' });
 			if (!response.ok) {
 				const data = await response.json();
-				deleteError = { id, message: data.details || 'Failed to remove network' };
-				toast.error(`Failed to remove ${name}`);
+				deleteError = { id, message: data.details || translate('networks.toasts.removeFailedGeneric') };
+				toast.error(translate('networks.toasts.removeFailed', { name }));
 				clearErrorAfterDelay(id);
 				return;
 			}
-			toast.success(`Removed ${name}`);
+			toast.success(translate('networks.toasts.removed', { name }));
 			await fetchNetworks();
 		} catch (error) {
 			console.error('Failed to remove network:', error);
-			deleteError = { id, message: 'Failed to remove network' };
-			toast.error(`Failed to remove ${name}`);
+			deleteError = { id, message: translate('networks.toasts.removeFailedGeneric') };
+			toast.error(translate('networks.toasts.removeFailed', { name }));
 			clearErrorAfterDelay(id);
 		}
 	}
@@ -366,15 +367,15 @@
 				body: JSON.stringify({ containerId, containerName })
 			});
 			if (response.ok) {
-				toast.success(`Disconnected ${containerName} from ${networkName}`);
+				toast.success(translate('networks.toasts.disconnected', { container: containerName, network: networkName }));
 				await fetchNetworks();
 			} else {
 				const data = await response.json();
-				toast.error(data.details || 'Failed to disconnect container');
+				toast.error(data.details || translate('networks.toasts.disconnectFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to disconnect container:', error);
-			toast.error('Failed to disconnect container');
+			toast.error(translate('networks.toasts.disconnectFailed'));
 		} finally {
 			disconnectingContainerId = null;
 			confirmDisconnectId = null;
@@ -384,9 +385,9 @@
 	async function copyNetworkId(id: string) {
 		const ok = await copyToClipboard(id);
 		if (ok) {
-			toast.success('Network ID copied to clipboard');
+			toast.success(translate('networks.toasts.idCopied'));
 		} else {
-			toast.error('Failed to copy ID');
+			toast.error(translate('networks.toasts.copyIdFailed'));
 		}
 	}
 
@@ -416,15 +417,15 @@
 			});
 
 			if (response.ok) {
-				toast.success(`Created ${newName}`);
+				toast.success(translate('networks.toasts.created', { name: newName }));
 				await fetchNetworks();
 			} else {
 				const data = await response.json();
-				toast.error(data.details || 'Failed to duplicate network');
+				toast.error(data.details || translate('networks.toasts.duplicateFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to duplicate network:', error);
-			toast.error('Failed to duplicate network');
+			toast.error(translate('networks.toasts.duplicateFailed'));
 		}
 	}
 
@@ -437,15 +438,15 @@
 			});
 			if (response.ok) {
 				pruneStatus = 'success';
-				toast.success('Unused networks pruned');
+				toast.success(translate('networks.toasts.pruned'));
 				await fetchNetworks();
 			} else {
 				pruneStatus = 'error';
-				toast.error('Failed to prune networks');
+				toast.error(translate('networks.toasts.pruneFailed'));
 			}
 		} catch (error) {
 			pruneStatus = 'error';
-			toast.error('Failed to prune networks');
+			toast.error(translate('networks.toasts.pruneFailed'));
 		}
 		pendingTimeouts.push(setTimeout(() => {
 			pruneStatus = 'idle';
@@ -503,13 +504,13 @@
 
 <div class="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
 	<div class="shrink-0 flex flex-wrap justify-between items-center gap-3 min-h-8">
-		<PageHeader icon={Network} title="Networks" count={networks.length} />
+		<PageHeader icon={Network} title={$t('networks.title')} count={networks.length} />
 		<div class="flex flex-wrap items-center gap-2">
 			<div class="relative">
 				<Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
 				<Input
 					type="text"
-					placeholder="Search networks..."
+					placeholder={$t('networks.searchPlaceholder')}
 					bind:value={searchInput}
 					onkeydown={(e) => e.key === 'Escape' && (searchInput = '')}
 					class="pl-8 h-8 w-48 text-sm"
@@ -519,22 +520,22 @@
 			<MultiSelectFilter
 				bind:value={selectedDrivers}
 				options={driverOptions}
-				placeholder="Driver"
-				pluralLabel="drivers"
+				placeholder={$t('common.labels.driver')}
+				pluralLabel={$t('networks.filters.drivers')}
 			/>
 			<!-- Scope filter -->
 			<MultiSelectFilter
 				bind:value={selectedScopes}
 				options={scopeOptions}
-				placeholder="Scope"
-				pluralLabel="scopes"
+				placeholder={$t('common.labels.scope')}
+				pluralLabel={$t('networks.filters.scopes')}
 			/>
 			{#if $canAccess('networks', 'remove')}
 			<ConfirmPopover
 				open={confirmPrune}
-				action="Prune"
-				itemType="unused networks"
-				title="Prune networks"
+				action={$t('networks.actions.prune')}
+				itemType={$t('networks.confirm.unusedNetworks')}
+				title={$t('networks.actions.pruneNetworks')}
 				position="left"
 				onConfirm={pruneNetworks}
 				onOpenChange={(open) => confirmPrune = open}
@@ -551,23 +552,23 @@
 						{:else}
 							<Icon iconNode={broom} class="w-3.5 h-3.5" />
 						{/if}
-						Prune
+						{$t('networks.actions.prune')}
 					</span>
 				{/snippet}
 			</ConfirmPopover>
 			{/if}
 			<Button size="sm" variant="outline" onclick={fetchNetworks}>
 				<RefreshCw class="w-3.5 h-3.5" />
-				Refresh
+				{$t('common.actions.refresh')}
 			</Button>
 			<Button size="sm" variant="outline" onclick={openGraphModal}>
 				<GitGraph class="w-3.5 h-3.5" />
-				View Graph
+				{$t('networks.actions.viewGraph')}
 			</Button>
 			{#if $canAccess('networks', 'create')}
 			<Button size="sm" variant="outline" onclick={() => showCreateModal = true}>
 				<Plus class="w-3.5 h-3.5" />
-				Create
+				{$t('common.actions.create')}
 			</Button>
 			{/if}
 		</div>
@@ -577,20 +578,20 @@
 	<div class="h-4 shrink-0">
 		{#if selectedNetworks.size > 0}
 			<div class="flex items-center gap-1 text-xs text-muted-foreground h-full">
-			<span>{selectedInFilter.length} selected</span>
+			<span>{$t('networks.selection.selected', { count: selectedInFilter.length })}</span>
 			<button
 				type="button"
 				class="inline-flex items-center gap-1 px-1.5 py-0 rounded border border-border hover:border-foreground/30 hover:shadow transition-all"
 				onclick={selectNone}
 			>
-				Clear
+				{$t('common.actions.clear')}
 			</button>
 			{#if $canAccess('networks', 'remove')}
 			<ConfirmPopover
 				open={confirmBulkRemove}
-				action="Delete"
-				itemType="{selectedInFilter.length} network{selectedInFilter.length !== 1 ? 's' : ''}"
-				title="Delete {selectedInFilter.length}"
+				action={$t('common.actions.delete')}
+				itemType={$t('networks.selection.networkCount', { count: selectedInFilter.length })}
+				title={$t('networks.actions.deleteSelected', { count: selectedInFilter.length })}
 				unstyled
 				onConfirm={bulkRemove}
 				onOpenChange={(open) => confirmBulkRemove = open}
@@ -598,7 +599,7 @@
 				{#snippet children({ open })}
 					<span class="inline-flex items-center gap-1 px-1.5 py-0 rounded border border-border hover:text-destructive hover:border-destructive/40 hover:shadow transition-all cursor-pointer">
 						<Trash2 class="w-3 h-3" />
-						Delete
+						{$t('common.actions.delete')}
 					</span>
 				{/snippet}
 			</ConfirmPopover>
@@ -612,8 +613,8 @@
 	{:else if !loading && networks.length === 0}
 		<EmptyState
 			icon={Network}
-			title="No networks found"
-			description="Create a network to connect containers"
+			title={$t('networks.empty.title')}
+			description={$t('networks.empty.description')}
 		/>
 	{:else}
 		<DataGrid
@@ -636,10 +637,10 @@
 					<div class="flex items-center gap-2 min-w-0">
 						<span class="text-xs truncate" title={network.name}>{network.name}</span>
 						{#if isProtected}
-							<span class="text-2xs py-0 px-1.5 rounded-sm bg-muted text-muted-foreground shadow-sm shrink-0">built-in</span>
+							<span class="text-2xs py-0 px-1.5 rounded-sm bg-muted text-muted-foreground shadow-sm shrink-0">{$t('networks.badges.builtIn')}</span>
 						{/if}
 						{#if network.internal}
-							<Badge variant="outline" class="text-xs py-0 px-1.5 shrink-0">internal</Badge>
+							<Badge variant="outline" class="text-xs py-0 px-1.5 shrink-0">{$t('networks.badges.internal')}</Badge>
 						{/if}
 					</div>
 				{:else if column.id === 'driver'}
@@ -667,7 +668,7 @@
 						<button
 							type="button"
 							onclick={() => inspectNetwork(network)}
-							title="View details"
+							title={$t('networks.tooltips.viewDetails')}
 							class="p-1 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<Eye class="w-3 h-3 text-muted-foreground hover:text-foreground" />
@@ -677,7 +678,7 @@
 						<button
 							type="button"
 							onclick={() => openConnectModal(network)}
-							title="Connect container"
+							title={$t('networks.tooltips.connectContainer')}
 							class="p-1 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<Link class="w-3 h-3 text-muted-foreground hover:text-green-600" />
@@ -686,7 +687,7 @@
 						<button
 							type="button"
 							onclick={() => copyNetworkId(network.id)}
-							title="Copy network ID"
+							title={$t('networks.tooltips.copyNetworkId')}
 							class="p-1 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<Copy class="w-3 h-3 text-muted-foreground hover:text-foreground" />
@@ -695,7 +696,7 @@
 						<button
 							type="button"
 							onclick={() => duplicateNetwork(network)}
-							title="Duplicate network"
+							title={$t('networks.tooltips.duplicateNetwork')}
 							class="p-1 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer"
 						>
 							<CopyPlus class="w-3 h-3 text-muted-foreground hover:text-foreground" />
@@ -704,10 +705,10 @@
 						{#if !isProtected && $canAccess('networks', 'remove')}
 						<ConfirmPopover
 							open={confirmDeleteId === network.id}
-							action="Delete"
-							itemType="network"
+							action={$t('common.actions.delete')}
+							itemType={$t('networks.confirm.network')}
 							itemName={network.name}
-							title="Remove"
+							title={$t('common.actions.remove')}
 							onConfirm={() => removeNetwork(network.id, network.name)}
 							onOpenChange={(open) => confirmDeleteId = open ? network.id : null}
 						>

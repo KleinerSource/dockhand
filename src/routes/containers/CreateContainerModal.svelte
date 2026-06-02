@@ -12,6 +12,7 @@
 	import ContainerSettingsTab from './ContainerSettingsTab.svelte';
 	import { parseHostPort, expandPortBindings } from '$lib/utils/port-parse';
 	import type { VulnerabilityCriteria } from '$lib/components/VulnerabilityCriteriaSelector.svelte';
+	import { t, translate } from '$lib/i18n';
 
 	// Parse shell command respecting quotes
 	function parseShellCommand(cmd: string): string[] {
@@ -492,7 +493,7 @@
 			const result = await response.json();
 
 			if (!response.ok) {
-				let errorMsg = result.error || 'Failed to create container';
+				let errorMsg = result.error || translate('containers.create.errors.createContainer');
 				if (result.details) {
 					errorMsg += ': ' + result.details;
 				}
@@ -518,9 +519,9 @@
 			}
 
 			if (result.imagePulled) {
-				toast.success(`Container created (image ${image.trim()} was pulled automatically)`);
+				toast.success(translate('containers.create.toasts.createdWithImagePulled', { image: image.trim() }));
 			} else {
-				toast.success('Container created successfully');
+				toast.success(translate('containers.create.toasts.created'));
 			}
 
 			open = false;
@@ -528,7 +529,7 @@
 			onSuccess?.();
 			onClose?.();
 		} catch (err) {
-			toast.error('Failed to create container: ' + String(err));
+			toast.error(translate('containers.create.errors.createContainerWithDetails', { error: String(err) }));
 		} finally {
 			loading = false;
 		}
@@ -620,7 +621,7 @@
 <Dialog.Root bind:open onOpenChange={(isOpen) => isOpen && focusFirstInput()}>
 	<Dialog.Content class="max-w-4xl w-full h-[85vh] p-0 flex flex-col overflow-hidden !zoom-in-0 !zoom-out-0" showCloseButton={false}>
 		<Dialog.Header class="px-5 py-4 border-b bg-muted/30 shrink-0 sticky top-0 z-10">
-			<Dialog.Title class="text-base font-semibold">Create new container</Dialog.Title>
+			<Dialog.Title class="text-base font-semibold">{$t('containers.create.title')}</Dialog.Title>
 			<button
 				type="button"
 				onclick={handleClose}
@@ -628,7 +629,7 @@
 				class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-30"
 			>
 				<X class="h-4 w-4" />
-				<span class="sr-only">Close</span>
+				<span class="sr-only">{$t('common.actions.close')}</span>
 			</button>
 		</Dialog.Header>
 
@@ -641,7 +642,7 @@
 				onclick={() => activeTab = 'pull'}
 			>
 				<Download class="w-4 h-4" />
-				Pull
+				{$t('containers.create.tabs.pull')}
 				{#if pullStatus === 'complete'}
 					<CheckCircle2 class="w-3.5 h-3.5 text-green-500" />
 				{:else if pullStatus === 'pulling'}
@@ -659,7 +660,7 @@
 					disabled={pullStatus === 'idle' || pullStatus === 'pulling'}
 				>
 					<Shield class="w-4 h-4" />
-					Scan
+					{$t('containers.create.tabs.scan')}
 					{#if scanStatus === 'complete' && scanResults.length > 0}
 						{#if hasCriticalOrHigh}
 							<ShieldX class="w-3.5 h-3.5 text-red-500" />
@@ -680,7 +681,7 @@
 				onclick={() => activeTab = 'container'}
 			>
 				<Settings2 class="w-4 h-4" />
-				Container
+				{$t('common.labels.container')}
 			</button>
 		</div>
 		{/if}
@@ -718,8 +719,8 @@
 				<div class="flex-1 flex items-center justify-center">
 					<div class="text-center">
 						<Shield class="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
-						<p class="text-sm text-muted-foreground">Vulnerability scanning is disabled for this environment.</p>
-						<p class="text-xs text-muted-foreground mt-1">Enable it in Settings -> Environments to scan images.</p>
+						<p class="text-sm text-muted-foreground">{$t('containers.create.scanDisabled')}</p>
+						<p class="text-xs text-muted-foreground mt-1">{$t('containers.create.scanDisabledHelp')}</p>
 					</div>
 				</div>
 			{/if}
@@ -795,21 +796,21 @@
 				{#if activeTab === 'container' && hasCriticalOrHigh}
 					<div class="flex items-center gap-2 text-amber-600 text-xs">
 						<AlertTriangle class="w-4 h-4" />
-						<span>Critical/high vulnerabilities found in image</span>
+						<span>{$t('containers.create.criticalHighFound')}</span>
 					</div>
 				{/if}
 			</div>
 			<div class="flex gap-2">
 				<Button type="button" variant="outline" onclick={handleClose} disabled={loading || isPulling || isScanning}>
-					Cancel
+					{$t('common.actions.cancel')}
 				</Button>
 				<Button type="button" disabled={loading || isPulling || isScanning || activeTab !== 'container'} onclick={handleSubmit}>
 					{#if loading}
 						<Loader2 class="w-4 h-4 animate-spin" />
-						Creating...
+						{$t('containers.create.creating')}
 					{:else}
 						<Play class="w-4 h-4" />
-						Create container
+						{$t('containers.create.createContainer')}
 					{/if}
 				</Button>
 			</div>

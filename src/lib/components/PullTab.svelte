@@ -10,6 +10,7 @@
 	import { appendEnvParam } from '$lib/stores/environment';
 	import { watchJob } from '$lib/utils/sse-fetch';
 	import { formatBytes } from '$lib/utils/format';
+	import { t, translate } from '$lib/i18n';
 
 	interface LayerProgress {
 		id: string;
@@ -151,7 +152,7 @@
 		status = 'pulling';
 		startTime = Date.now();
 
-		addOutputLine(`[pull] Starting pull for ${image}`);
+		addOutputLine(`[pull] ${translate('imagePull.output.starting', { image })}`);
 
 		try {
 			const response = await fetch(appendEnvParam('/api/images/pull', envId), {
@@ -161,7 +162,7 @@
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to start pull');
+				throw new Error(translate('imagePull.errors.startFailed'));
 			}
 
 			const { jobId } = await response.json();
@@ -172,13 +173,13 @@
 			if (status === 'pulling') {
 				duration = Date.now() - startTime;
 				status = 'complete';
-				addOutputLine(`[pull] Pull completed in ${formatDuration(duration)}`);
+				addOutputLine(`[pull] ${translate('imagePull.output.completedIn', { duration: formatDuration(duration) })}`);
 				onComplete?.();
 			}
 		} catch (error: any) {
 			duration = Date.now() - startTime;
 			status = 'error';
-			errorMessage = error.message || 'Failed to pull image';
+			errorMessage = error.message || translate('imagePull.errors.pullFailed');
 			addOutputLine(`[error] ${errorMessage}`);
 			onError?.(errorMessage);
 		}
@@ -193,12 +194,12 @@
 		if (data.status === 'complete') {
 			duration = Date.now() - startTime;
 			status = 'complete';
-			addOutputLine(`[pull] Pull completed in ${formatDuration(duration)}`);
+			addOutputLine(`[pull] ${translate('imagePull.output.completedIn', { duration: formatDuration(duration) })}`);
 			onComplete?.();
 		} else if (data.status === 'error') {
 			duration = Date.now() - startTime;
 			status = 'error';
-			errorMessage = data.error || 'Unknown error occurred';
+			errorMessage = data.error || translate('common.errors.unknown');
 			addOutputLine(`[error] ${errorMessage}`);
 			onError?.(errorMessage);
 		} else if (data.id) {
@@ -229,7 +230,7 @@
 					...layersMap,
 					[data.id]: {
 						id: data.id,
-						status: data.status || 'Processing',
+						status: data.status || translate('imagePull.processing'),
 						progress: data.progress,
 						current: data.progressDetail?.current,
 						total: data.progressDetail?.total,
@@ -252,7 +253,7 @@
 					...layersMap,
 					[data.id]: {
 						id: data.id,
-						status: data.status || 'Processing',
+						status: data.status || translate('imagePull.processing'),
 						progress: data.progress,
 						current: data.progressDetail?.current,
 						total: data.progressDetail?.total,
@@ -294,7 +295,7 @@
 	<!-- Image Input -->
 	{#if showImageInput}
 		<div class="space-y-2 shrink-0">
-			<Label for="pull-image" class="text-sm font-medium">Image name</Label>
+			<Label for="pull-image" class="text-sm font-medium">{$t('imagePull.imageName')}</Label>
 			<div class="flex gap-2">
 				<Input
 					id="pull-image"
@@ -310,10 +311,10 @@
 				>
 					{#if isPulling}
 						<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-						Pulling...
+						{$t('imagePull.status.pulling')}
 					{:else}
 						<Download class="w-4 h-4" />
-						Pull
+						{$t('imagePull.steps.pull')}
 					{/if}
 				</Button>
 			</div>
@@ -328,20 +329,20 @@
 				<div class="flex items-center gap-2">
 					{#if status === 'pulling'}
 						<Loader2 class="w-4 h-4 animate-spin text-blue-600" />
-						<span class="text-sm">Pulling layers...</span>
+						<span class="text-sm">{$t('imagePull.status.pullingLayers')}</span>
 					{:else if status === 'complete'}
 						<CheckCircle2 class="w-4 h-4 text-green-600" />
-						<span class="text-sm text-green-600">Pull completed!</span>
+						<span class="text-sm text-green-600">{$t('imagePull.status.pullCompleted')}</span>
 					{:else if status === 'error'}
 						<XCircle class="w-4 h-4 text-red-600" />
-						<span class="text-sm text-red-600">Failed</span>
+						<span class="text-sm text-red-600">{$t('common.states.failed')}</span>
 					{/if}
 				</div>
 				<div class="flex items-center gap-3">
 					{#if status === 'pulling' || status === 'complete'}
 						<Badge variant="secondary" class="text-xs min-w-20 text-center">
 							{#if totalLayers > 0}
-								{completedLayers} / {totalLayers} layers
+								{$t('imagePull.layersProgress', { completed: completedLayers, total: totalLayers })}
 							{:else}
 								...
 							{/if}
@@ -359,7 +360,7 @@
 					<Progress value={overallProgress} class="h-2" />
 					<div class="text-xs text-muted-foreground h-4">
 						{#if downloadStats.totalBytes > 0}
-							Downloaded: {formatBytes(downloadStats.downloadedBytes)} / {formatBytes(downloadStats.totalBytes)}
+							{$t('imagePull.downloaded', { downloaded: formatBytes(downloadStats.downloadedBytes), total: formatBytes(downloadStats.totalBytes) })}
 						{/if}
 					</div>
 				</div>
@@ -382,9 +383,9 @@
 				<table class="w-full text-xs">
 					<thead class="bg-muted sticky top-0">
 						<tr>
-							<th class="text-left py-1.5 px-3 font-medium w-28">Layer ID</th>
-							<th class="text-left py-1.5 px-3 font-medium">Status</th>
-							<th class="text-right py-1.5 px-3 font-medium w-24">Progress</th>
+							<th class="text-left py-1.5 px-3 font-medium w-28">{$t('imagePull.table.layerId')}</th>
+							<th class="text-left py-1.5 px-3 font-medium">{$t('common.labels.status')}</th>
+							<th class="text-right py-1.5 px-3 font-medium w-24">{$t('common.labels.progress')}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -424,7 +425,7 @@
 											<span class="text-muted-foreground w-8">{percentage}%</span>
 										</div>
 									{:else if isComplete}
-										<span class="text-green-600">Done</span>
+										<span class="text-green-600">{$t('common.actions.done')}</span>
 									{:else}
 										<span class="text-muted-foreground">-</span>
 									{/if}
@@ -441,9 +442,9 @@
 			<div class="flex items-center justify-between text-xs text-muted-foreground mb-2 shrink-0">
 				<div class="flex items-center gap-2">
 					<Terminal class="w-3.5 h-3.5" />
-					<span>Output ({outputLines.length} lines)</span>
+					<span>{$t('imagePull.output.title', { count: outputLines.length })}</span>
 				</div>
-				<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title="Toggle log theme">
+				<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title={$t('executionLog.toggleTheme')}>
 					{#if logDarkMode}
 						<Sun class="w-3.5 h-3.5" />
 					{:else}
@@ -458,13 +459,13 @@
 				{#each outputLines as line}
 					<div class="whitespace-pre-wrap break-all leading-relaxed flex items-start gap-1.5">
 						{#if line.startsWith('[pull]')}
-							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-blue-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">pull</span>
+							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-blue-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('imagePull.output.labels.pull')}</span>
 							<span>{line.slice(7)}</span>
 						{:else if line.startsWith('[layer]')}
-							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-green-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">layer</span>
+							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-green-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('imagePull.output.labels.layer')}</span>
 							<span>{line.slice(8)}</span>
 						{:else if line.startsWith('[error]')}
-							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">error</span>
+							<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('common.labels.error')}</span>
 							<span class="text-red-400">{line.slice(8)}</span>
 						{:else}
 							<span>{line}</span>
@@ -478,7 +479,7 @@
 	<!-- Idle state -->
 	{#if status === 'idle' && !showImageInput}
 		<div class="flex-1 flex items-center justify-center text-muted-foreground">
-			<p class="text-sm">Enter an image name to start pulling</p>
+			<p class="text-sm">{$t('imagePull.idle')}</p>
 		</div>
 	{/if}
 </div>

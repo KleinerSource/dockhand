@@ -9,6 +9,7 @@
 	import { whale } from '@lucide/lab';
 	import { currentEnvironment } from '$lib/stores/environment';
 	import PushTab from '$lib/components/PushTab.svelte';
+	import { t } from '$lib/i18n';
 
 	interface Registry {
 		id: number;
@@ -155,7 +156,7 @@
 				{:else}
 					<Upload class="w-5 h-5" />
 				{/if}
-				Push to registry
+				{$t('imagePush.modalTitle')}
 				<code class="text-sm font-normal bg-muted px-1.5 py-0.5 rounded ml-1">{imageName}</code>
 			</Dialog.Title>
 		</Dialog.Header>
@@ -168,7 +169,7 @@
 				disabled={isProcessing}
 			>
 				<Settings2 class="w-3.5 h-3.5 inline mr-1.5" />
-				Configure
+				{$t('imagePush.steps.configure')}
 			</button>
 			<ArrowBigRight class="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
 			<button
@@ -177,7 +178,7 @@
 				disabled={isProcessing || pushStatus === 'idle'}
 			>
 				<Upload class="w-3.5 h-3.5 inline mr-1.5" />
-				Push
+				{$t('imagePush.steps.push')}
 				{#if pushStatus === 'complete'}
 					<CheckCircle2 class="w-3.5 h-3.5 inline ml-1 text-green-500" />
 				{:else if pushStatus === 'error'}
@@ -192,14 +193,14 @@
 			<!-- Configuration Step -->
 			<div class="space-y-4 px-1" class:hidden={currentStep !== 'configure'}>
 				<div class="space-y-2">
-					<Label>Source image</Label>
+					<Label>{$t('imagePush.sourceImage')}</Label>
 					<div class="p-2 bg-muted rounded text-sm">
 						<code class="break-all">{imageName}</code>
 					</div>
 				</div>
 
 				<div class="space-y-2">
-					<Label>Target registry</Label>
+					<Label>{$t('imagePush.targetRegistry')}</Label>
 					<Select.Root type="single" value={targetRegistryId ? String(targetRegistryId) : undefined} onValueChange={(v) => targetRegistryId = Number(v)}>
 						<Select.Trigger class="w-full h-9 justify-start">
 							{#if targetRegistry}
@@ -208,9 +209,9 @@
 								{:else}
 									<Server class="w-4 h-4 mr-2 text-muted-foreground" />
 								{/if}
-								<span class="flex-1 text-left">{targetRegistry.name}{targetRegistry.hasCredentials ? ' (auth)' : ''}</span>
+								<span class="flex-1 text-left">{targetRegistry.name}{targetRegistry.hasCredentials ? ` (${$t('registry.authBadge')})` : ''}</span>
 							{:else}
-								<span class="text-muted-foreground">Select registry</span>
+								<span class="text-muted-foreground">{$t('registry.selectRegistry')}</span>
 							{/if}
 						</Select.Trigger>
 						<Select.Content>
@@ -223,25 +224,25 @@
 									{/if}
 									{registry.name}
 									{#if registry.hasCredentials}
-										<Badge variant="outline" class="ml-2 text-xs">auth</Badge>
+										<Badge variant="outline" class="ml-2 text-xs">{$t('registry.authBadge')}</Badge>
 									{/if}
 								</Select.Item>
 							{/each}
 						</Select.Content>
 					</Select.Root>
 					{#if pushableRegistries.length === 0}
-						<p class="text-xs text-muted-foreground">No target registries available. Add a private registry in Settings.</p>
+						<p class="text-xs text-muted-foreground">{$t('imagePush.noTargetRegistries')}</p>
 					{/if}
 				</div>
 
 				<div class="space-y-2">
-					<Label>Image name/tag</Label>
+					<Label>{$t('imagePush.imageNameTag')}</Label>
 					<Input
 						bind:value={customTag}
 						placeholder="myimage:latest"
 					/>
 					<p class="text-xs text-muted-foreground">
-						Will be pushed as: <code class="bg-muted px-1 py-0.5 rounded">{targetImageName()}</code>
+						{$t('imagePush.willPushAs')} <code class="bg-muted px-1 py-0.5 rounded">{targetImageName()}</code>
 					</p>
 				</div>
 			</div>
@@ -253,7 +254,7 @@
 					sourceImageName={imageName}
 					registryId={targetRegistryId ?? 0}
 					newTag={customTag}
-					registryName={targetRegistry?.name || 'registry'}
+					registryName={targetRegistry?.name || $t('common.labels.registry')}
 					envId={effectiveEnvId}
 					autoStart={pushStarted && pushStatus === 'idle'}
 					onComplete={handlePushComplete}
@@ -267,7 +268,7 @@
 			<div>
 				{#if currentStep === 'push' && pushStatus === 'error'}
 					<Button variant="outline" onclick={() => pushTabRef?.startPush()}>
-						Retry push
+						{$t('imagePush.retryPush')}
 					</Button>
 				{/if}
 			</div>
@@ -277,7 +278,7 @@
 					onclick={handleClose}
 					disabled={isProcessing}
 				>
-					{pushStatus === 'complete' ? 'Done' : 'Cancel'}
+					{pushStatus === 'complete' ? $t('common.actions.done') : $t('common.actions.cancel')}
 				</Button>
 				{#if currentStep === 'configure'}
 					<Button
@@ -285,7 +286,7 @@
 						disabled={!targetRegistryId || pushableRegistries.length === 0}
 					>
 						<Upload class="w-4 h-4" />
-						Push
+						{$t('imagePush.steps.push')}
 					</Button>
 				{/if}
 			</div>

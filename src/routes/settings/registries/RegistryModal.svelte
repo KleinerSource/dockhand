@@ -5,6 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Plus, Check, RefreshCw } from 'lucide-svelte';
 	import { focusFirstInput } from '$lib/utils';
+	import { t, translate } from '$lib/i18n';
 
 	export interface Registry {
 		id: number;
@@ -59,7 +60,7 @@
 
 	async function save() {
 		if (!formName.trim() || !formUrl.trim()) {
-			formError = 'Name and URL are required';
+			formError = translate('settings.registries.modal.validation.nameUrlRequired');
 			return;
 		}
 
@@ -92,10 +93,10 @@
 				onSaved();
 			} else {
 				const data = await response.json();
-				formError = data.error || `Failed to ${isEditing ? 'update' : 'create'} registry`;
+				formError = data.error || translate(isEditing ? 'settings.registries.modal.errors.updateFailed' : 'settings.registries.modal.errors.createFailed');
 			}
 		} catch {
-			formError = `Failed to ${isEditing ? 'update' : 'create'} registry`;
+			formError = translate(isEditing ? 'settings.registries.modal.errors.updateFailed' : 'settings.registries.modal.errors.createFailed');
 		} finally {
 			formSaving = false;
 		}
@@ -110,34 +111,34 @@
 <Dialog.Root bind:open onOpenChange={(o) => { if (o) { formError = ''; focusFirstInput(); } }}>
 	<Dialog.Content class="max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>{isEditing ? 'Edit' : 'Add'} registry</Dialog.Title>
+			<Dialog.Title>{isEditing ? $t('settings.registries.modal.titleEdit') : $t('settings.registries.modal.titleAdd')}</Dialog.Title>
 		</Dialog.Header>
 		<div class="space-y-4">
 			{#if formError}
 				<div class="text-sm text-red-600 dark:text-red-400">{formError}</div>
 			{/if}
 			<div class="space-y-2">
-				<Label for="reg-name">Name</Label>
-				<Input id="reg-name" bind:value={formName} placeholder="My Private Registry" />
+				<Label for="reg-name">{$t('settings.registries.modal.name')}</Label>
+				<Input id="reg-name" bind:value={formName} placeholder={$t('settings.registries.modal.namePlaceholder')} />
 			</div>
 			<div class="space-y-2">
-				<Label for="reg-url">URL</Label>
+				<Label for="reg-url">{$t('settings.registries.modal.url')}</Label>
 				<Input id="reg-url" bind:value={formUrl} placeholder="https://registry.example.com" />
 			</div>
 			<div class="space-y-4 pt-2 border-t">
-				<p class="text-xs text-muted-foreground">Credentials {isEditing ? '(leave password blank to keep existing)' : '(optional)'}</p>
+				<p class="text-xs text-muted-foreground">{isEditing ? $t('settings.registries.modal.credentialsKeepExisting') : $t('settings.registries.modal.credentialsOptional')}</p>
 				<div class="space-y-2">
-					<Label for="reg-username">Username</Label>
-					<Input id="reg-username" bind:value={formUsername} placeholder="username" />
+					<Label for="reg-username">{$t('settings.registries.modal.username')}</Label>
+					<Input id="reg-username" bind:value={formUsername} placeholder={$t('settings.registries.modal.usernamePlaceholder')} />
 				</div>
 				<div class="space-y-2">
-					<Label for="reg-password">Password / Token</Label>
-					<Input id="reg-password" type="password" bind:value={formPassword} placeholder={isEditing ? 'leave blank to keep existing' : 'password or access token'} />
+					<Label for="reg-password">{$t('settings.registries.modal.passwordToken')}</Label>
+					<Input id="reg-password" type="password" bind:value={formPassword} placeholder={isEditing ? $t('settings.registries.modal.keepExistingPlaceholder') : $t('settings.registries.modal.passwordPlaceholder')} />
 				</div>
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={handleClose}>Cancel</Button>
+			<Button variant="outline" onclick={handleClose}>{$t('settings.registries.modal.cancel')}</Button>
 			<Button onclick={save} disabled={formSaving}>
 				{#if formSaving}
 					<RefreshCw class="w-4 h-4 mr-1 animate-spin" />
@@ -146,7 +147,7 @@
 				{:else}
 					<Plus class="w-4 h-4" />
 				{/if}
-				{isEditing ? 'Save' : 'Add'}
+				{isEditing ? $t('settings.registries.modal.save') : $t('settings.registries.modal.add')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

@@ -8,6 +8,7 @@
 	import { Link, Loader2, Box } from 'lucide-svelte';
 	import { focusFirstInput } from '$lib/utils';
 	import type { NetworkInfo } from '$lib/types';
+	import { t, translate } from '$lib/i18n';
 
 	interface Container {
 		id: string;
@@ -75,17 +76,20 @@
 			});
 
 			if (response.ok) {
-				toast.success(`Connected ${selectedContainerInfo?.name || 'container'} to ${network.name}`);
+				toast.success(translate('networks.connect.toasts.connected', {
+					container: selectedContainerInfo?.name || translate('networks.connect.containerFallback'),
+					network: network.name
+				}));
 				open = false;
 				selectedContainer = undefined;
 				onSuccess();
 			} else {
 				const data = await response.json();
-				toast.error(data.details || 'Failed to connect container');
+				toast.error(data.details || translate('networks.connect.toasts.connectFailed'));
 			}
 		} catch (error) {
 			console.error('Failed to connect container:', error);
-			toast.error('Failed to connect container');
+			toast.error(translate('networks.connect.toasts.connectFailed'));
 		} finally {
 			submitting = false;
 		}
@@ -104,10 +108,10 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<Link class="w-4 h-4" />
-				Connect container to {network?.name}
+				{$t('networks.connect.title', { network: network?.name || '' })}
 			</Dialog.Title>
 			<Dialog.Description>
-				Select a container to connect to this network.
+				{$t('networks.connect.description')}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -119,12 +123,12 @@
 			{:else if availableContainers.length === 0}
 				<div class="text-center py-8 text-muted-foreground">
 					<Box class="w-8 h-8 mx-auto mb-2 opacity-50" />
-					<p class="text-sm">No containers available to connect.</p>
-					<p class="text-xs mt-1">All containers are already connected to this network.</p>
+					<p class="text-sm">{$t('networks.connect.empty.title')}</p>
+					<p class="text-xs mt-1">{$t('networks.connect.empty.description')}</p>
 				</div>
 			{:else}
 				<div class="space-y-2">
-					<Label for="container">Container</Label>
+					<Label for="container">{$t('networks.connect.containerLabel')}</Label>
 					<Select.Root type="single" bind:value={selectedContainer}>
 						<Select.Trigger id="container" class="w-full">
 							{#if selectedContainerInfo}
@@ -133,7 +137,7 @@
 									{selectedContainerInfo.name}
 								</span>
 							{:else}
-								<span class="text-muted-foreground">Select a container...</span>
+								<span class="text-muted-foreground">{$t('networks.connect.selectContainer')}</span>
 							{/if}
 						</Select.Trigger>
 						<Select.Content>
@@ -154,7 +158,7 @@
 
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => open = false} disabled={submitting}>
-				Cancel
+				{$t('networks.connect.cancel')}
 			</Button>
 			<Button
 				onclick={handleConnect}
@@ -165,7 +169,7 @@
 				{:else}
 					<Link class="w-4 h-4" />
 				{/if}
-				Connect
+				{$t('networks.connect.connect')}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

@@ -4,6 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Progress } from '$lib/components/ui/progress';
 	import { CircleArrowUp, CheckCircle2, XCircle, Loader2, Circle, Ship, Sparkles, Bug, Wrench, RotateCcw, AlertCircle } from 'lucide-svelte';
+	import { t } from '$lib/i18n';
 
 	declare const __APP_VERSION__: string | null;
 
@@ -56,19 +57,19 @@
 
 	const ALL_STEPS = [
 		// Preparation (from SSE)
-		{ id: 'pulling_image', label: 'Pulling new image' },
-		{ id: 'building_config', label: 'Building container config' },
-		{ id: 'pulling_updater', label: 'Pulling updater' },
-		{ id: 'creating_container', label: 'Creating new container' },
-		{ id: 'launching_updater', label: 'Launching updater' },
+		{ id: 'pulling_image' },
+		{ id: 'building_config' },
+		{ id: 'pulling_updater' },
+		{ id: 'creating_container' },
+		{ id: 'launching_updater' },
 		// Update (from updater container logs)
-		{ id: 'stopping', label: 'Stopping Dockhand' },
-		{ id: 'removing', label: 'Removing old container' },
-		{ id: 'renaming', label: 'Renaming container' },
-		{ id: 'connecting', label: 'Connecting networks' },
-		{ id: 'starting', label: 'Starting Dockhand' },
+		{ id: 'stopping' },
+		{ id: 'removing' },
+		{ id: 'renaming' },
+		{ id: 'connecting' },
+		{ id: 'starting' },
 		// Reconnect
-		{ id: 'reconnecting', label: 'Waiting for Dockhand' }
+		{ id: 'reconnecting' }
 	] as const;
 
 	// Updater log markers → step id mapping
@@ -80,7 +81,17 @@
 		{ start: 'Starting container', end: 'Container is running', id: 'starting' }
 	];
 
-	let steps = $state<StepState[]>(ALL_STEPS.map(s => ({ id: s.id, label: s.label, status: 'pending', logs: [], showLogs: false })));
+	function createInitialSteps(): StepState[] {
+		return ALL_STEPS.map(s => ({
+			id: s.id,
+			label: $t(`settings.about.selfUpdate.steps.${s.id}`),
+			status: 'pending',
+			logs: [],
+			showLogs: false
+		}));
+	}
+
+	let steps = $state<StepState[]>(createInitialSteps());
 	let scrollTick = $state(0);
 	let stepsListEl = $state<HTMLDivElement | null>(null);
 
@@ -112,7 +123,7 @@
 		consecutivePollFailures = 0;
 		releaseNotes = [];
 		lastParsedLogCount = 0;
-		steps = ALL_STEPS.map(s => ({ id: s.id, label: s.label, status: 'pending', logs: [], showLogs: false }));
+		steps = createInitialSteps();
 		stopPolling();
 	}
 
@@ -208,7 +219,7 @@
 	async function startUpdate() {
 		phase = 'preparing';
 		errorMessage = null;
-		steps = ALL_STEPS.map(s => ({ id: s.id, label: s.label, status: 'pending', logs: [], showLogs: false }));
+		steps = createInitialSteps();
 
 		try {
 			const response = await fetch('/api/self-update', {
@@ -222,14 +233,14 @@
 			if (contentType.includes('application/json')) {
 				const data = await response.json();
 				phase = 'error';
-				errorMessage = data.error || 'Update failed';
+				errorMessage = data.error || $t('settings.about.selfUpdate.updateFailed');
 				return;
 			}
 
 			// It's an SSE stream
 			if (!response.body) {
 				phase = 'error';
-				errorMessage = 'No response body';
+				errorMessage = $t('settings.about.selfUpdate.noResponseBody');
 				return;
 			}
 
@@ -258,7 +269,7 @@
 		} catch (err) {
 			if (phase === 'preparing') {
 				phase = 'error';
-				errorMessage = 'Connection lost: ' + String(err);
+				errorMessage = $t('settings.about.selfUpdate.connectionLost', { error: String(err) });
 			}
 		}
 	}
@@ -284,7 +295,7 @@
 			startProgressPolling();
 		} else if (event === 'error') {
 			phase = 'error';
-			errorMessage = data.message || 'Update failed';
+			errorMessage = data.message || $t('settings.about.selfUpdate.updateFailed');
 			// Mark current active step as error
 			const currentId = activeStepId();
 			if (currentId) {
@@ -328,7 +339,7 @@
 					switchToRestarting();
 				} else {
 					phase = 'error';
-					errorMessage = `Updater exited with code ${data.exitCode}`;
+					errorMessage = $t('settings.about.selfUpdate.updaterExited', { code: data.exitCode ?? '' });
 					const currentId = activeStepId();
 					if (currentId) setStepStatus(currentId, 'error');
 				}
@@ -428,7 +439,7 @@
 				phase = 'completed';
 				const step = getStep('reconnecting');
 				if (step) {
-					step.label = 'Dockhand is back online';
+					step.label = $t('settings.about.selfUpdate.backOnline');
 					step.status = 'completed';
 					steps = [...steps];
 				}
@@ -482,9 +493,9 @@
 			<Dialog.Title class="flex items-center gap-2">
 				<CircleArrowUp class="w-5 h-5 text-amber-500" />
 				{#if phase === 'confirm'}
-					Update Dockhand
+					{$t('settings.about.selfUpdate.updateDockhand')}
 				{:else}
-					Updating Dockhand
+					{$t('settings.about.selfUpdate.updatingDockhand')}
 				{/if}
 			</Dialog.Title>
 			{#if phase !== 'confirm'}
@@ -493,11 +504,11 @@
 						<span class="text-primary font-medium">{activeStep.label}...</span>
 						<span class="text-muted-foreground ml-2">({completedCount}/{ALL_STEPS.length})</span>
 					{:else if phase === 'completed'}
-						Update complete
+						{$t('settings.about.selfUpdate.updateComplete')}
 					{:else if phase === 'error'}
-						Update failed
+						{$t('settings.about.selfUpdate.updateFailed')}
 					{:else}
-						Preparing...
+						{$t('settings.about.selfUpdate.preparing')}
 					{/if}
 				</Dialog.Description>
 			{/if}
@@ -508,7 +519,7 @@
 			<div class="space-y-4 py-2 overflow-y-auto min-h-0 flex-1">
 				<div class="space-y-2">
 					<div class="flex items-center justify-between text-sm">
-						<span class="text-muted-foreground">Container</span>
+						<span class="text-muted-foreground">{$t('settings.about.selfUpdate.container')}</span>
 						<span class="font-medium flex items-center gap-1.5">
 							<Ship class="w-3.5 h-3.5" />
 							{containerName}
@@ -516,26 +527,26 @@
 					</div>
 					{#if isVersionUpdate}
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">Current image</span>
+							<span class="text-muted-foreground">{$t('settings.about.selfUpdate.currentImage')}</span>
 							<Badge variant="secondary" class="font-mono text-xs">{currentImage}</Badge>
 						</div>
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">New image</span>
+							<span class="text-muted-foreground">{$t('settings.about.selfUpdate.newImage')}</span>
 							<Badge variant="default" class="font-mono text-xs">{newImage}</Badge>
 						</div>
 					{:else}
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-muted-foreground">Image</span>
+							<span class="text-muted-foreground">{$t('settings.about.selfUpdate.image')}</span>
 							<Badge variant="secondary" class="font-mono text-xs">{currentImage}</Badge>
 						</div>
 						{#if currentDigest || newDigest}
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-muted-foreground">Current digest</span>
-								<span class="font-mono text-xs text-muted-foreground">{currentDigest ? currentDigest.replace('sha256:', '').slice(0, 12) : 'unknown'}</span>
+								<span class="text-muted-foreground">{$t('settings.about.selfUpdate.currentDigest')}</span>
+								<span class="font-mono text-xs text-muted-foreground">{currentDigest ? currentDigest.replace('sha256:', '').slice(0, 12) : $t('common.states.unknown')}</span>
 							</div>
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-muted-foreground">New digest</span>
-								<span class="font-mono text-xs text-amber-500">{newDigest ? newDigest.replace('sha256:', '').slice(0, 12) : 'unknown'}</span>
+								<span class="text-muted-foreground">{$t('settings.about.selfUpdate.newDigest')}</span>
+								<span class="font-mono text-xs text-amber-500">{newDigest ? newDigest.replace('sha256:', '').slice(0, 12) : $t('common.states.unknown')}</span>
 							</div>
 						{/if}
 					{/if}
@@ -544,12 +555,12 @@
 				{#if loadingNotes}
 					<div class="flex items-center gap-2 text-sm text-muted-foreground py-2">
 						<Loader2 class="w-4 h-4 animate-spin" />
-						Loading release notes...
+						{$t('settings.about.selfUpdate.loadingReleaseNotes')}
 					</div>
 				{:else if releaseNotes.length > 0}
 					<div class="border rounded-md overflow-hidden">
 						<div class="bg-muted/50 px-3 py-2 border-b">
-							<p class="text-sm font-medium">What's new</p>
+							<p class="text-sm font-medium">{$t('settings.about.selfUpdate.whatsNew')}</p>
 						</div>
 						<div class="p-3 space-y-3 overflow-y-auto">
 							{#each releaseNotes as entry}
@@ -576,7 +587,7 @@
 				{#if isComposeManaged}
 					<div class="rounded-md border border-blue-500/30 bg-blue-500/5 p-3">
 						<p class="text-xs text-muted-foreground">
-							<span class="font-medium text-blue-400">Note:</span> This container is managed by Docker Compose. After update it will continue to work but may lose Compose tracking. Use <code class="text-2xs">docker compose pull && docker compose up -d</code> for Compose-aware updates.
+							<span class="font-medium text-blue-400">{$t('settings.about.selfUpdate.composeNoteLabel')}</span> {$t('settings.about.selfUpdate.composeNoteBefore')} <code class="text-2xs">docker compose pull && docker compose up -d</code> {$t('settings.about.selfUpdate.composeNoteAfter')}
 						</p>
 					</div>
 				{/if}
@@ -584,11 +595,11 @@
 
 			<Dialog.Footer>
 				<Button variant="outline" onclick={handleClose}>
-					Cancel
+					{$t('common.actions.cancel')}
 				</Button>
 				<Button onclick={startUpdate}>
 					<CircleArrowUp class="w-4 h-4 mr-2" />
-					Update now
+					{$t('settings.about.selfUpdate.updateNow')}
 				</Button>
 			</Dialog.Footer>
 
@@ -598,7 +609,7 @@
 				<!-- Progress bar -->
 				<div class="space-y-2 shrink-0">
 					<div class="flex items-center justify-between text-sm">
-						<span class="text-muted-foreground">Progress</span>
+						<span class="text-muted-foreground">{$t('settings.about.selfUpdate.progress')}</span>
 						<Badge variant="secondary">{completedCount}/{ALL_STEPS.length}</Badge>
 					</div>
 					<Progress value={progressPercentage} class="h-2" />
@@ -650,16 +661,16 @@
 				{#if phase === 'completed'}
 					<Button onclick={() => window.location.reload()}>
 						<RotateCcw class="w-4 h-4 mr-2" />
-						Reload
+						{$t('settings.about.selfUpdate.reload')}
 					</Button>
 				{:else if phase === 'error'}
 					<Button variant="outline" onclick={handleClose}>
-						Close
+						{$t('common.actions.close')}
 					</Button>
 				{:else}
 					<Button variant="outline" disabled>
 						<Loader2 class="w-4 h-4 mr-2 animate-spin" />
-						Updating...
+						{$t('settings.about.selfUpdate.updating')}
 					</Button>
 				{/if}
 			</Dialog.Footer>

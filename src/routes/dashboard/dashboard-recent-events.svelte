@@ -16,6 +16,7 @@
 	} from 'lucide-svelte';
 	import type { Component } from 'svelte';
 	import { formatDateTime } from '$lib/stores/settings';
+	import { t } from '$lib/i18n';
 
 	interface Event {
 		container_name: string;
@@ -89,6 +90,11 @@
 		const diffDays = Math.floor(diffHours / 24);
 		return `${diffDays}d`;
 	}
+
+	function getActionLabel(action: string): string {
+		const label = $t(`activity.actions.${action}`);
+		return label === `activity.actions.${action}` ? action : label;
+	}
 </script>
 
 {#if events && events.length > 0}
@@ -110,7 +116,7 @@
 	>
 		<div class="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
 			<Activity class="w-3 h-3" />
-			<span class="font-medium">Recent events</span>
+			<span class="font-medium">{$t('dashboard.stats.recentEvents')}</span>
 		</div>
 		<!-- Grid layout with fixed columns: timestamp, action icon, container name -->
 		<div class="grid grid-cols-[auto_auto_1fr] gap-x-2 gap-y-1 text-xs">
@@ -121,7 +127,7 @@
 				</span>
 				{@const ActionIcon = getActionIcon(event.action)}
 				<!-- Action icon -->
-				<div class="flex items-center justify-center {getActionColor(event.action)}" title={event.action}>
+				<div class="flex items-center justify-center {getActionColor(event.action)}" title={getActionLabel(event.action)}>
 					<ActionIcon class="w-3 h-3" />
 				</div>
 				<!-- Container name -->

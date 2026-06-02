@@ -5,6 +5,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		stackName: string;
@@ -50,7 +51,7 @@
 		{#snippet child({ props })}
 			<button
 				type="button"
-				title="Redeploy"
+				title={$t('stacks.redeploy.title')}
 				{...props}
 				onclick={handleTriggerClick}
 				class="p-1 rounded hover:bg-muted transition-colors opacity-70 hover:opacity-100 cursor-pointer inline-flex items-center"
@@ -66,19 +67,19 @@
 		sideOffset={8}
 	>
 		<div class="space-y-3">
-			<p class="text-xs font-medium">Redeploy stack</p>
+			<p class="text-xs font-medium">{$t('stacks.redeploy.title')}</p>
 			<div class="space-y-2">
 				<label class="flex items-center gap-2 cursor-pointer">
 					<Checkbox bind:checked={pull} disabled={deploying} />
-					<span class="text-xs">Pull images</span>
+					<span class="text-xs">{$t('stacks.redeploy.pullImages')}</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<Checkbox bind:checked={build} disabled={deploying} />
-					<span class="text-xs">Build images</span>
+					<span class="text-xs">{$t('stacks.redeploy.buildImages')}</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<Checkbox bind:checked={forceRecreate} disabled={deploying} />
-					<span class="text-xs">Force recreate</span>
+					<span class="text-xs">{$t('stacks.redeploy.forceRecreate')}</span>
 				</label>
 			</div>
 			<Button
@@ -89,9 +90,9 @@
 			>
 				{#if deploying}
 					<Loader2 class="w-3 h-3 mr-1 animate-spin" />
-					Deploying...
+					{$t('stacks.gitDeploy.deploying')}
 				{:else}
-					Deploy
+					{$t('common.actions.deploy')}
 				{/if}
 			</Button>
 		</div>

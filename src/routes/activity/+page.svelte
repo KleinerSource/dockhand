@@ -43,6 +43,7 @@
 	import { formatDateTime, appSettings } from '$lib/stores/settings';
 	import { NoEnvironment } from '$lib/components/ui/empty-state';
 	import { DataGrid } from '$lib/components/data-grid';
+	import { formatNumber, locale, t } from '$lib/i18n';
 
 	interface ContainerEvent {
 		id: number;
@@ -142,21 +143,21 @@
 	let sseConnected = $state(false);
 	let eventSource: EventSource | null = null;
 
-	const actionOptions = [
-		{ value: 'create', label: 'Create', icon: Plus, color: 'text-emerald-500' },
-		{ value: 'start', label: 'Start', icon: Play, color: 'text-emerald-500' },
-		{ value: 'stop', label: 'Stop', icon: Square, color: 'text-amber-500' },
-		{ value: 'die', label: 'Die', icon: Skull, color: 'text-red-500' },
-		{ value: 'kill', label: 'Kill', icon: Zap, color: 'text-red-500' },
-		{ value: 'restart', label: 'Restart', icon: RotateCcw, color: 'text-sky-500' },
-		{ value: 'pause', label: 'Pause', icon: Pause, color: 'text-amber-500' },
-		{ value: 'unpause', label: 'Unpause', icon: CirclePlay, color: 'text-emerald-500' },
-		{ value: 'destroy', label: 'Destroy', icon: Trash2, color: 'text-red-500' },
-		{ value: 'rename', label: 'Rename', icon: Pencil, color: 'text-muted-foreground' },
-		{ value: 'update', label: 'Update', icon: Pencil, color: 'text-sky-500' },
-		{ value: 'oom', label: 'Out of memory', icon: AlertTriangle, color: 'text-red-500' },
-		{ value: 'health_status', label: 'Health status', icon: Heart, color: 'text-amber-500' }
-	];
+	const actionOptions = $derived([
+		{ value: 'create', label: $t('activity.actions.create'), icon: Plus, color: 'text-emerald-500' },
+		{ value: 'start', label: $t('activity.actions.start'), icon: Play, color: 'text-emerald-500' },
+		{ value: 'stop', label: $t('activity.actions.stop'), icon: Square, color: 'text-amber-500' },
+		{ value: 'die', label: $t('activity.actions.die'), icon: Skull, color: 'text-red-500' },
+		{ value: 'kill', label: $t('activity.actions.kill'), icon: Zap, color: 'text-red-500' },
+		{ value: 'restart', label: $t('activity.actions.restart'), icon: RotateCcw, color: 'text-sky-500' },
+		{ value: 'pause', label: $t('activity.actions.pause'), icon: Pause, color: 'text-amber-500' },
+		{ value: 'unpause', label: $t('activity.actions.unpause'), icon: CirclePlay, color: 'text-emerald-500' },
+		{ value: 'destroy', label: $t('activity.actions.destroy'), icon: Trash2, color: 'text-red-500' },
+		{ value: 'rename', label: $t('activity.actions.rename'), icon: Pencil, color: 'text-muted-foreground' },
+		{ value: 'update', label: $t('activity.actions.update'), icon: Pencil, color: 'text-sky-500' },
+		{ value: 'oom', label: $t('activity.actions.oom'), icon: AlertTriangle, color: 'text-red-500' },
+		{ value: 'health_status', label: $t('activity.actions.health_status'), icon: Heart, color: 'text-amber-500' }
+	]);
 
 	// Date filter preset
 	let selectedDatePreset = $state<string>('');
@@ -166,14 +167,14 @@
 		filterContainerName || filterActions.length > 0 || filterEnvironmentId !== null || selectedDatePreset
 	);
 
-	const datePresets = [
-		{ value: 'today', label: 'Today' },
-		{ value: 'yesterday', label: 'Yesterday' },
-		{ value: 'last7days', label: 'Last 7 days' },
-		{ value: 'last30days', label: 'Last 30 days' },
-		{ value: 'thisMonth', label: 'This month' },
-		{ value: 'lastMonth', label: 'Last month' }
-	];
+	const datePresets = $derived([
+		{ value: 'today', label: $t('filters.today') },
+		{ value: 'yesterday', label: $t('filters.yesterday') },
+		{ value: 'last7days', label: $t('filters.last7days') },
+		{ value: 'last30days', label: $t('filters.last30days') },
+		{ value: 'thisMonth', label: $t('filters.thisMonth') },
+		{ value: 'lastMonth', label: $t('filters.lastMonth') }
+	]);
 
 	function formatDateForInput(date: Date): string {
 		const year = date.getFullYear();
@@ -244,9 +245,9 @@
 			});
 			if (!res.ok) {
 				const data = await res.json();
-				throw new Error(data.error || 'Failed to clear activity');
+				throw new Error(data.error || $t('activity.failedToClear'));
 			}
-			toast.success('Activity log cleared');
+			toast.success($t('activity.logCleared'));
 			// Reset and reload
 			events = [];
 			eventIds = new Set();
@@ -301,7 +302,7 @@
 				signal: fetchController.signal
 			});
 			if (!response.ok) {
-				throw new Error('Failed to fetch events');
+				throw new Error($t('activity.failedToFetch'));
 			}
 			const data = await response.json();
 
@@ -423,6 +424,10 @@
 
 	function formatTimestamp(ts: string): string {
 		return formatDateTime(ts, true);
+	}
+
+	function getActionLabel(action: string): string {
+		return $t(`activity.actions.${action}`);
 	}
 
 	function getActionIcon(action: string) {
@@ -637,23 +642,23 @@
 </script>
 
 <svelte:head>
-	<title>Activity - Dockhand</title>
+	<title>{$t('activity.title')} - Dockhand</title>
 </svelte:head>
 
 <div class="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
 	<!-- Header with inline filters -->
 	<div class="shrink-0 flex flex-wrap justify-between items-center gap-3 min-h-8">
 		<div class="flex items-center gap-3">
-			<PageHeader icon={Activity} title="Activity" count={visibleEnd > 0 ? `${visibleStart}-${visibleEnd}` : undefined} total={total > 0 ? total : undefined} countClass="min-w-32" />
+			<PageHeader icon={Activity} title={$t('activity.title')} count={visibleEnd > 0 ? `${visibleStart}-${visibleEnd}` : undefined} total={total > 0 ? total : undefined} countClass="min-w-32" />
 			<Badge variant="outline" class="gap-1.5 {($appSettings.eventCollectionMode || 'stream') === 'stream' ? 'text-green-500 border-green-500/50' : 'text-amber-500 border-amber-500/50'}">
 				{#if ($appSettings.eventCollectionMode || 'stream') === 'stream'}
 					<Wifi class="w-3 h-3" />
-					<span>Stream</span>
+					<span>{$t('activity.stream')}</span>
 				{:else if ($appSettings.eventCollectionMode || 'stream') === 'poll'}
 					<Radio class="w-3 h-3" />
-					<span>Poll</span><span class="text-[10px] opacity-70">({($appSettings.eventPollInterval || 60000) / 1000}s)</span>
+					<span>{$t('activity.poll')}</span><span class="text-[10px] opacity-70">({($appSettings.eventPollInterval || 60000) / 1000}s)</span>
 				{:else}
-					<span class="text-muted-foreground">Off</span>
+					<span class="text-muted-foreground">{$t('common.states.off')}</span>
 				{/if}
 			</Badge>
 		</div>
@@ -663,7 +668,7 @@
 				<Search class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
 				<Input
 					type="text"
-					placeholder="Container..."
+					placeholder={$t('activity.containerPlaceholder')}
 					bind:value={filterContainerName}
 					onkeydown={(e) => e.key === 'Escape' && (filterContainerName = '')}
 					class="pl-8 h-8 w-36 text-sm"
@@ -674,8 +679,8 @@
 			<MultiSelectFilter
 				bind:value={filterActions}
 				options={actionOptions}
-				placeholder="Action"
-				pluralLabel="actions"
+				placeholder={$t('activity.actionPlaceholder')}
+				pluralLabel={$t('activity.actionsSelected')}
 				width="w-36"
 				defaultIcon={Activity}
 			/>
@@ -696,16 +701,16 @@
 						{/if}
 						<span class="truncate">
 							{#if filterEnvironmentId === null}
-								Environment
+								{$t('activity.environmentPlaceholder')}
 							{:else}
-								{selectedEnv?.name || 'Environment'}
+								{selectedEnv?.name || $t('activity.environmentPlaceholder')}
 							{/if}
 						</span>
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="">
 							<Server class="w-4 h-4 mr-2 text-muted-foreground" />
-							All environments
+							{$t('activity.allEnvironments')}
 						</Select.Item>
 						{#each environments as env}
 							<Select.Item value={String(env.id)}>
@@ -732,27 +737,27 @@
 					<Calendar class="w-3.5 h-3.5 mr-1.5 text-muted-foreground shrink-0" />
 					<span class="truncate">
 						{#if selectedDatePreset === 'custom'}
-							Custom
+							{$t('filters.custom')}
 						{:else if selectedDatePreset}
-							{datePresets.find(d => d.value === selectedDatePreset)?.label || 'All time'}
+							{datePresets.find(d => d.value === selectedDatePreset)?.label || $t('filters.allTime')}
 						{:else}
-							All time
+							{$t('filters.allTime')}
 						{/if}
 					</span>
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value="">All time</Select.Item>
+					<Select.Item value="">{$t('filters.allTime')}</Select.Item>
 					{#each datePresets as preset}
 						<Select.Item value={preset.value}>{preset.label}</Select.Item>
 					{/each}
-					<Select.Item value="custom">Custom range...</Select.Item>
+					<Select.Item value="custom">{$t('filters.customRange')}</Select.Item>
 				</Select.Content>
 			</Select.Root>
 
 			<!-- Custom date inputs -->
 			{#if selectedDatePreset === 'custom'}
-				<DatePicker bind:value={filterFromDate} placeholder="From" class="h-8 w-28" />
-				<DatePicker bind:value={filterToDate} placeholder="To" class="h-8 w-28" />
+				<DatePicker bind:value={filterFromDate} placeholder={$t('filters.from')} class="h-8 w-28" />
+				<DatePicker bind:value={filterToDate} placeholder={$t('filters.to')} class="h-8 w-28" />
 			{/if}
 
 			<!-- Clear filters -->
@@ -762,7 +767,7 @@
 				class="h-8 px-2"
 				onclick={clearFilters}
 				disabled={!hasActiveFilters}
-				title="Clear all filters"
+				title={$t('filters.clearAllFilters')}
 			>
 				<X class="w-3.5 h-3.5" />
 			</Button>
@@ -774,11 +779,11 @@
 			{#if $canAccess('activity', 'delete')}
 				<ConfirmPopover
 					bind:open={showClearConfirm}
-					action="Clear"
-					itemType="activity log"
-					title="Clear all"
+					action={$t('activity.clearConfirm')}
+					itemType={$t('activity.activityLog')}
+					title={$t('activity.clearTitle')}
 					onConfirm={clearActivity}
-					confirmText="Clear"
+					confirmText={$t('activity.clearConfirm')}
 					variant="destructive"
 					disabled={clearingActivity}
 					onOpenChange={(open) => showClearConfirm = open}
@@ -825,7 +830,7 @@
 					{/if}
 				{:else if column.id === 'action'}
 					<div class="flex justify-center">
-						<Badge class="{getActionColor(event.action)} py-0.5 px-1" title={event.action.charAt(0).toUpperCase() + event.action.slice(1)}>
+						<Badge class="{getActionColor(event.action)} py-0.5 px-1" title={getActionLabel(event.action)}>
 							<svelte:component this={getActionIcon(event.action)} class="w-3 h-3" />
 						</Badge>
 					</div>
@@ -833,7 +838,7 @@
 					<div class="flex items-center gap-1 truncate text-xs">
 						<Box class="w-3 h-3 text-muted-foreground shrink-0" />
 						<span class="truncate" title={event.containerName || event.containerId || 'Unknown'}>
-							{event.containerName || (event.containerId ? event.containerId.slice(0, 12) : 'Unknown')}
+							{event.containerName || (event.containerId ? event.containerId.slice(0, 12) : $t('common.states.unknown'))}
 						</span>
 					</div>
 				{:else if column.id === 'image'}
@@ -861,26 +866,26 @@
 			{#snippet emptyState()}
 				<div class="flex flex-col items-center justify-center py-16 text-muted-foreground">
 					<FileX class="w-10 h-10 mb-3 opacity-40" />
-					<p>No container events found</p>
-					<p class="text-xs mt-1">Events will appear here as containers start, stop, etc.</p>
+					<p>{$t('activity.empty')}</p>
+					<p class="text-xs mt-1">{$t('activity.emptyDescription')}</p>
 				</div>
 			{/snippet}
 
 			{#snippet loadingState()}
 				<div class="flex items-center justify-center py-16 text-muted-foreground">
 					<RefreshCw class="w-5 h-5 animate-spin mr-2" />
-					Loading...
+					{$t('common.states.loading')}
 				</div>
 			{/snippet}
 			{#snippet footer()}
 				{#if loadingMore}
 					<div class="flex items-center justify-center py-2 text-muted-foreground">
 						<Loader2 class="w-4 h-4 animate-spin mr-2" />
-						Loading more...
+						{$t('activity.loadingMore')}
 					</div>
 				{:else if !hasMore && events.length > 0}
 					<div class="text-center py-2 text-sm text-muted-foreground">
-						End of results ({total.toLocaleString()} events)
+						{$t('activity.endOfResults', { count: formatNumber(total, $locale) })}
 					</div>
 				{/if}
 			{/snippet}
@@ -892,44 +897,44 @@
 <Dialog.Root bind:open={showDetailDialog}>
 	<Dialog.Content class="max-w-2xl">
 		<Dialog.Header>
-			<Dialog.Title>Event details</Dialog.Title>
+			<Dialog.Title>{$t('activity.detailsTitle')}</Dialog.Title>
 		</Dialog.Header>
 		{#if selectedEvent}
 			<div class="space-y-4">
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label class="text-sm font-medium text-muted-foreground">Timestamp</label>
+						<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.timestamp')}</label>
 						<p class="font-mono text-sm">{formatTimestamp(selectedEvent.timestamp)}</p>
 					</div>
 					<div>
-						<label class="text-sm font-medium text-muted-foreground">Action</label>
+						<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.actions')}</label>
 						<p>
 							<Badge class="{getActionColor(selectedEvent.action)} gap-1">
 								<svelte:component this={getActionIcon(selectedEvent.action)} class="w-3 h-3" />
-								{selectedEvent.action}
+								{getActionLabel(selectedEvent.action)}
 							</Badge>
 						</p>
 					</div>
 					<div>
-						<label class="text-sm font-medium text-muted-foreground">Container name</label>
+						<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.containerName')}</label>
 						<p class="flex items-center gap-1">
 							<Box class="w-4 h-4 text-muted-foreground" />
 							{selectedEvent.containerName || '-'}
 						</p>
 					</div>
 					<div>
-						<label class="text-sm font-medium text-muted-foreground">Container ID</label>
+						<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.containerId')}</label>
 						<p class="font-mono text-sm break-all">{selectedEvent.containerId}</p>
 					</div>
 					{#if selectedEvent.image}
 						<div class="col-span-2">
-							<label class="text-sm font-medium text-muted-foreground">Image</label>
+							<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.image')}</label>
 							<p class="font-mono text-sm break-all">{selectedEvent.image}</p>
 						</div>
 					{/if}
 					{#if selectedEvent.environmentName}
 						<div>
-							<label class="text-sm font-medium text-muted-foreground">Environment</label>
+							<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.environment')}</label>
 							<p>{selectedEvent.environmentName}</p>
 						</div>
 					{/if}
@@ -937,7 +942,7 @@
 
 				{#if selectedEvent.actorAttributes && Object.keys(selectedEvent.actorAttributes).length > 0}
 					<div>
-						<label class="text-sm font-medium text-muted-foreground">Attributes</label>
+						<label class="text-sm font-medium text-muted-foreground">{$t('common.labels.attributes')}</label>
 						<div class="mt-1 border rounded-md overflow-hidden max-h-[200px] overflow-y-auto">
 							<table class="w-full text-xs">
 								<tbody>
@@ -955,7 +960,7 @@
 			</div>
 		{/if}
 		<Dialog.Footer>
-			<Button variant="outline" onclick={() => showDetailDialog = false}>Close</Button>
+			<Button variant="outline" onclick={() => showDetailDialog = false}>{$t('common.actions.close')}</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

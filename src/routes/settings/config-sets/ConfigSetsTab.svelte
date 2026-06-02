@@ -10,6 +10,7 @@
 	import { canAccess } from '$lib/stores/auth';
 	import ConfigSetModal from './ConfigSetModal.svelte';
 	import { EmptyState } from '$lib/components/ui/empty-state';
+	import { t, translate } from '$lib/i18n';
 
 	// Config set types
 	interface ConfigSet {
@@ -40,7 +41,7 @@
 			configSets = await response.json();
 		} catch (error) {
 			console.error('Failed to fetch config sets:', error);
-			toast.error('Failed to fetch config sets');
+			toast.error(translate('settings.configSets.list.toasts.loadFailed'));
 		} finally {
 			cfgLoading = false;
 		}
@@ -59,13 +60,13 @@
 
 			if (response.ok) {
 				await fetchConfigSets();
-				toast.success('Config set deleted');
+				toast.success(translate('settings.configSets.list.toasts.deleted'));
 			} else {
 				const data = await response.json();
-				toast.error(data.error || 'Failed to delete config set');
+				toast.error(data.error || translate('settings.configSets.list.toasts.deleteFailed'));
 			}
 		} catch (error) {
-			toast.error('Failed to delete config set');
+			toast.error(translate('settings.configSets.list.toasts.deleteFailed'));
 		}
 	}
 
@@ -80,9 +81,9 @@
 			<div class="flex items-start gap-3">
 				<Layers class="w-5 h-5 text-muted-foreground mt-0.5" />
 				<div>
-					<p class="text-sm font-medium">What are config sets?</p>
+					<p class="text-sm font-medium">{$t('settings.configSets.list.infoTitle')}</p>
 					<p class="text-xs text-muted-foreground mt-1">
-						Config sets are reusable templates for container configuration. Define common environment variables, labels, ports, and volumes once, then apply them when creating or editing containers. Values from config sets can be overwritten during container creation.
+						{$t('settings.configSets.list.infoDescription')}
 					</p>
 				</div>
 			</div>
@@ -91,26 +92,26 @@
 
 	<div class="flex justify-between items-center">
 		<div class="flex items-center gap-3">
-			<Badge variant="secondary" class="text-xs">{configSets.length} total</Badge>
+			<Badge variant="secondary" class="text-xs">{$t('settings.configSets.list.totalCount', { count: configSets.length })}</Badge>
 		</div>
 		<div class="flex gap-2">
 			{#if $canAccess('configsets', 'create')}
 				<Button size="sm" onclick={() => openCfgModal()}>
 					<Plus class="w-4 h-4" />
-					Add config set
+					{$t('settings.configSets.list.addConfigSet')}
 				</Button>
 			{/if}
-			<Button size="sm" variant="outline" onclick={fetchConfigSets}>Refresh</Button>
+			<Button size="sm" variant="outline" onclick={fetchConfigSets}>{$t('settings.configSets.list.refresh')}</Button>
 		</div>
 	</div>
 
 	{#if cfgLoading && configSets.length === 0}
-		<p class="text-muted-foreground text-sm">Loading config sets...</p>
+		<p class="text-muted-foreground text-sm">{$t('settings.configSets.list.loading')}</p>
 	{:else if configSets.length === 0}
 		<EmptyState
 			icon={Layers}
-			title="No config sets found"
-			description="Create a reusable config set to get started"
+			title={$t('settings.configSets.list.empty.title')}
+			description={$t('settings.configSets.list.empty.description')}
 		/>
 	{:else}
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -132,23 +133,23 @@
 
 						<div class="flex flex-wrap gap-1.5">
 							{#if cfg.envVars && cfg.envVars.length > 0}
-								<Badge variant="outline" class="text-xs">{cfg.envVars.length} env vars</Badge>
+								<Badge variant="outline" class="text-xs">{$t('settings.configSets.list.badges.envVars', { count: cfg.envVars.length })}</Badge>
 							{/if}
 							{#if cfg.labels && cfg.labels.length > 0}
-								<Badge variant="outline" class="text-xs">{cfg.labels.length} labels</Badge>
+								<Badge variant="outline" class="text-xs">{$t('settings.configSets.list.badges.labels', { count: cfg.labels.length })}</Badge>
 							{/if}
 							{#if cfg.ports && cfg.ports.length > 0}
-								<Badge variant="outline" class="text-xs">{cfg.ports.length} ports</Badge>
+								<Badge variant="outline" class="text-xs">{$t('settings.configSets.list.badges.ports', { count: cfg.ports.length })}</Badge>
 							{/if}
 							{#if cfg.volumes && cfg.volumes.length > 0}
-								<Badge variant="outline" class="text-xs">{cfg.volumes.length} volumes</Badge>
+								<Badge variant="outline" class="text-xs">{$t('settings.configSets.list.badges.volumes', { count: cfg.volumes.length })}</Badge>
 							{/if}
 						</div>
 
 						<div class="text-xs text-muted-foreground">
-							<span>Network: {cfg.networkMode}</span>
+							<span>{$t('settings.configSets.list.network', { mode: cfg.networkMode })}</span>
 							<span class="mx-1">|</span>
-							<span>Restart: {cfg.restartPolicy}</span>
+							<span>{$t('settings.configSets.list.restart', { policy: cfg.restartPolicy })}</span>
 						</div>
 
 						<div class="flex gap-2 pt-2">
@@ -159,16 +160,16 @@
 									onclick={() => openCfgModal(cfg)}
 								>
 									<Pencil class="w-3 h-3" />
-									Edit
+									{$t('settings.configSets.list.edit')}
 								</Button>
 							{/if}
 							{#if $canAccess('configsets', 'delete')}
 								<ConfirmPopover
 									open={confirmDeleteConfigSetId === cfg.id}
-									action="Delete"
-									itemType="config set"
+									action={$t('settings.configSets.list.confirm.deleteAction')}
+									itemType={$t('settings.configSets.list.confirm.configSet')}
 									itemName={cfg.name}
-									title="Remove"
+									title={$t('settings.configSets.list.confirm.removeTitle')}
 									position="left"
 									onConfirm={() => deleteConfigSet(cfg.id)}
 									onOpenChange={(open) => confirmDeleteConfigSetId = open ? cfg.id : null}

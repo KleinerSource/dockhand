@@ -3,6 +3,7 @@
 	import { CheckCircle2, XCircle, Loader2, AlertCircle, Terminal, Sun, Moon, Upload } from 'lucide-svelte';
 	import { appendEnvParam } from '$lib/stores/environment';
 	import { watchJob } from '$lib/utils/sse-fetch';
+	import { t, translate } from '$lib/i18n';
 
 	type PushStatus = 'idle' | 'pushing' | 'complete' | 'error';
 
@@ -22,7 +23,7 @@
 		sourceImageName,
 		registryId,
 		newTag = '',
-		registryName = 'registry',
+		registryName = translate('common.labels.registry'),
 		envId = null,
 		autoStart = false,
 		onComplete,
@@ -90,7 +91,7 @@
 
 		reset();
 		status = 'pushing';
-		statusMessage = 'Finding image...';
+		statusMessage = translate('imagePush.status.findingImage');
 
 		try {
 			// Small delay to ensure image is indexed
@@ -116,13 +117,13 @@
 
 			if (!pulledImage) {
 				console.log('Looking for:', sourceImageName, 'Available tags:', images.map((i: any) => i.tags).flat());
-				errorMessage = 'Could not find image to push';
+				errorMessage = translate('imagePush.errors.imageNotFound');
 				status = 'error';
 				onError?.(errorMessage);
 				return;
 			}
 
-			addOutputLine(`[push] Starting push to ${registryName}...`);
+			addOutputLine(`[push] ${translate('imagePush.output.starting', { registry: registryName })}`);
 
 			// Push to target registry with streaming
 			const pushResponse = await fetch(appendEnvParam('/api/images/push', envId), {
@@ -138,7 +139,7 @@
 
 			if (!pushResponse.ok) {
 				const data = await pushResponse.json();
-				errorMessage = data.error || 'Failed to push image';
+				errorMessage = data.error || translate('imagePush.errors.pushFailed');
 				status = 'error';
 				addOutputLine(`[error] ${errorMessage}`);
 				onError?.(errorMessage);
@@ -153,13 +154,13 @@
 			// If job ended without an explicit complete/error event
 			if (status === 'pushing') {
 				status = 'complete';
-				statusMessage = 'Image pushed successfully!';
-				addOutputLine(`[push] Push complete!`);
+				statusMessage = translate('imagePush.status.pushedSuccessfully');
+				addOutputLine(`[push] ${translate('imagePush.output.complete')}`);
 				onComplete?.(targetTag);
 			}
 		} catch (error: any) {
 			console.error('Failed to push image:', error);
-			errorMessage = error.message || 'Failed to push image';
+			errorMessage = error.message || translate('imagePush.errors.pushFailed');
 			status = 'error';
 			addOutputLine(`[error] ${errorMessage}`);
 			onError?.(errorMessage);
@@ -172,16 +173,16 @@
 		}
 
 		if (data.status === 'tagging') {
-			addOutputLine(`[push] Tagging image for target registry...`);
+			addOutputLine(`[push] ${translate('imagePush.output.tagging')}`);
 		} else if (data.status === 'pushing') {
-			addOutputLine(`[push] Pushing layers...`);
+			addOutputLine(`[push] ${translate('imagePush.output.pushingLayers')}`);
 		} else if (data.status === 'complete') {
-			statusMessage = data.message || 'Image pushed successfully!';
+			statusMessage = data.message || translate('imagePush.status.pushedSuccessfully');
 			status = 'complete';
-			addOutputLine(`[push] ${data.message || 'Push complete!'}`);
+			addOutputLine(`[push] ${data.message || translate('imagePush.output.complete')}`);
 			onComplete?.(targetTag || data.targetTag || '');
 		} else if (data.status === 'error' || data.error) {
-			errorMessage = data.error || 'Push failed';
+			errorMessage = data.error || translate('imagePush.errors.pushFailedShort');
 			status = 'error';
 			addOutputLine(`[error] ${data.error}`);
 			onError?.(errorMessage);
@@ -210,10 +211,10 @@
 						<span class="text-sm">{statusMessage}</span>
 					{:else if status === 'complete'}
 						<CheckCircle2 class="w-4 h-4 text-green-600" />
-						<span class="text-sm text-green-600">Push complete!</span>
+						<span class="text-sm text-green-600">{$t('imagePush.status.complete')}</span>
 					{:else if status === 'error'}
 						<XCircle class="w-4 h-4 text-red-600" />
-						<span class="text-sm text-red-600">Push failed</span>
+						<span class="text-sm text-red-600">{$t('imagePush.status.failed')}</span>
 					{/if}
 				</div>
 				{#if status === 'complete' && targetTag}
@@ -237,9 +238,9 @@
 				<div class="flex items-center justify-between text-xs text-muted-foreground mb-2 shrink-0">
 					<div class="flex items-center gap-2">
 						<Terminal class="w-3.5 h-3.5" />
-						<span>Output ({outputLines.length} lines)</span>
+						<span>{$t('imagePull.output.title', { count: outputLines.length })}</span>
 					</div>
-					<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title="Toggle log theme">
+					<button type="button" onclick={toggleLogTheme} class="p-1 rounded hover:bg-muted transition-colors cursor-pointer" title={$t('executionLog.toggleTheme')}>
 						{#if logDarkMode}
 							<Sun class="w-3.5 h-3.5" />
 						{:else}
@@ -254,13 +255,13 @@
 					{#each outputLines as line}
 						<div class="whitespace-pre-wrap break-all leading-relaxed flex items-start gap-1.5">
 							{#if line.startsWith('[push]')}
-								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-blue-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">push</span>
+								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-blue-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('imagePush.output.labels.push')}</span>
 								<span>{line.slice(7)}</span>
 							{:else if line.startsWith('[layer')}
-								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-violet-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">layer</span>
+								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-violet-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('imagePull.output.labels.layer')}</span>
 								<span>{line.slice(line.indexOf(']') + 2)}</span>
 							{:else if line.startsWith('[error]')}
-								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">error</span>
+								<span class="inline-flex items-center px-1 rounded text-[8px] font-medium bg-red-500 text-white shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]">{$t('common.labels.error')}</span>
 								<span class="text-red-400">{line.slice(8)}</span>
 							{:else}
 								<span>{line}</span>
@@ -276,7 +277,7 @@
 	{#if status === 'idle'}
 		<div class="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
 			<Upload class="w-12 h-12 opacity-50" />
-			<p class="text-sm">Ready to push to <code class="bg-muted px-1.5 py-0.5 rounded">{registryName}</code></p>
+			<p class="text-sm">{$t('imagePush.readyToPush')} <code class="bg-muted px-1.5 py-0.5 rounded">{registryName}</code></p>
 		</div>
 	{/if}
 </div>
