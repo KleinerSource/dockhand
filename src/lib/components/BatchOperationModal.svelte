@@ -6,6 +6,7 @@
 	import { onDestroy } from 'svelte';
 	import { formatBytes } from '$lib/utils/format';
 	import { t } from '$lib/i18n';
+	import { formatBatchOperationError } from '$lib/utils/localized-messages';
 
 	// Local type definitions (matching server types)
 	type ItemStatus = 'pending' | 'processing' | 'success' | 'error' | 'cancelled';
@@ -332,7 +333,7 @@
 					<!-- Error message on separate line -->
 					{#if item.status === 'error' && item.error}
 						<div class="mt-1 ml-7 text-xs text-red-600 dark:text-red-400 break-words">
-							{item.error}
+							{formatBatchOperationError(item.error, $t)}
 						</div>
 					{/if}
 				</div>

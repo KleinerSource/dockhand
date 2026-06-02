@@ -77,13 +77,13 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 	let scrollRafPending = false;
 
 	// Tail count and since filter
-	const tailOptions = [
+	const tailOptions: Array<{ value: string; label?: string; labelKey?: string }> = [
 		{ value: '100', label: '100' },
 		{ value: '500', label: '500' },
 		{ value: '1000', label: '1K' },
 		{ value: '5000', label: '5K' },
 		{ value: '10000', label: '10K' },
-		{ value: 'all', label: 'All' }
+		{ value: 'all', labelKey: 'logs.tail.all' }
 	];
 	let tailCount = $state('500');
 	let sinceDate = $state('');
@@ -2098,7 +2098,7 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 								</Select.Trigger>
 								<Select.Content>
 									{#each tailOptions as opt}
-										<Select.Item value={opt.value} label={opt.value === 'all' ? $t('logs.tail.all') : opt.label} class="pe-2 [&>span:first-child]:hidden">{opt.value === 'all' ? $t('logs.tail.allLines') : $t('logs.tail.lines', { count: opt.label })}</Select.Item>
+										<Select.Item value={opt.value} label={opt.labelKey ? $t(opt.labelKey) : (opt.label ?? opt.value)} class="pe-2 [&>span:first-child]:hidden">{opt.value === 'all' ? $t('logs.tail.allLines') : $t('logs.tail.lines', { count: opt.label ?? opt.value })}</Select.Item>
 									{/each}
 								</Select.Content>
 							</Select.Root>
@@ -2318,7 +2318,7 @@ import type { FavoriteGroup } from '../api/preferences/favorite-groups/+server';
 						</Select.Trigger>
 						<Select.Content>
 							{#each tailOptions as opt}
-								<Select.Item value={opt.value} label={opt.value === 'all' ? $t('logs.tail.all') : opt.label} class="pe-2 [&>span:first-child]:hidden">{opt.value === 'all' ? $t('logs.tail.allLines') : $t('logs.tail.lines', { count: opt.label })}</Select.Item>
+								<Select.Item value={opt.value} label={opt.labelKey ? $t(opt.labelKey) : (opt.label ?? opt.value)} class="pe-2 [&>span:first-child]:hidden">{opt.value === 'all' ? $t('logs.tail.allLines') : $t('logs.tail.lines', { count: opt.label ?? opt.value })}</Select.Item>
 							{/each}
 						</Select.Content>
 					</Select.Root>

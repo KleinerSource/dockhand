@@ -38,6 +38,7 @@ export interface ScheduleInfo {
 	lastExecution: ScheduleExecutionData | null;
 	recentExecutions: ScheduleExecutionData[];
 	isSystem: boolean;
+	retentionDays?: number;
 	// Container update specific fields
 	envHasScanning?: boolean;
 	vulnerabilityCriteria?: VulnerabilityCriteria | null;
@@ -227,6 +228,7 @@ export const GET: RequestHandler = async () => {
 					nextRun: sys.nextRun,
 					lastExecution: lastExecution ?? null,
 					recentExecutions,
+					retentionDays: sys.retentionDays,
 					isSystem: true
 				};
 			})

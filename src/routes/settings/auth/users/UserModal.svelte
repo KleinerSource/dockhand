@@ -61,6 +61,24 @@
 
 	const isEditing = $derived(user !== null);
 
+	function getSystemRoleKey(roleName: string): 'admin' | 'operator' | 'viewer' | null {
+		switch (roleName) {
+			case 'Admin':
+				return 'admin';
+			case 'Operator':
+				return 'operator';
+			case 'Viewer':
+				return 'viewer';
+			default:
+				return null;
+		}
+	}
+
+	function getRoleDisplayName(role: Role): string {
+		const key = role.isSystem ? getSystemRoleKey(role.name) : null;
+		return key ? $t(`settings.auth.roles.systemRoles.${key}.name`) : role.name;
+	}
+
 	// Form state
 	let formUsername = $state('');
 	let formEmail = $state('');
@@ -495,6 +513,7 @@
 									{#each systemRoles as role}
 										{@const isAssigned = formRoleAssignments.some(a => a.roleId === role.id)}
 										{@const RoleIcon = getRoleIcon(role.name)}
+										{@const roleDisplayName = getRoleDisplayName(role)}
 										<button
 											type="button"
 											class="flex items-center gap-2 px-3 py-2 rounded-md text-sm border transition-all {isAssigned ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-background hover:bg-muted border-border'}"
@@ -505,7 +524,7 @@
 											{:else}
 												<RoleIcon class="w-4 h-4 flex-shrink-0 opacity-50" />
 											{/if}
-											<span class="truncate">{role.name}</span>
+											<span class="truncate">{roleDisplayName}</span>
 										</button>
 									{/each}
 								</div>

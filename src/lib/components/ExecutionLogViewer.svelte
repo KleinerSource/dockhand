@@ -29,16 +29,16 @@
 		return { timestamp, content, type };
 	}
 
-	function getTypeBadge(type: 'trivy' | 'grype' | 'error' | 'default'): { label: string; class: string } {
+	function getTypeBadge(type: 'trivy' | 'grype' | 'error' | 'default'): { labelKey: string; class: string } {
 		switch (type) {
 			case 'trivy':
-				return { label: 'trivy', class: 'bg-teal-500 text-white' };
+				return { labelKey: 'executionLog.badges.trivy', class: 'bg-teal-500 text-white' };
 			case 'grype':
-				return { label: 'grype', class: 'bg-violet-500 text-white' };
+				return { labelKey: 'executionLog.badges.grype', class: 'bg-violet-500 text-white' };
 			case 'error':
-				return { label: 'error', class: 'bg-red-500 text-white' };
+				return { labelKey: 'executionLog.badges.error', class: 'bg-red-500 text-white' };
 			default:
-				return { label: 'dockhand', class: 'bg-slate-500 text-white' };
+				return { labelKey: 'executionLog.badges.dockhand', class: 'bg-slate-500 text-white' };
 		}
 	}
 
@@ -88,7 +88,7 @@
 					<span
 						class="inline-flex items-center justify-center w-12 px-1 rounded text-[8px] font-medium {badge.class} shadow-[0_1px_1px_rgba(0,0,0,0.2)] shrink-0 mt-[3px]"
 					>
-						{badge.label}
+						{$t(badge.labelKey)}
 					</span>
 					{#if parsed.timestamp}
 						<span class="{darkMode ? 'text-zinc-500' : 'text-zinc-400'} shrink-0">

@@ -6,10 +6,10 @@ import type { RequestHandler } from './$types';
 
 // Shell paths to check
 const SHELLS_TO_CHECK = [
-	{ path: '/bin/bash', label: 'Bash' },
-	{ path: '/bin/sh', label: 'Shell (sh)' },
-	{ path: '/bin/zsh', label: 'Zsh' },
-	{ path: '/bin/ash', label: 'Ash (Alpine)' }
+	{ path: '/bin/bash', label: 'Bash', labelKey: 'shells.bash' },
+	{ path: '/bin/sh', label: 'Shell (sh)', labelKey: 'shells.sh' },
+	{ path: '/bin/zsh', label: 'Zsh', labelKey: 'shells.zsh' },
+	{ path: '/bin/ash', label: 'Ash (Alpine)', labelKey: 'shells.ash' }
 ];
 
 export const GET: RequestHandler = async ({ params, url, cookies }) => {
@@ -84,6 +84,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 			allShells: SHELLS_TO_CHECK.map(s => ({
 				path: s.path,
 				label: s.label,
+				labelKey: s.labelKey,
 				available: availableShells.includes(s.path)
 			}))
 		});
@@ -96,6 +97,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 			allShells: SHELLS_TO_CHECK.map(s => ({
 				path: s.path,
 				label: s.label,
+				labelKey: s.labelKey,
 				available: false
 			}))
 		}, { status: 200 }); // Return 200 with empty results rather than 500

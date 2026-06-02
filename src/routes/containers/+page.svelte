@@ -442,8 +442,21 @@
 		}, 3000));
 	}
 
+	function getUpdateCheckErrorMessage(error: string): string {
+		switch (error) {
+			case 'Could not inspect current image':
+				return translate('containers.updateCheckErrors.couldNotInspectCurrentImage');
+			case 'Could not determine image name':
+				return translate('containers.updateCheckErrors.couldNotDetermineImageName');
+			case 'Could not query registry':
+				return translate('containers.updateCheckErrors.couldNotQueryRegistry');
+			default:
+				return error;
+		}
+	}
+
 	function showFailedChecksToast(failed: typeof failedUpdateChecks, prefix: string) {
-		const details = failed.map(f => `• ${f.containerName}: ${f.error}`).join('\n');
+		const details = failed.map(f => `• ${f.containerName}: ${getUpdateCheckErrorMessage(f.error)}`).join('\n');
 		toast.warning(translate('containers.toasts.failedUpdateChecksSummary', { prefix, count: failed.length }), {
 			description: details,
 			descriptionClass: 'whitespace-pre-line',
@@ -1231,7 +1244,7 @@
 	}
 
 	function formatUptime(status: string): string {
-		// Extract uptime from status like "Up 2 hours" or "Exited (0) 3 days ago"
+		// Extract uptime from Docker status strings.
 		if (!status) return '-';
 		const upMatch = status.match(/Up\s+(.+?)(?:\s+\(|$)/i);
 		if (upMatch) return formatDockerDuration(upMatch[1].trim());

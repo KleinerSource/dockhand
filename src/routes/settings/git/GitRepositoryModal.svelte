@@ -213,7 +213,7 @@
 				<Input
 					id="repo-name"
 					bind:value={formName}
-					placeholder="e.g., my-app-repo"
+					placeholder={$t('settings.git.repositoryModal.namePlaceholder')}
 					class={formErrors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
 					oninput={() => formErrors.name = undefined}
 				/>
@@ -229,7 +229,7 @@
 				<Input
 					id="repo-url"
 					bind:value={formUrl}
-					placeholder="https://github.com/user/repo.git or git@github.com:user/repo.git"
+					placeholder={$t('settings.git.repositoryModal.urlPlaceholder')}
 					class={formErrors.url ? 'border-destructive focus-visible:ring-destructive' : ''}
 					oninput={() => { formErrors.url = undefined; testResult = null; }}
 				/>

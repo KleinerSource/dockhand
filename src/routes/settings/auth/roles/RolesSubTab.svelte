@@ -81,6 +81,29 @@
 	let copyingRole = $state<Role | null>(null);
 	let confirmDeleteRoleId = $state<number | null>(null);
 
+	function getSystemRoleKey(roleName: string): 'admin' | 'operator' | 'viewer' | null {
+		switch (roleName) {
+			case 'Admin':
+				return 'admin';
+			case 'Operator':
+				return 'operator';
+			case 'Viewer':
+				return 'viewer';
+			default:
+				return null;
+		}
+	}
+
+	function getRoleDisplayName(role: Role): string {
+		const key = role.isSystem ? getSystemRoleKey(role.name) : null;
+		return key ? $t(`settings.auth.roles.systemRoles.${key}.name`) : role.name;
+	}
+
+	function getRoleDescription(role: Role): string {
+		const key = role.isSystem ? getSystemRoleKey(role.name) : null;
+		return key ? $t(`settings.auth.roles.systemRoles.${key}.description`) : (role.description ?? '');
+	}
+
 	// Permission definitions
 	const categoryIcons: Record<string, typeof Box> = {
 		containers: Box,
@@ -301,17 +324,19 @@
 				{:else}
 					<div class="space-y-2 max-h-96 overflow-y-auto">
 						{#each roles as role}
+							{@const roleDisplayName = getRoleDisplayName(role)}
+							{@const roleDescription = getRoleDescription(role)}
 							{@const pills = getRolePermissionPills(role.permissions)}
 							<div class="flex items-center justify-between p-3 border rounded-md gap-4">
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 mb-1">
-										<span class="font-medium text-sm">{role.name}</span>
+										<span class="font-medium text-sm">{roleDisplayName}</span>
 										{#if role.isSystem}
 											<Badge variant="outline" class="text-xs">{$t('settings.auth.roles.list.badges.system')}</Badge>
 										{/if}
 									</div>
-									{#if role.description}
-										<p class="text-xs text-muted-foreground mb-2">{role.description}</p>
+									{#if roleDescription}
+										<p class="text-xs text-muted-foreground mb-2">{roleDescription}</p>
 									{/if}
 									<!-- Permission Pills - System -->
 									{#if pills.system.length > 0}

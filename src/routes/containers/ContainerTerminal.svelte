@@ -5,7 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Terminal as TerminalIcon, X, ExternalLink, Shell, User, Loader2, AlertCircle } from 'lucide-svelte';
-	import { detectShells, getBestShell, hasAvailableShell, USER_OPTIONS, type ShellDetectionResult } from '$lib/utils/shell-detection';
+	import { detectShells, getBestShell, hasAvailableShell, USER_OPTIONS, type ShellInfo, type ShellDetectionResult } from '$lib/utils/shell-detection';
 	import { t, translate } from '$lib/i18n';
 
 	// Dynamic imports for browser-only xterm
@@ -42,6 +42,24 @@
 
 	let selectedShell = $state('/bin/bash');
 	let selectedUser = $state('root');
+
+	function getUserOptionLabel(option: (typeof USER_OPTIONS)[number]): string {
+		return option.labelKey ? $t(option.labelKey) : (option.label ?? option.value);
+	}
+
+	function getShellOptionLabel(option: ShellInfo): string {
+		return option.labelKey ? $t(option.labelKey) : option.label;
+	}
+
+	function getSelectedUserLabel(value: string): string {
+		const option = USER_OPTIONS.find((item) => item.value === value);
+		return option ? getUserOptionLabel(option) : $t('containers.terminal.selectUser');
+	}
+
+	function getSelectedShellLabel(value: string): string {
+		const option = shellDetection?.allShells.find((item) => item.path === value);
+		return option ? getShellOptionLabel(option) : $t('containers.terminal.selectShell');
+	}
 	let showConfig = $state(true);
 
 	function initTerminal() {
@@ -274,7 +292,7 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<TerminalIcon class="w-5 h-5" />
-					<Dialog.Title>Terminal - {containerName}</Dialog.Title>
+					<Dialog.Title>{$t('containers.terminal.titleWithContainer', { name: containerName })}</Dialog.Title>
 					{#if connected}
 						<span class="inline-flex items-center gap-1 text-xs text-green-500">
 							<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -328,19 +346,20 @@
 								<Select.Root type="single" bind:value={selectedShell}>
 									<Select.Trigger class="w-full h-10">
 										<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
-										<span>{shellDetection?.allShells.find(o => o.path === selectedShell)?.label || $t('containers.terminal.selectShell')}</span>
+										<span>{getSelectedShellLabel(selectedShell)}</span>
 									</Select.Trigger>
 									<Select.Content>
 										{#if shellDetection}
 											{#each shellDetection.allShells as option}
+												{@const optionLabel = getShellOptionLabel(option)}
 												<Select.Item
 													value={option.path}
-													label={option.label}
+													label={optionLabel}
 													disabled={!option.available}
 												>
 													<Shell class="w-4 h-4 mr-2 {option.available ? 'text-green-500' : 'text-muted-foreground/40'}" />
 													<span class={option.available ? 'text-foreground' : 'text-muted-foreground/60'}>
-														{option.label}
+														{optionLabel}
 														{#if !option.available}
 															<span class="text-xs ml-1">({$t('containers.terminal.unavailable')})</span>
 														{/if}
@@ -357,13 +376,14 @@
 								<Select.Root type="single" bind:value={selectedUser}>
 									<Select.Trigger class="w-full h-10">
 										<User class="w-4 h-4 mr-2 text-muted-foreground" />
-										<span>{USER_OPTIONS.find(o => o.value === selectedUser)?.label || $t('containers.terminal.selectUser')}</span>
+										<span>{getSelectedUserLabel(selectedUser)}</span>
 									</Select.Trigger>
 									<Select.Content>
 										{#each USER_OPTIONS as option}
-											<Select.Item value={option.value} label={option.label}>
+											{@const optionLabel = getUserOptionLabel(option)}
+											<Select.Item value={option.value} label={optionLabel}>
 												<User class="w-4 h-4 mr-2 text-muted-foreground" />
-												{option.label}
+												{optionLabel}
 											</Select.Item>
 										{/each}
 									</Select.Content>

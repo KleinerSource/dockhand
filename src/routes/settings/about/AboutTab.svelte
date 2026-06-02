@@ -550,17 +550,17 @@
 								<div class="flex items-center gap-2 flex-wrap">
 									{#if systemInfo.docker.connection.type === 'socket'}
 										<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-500/15 text-violet-600 dark:text-violet-400 shadow-sm ring-1 ring-violet-500/20">
-											Unix Socket
+											{$t('common.connectionTypes.unixSocket')}
 										</span>
 										<span class="text-xs font-mono text-muted-foreground">{systemInfo.docker.connection.socketPath}</span>
 									{:else if systemInfo.docker.connection.type === 'https'}
 										<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/15 text-green-600 dark:text-green-400 shadow-sm ring-1 ring-green-500/20">
-											HTTPS (TLS)
+											{$t('common.protocols.httpsTls')}
 										</span>
 										<span class="text-xs font-mono text-muted-foreground">{systemInfo.docker.connection.host}:{systemInfo.docker.connection.port}</span>
 									{:else}
 										<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 shadow-sm ring-1 ring-amber-500/20">
-											HTTP
+											{$t('common.protocols.http')}
 										</span>
 										<span class="text-xs font-mono text-muted-foreground">{systemInfo.docker.connection.host}:{systemInfo.docker.connection.port}</span>
 									{/if}

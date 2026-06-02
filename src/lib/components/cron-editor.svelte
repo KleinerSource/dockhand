@@ -4,8 +4,7 @@
 	import { Calendar, CalendarDays, Clock } from 'lucide-svelte';
 	import { appSettings } from '$lib/stores/settings';
 	import { locale, t } from '$lib/i18n';
-	import cronstrue from 'cronstrue';
-	import 'cronstrue/locales/zh_CN';
+	import { formatCronDescription } from '$lib/utils/cron-display';
 
 	// Reactive time format from settings
 	let is12Hour = $derived($appSettings.timeFormat === '12h');
@@ -44,7 +43,7 @@
 	// Parse cron into components for UI
 	let minute = $state('0');
 	let hour = $state('3');
-	let dayOfWeek = $state('1'); // Monday
+	let dayOfWeek = $state('1');
 	let scheduleType = $state<'daily' | 'weekly' | 'custom'>('daily');
 
 	// Track if component has been initialized
@@ -59,7 +58,7 @@
 			if (parts.length >= 5) {
 				minute = parts[0] || '0';
 				hour = parts[1] || '3';
-				dayOfWeek = parts[4] !== '*' ? parts[4] : '1'; // Default to Monday
+				dayOfWeek = parts[4] !== '*' ? parts[4] : '1';
 
 				// Only update schedule type if not actively typing in custom mode
 				if (!isTypingCustom) {
@@ -112,7 +111,7 @@
 			} else if (type === 'weekly') {
 				minute = '0';
 				hour = '3';
-				dayOfWeek = '1'; // Monday
+				dayOfWeek = '1';
 				onchange('0 3 * * 1');
 			}
 			previousScheduleType = type;
@@ -150,11 +149,7 @@
 		return parts.every((part) => cronFieldPattern.test(part));
 	}
 
-	function getCronstrueLocale(): string {
-		return $locale === 'zh-CN' ? 'zh_CN' : 'en';
-	}
-
-	// Human-readable description using cronstrue
+	// Human-readable description for the current cron expression.
 	let humanReadable = $derived(() => {
 		if (!value) return '';
 		if (!value.trim()) return '';
@@ -165,14 +160,7 @@
 		}
 
 		try {
-			// Use cronstrue to parse the cron expression
-			// Configure it to use the user's time format preference
-			const description = cronstrue.toString(value, {
-				use24HourTimeFormat: !is12Hour,
-				throwExceptionOnParseError: true,
-				locale: getCronstrueLocale()
-			});
-			return description;
+			return formatCronDescription(value, { is12Hour, locale: $locale, t: $t });
 		} catch (error) {
 			return $t('cron.invalid');
 		}

@@ -159,12 +159,12 @@
 			<div class="flex justify-center mb-4">
 				<img
 					src="/logo-light.webp"
-					alt="Dockhand Logo"
+					alt={$t('auth.logoAlt')}
 					class="h-16 w-auto object-contain dark:hidden"
 				/>
 				<img
 					src="/logo-dark.webp"
-					alt="Dockhand Logo"
+					alt={$t('auth.logoAlt')}
 					class="h-16 w-auto object-contain hidden dark:block"
 				/>
 			</div>

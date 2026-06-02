@@ -15,6 +15,7 @@
 	import ScannerSeverityPills from '$lib/components/ScannerSeverityPills.svelte';
 	import { watchJob } from '$lib/utils/sse-fetch';
 	import { t, translate } from '$lib/i18n';
+	import { formatUpdateBlockReason, formatUpdateMessage } from '$lib/utils/localized-messages';
 
 	interface Props {
 		open: boolean;
@@ -521,9 +522,9 @@ const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2,
 								<div class="flex-1 min-w-0">
 									<div class="font-medium truncate">{item.containerName}</div>
 									{#if item.error}
-										<div class="text-xs text-red-600 dark:text-red-400 truncate">{item.error}</div>
+										<div class="text-xs text-red-600 dark:text-red-400 truncate">{formatUpdateMessage(item.error, $t)}</div>
 									{:else if item.blockReason}
-										<div class="text-xs text-amber-600 dark:text-amber-400 truncate">{item.blockReason}</div>
+										<div class="text-xs text-amber-600 dark:text-amber-400 truncate">{formatUpdateBlockReason(item.blockReason, $t)}</div>
 									{:else}
 										<div class="text-xs text-muted-foreground">{getStepLabel(item.step)}</div>
 									{/if}

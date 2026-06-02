@@ -18,6 +18,12 @@ export interface ParsedHostPort {
 	hostPort: string;
 }
 
+type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
+
+function validationMessage(t: TranslateFn | undefined, key: string, params?: Record<string, string | number>): string {
+	return t ? t(key, params) : key;
+}
+
 /**
  * Parse a host port string that may include an IP binding.
  * Returns the IP and port separately.
@@ -59,7 +65,7 @@ export function parseHostPort(input: string): ParsedHostPort {
  * Validate a port number or range string.
  * Returns error message or empty string if valid.
  */
-export function validatePort(port: string): string {
+export function validatePort(port: string, t?: TranslateFn): string {
 	if (!port) return ''; // Empty is valid (means random allocation)
 
 	// Port range: "8000-8005"
@@ -67,16 +73,20 @@ export function validatePort(port: string): string {
 	if (rangeMatch) {
 		const start = parseInt(rangeMatch[1]);
 		const end = parseInt(rangeMatch[2]);
-		if (start < 1 || start > 65535) return `Port ${start} out of range (1-65535)`;
-		if (end < 1 || end > 65535) return `Port ${end} out of range (1-65535)`;
-		if (start >= end) return 'Range start must be less than end';
+		if (start < 1 || start > 65535) {
+			return validationMessage(t, 'containers.settings.validation.portOutOfRangeWithPort', { port: start });
+		}
+		if (end < 1 || end > 65535) {
+			return validationMessage(t, 'containers.settings.validation.portOutOfRangeWithPort', { port: end });
+		}
+		if (start >= end) return validationMessage(t, 'containers.settings.validation.rangeStartLessThanEnd');
 		return '';
 	}
 
 	// Single port
-	if (!/^\d+$/.test(port)) return 'Invalid port number';
+	if (!/^\d+$/.test(port)) return validationMessage(t, 'containers.settings.validation.invalidPortNumber');
 	const num = parseInt(port);
-	if (num < 1 || num > 65535) return 'Port out of range (1-65535)';
+	if (num < 1 || num > 65535) return validationMessage(t, 'containers.settings.validation.portOutOfRange');
 	return '';
 }
 
@@ -84,20 +94,20 @@ export function validatePort(port: string): string {
  * Validate an IP address (IPv4 or IPv6).
  * Returns error message or empty string if valid.
  */
-export function validateIp(ip: string): string {
+export function validateIp(ip: string, t?: TranslateFn): string {
 	if (!ip) return ''; // Empty is valid (bind to all interfaces)
 
 	// Basic IPv4 check
 	if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
 		const parts = ip.split('.').map(Number);
 		if (parts.every(p => p >= 0 && p <= 255)) return '';
-		return 'Invalid IPv4 address';
+		return validationMessage(t, 'containers.settings.validation.invalidIpv4');
 	}
 
 	// IPv6 (simplified check — accept common forms)
 	if (/^[0-9a-fA-F:]+$/.test(ip)) return '';
 
-	return 'Invalid IP address';
+	return validationMessage(t, 'containers.settings.validation.invalidIp');
 }
 
 /**

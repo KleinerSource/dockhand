@@ -1768,10 +1768,10 @@
 										<span class="flex items-center gap-2">
 											{#if formProtocol === 'https'}
 												<Lock class="w-4 h-4 text-green-500" />
-												HTTPS (TLS)
+												{$t('common.protocols.httpsTls')}
 											{:else}
 												<LockOpen class="w-4 h-4 text-muted-foreground" />
-												HTTP
+												{$t('common.protocols.http')}
 											{/if}
 										</span>
 									</Select.Trigger>
@@ -1779,13 +1779,13 @@
 										<Select.Item value="http">
 											<span class="flex items-center gap-2">
 												<LockOpen class="w-4 h-4 text-muted-foreground" />
-												HTTP
+												{$t('common.protocols.http')}
 											</span>
 										</Select.Item>
 										<Select.Item value="https">
 											<span class="flex items-center gap-2">
 												<Lock class="w-4 h-4 text-green-500" />
-												HTTPS (TLS)
+												{$t('common.protocols.httpsTls')}
 											</span>
 										</Select.Item>
 									</Select.Content>
@@ -1854,10 +1854,10 @@
 										<span class="flex items-center gap-2">
 											{#if formProtocol === 'https'}
 												<Lock class="w-4 h-4 text-green-500" />
-												HTTPS (TLS)
+												{$t('common.protocols.httpsTls')}
 											{:else}
 												<LockOpen class="w-4 h-4 text-muted-foreground" />
-												HTTP
+												{$t('common.protocols.http')}
 											{/if}
 										</span>
 									</Select.Trigger>
@@ -1865,13 +1865,13 @@
 										<Select.Item value="http">
 											<span class="flex items-center gap-2">
 												<LockOpen class="w-4 h-4 text-muted-foreground" />
-												HTTP
+												{$t('common.protocols.http')}
 											</span>
 										</Select.Item>
 										<Select.Item value="https">
 											<span class="flex items-center gap-2">
 												<Lock class="w-4 h-4 text-green-500" />
-												HTTPS (TLS)
+												{$t('common.protocols.httpsTls')}
 											</span>
 										</Select.Item>
 									</Select.Content>

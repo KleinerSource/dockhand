@@ -11,6 +11,7 @@
 	import { onMount } from 'svelte';
 	import EnvironmentIcon from '$lib/components/EnvironmentIcon.svelte';
 	import { t, translate } from '$lib/i18n';
+	import { formatStackScanError } from '$lib/utils/localized-messages';
 
 	interface RunningStackInfo {
 		envId: number;
@@ -537,7 +538,7 @@
 									<AlertCircle class="w-4 h-4 text-destructive shrink-0 mt-0.5" />
 									<div class="flex-1 min-w-0">
 										<code class="text-xs block truncate" title={error.path}>{error.path}</code>
-										<p class="text-xs text-destructive">{error.error}</p>
+										<p class="text-xs text-destructive">{formatStackScanError(error.error, $t)}</p>
 									</div>
 								</div>
 							{/each}

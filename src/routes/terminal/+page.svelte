@@ -44,6 +44,32 @@
 	let prevShell = $state('/bin/bash');
 	let prevUser = $state('root');
 
+	function getUserOptionLabel(option: (typeof USER_OPTIONS)[number]): string {
+		return option.labelKey ? $t(option.labelKey) : (option.label ?? option.value);
+	}
+
+	function getShellOptionLabel(option: ShellInfo): string {
+		return option.labelKey ? $t(option.labelKey) : option.label;
+	}
+
+	function getShellLabel(path: string): string {
+		const option = shellDetection?.allShells.find((item) => item.path === path);
+		if (option) return getShellOptionLabel(option);
+
+		switch (path) {
+			case '/bin/bash': return $t('shells.bash');
+			case '/bin/sh': return $t('shells.sh');
+			case '/bin/zsh': return $t('shells.zsh');
+			case '/bin/ash': return $t('shells.ash');
+			default: return $t('terminal.select');
+		}
+	}
+
+	function getSelectedUserLabel(value: string): string {
+		const option = USER_OPTIONS.find((item) => item.value === value);
+		return option ? getUserOptionLabel(option) : value || $t('terminal.select');
+	}
+
 	const fontSizeOptions = [10, 12, 14, 16, 18];
 
 	// Searchable dropdown state
@@ -326,24 +352,21 @@
 					<Select.Trigger class="h-9 w-44" disabled={!anyShellAvailable}>
 						<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
 						<span class={!selectedShellAvailable ? 'text-muted-foreground line-through' : ''}>
-							{shellDetection?.allShells.find(o => o.path === selectedShell)?.label ||
-							 (selectedShell === '/bin/bash' ? 'Bash' :
-							  selectedShell === '/bin/sh' ? 'Shell (sh)' :
-							  selectedShell === '/bin/zsh' ? 'Zsh' :
-							  selectedShell === '/bin/ash' ? 'Ash (Alpine)' : $t('terminal.select'))}
+							{getShellLabel(selectedShell)}
 						</span>
 					</Select.Trigger>
 					<Select.Content>
 						{#if shellDetection}
 							{#each shellDetection.allShells as option}
+								{@const optionLabel = getShellOptionLabel(option)}
 								<Select.Item
 									value={option.path}
-									label={option.label}
+									label={optionLabel}
 									disabled={!option.available}
 								>
 									<Shell class="w-4 h-4 mr-2 {option.available ? 'text-green-500' : 'text-muted-foreground/40'}" />
 									<span class={option.available ? 'text-foreground' : 'text-muted-foreground/60'}>
-										{option.label}
+										{optionLabel}
 										{#if !option.available}
 											<span class="text-xs ml-1">({$t('terminal.unavailable')})</span>
 										{/if}
@@ -351,21 +374,21 @@
 								</Select.Item>
 							{/each}
 						{:else}
-							<Select.Item value="/bin/bash" label="Bash">
+							<Select.Item value="/bin/bash" label={$t('shells.bash')}>
 								<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
-								Bash
+								{$t('shells.bash')}
 							</Select.Item>
-							<Select.Item value="/bin/sh" label="Shell (sh)">
+							<Select.Item value="/bin/sh" label={$t('shells.sh')}>
 								<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
-								Shell (sh)
+								{$t('shells.sh')}
 							</Select.Item>
-							<Select.Item value="/bin/zsh" label="Zsh">
+							<Select.Item value="/bin/zsh" label={$t('shells.zsh')}>
 								<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
-								Zsh
+								{$t('shells.zsh')}
 							</Select.Item>
-							<Select.Item value="/bin/ash" label="Ash (Alpine)">
+							<Select.Item value="/bin/ash" label={$t('shells.ash')}>
 								<Shell class="w-4 h-4 mr-2 text-muted-foreground" />
-								Ash (Alpine)
+								{$t('shells.ash')}
 							</Select.Item>
 						{/if}
 					</Select.Content>
@@ -379,13 +402,14 @@
 			<Select.Root type="single" bind:value={selectedUser} onValueChange={onUserSelectChange}>
 				<Select.Trigger class="h-9 w-48">
 					<User class="w-4 h-4 mr-2 text-muted-foreground" />
-					<span>{USER_OPTIONS.find(o => o.value === selectedUser)?.label || selectedUser || $t('terminal.select')}</span>
+					<span>{getSelectedUserLabel(selectedUser)}</span>
 				</Select.Trigger>
 				<Select.Content>
 					{#each USER_OPTIONS as option}
-						<Select.Item value={option.value} label={option.label}>
+						{@const optionLabel = getUserOptionLabel(option)}
+						<Select.Item value={option.value} label={optionLabel}>
 							<User class="w-4 h-4 mr-2 text-muted-foreground" />
-							{option.label}
+							{optionLabel}
 						</Select.Item>
 					{/each}
 					{#if customUsers.length > 0}

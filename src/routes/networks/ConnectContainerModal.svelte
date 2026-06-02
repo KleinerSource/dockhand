@@ -7,6 +7,7 @@
 	import { appendEnvParam } from '$lib/stores/environment';
 	import { Link, Loader2, Box } from 'lucide-svelte';
 	import { focusFirstInput } from '$lib/utils';
+	import { formatContainerStatus } from '$lib/utils/localized-messages';
 	import type { NetworkInfo } from '$lib/types';
 	import { t, translate } from '$lib/i18n';
 
@@ -146,7 +147,7 @@
 									<span class="flex items-center gap-2">
 										<span class="w-2 h-2 rounded-full {container.state === 'running' ? 'bg-green-500' : 'bg-gray-400'}"></span>
 										{container.name}
-										<span class="text-xs text-muted-foreground ml-auto">{container.state}</span>
+										<span class="text-xs text-muted-foreground ml-auto">{formatContainerStatus(container.state, $t)}</span>
 									</span>
 								</Select.Item>
 							{/each}

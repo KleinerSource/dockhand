@@ -1500,7 +1500,7 @@
 									label={$t('stacks.modal.envFile')}
 									path={displayEnvPath || null}
 									selectedPath={workingEnvPath || suggestedEnvPath || ''}
-									placeholder="/path/to/.env (optional)"
+									placeholder={$t('stacks.modal.envFilePlaceholder')}
 									copied={envPathCopied}
 									onCopy={() => copyText(displayEnvPath, (v) => envPathCopied = v)}
 									onBrowse={openEnvBrowser}

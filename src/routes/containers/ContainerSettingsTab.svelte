@@ -837,7 +837,7 @@
 												<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.network.ipv4')} {$t('common.labels.ipAddress')}</Label>
 												<Input
 													bind:value={networkConfigs[networkName].ipv4Address}
-													placeholder="e.g., 172.28.0.100"
+													placeholder={$t('containers.settings.placeholders.ipv4Address')}
 													class="h-8 text-xs"
 												/>
 												{#if validateIpv4(networkConfigs[networkName].ipv4Address)}
@@ -848,7 +848,7 @@
 												<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.network.ipv6')} {$t('common.labels.ipAddress')}</Label>
 												<Input
 													bind:value={networkConfigs[networkName].ipv6Address}
-													placeholder="e.g., fd00::100"
+													placeholder={$t('containers.settings.placeholders.ipv6Address')}
 													class="h-8 text-xs"
 												/>
 												{#if validateIpv6(networkConfigs[networkName].ipv6Address)}
@@ -860,7 +860,7 @@
 											<Label class="text-2xs font-medium text-muted-foreground">{$t('containers.settings.labels.aliasesCommaSeparated')}</Label>
 											<Input
 												bind:value={networkConfigs[networkName].aliases}
-												placeholder="e.g., myalias, web"
+												placeholder={$t('containers.settings.placeholders.aliases')}
 												class="h-8 text-xs"
 											/>
 										</div>
@@ -876,7 +876,7 @@
 					<Label class="text-xs font-medium">{$t('containers.settings.labels.macAddress')}</Label>
 					<Input
 						bind:value={macAddress}
-						placeholder="e.g., 02:42:ac:11:00:02"
+						placeholder={$t('containers.settings.placeholders.macAddress')}
 						class="h-9"
 					/>
 					{#if validateMac(macAddress)}
@@ -904,14 +904,14 @@
 		<div class="space-y-2">
 			{#each portMappings as mapping, index}
 				{@const parsed = parseHostPort(mapping.hostPort)}
-				{@const hostPortError = validatePort(parsed.hostPort)}
-				{@const hostIpError = validateIp(parsed.hostIp)}
-				{@const containerPortError = validatePort(mapping.containerPort)}
+				{@const hostPortError = validatePort(parsed.hostPort, $t)}
+				{@const hostIpError = validateIp(parsed.hostIp, $t)}
+				{@const containerPortError = validatePort(mapping.containerPort, $t)}
 				<div class="flex flex-col gap-1">
 					<div class="flex gap-2 items-center">
 						<div class="flex-1 relative group/port">
 							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('common.labels.host')}</span>
-							<Input bind:value={mapping.hostPort} type="text" placeholder="e.g. 8080 or 127.0.0.1:8080" class="h-9 {(hostPortError || hostIpError) && mapping.hostPort ? 'border-destructive' : ''}" />
+							<Input bind:value={mapping.hostPort} type="text" placeholder={$t('containers.settings.placeholders.hostPort')} class="h-9 {(hostPortError || hostIpError) && mapping.hostPort ? 'border-destructive' : ''}" />
 							<button
 								type="button"
 								class="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-primary transition-colors opacity-0 group-hover/port:opacity-100"
@@ -928,7 +928,7 @@
 						</div>
 						<div class="flex-1 relative">
 							<span class="absolute -top-2 left-2 text-2xs text-muted-foreground bg-background px-1">{$t('common.labels.container')}</span>
-							<Input bind:value={mapping.containerPort} type="text" placeholder="e.g. 8080 or 8000-8005" class="h-9 {containerPortError && mapping.containerPort ? 'border-destructive' : ''}" />
+							<Input bind:value={mapping.containerPort} type="text" placeholder={$t('containers.settings.placeholders.containerPort')} class="h-9 {containerPortError && mapping.containerPort ? 'border-destructive' : ''}" />
 						</div>
 					<ToggleGroup
 						value={mapping.protocol}
@@ -1117,17 +1117,17 @@
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
 						<Label for="memoryLimit" class="text-xs font-medium">{$t('containers.settings.labels.memoryLimit')}</Label>
-						<Input id="memoryLimit" bind:value={memoryLimit} placeholder="e.g., 512m, 1g" class="h-9" />
+						<Input id="memoryLimit" bind:value={memoryLimit} placeholder={$t('containers.settings.placeholders.memoryLimit')} class="h-9" />
 					</div>
 					<div class="space-y-1.5">
 						<Label for="memoryReservation" class="text-xs font-medium">{$t('containers.settings.labels.memoryReservation')}</Label>
-						<Input id="memoryReservation" bind:value={memoryReservation} placeholder="e.g., 256m" class="h-9" />
+						<Input id="memoryReservation" bind:value={memoryReservation} placeholder={$t('containers.settings.placeholders.memoryReservation')} class="h-9" />
 					</div>
 				</div>
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
 						<Label for="nanoCpus" class="text-xs font-medium">{$t('containers.settings.labels.cpuLimit')}</Label>
-						<Input id="nanoCpus" bind:value={nanoCpus} placeholder="e.g., 0.5, 1.5, 2" class="h-9" />
+						<Input id="nanoCpus" bind:value={nanoCpus} placeholder={$t('containers.settings.placeholders.cpuLimit')} class="h-9" />
 					</div>
 					<div class="space-y-1.5">
 						<Label for="cpuShares" class="text-xs font-medium">{$t('containers.settings.labels.cpuShares')}</Label>
@@ -1137,7 +1137,7 @@
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
 						<Label for="cpuQuota" class="text-xs font-medium">{$t('containers.settings.labels.cpuQuota')}</Label>
-						<Input id="cpuQuota" bind:value={cpuQuota} type="number" placeholder="e.g., 50000" class="h-9" />
+						<Input id="cpuQuota" bind:value={cpuQuota} type="number" placeholder={$t('containers.settings.placeholders.cpuQuota')} class="h-9" />
 						<p class="text-xs text-muted-foreground">{$t('containers.settings.help.microsecondsPerPeriod')}</p>
 					</div>
 					<div class="space-y-1.5">
@@ -1175,7 +1175,7 @@
 				<div class="grid grid-cols-2 gap-3 pt-2">
 					<div class="space-y-1.5">
 						<Label for="containerUser" class="text-xs font-medium">{$t('common.labels.user')}</Label>
-						<Input id="containerUser" bind:value={containerUser} placeholder="user:group or UID:GID" class="h-9" />
+						<Input id="containerUser" bind:value={containerUser} placeholder={$t('containers.settings.placeholders.userGroup')} class="h-9" />
 					</div>
 					<div class="space-y-1.5 flex flex-col justify-center pt-4">
 						<div class="flex items-center space-x-2">
@@ -1245,7 +1245,7 @@
 					<div class="flex gap-2">
 						<Input
 							bind:value={securityOptionInput}
-							placeholder="e.g., no-new-privileges, seccomp=unconfined"
+							placeholder={$t('containers.settings.placeholders.securityOption')}
 							class="h-9 flex-1"
 							onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSecurityOption(); } }}
 						/>
@@ -1300,7 +1300,7 @@
 				{#if healthcheckEnabled}
 					<div class="space-y-1.5">
 						<Label for="healthcheckCommand" class="text-xs font-medium">{$t('common.labels.command')}</Label>
-						<Input id="healthcheckCommand" bind:value={healthcheckCommand} placeholder="e.g., curl -f http://localhost/ || exit 1" class="h-9" />
+						<Input id="healthcheckCommand" bind:value={healthcheckCommand} placeholder={$t('containers.settings.placeholders.healthcheckCommand')} class="h-9" />
 					</div>
 					<div class="grid grid-cols-4 gap-3">
 						<div class="space-y-1.5">
@@ -1352,7 +1352,7 @@
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsInput}
-							placeholder="e.g., 8.8.8.8"
+							placeholder={$t('containers.settings.placeholders.dnsServer')}
 							class="h-9 flex-1"
 							onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addDnsServer(); } }}
 						/>
@@ -1380,7 +1380,7 @@
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsSearchInput}
-							placeholder="e.g., example.com"
+							placeholder={$t('containers.settings.placeholders.dnsSearchDomain')}
 							class="h-9 flex-1"
 							onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addDnsSearch(); } }}
 						/>
@@ -1408,7 +1408,7 @@
 					<div class="flex gap-2">
 						<Input
 							bind:value={dnsOptionInput}
-							placeholder="e.g., ndots:5"
+							placeholder={$t('containers.settings.placeholders.dnsOption')}
 							class="h-9 flex-1"
 							onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addDnsOption(); } }}
 						/>
@@ -1562,7 +1562,7 @@
 							<div class="flex gap-2">
 								<Input
 									bind:value={gpuDeviceIdInput}
-									placeholder="e.g., 0, GPU-xxxx"
+									placeholder={$t('containers.settings.placeholders.gpuDeviceId')}
 									class="h-9 flex-1"
 									onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addGpuDeviceId(); } }}
 								/>

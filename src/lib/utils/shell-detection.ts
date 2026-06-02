@@ -3,20 +3,27 @@ import { appendEnvParam } from '$lib/stores/environment';
 export interface ShellInfo {
 	path: string;
 	label: string;
+	labelKey?: string;
 	available: boolean;
 }
 
+export interface UserOption {
+	value: string;
+	label?: string;
+	labelKey?: string;
+}
+
 export const SHELL_OPTIONS: Omit<ShellInfo, 'available'>[] = [
-	{ path: '/bin/bash', label: 'Bash' },
-	{ path: '/bin/sh', label: 'Shell (sh)' },
-	{ path: '/bin/zsh', label: 'Zsh' },
-	{ path: '/bin/ash', label: 'Ash (Alpine)' }
+	{ path: '/bin/bash', label: 'Bash', labelKey: 'shells.bash' },
+	{ path: '/bin/sh', label: 'Shell (sh)', labelKey: 'shells.sh' },
+	{ path: '/bin/zsh', label: 'Zsh', labelKey: 'shells.zsh' },
+	{ path: '/bin/ash', label: 'Ash (Alpine)', labelKey: 'shells.ash' }
 ];
 
-export const USER_OPTIONS = [
+export const USER_OPTIONS: UserOption[] = [
 	{ value: 'root', label: 'root' },
 	{ value: 'nobody', label: 'nobody' },
-	{ value: '', label: 'Container default' }
+	{ value: '', labelKey: 'common.labels.containerDefault' }
 ];
 
 const TERMINAL_USER_STORAGE_KEY = 'dockhand-terminal-users';

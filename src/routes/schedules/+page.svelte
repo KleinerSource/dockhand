@@ -54,9 +54,9 @@
 	const canRunSchedules = $derived($canAccess('schedules', 'run'));
 	import { vulnerabilityCriteriaIcons } from '$lib/utils/update-steps';
 	import type { VulnerabilityCriteria } from '$lib/server/db';
-	import cronstrue from 'cronstrue';
-	import 'cronstrue/locales/zh_CN';
 	import { getIntlLocale, locale, t } from '$lib/i18n';
+	import { formatCronDescription } from '$lib/utils/cron-display';
+	import { formatUpdateBlockReason, formatUpdateMessage } from '$lib/utils/localized-messages';
 
 	// Scanner result per scanner
 	interface ScannerResult {
@@ -180,6 +180,7 @@
 		lastExecution: ScheduleExecution | null;
 		recentExecutions: ScheduleExecution[];
 		isSystem: boolean;
+		retentionDays?: number;
 		// Container update specific fields
 		envHasScanning?: boolean;
 		vulnerabilityCriteria?: string | null;
@@ -343,17 +344,13 @@
 			case 'image_prune':
 				return getImagePruneDescription(schedule);
 			case 'system_cleanup':
-				return getSystemScheduleDisplayDescription(schedule.id, schedule.description);
+				return getSystemScheduleDisplayDescription(schedule.id, schedule.description, schedule.retentionDays);
 			default:
 				return schedule.description || $t('schedules.systemJob');
 		}
 	}
 
-	function getCronstrueLocale(): string {
-		return $locale === 'zh-CN' ? 'zh_CN' : 'en';
-	}
-
-	function getScheduleTypeLabel(scheduleType: string): string {
+	function getCronScheduleTypeLabel(scheduleType: string): string {
 		switch (scheduleType) {
 			case 'daily':
 				return $t('cron.daily');
@@ -367,8 +364,7 @@
 	}
 
 	function getImagePruneDescription(schedule: Schedule): string {
-		const pruneMode = schedule.pruneMode || (schedule.description?.toLowerCase().includes('dangling') ? 'dangling' : 'all');
-		return pruneMode === 'dangling'
+		return schedule.pruneMode === 'dangling'
 			? $t('schedules.display.descriptions.pruneDanglingImages')
 			: $t('schedules.display.descriptions.pruneAllUnusedImages');
 	}
@@ -388,8 +384,8 @@
 		}
 	}
 
-	function getSystemScheduleDisplayDescription(id: number, fallback?: string): string {
-		const days = getRetentionDays(fallback);
+	function getSystemScheduleDisplayDescription(id: number, fallback?: string, retentionDays?: number): string {
+		const days = retentionDays ?? getRetentionDays(fallback);
 
 		switch (id) {
 			case 1:
@@ -967,7 +963,7 @@
 		}
 	}
 
-	function getScheduleTypeLabel(type: string): string {
+	function getScheduleKindLabel(type: string): string {
 		return $t(`schedules.types.${type}`);
 	}
 
@@ -1070,7 +1066,7 @@
 						{#if filterTypes.length === 0}
 							{$t('schedules.allTypes')}
 						{:else if filterTypes.length === 1}
-							{getScheduleTypeLabel(filterTypes[0])}
+							{getScheduleKindLabel(filterTypes[0])}
 						{:else}
 							{$t('schedules.typesSelected', { count: filterTypes.length })}
 						{/if}
@@ -1333,17 +1329,13 @@
 							{(() => {
 								try {
 									const is12Hour = $appSettings.timeFormat === '12h';
-									return cronstrue.toString(schedule.cronExpression, {
-										use24HourTimeFormat: !is12Hour,
-										throwExceptionOnParseError: true,
-										locale: getCronstrueLocale()
-									});
+									return formatCronDescription(schedule.cronExpression, { is12Hour, locale: $locale, t: $t });
 								} catch {
 									return schedule.cronExpression;
 								}
 							})()}
 						{:else}
-							{getScheduleTypeLabel(schedule.scheduleType)}
+							{getCronScheduleTypeLabel(schedule.scheduleType)}
 						{/if}
 					</span>
 				</div>
@@ -1539,7 +1531,7 @@
 											</Tooltip.Root>
 										</td>
 										<td class="px-2 py-1 text-xs text-destructive">
-											{exec.errorMessage || ''}
+											{formatUpdateMessage(exec.errorMessage, $t)}
 										</td>
 										<td class="px-2 py-1">
 											<div class="flex items-center gap-1">
@@ -1664,7 +1656,7 @@
 										<div class="flex items-center gap-2 min-w-0">
 											<ShieldX class="w-3.5 h-3.5 text-amber-500 shrink-0" />
 											<span class="font-medium truncate">{bc.name}</span>
-											<span class="text-muted-foreground shrink-0">- {bc.reason}</span>
+											<span class="text-muted-foreground shrink-0">- {formatUpdateBlockReason(bc.reason, $t)}</span>
 										</div>
 										{#if bc.scannerResults}
 										<ScannerSeverityPills results={bc.scannerResults} />
@@ -1729,7 +1721,7 @@
 						<div class="text-xs text-muted-foreground mb-1">{$t('schedules.blockReason')}</div>
 						<div class="bg-amber-500/10 border border-amber-500/30 rounded p-3 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
 							<Bug class="w-4 h-4 shrink-0" />
-							<span>{selectedExecution.details.blockReason || $t('schedules.updateBlocked')}</span>
+							<span>{selectedExecution.details.blockReason ? formatUpdateBlockReason(selectedExecution.details.blockReason, $t) : $t('schedules.updateBlocked')}</span>
 						</div>
 					</div>
 				{/if}
@@ -1759,7 +1751,7 @@
 					<div class="shrink-0">
 						<div class="text-xs text-muted-foreground mb-1">{$t('common.labels.error')}</div>
 						<div class="bg-destructive/10 border border-destructive/20 rounded p-3 text-xs text-destructive">
-							{selectedExecution.errorMessage}
+							{formatUpdateMessage(selectedExecution.errorMessage, $t)}
 						</div>
 					</div>
 				{/if}

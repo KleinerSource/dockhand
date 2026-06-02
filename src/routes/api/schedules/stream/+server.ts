@@ -203,6 +203,7 @@ async function getSchedulesData(): Promise<ScheduleInfo[]> {
 				nextRun: sys.nextRun,
 				lastExecution: lastExecution ?? null,
 				recentExecutions,
+				retentionDays: sys.retentionDays,
 				isSystem: true
 			};
 		})

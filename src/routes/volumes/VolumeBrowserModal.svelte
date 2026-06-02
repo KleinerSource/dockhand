@@ -4,6 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import FileBrowserPanel from '../containers/FileBrowserPanel.svelte';
 	import { t } from '$lib/i18n';
+	import { formatContainerStatus } from '$lib/utils/localized-messages';
 
 	interface VolumeUsageInfo {
 		containerId: string;
@@ -72,7 +73,7 @@
 							<span class="inline-flex items-center gap-1 text-foreground font-medium">
 								<Container class="w-3 h-3" />
 								{container.containerName}
-								<span class="text-muted-foreground">({container.state})</span>{#if i < volumeUsage.length - 1}<span>,</span>{/if}
+								<span class="text-muted-foreground">({formatContainerStatus(container.state, $t)})</span>{#if i < volumeUsage.length - 1}<span>,</span>{/if}
 							</span>
 						{/each}
 						<span class="text-muted-foreground">{$t('volumes.browser.editingDisabled')}</span>

@@ -171,7 +171,7 @@
 				<Input
 					id="cred-name"
 					bind:value={formName}
-					placeholder="e.g., GitHub Personal"
+					placeholder={$t('settings.git.credentialModal.namePlaceholder')}
 					class={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
 					oninput={() => errors.name = undefined}
 				/>

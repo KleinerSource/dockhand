@@ -446,11 +446,15 @@
 	}
 
 	function getActionLabel(action: string): string {
-		return $t(`audit.actions.${action}`);
+		const key = `audit.actions.${action}`;
+		const label = $t(key);
+		return label === key ? action : label;
 	}
 
 	function getEntityTypeLabel(entityType: string): string {
-		return $t(`audit.entityTypes.${entityType}`);
+		const key = `audit.entityTypes.${entityType}`;
+		const label = $t(key);
+		return label === key ? entityType : label;
 	}
 
 	function getEntityIcon(entityType: string) {

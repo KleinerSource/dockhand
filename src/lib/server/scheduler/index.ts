@@ -730,6 +730,7 @@ export async function getSystemSchedules(): Promise<SystemScheduleInfo[]> {
 			type: 'system_cleanup' as const,
 			name: 'Schedule execution cleanup',
 			description: `Removes execution logs older than ${scheduleRetention} days`,
+			retentionDays: scheduleRetention,
 			cronExpression: scheduleCleanupCron,
 			nextRun: scheduleCleanupEnabled ? getNextRun(scheduleCleanupCron)?.toISOString() ?? null : null,
 			isSystem: true,
@@ -740,6 +741,7 @@ export async function getSystemSchedules(): Promise<SystemScheduleInfo[]> {
 			type: 'system_cleanup' as const,
 			name: 'Container event cleanup',
 			description: `Removes container events older than ${eventRetention} days`,
+			retentionDays: eventRetention,
 			cronExpression: eventCleanupCron,
 			nextRun: eventCleanupEnabled ? getNextRun(eventCleanupCron)?.toISOString() ?? null : null,
 			isSystem: true,
@@ -773,6 +775,7 @@ export interface SystemScheduleInfo {
 	type: 'system_cleanup';
 	name: string;
 	description: string;
+	retentionDays?: number;
 	cronExpression: string;
 	nextRun: string | null;
 	isSystem: true;

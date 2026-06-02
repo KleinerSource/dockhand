@@ -83,11 +83,14 @@
 			"commit": "Commit",
 			"connection": "Connection",
 			"container": "Container",
+			"containerDefault": "Container default",
 			"containerId": "Container ID",
 			"containerName": "Container name",
 			"containers": "Containers",
 			"cpu": "CPU",
 			"created": "Created",
+			"credential": "Credential",
+			"credentials": "Credentials",
 			"database": "Database",
 			"dashboard": "Dashboard",
 			"description": "Description",
@@ -134,6 +137,8 @@
 			"registry": "Registry",
 			"registries": "Registries",
 			"releaseNotes": "Release notes",
+			"repository": "Repository",
+			"repositories": "Repositories",
 			"restarts": "Restarts",
 			"runtime": "Runtime",
 			"schedule": "Schedule",
@@ -176,6 +181,16 @@
 			"selectAll": "Select all",
 			"deselectAll": "Deselect all"
 		},
+		"placeholders": {
+			"pickDate": "Pick a date"
+		},
+		"protocols": {
+			"http": "HTTP",
+			"httpsTls": "HTTPS (TLS)"
+		},
+		"connectionTypes": {
+			"unixSocket": "Unix socket"
+		},
 		"errors": {
 			"unknown": "Unknown error occurred"
 		}
@@ -208,7 +223,13 @@
 		"daysAgo": "{count} days ago",
 		"weeksAgo": "{count} weeks ago",
 		"monthsAgo": "{count} months ago",
-		"yearsAgo": "{count} years ago"
+		"yearsAgo": "{count} years ago",
+		"short": {
+			"now": "now",
+			"minutesAgo": "{count}m",
+			"hoursAgo": "{count}h",
+			"daysAgo": "{count}d"
+		}
 	},
 	"navigation": {
 		"dashboard": "Dashboard",
@@ -327,6 +348,12 @@
 		"title": "Alerts",
 		"empty": "No alerts configured",
 		"comingSoon": "Alert configuration coming soon"
+	},
+	"shells": {
+		"bash": "Bash",
+		"sh": "Shell (sh)",
+		"zsh": "Zsh",
+		"ash": "Ash (Alpine)"
 	},
 	"terminal": {
 		"pageTitle": "Terminal - Dockhand",
@@ -776,7 +803,8 @@
 			"restarting": "Restarting",
 			"exited": "Exited",
 			"created": "Created",
-			"dead": "Dead"
+			"dead": "Dead",
+			"removing": "Removing"
 		},
 		"health": {
 			"healthy": "Healthy",
@@ -861,6 +889,11 @@
 		"update": {
 			"available": "Update available"
 		},
+		"updateCheckErrors": {
+			"couldNotInspectCurrentImage": "Could not inspect current image",
+			"couldNotDetermineImageName": "Could not determine image name",
+			"couldNotQueryRegistry": "Could not query registry"
+		},
 		"system": {
 			"settingsAbout": "Settings > About",
 			"dockhandManagement": "Dockhand management container",
@@ -883,6 +916,7 @@
 		},
 		"terminal": {
 			"detectingShells": "Detecting shells...",
+			"titleWithContainer": "Terminal - {name}",
 			"detectingAvailableShells": "Detecting available shells...",
 			"noShellAvailable": "No shell available",
 			"noShellInstalled": "This container has no shell installed.",
@@ -1197,6 +1231,23 @@
 				"selectCapabilityDrop": "Select capability to drop...",
 				"runtimeName": "Runtime name",
 				"addCapability": "Add capability...",
+				"ipv4Address": "e.g., 172.28.0.100",
+				"ipv6Address": "e.g., fd00::100",
+				"aliases": "e.g., myalias, web",
+				"macAddress": "e.g., 02:42:ac:11:00:02",
+				"hostPort": "e.g. 8080 or 127.0.0.1:8080",
+				"containerPort": "e.g. 8080 or 8000-8005",
+				"memoryLimit": "e.g., 512m, 1g",
+				"memoryReservation": "e.g., 256m",
+				"cpuLimit": "e.g., 0.5, 1.5, 2",
+				"cpuQuota": "e.g., 50000",
+				"userGroup": "user:group or UID:GID",
+				"securityOption": "e.g., no-new-privileges, seccomp=unconfined",
+				"healthcheckCommand": "e.g., curl -f http://localhost/ || exit 1",
+				"dnsServer": "e.g., 8.8.8.8",
+				"dnsSearchDomain": "e.g., example.com",
+				"dnsOption": "e.g., ndots:5",
+				"gpuDeviceId": "e.g., 0, GPU-xxxx",
 				"soft": "Soft",
 				"hard": "Hard"
 			},
@@ -1236,7 +1287,12 @@
 			"validation": {
 				"invalidIpv4": "Invalid IPv4 address",
 				"invalidIpv6": "Invalid IPv6 address",
-				"invalidMac": "Invalid MAC address (e.g., 02:42:ac:11:00:02)"
+				"invalidIp": "Invalid IP address",
+				"invalidMac": "Invalid MAC address (e.g., 02:42:ac:11:00:02)",
+				"invalidPortNumber": "Invalid port number",
+				"portOutOfRange": "Port out of range (1-65535)",
+				"portOutOfRangeWithPort": "Port {port} out of range (1-65535)",
+				"rangeStartLessThanEnd": "Range start must be less than end"
 			},
 			"actions": {
 				"addDevice": "Add device",
@@ -1870,6 +1926,7 @@
 		"password": "Password",
 		"passwordPlaceholder": "Enter your password",
 		"mfaRequired": "Two-factor authentication required",
+		"logoAlt": "Dockhand logo",
 		"authenticationCode": "Authentication code",
 		"codePlaceholder": "Enter code",
 		"codeHelp": "Enter the 6-digit code from your authenticator app, or use a backup code",
@@ -1886,6 +1943,7 @@
 		},
 		"errors": {
 			"loginFailed": "Login failed",
+			"network": "Network error",
 			"unexpected": "An unexpected error occurred",
 			"sso": "Failed to initiate SSO login"
 		}
@@ -2050,6 +2108,11 @@
 				"adoptedStacks": "Adopted stacks",
 				"alreadyAdopted": "Already adopted",
 				"errors": "Errors",
+				"errorMessages": {
+					"pathDoesNotExist": "Path does not exist",
+					"pathIsNotDirectory": "Path is not a directory",
+					"cannotAccessPath": "Cannot access path"
+				},
 				"empty": {
 					"title": "No Docker Compose files found in the configured paths.",
 					"description": "Make sure your paths contain compose.yaml, compose.yml, or similar files."
@@ -2350,6 +2413,7 @@
 					},
 					"basicSettings": "Basic settings",
 					"name": "Name",
+					"namePlaceholder": "Okta, Auth0, Azure AD...",
 					"issuerUrl": "Issuer URL",
 					"enableProvider": "Enable this OIDC provider",
 					"clientCredentials": "Client credentials",
@@ -2376,6 +2440,7 @@
 					"claimName": "Claim name",
 					"claimNameHelp": "Name of the claim containing roles/groups",
 					"adminValues": "Admin value(s)",
+					"adminValuesPlaceholder": "admin, Administrators",
 					"adminValuesHelp": "Comma-separated values that grant Admin role",
 					"claimRoleMappings": "Claim to role mappings",
 					"claimRoleMappingsDescription": "Map claim values from your identity provider to Dockhand roles.",
@@ -2402,6 +2467,20 @@
 				}
 			},
 			"roles": {
+				"systemRoles": {
+					"admin": {
+						"name": "Admin",
+						"description": "Full access to all resources"
+					},
+					"operator": {
+						"name": "Operator",
+						"description": "Can manage containers and view resources"
+					},
+					"viewer": {
+						"name": "Viewer",
+						"description": "Read-only access to all resources"
+					}
+				},
 				"categories": {
 					"containers": "Containers",
 					"images": "Images",
@@ -2680,6 +2759,7 @@
 					"passwordPlaceholder": "App password or token",
 					"fromEmail": "From email",
 					"fromName": "From name",
+					"fromNamePlaceholder": "Dockhand Alerts",
 					"recipients": "Recipients * (comma-separated)"
 				},
 				"apprise": {
@@ -3326,8 +3406,10 @@
 				"descriptionAdd": "Add a Git repository that can be used to deploy stacks",
 				"descriptionEdit": "Update repository settings",
 				"name": "Name",
+				"namePlaceholder": "e.g., my-app-repo",
 				"nameHelp": "A friendly name to identify this repository",
 				"url": "Repository URL",
+				"urlPlaceholder": "https://github.com/user/repo.git or git@github.com:user/repo.git",
 				"branch": "Branch",
 				"credentialOptional": "Credential (optional)",
 				"nonePublicRepository": "None (public repository)",
@@ -3383,6 +3465,7 @@
 				"descriptionAdd": "Create a new credential for accessing Git repositories",
 				"descriptionEdit": "Update credential settings",
 				"name": "Name",
+				"namePlaceholder": "e.g., GitHub Personal",
 				"nameHelp": "A friendly name to identify this credential",
 				"authType": "Authentication type",
 				"passwordToken": "Password/Token",
@@ -3517,7 +3600,13 @@
 	"executionLog": {
 		"title": "Logs",
 		"toggleTheme": "Toggle log theme",
-		"empty": "No logs available"
+		"empty": "No logs available",
+		"badges": {
+			"trivy": "trivy",
+			"grype": "grype",
+			"error": "error",
+			"dockhand": "dockhand"
+		}
 	},
 	"hostInfo": {
 		"selectEnvironment": "Select environment",
@@ -3567,6 +3656,11 @@
 			"destroy": "Destroy",
 			"rename": "Rename",
 			"update": "Update",
+			"attach": "Attach",
+			"detach": "Detach",
+			"exec_create": "Exec created",
+			"exec_start": "Exec started",
+			"exec_die": "Exec ended",
 			"oom": "Out of memory",
 			"health_status": "Health status",
 			"health_status_healthy": "Healthy",
@@ -3606,15 +3700,20 @@
 			"restart": "Restart",
 			"pause": "Pause",
 			"unpause": "Unpause",
+			"down": "Down",
 			"pull": "Pull",
 			"push": "Push",
 			"prune": "Prune",
 			"exec": "Exec",
 			"connect": "Connect",
 			"disconnect": "Disconnect",
+			"deploy": "Deploy",
+			"rename": "Rename",
+			"view": "View",
 			"login": "Login",
 			"logout": "Logout",
-			"sync": "Sync"
+			"sync": "Sync",
+			"webhook": "Webhook"
 		},
 		"entityTypes": {
 			"container": "Containers",
@@ -3628,7 +3727,13 @@
 			"role": "Roles",
 			"settings": "Settings",
 			"git_repository": "Git repositories",
-			"git_credential": "Git credentials"
+			"git_credential": "Git credentials",
+			"config_set": "Config sets",
+			"notification": "Notifications",
+			"oidc_provider": "OIDC providers",
+			"ldap_config": "LDAP configs",
+			"git_stack": "Git stacks",
+			"api_token": "API tokens"
 		}
 	},
 	"registry": {
@@ -3902,6 +4007,7 @@
 			"runningContainers": "Running containers:",
 			"composeFile": "Compose file",
 			"envFile": "Env file",
+			"envFilePlaceholder": "/path/to/.env (optional)",
 			"newStack": "New stack",
 			"enterStackNameAbove": "Enter stack name above",
 			"notSpecified": "Not specified",
@@ -4375,6 +4481,13 @@
 		"at": "at",
 		"on": "on",
 		"invalid": "Invalid",
+		"descriptions": {
+			"dailyAt": "Daily at {time}",
+			"weeklyAt": "Every {day} at {time}",
+			"onlyOnDaysAt": "At {time}, only on {days}",
+			"everyMinute": "Every minute",
+			"everyMinutes": "Every {count} minutes"
+		},
 		"days": {
 			"monday": "Monday",
 			"tuesday": "Tuesday",
@@ -4398,6 +4511,20 @@
 		"pending": "Pending",
 		"done": "Done",
 		"cancel": "Cancel",
+		"errors": {
+			"invalidJsonBody": "Invalid JSON body",
+			"invalidEntityType": "Invalid entity type: {entityType}. Supported: {supported}",
+			"invalidOperation": "Invalid operation \"{operation}\" for {entityType}. Supported: {supported}",
+			"itemsRequired": "Items array is required and must not be empty",
+			"permissionDenied": "Permission denied",
+			"environmentAccessDenied": "Access denied to this environment",
+			"unsupportedOperation": "Unsupported {type}: {value}",
+			"failedToStartStack": "Failed to start stack",
+			"failedToStopStack": "Failed to stop stack",
+			"failedToRestartStack": "Failed to restart stack",
+			"failedToDownStack": "Failed to down stack",
+			"failedToRemoveStack": "Failed to remove stack"
+		},
 		"operations": {
 			"remove": "remove",
 			"start": "start",
@@ -4408,6 +4535,32 @@
 			"starting": "starting",
 			"stopping": "stopping",
 			"restarting": "restarting"
+		}
+	},
+	"updateMessages": {
+		"errors": {
+			"containerNotFound": "Container not found",
+			"couldNotDetermineImageName": "Could not determine image name",
+			"failedToGetNewImageId": "Failed to get new image ID after pull",
+			"containerRecreationFailed": "Container recreation failed",
+			"pullFailed": "Pull failed: {error}",
+			"scanFailed": "Scan failed: {error}",
+			"vulnerabilityScanFailed": "Vulnerability scan failed: {error}",
+			"registryCheckFailed": "Registry check failed: {error}"
+		},
+		"reasons": {
+			"skippedByLabel": "Skipped by dockhand.update=false label",
+			"imagePinnedToDigest": "Image pinned to specific digest",
+			"localImageNoRegistry": "Local image - no registry available",
+			"alreadyUpToDate": "Already up-to-date",
+			"cannotAutoUpdateDockhand": "Cannot auto-update Dockhand itself",
+			"cannotAutoUpdateHawser": "Cannot auto-update Hawser agent"
+		},
+		"blockReasons": {
+			"any": "Found {total} vulnerabilities ({critical} critical, {high} high, {medium} medium, {low} low)",
+			"criticalHigh": "Found {critical} critical and {high} high severity vulnerabilities",
+			"critical": "Found {critical} critical vulnerabilities",
+			"moreThanCurrent": "New image has {total} vulnerabilities vs {current} in current image"
 		}
 	},
 	"updateSteps": {

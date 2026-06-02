@@ -6,6 +6,7 @@
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { formatDate } from '$lib/stores/settings';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		/** Value in YYYY-MM-DD format (for compatibility with existing code) */
@@ -14,7 +15,7 @@
 		class?: string;
 	}
 
-	let { value = $bindable(''), placeholder = 'Pick a date', class: className = '' }: Props = $props();
+	let { value = $bindable(''), placeholder, class: className = '' }: Props = $props();
 
 	let open = $state(false);
 
@@ -59,7 +60,7 @@
 		{#if displayValue}
 			<span class="text-xs">{displayValue}</span>
 		{:else}
-			<span class="text-xs">{placeholder}</span>
+			<span class="text-xs">{placeholder ?? $t('common.placeholders.pickDate')}</span>
 		{/if}
 	</Popover.Trigger>
 	<Popover.Content class="w-auto p-0 z-[200]" align="start">

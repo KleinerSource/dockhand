@@ -427,7 +427,9 @@
 	}
 
 	function getActionLabel(action: string): string {
-		return $t(`activity.actions.${getActionLabelKey(action)}`);
+		const key = `activity.actions.${getActionLabelKey(action)}`;
+		const label = $t(key);
+		return label === key ? action : label;
 	}
 
 	function getActionLabelKey(action: string): string {

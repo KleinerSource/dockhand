@@ -2,7 +2,7 @@
 	import Cropper from 'svelte-easy-crop';
 	import { Button } from '$lib/components/ui/button';
 	import { ZoomIn, ZoomOut, X, Check } from 'lucide-svelte';
-	import { t } from '$lib/i18n';
+	import { t, translate } from '$lib/i18n';
 
 	interface Props {
 		show: boolean;
@@ -146,7 +146,7 @@
 		}
 
 		if (!cropData) {
-			throw new Error('No crop data available');
+			throw new Error(translate('avatarCropper.errors.noCropData'));
 		}
 
 		return new Promise((resolve, reject) => {
@@ -158,7 +158,7 @@
 				const ctx = canvas.getContext('2d');
 
 				if (!ctx) {
-					reject(new Error('Failed to get canvas context'));
+					reject(new Error(translate('avatarCropper.errors.canvasContext')));
 					return;
 				}
 
@@ -191,7 +191,7 @@
 			};
 
 			image.onerror = () => {
-				reject(new Error('Failed to load image'));
+				reject(new Error(translate('avatarCropper.errors.loadImage')));
 			};
 		});
 	}

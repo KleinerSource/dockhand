@@ -5,6 +5,7 @@
 	import type { ButtonVariant } from "../button/button.svelte";
 	import { isEqualMonth, type DateValue } from "@internationalized/date";
 	import type { Snippet } from "svelte";
+	import { getIntlLocale, locale as appLocale } from "$lib/i18n";
 
 	let {
 		ref = $bindable(null),
@@ -14,7 +15,7 @@
 		weekdayFormat = "short",
 		buttonVariant = "ghost",
 		captionLayout = "label",
-		locale = "en-US",
+		locale: localeProp,
 		months: monthsProp,
 		years,
 		monthFormat: monthFormatProp,
@@ -37,6 +38,8 @@
 		if (captionLayout.startsWith("dropdown")) return "short";
 		return "long";
 	});
+
+	const resolvedLocale = $derived(localeProp ?? getIntlLocale($appLocale));
 </script>
 
 <!--
@@ -53,7 +56,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 		"bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
 		className
 	)}
-	{locale}
+	locale={resolvedLocale}
 	{monthFormat}
 	{yearFormat}
 	{...restProps}
@@ -75,7 +78,7 @@ get along, so we shut typescript up by casting `value` to `never`.
 							{yearFormat}
 							month={month.value}
 							bind:placeholder
-							{locale}
+							locale={resolvedLocale}
 							{monthIndex}
 						/>
 					</Calendar.Header>

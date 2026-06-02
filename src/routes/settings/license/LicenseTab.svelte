@@ -246,7 +246,7 @@
 
 				{#if licenseInfo?.error && !licenseFormError}
 					<div class="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 rounded p-2">
-						{licenseInfo.error}
+						{getLicenseErrorMessage(licenseInfo.error)}
 					</div>
 				{/if}
 

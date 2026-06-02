@@ -400,7 +400,7 @@
 						</div>
 						<div class="space-y-2">
 							<Label for="notif-smtp-from-name">{$t('settings.notifications.modal.smtp.fromName')}</Label>
-							<Input id="notif-smtp-from-name" bind:value={formSmtpFromName} placeholder="Dockhand Alerts" />
+							<Input id="notif-smtp-from-name" bind:value={formSmtpFromName} placeholder={$t('settings.notifications.modal.smtp.fromNamePlaceholder')} />
 						</div>
 					</div>
 					<div class="space-y-2">

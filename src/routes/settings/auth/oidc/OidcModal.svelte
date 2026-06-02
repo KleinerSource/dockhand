@@ -247,7 +247,7 @@
 							<Label>{$t('settings.auth.oidc.modal.name')} <span class="text-destructive">*</span></Label>
 							<Input
 								bind:value={formName}
-								placeholder="Okta, Auth0, Azure AD..."
+								placeholder={$t('settings.auth.oidc.modal.namePlaceholder')}
 								class={formErrors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
 								oninput={() => formErrors.name = undefined}
 							/>
@@ -406,7 +406,7 @@
 								<Label>{$t('settings.auth.oidc.modal.adminValues')}</Label>
 								<Input
 									bind:value={formAdminValue}
-									placeholder="admin, Administrators"
+									placeholder={$t('settings.auth.oidc.modal.adminValuesPlaceholder')}
 								/>
 								<p class="text-xs text-muted-foreground">{$t('settings.auth.oidc.modal.adminValuesHelp')}</p>
 							</div>

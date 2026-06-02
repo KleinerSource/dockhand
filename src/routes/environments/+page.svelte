@@ -411,16 +411,16 @@
 							{:else}
 								<Unlock class="w-4 h-4 mr-2 text-muted-foreground" />
 							{/if}
-							<span>{formProtocol === 'https' ? 'HTTPS (TLS)' : 'HTTP'}</span>
+							<span>{formProtocol === 'https' ? $t('common.protocols.httpsTls') : $t('common.protocols.http')}</span>
 						</Select.Trigger>
 						<Select.Content>
-							<Select.Item value="http" label="HTTP">
+							<Select.Item value="http" label={$t('common.protocols.http')}>
 								<Unlock class="w-4 h-4 mr-2 text-muted-foreground" />
-								HTTP
+								{$t('common.protocols.http')}
 							</Select.Item>
-							<Select.Item value="https" label="HTTPS (TLS)">
+							<Select.Item value="https" label={$t('common.protocols.httpsTls')}>
 								<Lock class="w-4 h-4 mr-2 text-muted-foreground" />
-								HTTPS (TLS)
+								{$t('common.protocols.httpsTls')}
 							</Select.Item>
 						</Select.Content>
 					</Select.Root>
@@ -530,16 +530,16 @@
 							{:else}
 								<Unlock class="w-4 h-4 mr-2 text-muted-foreground" />
 							{/if}
-							<span>{formProtocol === 'https' ? 'HTTPS (TLS)' : 'HTTP'}</span>
+							<span>{formProtocol === 'https' ? $t('common.protocols.httpsTls') : $t('common.protocols.http')}</span>
 						</Select.Trigger>
 						<Select.Content>
-							<Select.Item value="http" label="HTTP">
+							<Select.Item value="http" label={$t('common.protocols.http')}>
 								<Unlock class="w-4 h-4 mr-2 text-muted-foreground" />
-								HTTP
+								{$t('common.protocols.http')}
 							</Select.Item>
-							<Select.Item value="https" label="HTTPS (TLS)">
+							<Select.Item value="https" label={$t('common.protocols.httpsTls')}>
 								<Lock class="w-4 h-4 mr-2 text-muted-foreground" />
-								HTTPS (TLS)
+								{$t('common.protocols.httpsTls')}
 							</Select.Item>
 						</Select.Content>
 					</Select.Root>

@@ -83,11 +83,14 @@
 			"commit": "提交",
 			"connection": "连接",
 			"container": "容器",
+			"containerDefault": "容器默认值",
 			"containerId": "容器 ID",
 			"containerName": "容器名称",
 			"containers": "容器",
 			"cpu": "CPU",
 			"created": "创建时间",
+			"credential": "凭据",
+			"credentials": "凭据",
 			"database": "数据库",
 			"dashboard": "仪表盘",
 			"description": "描述",
@@ -134,11 +137,13 @@
 			"registry": "镜像仓库",
 			"registries": "镜像仓库",
 			"releaseNotes": "发布说明",
+			"repository": "仓库",
+			"repositories": "仓库",
 			"restarts": "重启次数",
 			"runtime": "运行时",
 			"schedule": "调度",
 			"schedules": "调度",
-			"schema": "Schema",
+			"schema": "架构",
 			"scope": "作用域",
 			"settings": "设置",
 			"shell": "终端",
@@ -176,6 +181,16 @@
 			"selectAll": "全选",
 			"deselectAll": "取消全选"
 		},
+		"placeholders": {
+			"pickDate": "选择日期"
+		},
+		"protocols": {
+			"http": "HTTP",
+			"httpsTls": "HTTPS（TLS）"
+		},
+		"connectionTypes": {
+			"unixSocket": "Unix 套接字"
+		},
 		"errors": {
 			"unknown": "发生未知错误"
 		}
@@ -208,7 +223,13 @@
 		"daysAgo": "{count} 天前",
 		"weeksAgo": "{count} 周前",
 		"monthsAgo": "{count} 个月前",
-		"yearsAgo": "{count} 年前"
+		"yearsAgo": "{count} 年前",
+		"short": {
+			"now": "刚刚",
+			"minutesAgo": "{count}分",
+			"hoursAgo": "{count}时",
+			"daysAgo": "{count}天"
+		}
 	},
 	"navigation": {
 		"dashboard": "仪表盘",
@@ -250,14 +271,14 @@
 		"clearFilters": "清除筛选",
 		"unknownHost": "未知主机",
 		"connections": {
-			"socket": "Socket",
+			"socket": "套接字",
 			"direct": "直连",
 			"standard": "标准",
 			"edge": "边缘",
 			"edgeConnection": "边缘连接",
 			"all": "全部连接",
 			"plural": "连接",
-			"socketTitle": "Unix socket 连接",
+			"socketTitle": "Unix 套接字连接",
 			"directTitle": "Docker 直连",
 			"standardTitle": "Hawser agent（标准模式）",
 			"edgeTitle": "Hawser agent（边缘模式）"
@@ -328,9 +349,15 @@
 		"empty": "尚未配置告警",
 		"comingSoon": "告警配置即将推出"
 	},
+	"shells": {
+		"bash": "Bash",
+		"sh": "Shell（sh）",
+		"zsh": "Zsh",
+		"ash": "Ash（Alpine）"
+	},
 	"terminal": {
 		"pageTitle": "终端 - Dockhand",
-		"shell": "Shell",
+		"shell": "Shell 终端",
 		"user": "用户",
 		"terminal": "终端",
 		"removeUser": "移除用户",
@@ -776,7 +803,8 @@
 			"restarting": "重启中",
 			"exited": "已退出",
 			"created": "已创建",
-			"dead": "已失效"
+			"dead": "已失效",
+			"removing": "正在移除"
 		},
 		"health": {
 			"healthy": "健康",
@@ -861,6 +889,11 @@
 		"update": {
 			"available": "有可用更新"
 		},
+		"updateCheckErrors": {
+			"couldNotInspectCurrentImage": "无法检查当前镜像",
+			"couldNotDetermineImageName": "无法确定镜像名称",
+			"couldNotQueryRegistry": "无法查询镜像仓库"
+		},
 		"system": {
 			"settingsAbout": "设置 > 关于",
 			"dockhandManagement": "Dockhand 管理容器",
@@ -883,6 +916,7 @@
 		},
 		"terminal": {
 			"detectingShells": "正在检测 Shell...",
+			"titleWithContainer": "终端 - {name}",
 			"detectingAvailableShells": "正在检测可用 Shell...",
 			"noShellAvailable": "无可用 Shell",
 			"noShellInstalled": "此容器未安装 Shell。",
@@ -1022,7 +1056,7 @@
 			"sections": {
 				"basicInformation": "基础信息",
 				"dnsConfiguration": "DNS 配置",
-				"extraHosts": "额外 hosts",
+				"extraHosts": "额外主机映射（hosts）",
 				"connectedNetworks": "已连接网络",
 				"resourceLimits": "资源限制",
 				"cgroupSettings": "Cgroup 设置",
@@ -1045,16 +1079,16 @@
 				"privileged": "特权模式",
 				"readOnlyRoot": "只读根文件系统",
 				"userNamespace": "用户命名空间",
-				"apparmorProfile": "AppArmor Profile",
-				"addedCapabilities": "已添加 capabilities",
-				"droppedCapabilities": "已移除 capabilities",
+				"apparmorProfile": "AppArmor 配置文件",
+				"addedCapabilities": "已添加能力（capabilities）",
+				"droppedCapabilities": "已移除能力（capabilities）",
 				"cpus": "CPU 数量",
 				"memorySwap": "内存 Swap",
 				"pidsLimit": "PIDs 限制",
-				"oomKill": "OOM Kill",
-				"cpuPeriodQuota": "CPU Period/Quota",
+				"oomKill": "OOM Kill（内存不足终止）",
+				"cpuPeriodQuota": "CPU 周期/配额",
 				"count": "数量",
-				"cgroupParent": "Cgroup Parent",
+				"cgroupParent": "Cgroup 父级",
 				"cgroupnsMode": "Cgroupns 模式",
 				"interval": "间隔",
 				"timeout": "超时",
@@ -1138,7 +1172,7 @@
 				"dns": "DNS 设置",
 				"devices": "设备",
 				"gpu": "GPU",
-				"ulimits": "Ulimits"
+				"ulimits": "Ulimits（资源限制）"
 			},
 			"labels": {
 				"commandOptional": "命令（可选）",
@@ -1157,12 +1191,12 @@
 				"memoryLimit": "内存限制",
 				"memoryReservation": "内存预留",
 				"cpuLimit": "CPU 限制",
-				"cpuShares": "CPU shares",
-				"cpuQuota": "CPU quota",
-				"cpuPeriod": "CPU period",
+				"cpuShares": "CPU 份额",
+				"cpuQuota": "CPU 配额",
+				"cpuPeriod": "CPU 周期",
 				"privilegedMode": "特权模式",
-				"addCapabilities": "添加 capabilities",
-				"dropCapabilities": "移除 capabilities",
+				"addCapabilities": "添加能力（capabilities）",
+				"dropCapabilities": "移除能力（capabilities）",
 				"securityOptions": "安全选项",
 				"enableHealthcheck": "启用健康检查",
 				"intervalSeconds": "间隔（秒）",
@@ -1176,7 +1210,7 @@
 				"gpuMode": "GPU 模式",
 				"gpuCount": "GPU 数量",
 				"deviceIds": "设备 ID",
-				"capabilities": "Capabilities"
+				"capabilities": "能力（Capabilities）"
 			},
 			"restartPolicies": {
 				"no": "不重启",
@@ -1185,9 +1219,9 @@
 				"unlessStopped": "除非手动停止"
 			},
 			"networkModes": {
-				"bridge": "Bridge",
-				"host": "Host",
-				"none": "None"
+				"bridge": "Bridge（桥接）",
+				"host": "Host（主机）",
+				"none": "None（无）"
 			},
 			"placeholders": {
 				"unlimited": "无限制",
@@ -1197,8 +1231,25 @@
 				"selectCapabilityDrop": "选择要移除的 capability...",
 				"runtimeName": "Runtime 名称",
 				"addCapability": "添加 capability...",
-				"soft": "Soft",
-				"hard": "Hard"
+				"ipv4Address": "例如：172.28.0.100",
+				"ipv6Address": "例如：fd00::100",
+				"aliases": "例如：myalias, web",
+				"macAddress": "例如：02:42:ac:11:00:02",
+				"hostPort": "例如：8080 或 127.0.0.1:8080",
+				"containerPort": "例如：8080 或 8000-8005",
+				"memoryLimit": "例如：512m, 1g",
+				"memoryReservation": "例如：256m",
+				"cpuLimit": "例如：0.5, 1.5, 2",
+				"cpuQuota": "例如：50000",
+				"userGroup": "user:group 或 UID:GID",
+				"securityOption": "例如：no-new-privileges, seccomp=unconfined",
+				"healthcheckCommand": "例如：curl -f http://localhost/ || exit 1",
+				"dnsServer": "例如：8.8.8.8",
+				"dnsSearchDomain": "例如：example.com",
+				"dnsOption": "例如：ndots:5",
+				"gpuDeviceId": "例如：0, GPU-xxxx",
+				"soft": "软限制",
+				"hard": "硬限制"
 			},
 			"help": {
 				"unlimitedRetries": "留空表示无限重试",
@@ -1236,7 +1287,12 @@
 			"validation": {
 				"invalidIpv4": "IPv4 地址无效",
 				"invalidIpv6": "IPv6 地址无效",
-				"invalidMac": "MAC 地址无效（例如：02:42:ac:11:00:02）"
+				"invalidIp": "IP 地址无效",
+				"invalidMac": "MAC 地址无效（例如：02:42:ac:11:00:02）",
+				"invalidPortNumber": "端口号无效",
+				"portOutOfRange": "端口超出范围（1-65535）",
+				"portOutOfRangeWithPort": "端口 {port} 超出范围（1-65535）",
+				"rangeStartLessThanEnd": "范围起始端口必须小于结束端口"
 			},
 			"actions": {
 				"addDevice": "添加设备",
@@ -1655,12 +1711,12 @@
 			"creating": "正在创建...",
 			"createNetwork": "创建网络",
 			"drivers": {
-				"bridge": "Bridge",
-				"host": "Host",
-				"overlay": "Overlay",
+				"bridge": "Bridge（桥接）",
+				"host": "Host（主机）",
+				"overlay": "Overlay（覆盖）",
 				"macvlan": "Macvlan",
 				"ipvlan": "IPvlan",
-				"none": "None"
+				"none": "None（无）"
 			},
 			"driverDescriptions": {
 				"bridge": "默认网络驱动",
@@ -1671,13 +1727,13 @@
 				"none": "禁用网络"
 			},
 			"modes": {
-				"bridgeDefault": "Bridge（默认）",
-				"private": "Private",
-				"passthru": "Passthru",
+				"bridgeDefault": "Bridge（桥接，默认）",
+				"private": "Private（私有）",
+				"passthru": "Passthru（直通）",
 				"l2Default": "L2（默认）"
 			},
 			"commonDriverOptions": {
-				"bridgeName": "Bridge 设备名称",
+				"bridgeName": "Bridge（桥接）设备名称",
 				"ipMasquerade": "启用 IP 伪装（true/false）",
 				"interContainerCommunication": "启用容器间通信（true/false）",
 				"hostBindingIpv4": "主机绑定 IPv4 地址",
@@ -1870,6 +1926,7 @@
 		"password": "密码",
 		"passwordPlaceholder": "输入密码",
 		"mfaRequired": "需要双因素认证",
+		"logoAlt": "Dockhand 标志",
 		"authenticationCode": "认证码",
 		"codePlaceholder": "输入验证码",
 		"codeHelp": "输入认证器应用中的 6 位验证码，或使用备用码",
@@ -1886,6 +1943,7 @@
 		},
 		"errors": {
 			"loginFailed": "登录失败",
+			"network": "网络错误",
 			"unexpected": "发生意外错误",
 			"sso": "发起 SSO 登录失败"
 		}
@@ -2050,6 +2108,11 @@
 				"adoptedStacks": "已采用的堆栈",
 				"alreadyAdopted": "已采用",
 				"errors": "错误",
+				"errorMessages": {
+					"pathDoesNotExist": "路径不存在",
+					"pathIsNotDirectory": "路径不是目录",
+					"cannotAccessPath": "无法访问路径"
+				},
 				"empty": {
 					"title": "在配置路径中未找到 Docker Compose 文件。",
 					"description": "请确认这些路径包含 compose.yaml、compose.yml 或类似文件。"
@@ -2260,8 +2323,8 @@
 					"keepExistingPassword": "留空则保留现有密码",
 					"enterPassword": "输入密码",
 					"userSearchSettings": "用户搜索设置",
-					"baseDn": "Base DN",
-					"baseDnHelp": "用于搜索用户的 Base DN。",
+					"baseDn": "Base DN（基础 DN）",
+					"baseDnHelp": "用于搜索用户的 Base DN（基础 DN）。",
 					"userFilter": "用户过滤器",
 					"userFilterHelpBefore": "用于查找用户的 LDAP 过滤器。使用",
 					"userFilterHelpAfter": "作为占位符。",
@@ -2291,7 +2354,7 @@
 					"validation": {
 						"nameRequired": "名称为必填项",
 						"serverUrlRequired": "服务器 URL 为必填项",
-						"baseDnRequired": "Base DN 为必填项"
+						"baseDnRequired": "Base DN（基础 DN）为必填项"
 					},
 					"errors": {
 						"createFailed": "创建 LDAP 配置失败",
@@ -2325,7 +2388,7 @@
 					},
 					"test": {
 						"connectionSuccessful": "连接成功",
-						"issuer": "Issuer：{issuer}",
+						"issuer": "签发方：{issuer}",
 						"connectionFailed": "连接失败：{error}",
 						"testFailed": "测试连接失败"
 					},
@@ -2350,18 +2413,19 @@
 					},
 					"basicSettings": "基础设置",
 					"name": "名称",
-					"issuerUrl": "Issuer URL",
+					"namePlaceholder": "Okta、Auth0、Azure AD...",
+					"issuerUrl": "Issuer URL（颁发者 URL）",
 					"enableProvider": "启用此 OIDC 提供商",
 					"clientCredentials": "客户端凭据",
 					"clientCredentialsDescription": "从身份提供商的应用设置中获取这些信息。",
-					"clientId": "Client ID",
-					"clientSecret": "Client secret",
+					"clientId": "Client ID（客户端 ID）",
+					"clientSecret": "客户端密钥",
 					"clientSecretPlaceholder": "your-client-secret",
 					"keepExistingSecret": "留空则保留现有密钥",
 					"redirectSettings": "重定向设置",
-					"redirectUri": "Redirect URI",
+					"redirectUri": "Redirect URI（重定向 URI）",
 					"redirectUriHelp": "将此 URI 添加到身份提供商允许的回调 URL 中。",
-					"scopes": "Scopes",
+					"scopes": "Scopes（作用域）",
 					"claimMapping": "Claim 映射",
 					"claimMappingDescription": "将 OIDC claims 映射到用户属性。",
 					"usernameClaim": "用户名 claim",
@@ -2376,6 +2440,7 @@
 					"claimName": "Claim 名称",
 					"claimNameHelp": "包含角色/组的 claim 名称",
 					"adminValues": "管理员值",
+					"adminValuesPlaceholder": "admin、Administrators",
 					"adminValuesHelp": "授予 Admin 角色的逗号分隔值",
 					"claimRoleMappings": "Claim 到角色映射",
 					"claimRoleMappingsDescription": "将身份提供商中的 claim 值映射到 Dockhand 角色。",
@@ -2392,7 +2457,7 @@
 						"nameRequired": "名称为必填项",
 						"issuerUrlRequired": "Issuer URL 为必填项",
 						"clientIdRequired": "Client ID 为必填项",
-						"clientSecretRequired": "Client secret 为必填项",
+						"clientSecretRequired": "客户端密钥为必填项",
 						"redirectUriRequired": "Redirect URI 为必填项"
 					},
 					"errors": {
@@ -2402,6 +2467,20 @@
 				}
 			},
 			"roles": {
+				"systemRoles": {
+					"admin": {
+						"name": "管理员",
+						"description": "拥有所有资源的完整访问权限"
+					},
+					"operator": {
+						"name": "操作员",
+						"description": "可管理容器并查看资源"
+					},
+					"viewer": {
+						"name": "查看者",
+						"description": "拥有所有资源的只读访问权限"
+					}
+				},
 				"categories": {
 					"containers": "容器",
 					"images": "镜像",
@@ -2680,6 +2759,7 @@
 					"passwordPlaceholder": "应用密码或 token",
 					"fromEmail": "发件邮箱",
 					"fromName": "发件人名称",
+					"fromNamePlaceholder": "Dockhand 告警",
 					"recipients": "收件人 *（用逗号分隔）"
 				},
 				"apprise": {
@@ -2778,8 +2858,8 @@
 				"save": "保存",
 				"add": "添加",
 				"networkOptions": {
-					"bridge": "Bridge",
-					"host": "Host",
+					"bridge": "Bridge（桥接）",
+					"host": "Host（主机）",
 					"none": "无"
 				},
 				"restartOptions": {
@@ -2931,10 +3011,10 @@
 					"actions": "操作"
 				},
 				"connectionTypes": {
-					"socketTitle": "Unix socket 连接",
+					"socketTitle": "Unix 套接字连接",
 					"directTitle": "直接 Docker 连接",
-					"hawserStandardTitle": "Hawser agent（标准模式）",
-					"hawserEdgeTitle": "Hawser agent（Edge 模式）",
+					"hawserStandardTitle": "Hawser 代理（标准模式）",
+					"hawserEdgeTitle": "Hawser 代理（Edge 模式）",
 					"edgeOutbound": "Edge 连接（出站）"
 				},
 				"features": {
@@ -3000,24 +3080,24 @@
 				},
 				"connection": {
 					"type": "连接类型",
-					"socket": "Unix socket",
-					"socketHelp": "通过同一台机器上的 Docker socket 连接。默认路径：/var/run/docker.sock。也适用于 Docker Desktop 和 OrbStack。",
-					"socketShort": "通过同一台机器上的 Unix socket 连接。",
-					"socketPath": "Socket 路径",
-					"autoDetectSocket": "自动检测 Docker socket",
+					"socket": "Unix 套接字",
+					"socketHelp": "通过同一台机器上的 Docker 套接字连接。默认路径：/var/run/docker.sock。也适用于 Docker Desktop 和 OrbStack。",
+					"socketShort": "通过同一台机器上的 Unix 套接字连接。",
+					"socketPath": "套接字路径",
+					"autoDetectSocket": "自动检测 Docker 套接字",
 					"autoDetectSocketHelpPrefix": "点击",
-					"autoDetectSocketHelpSuffix": "自动检测可用 Docker socket",
+					"autoDetectSocketHelpSuffix": "自动检测可用 Docker 套接字",
 					"direct": "直接连接",
 					"directHelp": "直接连接 Docker Engine API。需要 Docker 在 TCP 端口暴露 API（默认 2375/2376）。适合局域网环境。",
 					"directShort": "通过 TCP 端口直接连接 Docker Engine API。",
 					"hawserStandard": "Hawser 标准模式",
-					"hawserStandardOption": "Hawser agent（标准）",
-					"hawserStandardHelp": "Hawser agent 监听端口，Dockhand 主动连接。适合有静态 IP 的局域网。",
-					"hawserStandardShort": "agent 监听连接，Dockhand 主动连接。",
+					"hawserStandardOption": "Hawser 代理（标准）",
+					"hawserStandardHelp": "Hawser 代理监听端口，Dockhand 主动连接。适合有静态 IP 的局域网。",
+					"hawserStandardShort": "代理监听连接，Dockhand 主动连接。",
 					"hawserEdge": "Hawser Edge 模式",
-					"hawserEdgeOption": "Hawser agent（Edge）",
-					"hawserEdgeHelp": "Hawser agent 主动发起出站 WebSocket 到 Dockhand。不需要端口转发，适合 VPS、NAT 或动态 IP。",
-					"hawserEdgeShort": "agent 主动连接到 Dockhand。不需要端口转发。",
+					"hawserEdgeOption": "Hawser 代理（Edge）",
+					"hawserEdgeHelp": "Hawser 代理主动发起出站 WebSocket 到 Dockhand。不需要端口转发，适合 VPS、NAT 或动态 IP。",
+					"hawserEdgeShort": "代理主动连接到 Dockhand。不需要端口转发。",
 					"learnMoreHawser": "了解更多 Hawser 信息"
 				},
 				"tls": {
@@ -3027,8 +3107,8 @@
 					"clientKey": "客户端密钥"
 				},
 				"hawser": {
-					"agentHost": "Agent 主机",
-					"agentPort": "Agent 端口",
+					"agentHost": "代理主机",
+					"agentPort": "代理端口",
 					"selfSignedCaCertificate": "CA 证书（用于自签名）",
 					"selfSignedCaHelp": "如果 agent 使用自签名 TLS，请粘贴 CA 证书（RSA 或 ECDSA）。",
 					"skipTlsVerification": "跳过 TLS 验证",
@@ -3051,8 +3131,8 @@
 					"copyCommand": "复制命令",
 					"connectionStatus": "连接状态",
 					"connected": "已连接",
-					"waitingForAgent": "正在等待 agent",
-					"agent": "Agent",
+					"waitingForAgent": "正在等待代理",
+					"agent": "代理",
 					"version": "版本",
 					"lastSeen": "最后在线",
 					"connectionToken": "连接 token",
@@ -3132,10 +3212,10 @@
 					"connected": "已连接！Docker {version} - {count} 个容器",
 					"connectionFailed": "连接失败",
 					"connectionTestFailed": "连接测试失败",
-					"noSocketsFound": "未找到 Docker socket",
+					"noSocketsFound": "未找到 Docker 套接字",
 					"socketFound": "已找到 {name}",
-					"socketsFound": "已找到 {count} 个 Docker socket",
-					"detectSocketsFailed": "检测 socket 失败",
+					"socketsFound": "已找到 {count} 个 Docker 套接字",
+					"detectSocketsFailed": "检测套接字失败",
 					"updated": "环境已更新：{name}"
 				}
 			},
@@ -3326,8 +3406,10 @@
 				"descriptionAdd": "添加可用于部署堆栈的 Git 仓库",
 				"descriptionEdit": "更新仓库设置",
 				"name": "名称",
+				"namePlaceholder": "例如：my-app-repo",
 				"nameHelp": "用于识别此仓库的友好名称",
 				"url": "仓库 URL",
+				"urlPlaceholder": "https://github.com/user/repo.git 或 git@github.com:user/repo.git",
 				"branch": "分支",
 				"credentialOptional": "凭据（可选）",
 				"nonePublicRepository": "无（公开仓库）",
@@ -3383,6 +3465,7 @@
 				"descriptionAdd": "创建用于访问 Git 仓库的新凭据",
 				"descriptionEdit": "更新凭据设置",
 				"name": "名称",
+				"namePlaceholder": "例如：GitHub Personal",
 				"nameHelp": "用于识别此凭据的友好名称",
 				"authType": "认证类型",
 				"passwordToken": "密码/Token",
@@ -3517,7 +3600,13 @@
 	"executionLog": {
 		"title": "日志",
 		"toggleTheme": "切换日志主题",
-		"empty": "暂无日志"
+		"empty": "暂无日志",
+		"badges": {
+			"trivy": "trivy",
+			"grype": "grype",
+			"error": "错误",
+			"dockhand": "dockhand"
+		}
 	},
 	"hostInfo": {
 		"selectEnvironment": "选择环境",
@@ -3567,6 +3656,11 @@
 			"destroy": "销毁",
 			"rename": "重命名",
 			"update": "更新",
+			"attach": "附加",
+			"detach": "分离",
+			"exec_create": "命令已创建",
+			"exec_start": "命令已启动",
+			"exec_die": "命令已结束",
 			"oom": "内存不足",
 			"health_status": "健康状态",
 			"health_status_healthy": "健康",
@@ -3606,15 +3700,20 @@
 			"restart": "重启",
 			"pause": "暂停",
 			"unpause": "恢复",
+			"down": "下线",
 			"pull": "拉取",
 			"push": "推送",
 			"prune": "清理",
 			"exec": "执行命令",
 			"connect": "连接",
 			"disconnect": "断开连接",
+			"deploy": "部署",
+			"rename": "重命名",
+			"view": "查看",
 			"login": "登录",
 			"logout": "登出",
-			"sync": "同步"
+			"sync": "同步",
+			"webhook": "Webhook"
 		},
 		"entityTypes": {
 			"container": "容器",
@@ -3628,7 +3727,13 @@
 			"role": "角色",
 			"settings": "设置",
 			"git_repository": "Git 仓库",
-			"git_credential": "Git 凭据"
+			"git_credential": "Git 凭据",
+			"config_set": "配置集",
+			"notification": "通知",
+			"oidc_provider": "OIDC 提供商",
+			"ldap_config": "LDAP 配置",
+			"git_stack": "Git 堆栈",
+			"api_token": "API 令牌"
 		}
 	},
 	"registry": {
@@ -3736,9 +3841,9 @@
 			"restartCount": "重启 {count} 个",
 			"stopCount": "停止 {count} 个",
 			"removeCount": "移除 {count} 个",
-			"down": "Down",
-			"downCount": "Down {count} 个",
-			"downRemoveContainers": "Down（移除容器）",
+			"down": "下线",
+			"downCount": "下线 {count} 个",
+			"downRemoveContainers": "下线（移除容器）",
 			"recreate": "重新创建（stop & up）",
 			"deploy": "部署",
 			"syncFromGit": "从 Git 同步",
@@ -3902,6 +4007,7 @@
 			"runningContainers": "运行中的容器：",
 			"composeFile": "Compose 文件",
 			"envFile": "Env 文件",
+			"envFilePlaceholder": "/path/to/.env（可选）",
 			"newStack": "新堆栈",
 			"enterStackNameAbove": "请先在上方输入堆栈名称",
 			"notSpecified": "未指定",
@@ -4074,9 +4180,9 @@
 				"unlessStopped": "除非手动停止"
 			},
 			"networkDrivers": {
-				"bridge": "Bridge",
-				"host": "Host",
-				"overlay": "Overlay",
+				"bridge": "Bridge（桥接）",
+				"host": "Host（主机）",
+				"overlay": "Overlay（覆盖）",
 				"macvlan": "Macvlan",
 				"ipvlan": "IPvlan",
 				"none": "无（none）"
@@ -4173,8 +4279,8 @@
 			"startingMany": "正在启动 {count} 个堆栈",
 			"stoppingOne": "正在停止 {count} 个堆栈",
 			"stoppingMany": "正在停止 {count} 个堆栈",
-			"downOne": "正在 Down {count} 个堆栈",
-			"downMany": "正在 Down {count} 个堆栈",
+			"downOne": "正在下线 {count} 个堆栈",
+			"downMany": "正在下线 {count} 个堆栈",
 			"restartingOne": "正在重启 {count} 个堆栈",
 			"restartingMany": "正在重启 {count} 个堆栈",
 			"removingOne": "正在移除 {count} 个堆栈",
@@ -4212,7 +4318,7 @@
 			"restarted": "已重启 {name}",
 			"recreated": "已重新创建 {name}",
 			"redeployed": "已重新部署 {name}",
-			"broughtDown": "已 Down {name}",
+			"broughtDown": "已下线 {name}",
 			"removed": "已移除 {name}",
 			"removedWithVolumes": "已移除 {name}（卷已删除）",
 			"containerStarted": "容器已启动",
@@ -4231,8 +4337,8 @@
 			"restartStack": "重启堆栈失败",
 			"redeployTitle": "重新部署 {name} 失败",
 			"redeployStack": "重新部署堆栈失败",
-			"downTitle": "Down {name} 失败",
-			"downStack": "Down 堆栈失败",
+			"downTitle": "下线 {name} 失败",
+			"downStack": "下线堆栈失败",
 			"removeTitle": "移除 {name} 失败",
 			"removeStack": "移除堆栈失败"
 		}
@@ -4375,6 +4481,13 @@
 		"at": "于",
 		"on": "在",
 		"invalid": "无效",
+		"descriptions": {
+			"dailyAt": "每天 {time}",
+			"weeklyAt": "每周{day} {time}",
+			"onlyOnDaysAt": "仅在{days} {time}",
+			"everyMinute": "每分钟",
+			"everyMinutes": "每 {count} 分钟"
+		},
 		"days": {
 			"monday": "星期一",
 			"tuesday": "星期二",
@@ -4398,6 +4511,20 @@
 		"pending": "待处理",
 		"done": "完成",
 		"cancel": "取消",
+		"errors": {
+			"invalidJsonBody": "JSON 请求体无效",
+			"invalidEntityType": "实体类型无效：{entityType}。支持：{supported}",
+			"invalidOperation": "{entityType} 不支持操作“{operation}”。支持：{supported}",
+			"itemsRequired": "items 数组为必填项，且不能为空",
+			"permissionDenied": "权限不足",
+			"environmentAccessDenied": "无权访问此环境",
+			"unsupportedOperation": "不支持的{type}：{value}",
+			"failedToStartStack": "启动堆栈失败",
+			"failedToStopStack": "停止堆栈失败",
+			"failedToRestartStack": "重启堆栈失败",
+			"failedToDownStack": "下线堆栈失败",
+			"failedToRemoveStack": "移除堆栈失败"
+		},
 		"operations": {
 			"remove": "移除",
 			"start": "启动",
@@ -4408,6 +4535,32 @@
 			"starting": "正在启动",
 			"stopping": "正在停止",
 			"restarting": "正在重启"
+		}
+	},
+	"updateMessages": {
+		"errors": {
+			"containerNotFound": "未找到容器",
+			"couldNotDetermineImageName": "无法确定镜像名称",
+			"failedToGetNewImageId": "拉取后无法获取新镜像 ID",
+			"containerRecreationFailed": "重新创建容器失败",
+			"pullFailed": "拉取失败：{error}",
+			"scanFailed": "扫描失败：{error}",
+			"vulnerabilityScanFailed": "漏洞扫描失败：{error}",
+			"registryCheckFailed": "镜像仓库检查失败：{error}"
+		},
+		"reasons": {
+			"skippedByLabel": "因 dockhand.update=false 标签跳过",
+			"imagePinnedToDigest": "镜像已固定到特定 digest",
+			"localImageNoRegistry": "本地镜像，没有可用镜像仓库",
+			"alreadyUpToDate": "已是最新",
+			"cannotAutoUpdateDockhand": "无法自动更新 Dockhand 自身",
+			"cannotAutoUpdateHawser": "无法自动更新 Hawser 代理"
+		},
+		"blockReasons": {
+			"any": "发现 {total} 个漏洞（严重 {critical} 个，高危 {high} 个，中危 {medium} 个，低危 {low} 个）",
+			"criticalHigh": "发现 {critical} 个严重漏洞和 {high} 个高危漏洞",
+			"critical": "发现 {critical} 个严重漏洞",
+			"moreThanCurrent": "新镜像有 {total} 个漏洞，当前镜像有 {current} 个"
 		}
 	},
 	"updateSteps": {
