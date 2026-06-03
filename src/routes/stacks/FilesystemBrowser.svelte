@@ -166,6 +166,10 @@
 			// Select file
 			selectedPath = entry.path;
 			selectedName = entry.name;
+			if (doubleClick) {
+				onSelect(entry.path, entry.name, entry.source || currentSource);
+				handleClose();
+			}
 		}
 	}
 
@@ -442,7 +446,7 @@
 									{entry.type === 'directory' ? 'cursor-pointer' : (selectable || highlighted) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}
 									{selectedPath === entry.path ? 'bg-blue-50 dark:bg-blue-900/20' : ''}"
 								onclick={() => (entry.type === 'directory' || selectable || highlighted) && handleEntryClick(entry, false)}
-								ondblclick={() => entry.type === 'directory' && handleEntryClick(entry, true)}
+								ondblclick={() => (entry.type === 'directory' || selectable || highlighted) && handleEntryClick(entry, true)}
 								disabled={entry.type !== 'directory' && !selectable && !highlighted}
 							>
 								{#if entry.type === 'directory'}

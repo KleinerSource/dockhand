@@ -178,13 +178,19 @@
 		onSelect: () => {}
 	});
 
+	const composeFileFilter = /\.ya?ml$/i;
+
+	function isComposeFilePath(path: string): boolean {
+		return composeFileFilter.test(path.split(/[\\/]/).pop() || path);
+	}
+
 	function openComposeBrowser() {
 		// For untracked stacks (needsFileLocation), only allow selecting files
 		// For tracked stacks, allow both files and directories
 		const isUntracked = needsFileLocation;
 		fileBrowserConfig = {
 			title: isUntracked ? translate('stacks.modal.selectComposeFile') : translate('stacks.modal.selectComposeFileOrDirectory'),
-			selectFilter: /\.ya?ml$/,
+			selectFilter: composeFileFilter,
 			selectMode: isUntracked ? 'file' : 'file_or_directory',
 			onSelect: handleComposeSelect
 		};
@@ -375,7 +381,7 @@
 
 	// Handle compose file selection from browser
 	async function handleComposeSelect(path: string, name: string, source: FileBrowserSource = 'environment') {
-		const isDirectory = !path.match(/\.ya?ml$/i);
+		const isDirectory = !isComposeFilePath(path);
 
 		// If selecting a file in edit mode with existing content, show confirmation
 		if (mode === 'edit' && !isDirectory && composeContent.trim()) {
@@ -398,7 +404,7 @@
 	// Proceed with compose file selection (after optional confirmation)
 	async function proceedWithComposeSelect(path: string, name: string, source: FileBrowserSource = 'environment') {
 		// Check if it's a directory (no extension or doesn't end with .yml/.yaml)
-		const isDirectory = !path.match(/\.ya?ml$/i);
+		const isDirectory = !isComposeFilePath(path);
 		const baseDir = path.endsWith('/') ? path.slice(0, -1) : path;
 		let finalPath = path;
 
