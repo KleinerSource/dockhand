@@ -98,7 +98,7 @@ export function shouldBlockUpdate(
 export function isDockhandContainer(imageName: string): boolean {
 	const lower = imageName.toLowerCase();
 	// Match fnsys/dockhand, registry.example.com/dockhand, or plain dockhand
-	return lower.includes('fnsys/dockhand') || /(?:^|\/)dockhand(?::|$)/.test(lower);
+	return lower.includes('kleinesource/dockhand') || /(?:^|\/)dockhand(?::|$)/.test(lower);
 }
 
 /**
@@ -107,7 +107,7 @@ export function isDockhandContainer(imageName: string): boolean {
  */
 export function isHawserContainer(imageName: string): boolean {
 	const lower = imageName.toLowerCase();
-	return lower.includes('finsys/hawser') || lower.includes('ghcr.io/finsys/hawser');
+	return lower.includes('kleinesource/hawser') || lower.includes('ghcr.io/kleinesource/hawser');
 }
 
 /**

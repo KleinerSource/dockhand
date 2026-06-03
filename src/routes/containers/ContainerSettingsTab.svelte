@@ -18,8 +18,8 @@
 	// Detect system containers (must match server-side logic in update-utils.ts)
 	function detectSystemContainer(imageName: string): SystemContainerType | null {
 		const lower = imageName.toLowerCase();
-		if (lower.includes('fnsys/dockhand')) return 'dockhand';
-		if (lower.includes('finsys/hawser') || lower.includes('ghcr.io/finsys/hawser')) return 'hawser';
+		if (lower.includes('kleinesource/dockhand')) return 'dockhand';
+		if (lower.includes('kleinesource/hawser') || lower.includes('ghcr.io/kleinesource/hawser')) return 'hawser';
 		return null;
 	}
 

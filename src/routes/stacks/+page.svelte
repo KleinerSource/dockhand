@@ -891,8 +891,8 @@
 		if (!stack.containerDetails) return null;
 		for (const c of stack.containerDetails) {
 			const img = (c.image || '').toLowerCase();
-			if (img.includes('fnsys/dockhand') || /(?:^|\/)dockhand(?::|$)/.test(img)) return 'dockhand';
-			if (img.includes('finsys/hawser') || img.includes('ghcr.io/finsys/hawser')) return 'hawser';
+			if (img.includes('kleinesource/dockhand') || /(?:^|\/)dockhand(?::|$)/.test(img)) return 'dockhand';
+			if (img.includes('kleinesource/hawser') || img.includes('ghcr.io/kleinesource/hawser')) return 'hawser';
 		}
 		return null;
 	}
