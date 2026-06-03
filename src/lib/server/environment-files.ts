@@ -40,16 +40,27 @@ function validatePath(path: string): void {
 	}
 }
 
-async function readJsonResponse<T>(response: Response): Promise<T> {
+async function readJsonResponse<T>(response: Response, options?: { hawserFileRequest?: boolean }): Promise<T> {
 	let data: any;
+	let text = '';
+	const textResponse = response.clone();
 	try {
 		data = await response.json();
 	} catch {
+		try {
+			text = await textResponse.text();
+		} catch {
+			text = '';
+		}
 		data = {};
 	}
 
 	if (!response.ok) {
-		throw new Error(data?.error || data?.message || `Request failed with status ${response.status}`);
+		const message = data?.error || data?.message || text || `Request failed with status ${response.status}`;
+		if (options?.hawserFileRequest && response.status === 404 && /page not found/i.test(message)) {
+			throw new Error('Hawser agent does not support filesystem browsing. Update the Hawser agent image and try again.');
+		}
+		throw new Error(message);
 	}
 
 	return data as T;
@@ -69,7 +80,7 @@ async function hawserFileRequest<T>(
 		},
 		envId
 	);
-	return readJsonResponse<T>(response);
+	return readJsonResponse<T>(response, { hawserFileRequest: true });
 }
 
 export async function listEnvironmentDirectory(

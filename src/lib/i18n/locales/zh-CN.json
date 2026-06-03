@@ -3885,7 +3885,8 @@
 		},
 		"recentLocations": {
 			"title": "位置",
-			"dockhandDefault": "Dockhand 默认",
+			"dockhandDefault": "Dockhand 默认(本机)",
+			"agentRoot": "代理设备根目录",
 			"removeFromRecent": "从最近位置移除",
 			"empty": "还没有位置。浏览文件夹后会添加到这里。"
 		},

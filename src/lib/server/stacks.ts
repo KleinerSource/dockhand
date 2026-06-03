@@ -115,6 +115,7 @@ export interface DeployStackOptions {
 	pullPolicy?: string; // Pull policy: 'always' | 'missing' | 'never'
 	composePath?: string; // Custom compose file path (for adopted/imported stacks)
 	envPath?: string; // Custom env file path (for adopted/imported stacks)
+	filesystem?: 'dockhand' | 'environment'; // Filesystem that composePath/envPath belong to
 	composeFileName?: string; // Compose filename to use (e.g., "docker-compose.yaml") for git stacks
 	envFileName?: string; // Env filename relative to compose dir (e.g., ".env") for git stacks
 }
@@ -336,7 +337,7 @@ async function shouldUseRemotePathMode(
 ): Promise<boolean> {
 	if (!composePath || useOverrideFile || !(await usesHawserFilesystem(envId))) return false;
 	const source = await getStackSource(stackName, envId);
-	return source?.sourceType !== 'git' && source?.composePath === composePath;
+	return source?.sourceType === 'internal' && source?.composePath === composePath;
 }
 
 /**
@@ -424,6 +425,7 @@ export interface GetComposeFileResult {
 	composePath?: string | null;
 	envPath?: string | null;
 	suggestedEnvPath?: string;
+	filesystem?: 'dockhand' | 'environment';
 }
 
 /**
@@ -459,7 +461,8 @@ export async function getStackComposeFile(
 	// Case 2: Stack has custom composePath set - use it
 	if (source.composePath) {
 		try {
-			const { content } = await readEnvironmentFile(source.composePath, envId);
+			const fileEnvId = source.sourceType === 'external' ? undefined : envId;
+			const { content } = await readEnvironmentFile(source.composePath, fileEnvId);
 			const stackDir = dirname(source.composePath);
 
 			// For custom paths, suggest .env next to compose if envPath not set
@@ -474,7 +477,8 @@ export async function getStackComposeFile(
 				stackDir,
 				composePath: source.composePath,
 				envPath: source.envPath,
-				suggestedEnvPath
+				suggestedEnvPath,
+				filesystem: source.sourceType === 'external' ? 'dockhand' : 'environment'
 			};
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
@@ -540,6 +544,7 @@ export async function saveStackComposeFile(
 		moveFromDir?: string;  // Old directory to move all files from when path changes
 		oldComposePath?: string;  // Old compose file path for renaming
 		oldEnvPath?: string;  // Old env file path for renaming
+		filesystem?: 'dockhand' | 'environment';
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	// Validate stack name - Docker Compose requires lowercase alphanumeric, hyphens, underscores
@@ -554,7 +559,11 @@ export async function saveStackComposeFile(
 	// Check if this stack has a custom compose path configured, or if one was provided
 	const source = await getStackSource(name, envId);
 	const composePath = options?.composePath || source?.composePath;
-	const hawserFilesystem = await usesHawserFilesystem(envId);
+	const writesToDockhand = options?.filesystem
+		? options.filesystem === 'dockhand'
+		: source?.sourceType === 'external';
+	const fileEnvId = writesToDockhand ? undefined : envId;
+	const hawserFilesystem = !writesToDockhand && await usesHawserFilesystem(envId);
 
 	// Handle compose file move/rename when path changes
 	if (options?.oldComposePath && options?.composePath &&
@@ -693,7 +702,9 @@ export async function saveStackComposeFile(
 		await upsertStackSource({
 			stackName: name,
 			environmentId: envId ?? null,
-			sourceType: 'internal',
+			sourceType: options?.filesystem
+				? (options.filesystem === 'dockhand' ? 'external' : 'internal')
+				: (source?.sourceType || 'internal'),
 			composePath: options?.composePath || source?.composePath || null,
 			envPath: options?.envPath !== undefined ? options.envPath : (source?.envPath ?? null)
 		});
@@ -711,13 +722,13 @@ export async function saveStackComposeFile(
 			}
 		} else if (hawserFilesystem) {
 			try {
-				await createEnvironmentDirectory(parentDir, envId);
+				await createEnvironmentDirectory(parentDir, fileEnvId);
 			} catch {
 				// Directory may already exist; write will surface real failures.
 			}
 		}
 		try {
-			await writeEnvironmentFile(composePath, content, envId);
+			await writeEnvironmentFile(composePath, content, fileEnvId);
 			return { success: true };
 		} catch (err: any) {
 			return { success: false, error: `Failed to save compose file: ${err.message}` };
@@ -855,6 +866,8 @@ interface ComposeCommandOptions {
 	composeFileName?: string;
 	/** Execute compose in-place on the Hawser agent host instead of copying files to the agent stack dir. */
 	remotePathMode?: boolean;
+	/** Where custom compose/env files live when envId points at a Hawser environment. */
+	filesystem?: 'dockhand' | 'environment';
 }
 
 /**
@@ -1456,7 +1469,7 @@ async function executeComposeCommand(
 	envVars?: Record<string, string>,
 	secretVars?: Record<string, string>
 ): Promise<StackOperationResult> {
-	const { stackName, envId, forceRecreate, build, noBuildCache, pullPolicy, removeVolumes, stackFiles, workingDir, composePath, envPath, useOverrideFile, serviceName, composeFileName, remotePathMode } = options;
+	const { stackName, envId, forceRecreate, build, noBuildCache, pullPolicy, removeVolumes, stackFiles, workingDir, composePath, envPath, useOverrideFile, serviceName, composeFileName, remotePathMode, filesystem } = options;
 
 	// Get environment configuration
 	const env = envId ? await getEnvironment(envId) : null;
@@ -1488,6 +1501,7 @@ async function executeComposeCommand(
 	switch (env.connectionType) {
 		case 'hawser-standard':
 		case 'hawser-edge': {
+			const fileEnvId = filesystem === 'dockhand' ? undefined : envId;
 			const effectiveRemotePathMode = remotePathMode ?? await shouldUseRemotePathMode(
 				stackName,
 				envId,
@@ -1501,7 +1515,7 @@ async function executeComposeCommand(
 			let hawserEnvVars = envVars;
 			if (envPath) {
 				try {
-					const envFileContent = (await readEnvironmentFile(envPath, envId)).content;
+					const envFileContent = (await readEnvironmentFile(envPath, fileEnvId)).content;
 					const envFileVars = parseEnvFileContent(envFileContent, stackName);
 					// Merge: envFileVars (lowest) < envVars (DB overrides)
 					// secretVars are handled separately in executeComposeViaHawser
@@ -1517,7 +1531,7 @@ async function executeComposeCommand(
 			const composeDir = workingDir || (composePath ? dirname(composePath) : null);
 			const composeBaseName = composePath ? basename(composePath) : 'compose.yaml';
 			if (composeDir) {
-				const overrideFile = await readComposeOverrideFile(composeDir, composeBaseName, envId);
+				const overrideFile = await readComposeOverrideFile(composeDir, composeBaseName, fileEnvId);
 				if (overrideFile) {
 					hawserStackFiles = { ...(hawserStackFiles || {}), [overrideFile.name]: overrideFile.content };
 					console.log(`[Stack:${stackName}] Including override file for Hawser: ${overrideFile.name}`);
@@ -1875,6 +1889,7 @@ export interface RequireComposeResult {
 	composePath?: string;
 	/** Full path to the env file (for --env-file flag) */
 	envPath?: string;
+	filesystem?: 'dockhand' | 'environment';
 }
 
 /**
@@ -1949,7 +1964,8 @@ export async function requireComposeFile(
 		nonSecretVars,
 		stackDir: composeResult.stackDir,
 		composePath: composeResult.composePath ?? undefined,
-		envPath: envFilePath ?? undefined
+		envPath: envFilePath ?? undefined,
+		filesystem: composeResult.filesystem
 	};
 }
 
@@ -1969,7 +1985,7 @@ export async function startStack(
 		return withContainerFallback(stackName, envId, 'start');
 	}
 
-	const opts = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath };
+	const opts = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem };
 
 	// Check if containers exist for this stack. If they do, use 'start' to resume
 	// them (preserves container IDs, avoids Traefik race conditions from recreation).
@@ -2003,7 +2019,7 @@ export async function stopStack(
 
 	const composeResult = await executeComposeCommand(
 		'stop',
-		{ stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath },
+		{ stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem },
 		result.content!,
 		result.nonSecretVars,
 		result.secretVars
@@ -2037,7 +2053,7 @@ export async function restartStack(
 		return withContainerFallback(stackName, envId, 'restart');
 	}
 
-	const opts: ComposeCommandOptions = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath };
+	const opts: ComposeCommandOptions = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem };
 
 	let composeResult: StackOperationResult;
 
@@ -2073,7 +2089,7 @@ export async function downStack(
 
 	const composeResult = await executeComposeCommand(
 		'down',
-		{ stackName, envId, removeVolumes, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath },
+		{ stackName, envId, removeVolumes, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem },
 		result.content!,
 		result.nonSecretVars,
 		result.secretVars
@@ -2114,7 +2130,8 @@ export async function removeStack(
 					removeVolumes,
 					workingDir: composeResult.stackDir,
 					composePath: composeResult.composePath ?? undefined,
-					envPath: composeResult.envPath ?? undefined
+					envPath: composeResult.envPath ?? undefined,
+					filesystem: composeResult.filesystem
 				},
 				composeResult.content!,
 				envVars,
@@ -2285,7 +2302,7 @@ export async function removeStack(
  * Uses stack locking to prevent concurrent deployments.
  */
 export async function deployStack(options: DeployStackOptions): Promise<StackOperationResult> {
-	const { name, compose, envId, sourceDir, forceRecreate, build, noBuildCache, pullPolicy, composePath, envPath, composeFileName, envFileName } = options;
+	const { name, compose, envId, sourceDir, forceRecreate, build, noBuildCache, pullPolicy, composePath, envPath, filesystem, composeFileName, envFileName } = options;
 	const logPrefix = `[Stack:${name}]`;
 
 	console.log(`${logPrefix} ========================================`);
@@ -2317,6 +2334,8 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 		let actualComposePath: string | undefined;
 		let actualEnvPath: string | undefined = envPath; // Start with provided envPath (for adopted stacks)
 		let stackFiles: Record<string, string> | undefined;
+		let fileEnvIdForStackFiles: number | null | undefined = envId;
+		let filesystemForCompose: 'dockhand' | 'environment' | undefined;
 
 		if (composePath) {
 			// Adopted/imported stack: use the original compose file location
@@ -2324,6 +2343,24 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 			// Files are NOT copied - we use them in-place at their original location
 			workingDir = dirname(composePath);
 			actualComposePath = composePath;
+			const source = await getStackSource(name, envId);
+			if (filesystem === 'dockhand') {
+				fileEnvIdForStackFiles = undefined;
+				filesystemForCompose = 'dockhand';
+				if (await usesHawserFilesystem(envId) && existsSync(workingDir)) {
+					stackFiles = await readDirFilesAsMap(workingDir);
+				}
+			} else if (filesystem === 'environment') {
+				filesystemForCompose = 'environment';
+			} else if (source?.sourceType === 'external' && source.composePath === composePath) {
+				fileEnvIdForStackFiles = undefined;
+				filesystemForCompose = 'dockhand';
+				if (await usesHawserFilesystem(envId) && existsSync(workingDir)) {
+					stackFiles = await readDirFilesAsMap(workingDir);
+				}
+			} else if (source?.sourceType === 'internal' && source.composePath === composePath) {
+				filesystemForCompose = 'environment';
+			}
 			console.log(`${logPrefix} Using custom compose path, workingDir:`, workingDir);
 		} else if (sourceDir && existsSync(sourceDir)) {
 			// Git stack: copy entire source directory to internal stack directory
@@ -2378,6 +2415,15 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 				if (source.envPath) {
 					actualEnvPath = source.envPath;
 				}
+				if (source.sourceType === 'external') {
+					fileEnvIdForStackFiles = undefined;
+					filesystemForCompose = 'dockhand';
+					if (await usesHawserFilesystem(envId) && existsSync(workingDir)) {
+						stackFiles = await readDirFilesAsMap(workingDir);
+					}
+				} else {
+					filesystemForCompose = 'environment';
+				}
 				console.log(`${logPrefix} Using custom path from DB:`, workingDir);
 			} else {
 				// Default: compose file should already exist (written by saveStackComposeFile)
@@ -2399,7 +2445,7 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 		}
 		if (actualEnvPath && !stackFiles['.env']) {
 			try {
-				const envContent = (await readEnvironmentFile(actualEnvPath, envId)).content;
+				const envContent = (await readEnvironmentFile(actualEnvPath, fileEnvIdForStackFiles)).content;
 				stackFiles['.env'] = envContent;
 				console.log(`${logPrefix} Added .env to stackFiles for Hawser (${envContent.length} chars)`);
 			} catch (err) {
@@ -2439,6 +2485,7 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 				composePath: actualComposePath,
 				envPath: actualEnvPath,
 				useOverrideFile: isGitStack,
+				filesystem: filesystemForCompose,
 				// Pass compose filename for Hawser (extracted from path or provided explicitly)
 				composeFileName: composeFileName || (actualComposePath ? basename(actualComposePath) : undefined)
 			},
@@ -2478,7 +2525,7 @@ export async function pullStackImages(
 
 	return executeComposeCommand(
 		'pull',
-		{ stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath },
+		{ stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem },
 		result.content!,
 		result.nonSecretVars,
 		result.secretVars
@@ -2517,6 +2564,7 @@ export async function pullStackService(
 			workingDir: result.stackDir,
 			composePath: result.composePath,
 			envPath: result.envPath,
+			filesystem: result.filesystem,
 			serviceName
 		},
 		result.content!,
@@ -2564,6 +2612,7 @@ export async function updateStackService(
 			workingDir: result.stackDir,
 			composePath: result.composePath,
 			envPath: result.envPath,
+			filesystem: result.filesystem,
 			serviceName
 		},
 		result.content!,

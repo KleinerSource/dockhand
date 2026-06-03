@@ -3885,7 +3885,8 @@
 		},
 		"recentLocations": {
 			"title": "Locations",
-			"dockhandDefault": "Dockhand default",
+			"dockhandDefault": "Dockhand default (local)",
+			"agentRoot": "Agent root",
 			"removeFromRecent": "Remove from recent",
 			"empty": "No locations yet. Browse folders to add them here."
 		},

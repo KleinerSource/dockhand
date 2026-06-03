@@ -91,7 +91,9 @@ export const POST: RequestHandler = async (event) => {
 
 	try {
 		const body = await request.json();
-		const { name, compose, start, envVars, rawEnvContent, composePath, envPath } = body;
+		const { name, compose, start, envVars, rawEnvContent, composePath, envPath, composeFilesystem } = body;
+		const filesystem = composeFilesystem === 'dockhand' ? 'dockhand' : 'environment';
+		const fileEnvId = filesystem === 'dockhand' ? undefined : envIdNum;
 
 		if (!name || typeof name !== 'string') {
 			return json({ error: 'Stack name is required' }, { status: 400 });
@@ -105,7 +107,8 @@ export const POST: RequestHandler = async (event) => {
 		if (start === false) {
 			const result = await saveStackComposeFile(name, compose, true, envIdNum, {
 				composePath: composePath || undefined,
-				envPath: envPath || undefined
+				envPath: envPath || undefined,
+				filesystem
 			});
 			if (!result.success) {
 				return json({ error: result.error }, { status: 400 });
@@ -115,7 +118,7 @@ export const POST: RequestHandler = async (event) => {
 			// - rawEnvContent → .env file (non-secrets with comments)
 			// - secrets only → DB (for shell injection at runtime)
 			if (rawEnvContent) {
-				await writeRawStackEnvFile(name, rawEnvContent, envIdNum, envPath || undefined);
+				await writeRawStackEnvFile(name, rawEnvContent, fileEnvId, envPath || undefined);
 			}
 			if (envVars && Array.isArray(envVars) && envVars.length > 0) {
 				const secrets = envVars.filter((v: any) => v.isSecret);
@@ -124,7 +127,7 @@ export const POST: RequestHandler = async (event) => {
 				}
 				// Fallback: if no rawEnvContent, generate .env from non-secret vars
 				if (!rawEnvContent) {
-					await writeStackEnvFile(name, envVars, envIdNum, envPath || undefined);
+					await writeStackEnvFile(name, envVars, fileEnvId, envPath || undefined);
 				}
 			}
 
@@ -132,7 +135,7 @@ export const POST: RequestHandler = async (event) => {
 			await upsertStackSource({
 				stackName: name,
 				environmentId: envIdNum,
-				sourceType: 'internal',
+				sourceType: filesystem === 'dockhand' ? 'external' : 'internal',
 				composePath: composePath || undefined,
 				envPath: envPath || undefined
 			});
@@ -146,7 +149,8 @@ export const POST: RequestHandler = async (event) => {
 		// ALWAYS save compose file first - deployStack expects it to exist
 		const saveResult = await saveStackComposeFile(name, compose, true, envIdNum, {
 			composePath: composePath || undefined,
-			envPath: envPath || undefined
+			envPath: envPath || undefined,
+			filesystem
 		});
 		if (!saveResult.success) {
 			return json({ error: saveResult.error }, { status: 400 });
@@ -155,7 +159,7 @@ export const POST: RequestHandler = async (event) => {
 		// Save environment variables BEFORE deploying so they're available during start
 		if (rawEnvContent || (envVars && Array.isArray(envVars) && envVars.length > 0)) {
 			if (rawEnvContent) {
-				await writeRawStackEnvFile(name, rawEnvContent, envIdNum, envPath || undefined);
+				await writeRawStackEnvFile(name, rawEnvContent, fileEnvId, envPath || undefined);
 			}
 			if (envVars && Array.isArray(envVars) && envVars.length > 0) {
 				const secrets = envVars.filter((v: any) => v.isSecret);
@@ -164,7 +168,7 @@ export const POST: RequestHandler = async (event) => {
 				}
 				// Fallback: if no rawEnvContent, generate .env from non-secret vars
 				if (!rawEnvContent) {
-					await writeStackEnvFile(name, envVars, envIdNum, envPath || undefined);
+					await writeStackEnvFile(name, envVars, fileEnvId, envPath || undefined);
 				}
 			}
 		}
@@ -173,7 +177,7 @@ export const POST: RequestHandler = async (event) => {
 		await upsertStackSource({
 			stackName: name,
 			environmentId: envIdNum,
-			sourceType: 'internal',
+			sourceType: filesystem === 'dockhand' ? 'external' : 'internal',
 			composePath: composePath || undefined,
 			envPath: envPath || undefined
 		});
@@ -186,7 +190,8 @@ export const POST: RequestHandler = async (event) => {
 					compose,
 					envId: envIdNum,
 					composePath: composePath || undefined,
-					envPath: envPath || undefined
+					envPath: envPath || undefined,
+					filesystem
 				});
 
 				if (!result.success) {

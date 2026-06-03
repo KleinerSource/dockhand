@@ -4,7 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Import, Loader2, Play, Info, ServerCog } from 'lucide-svelte';
-	import FilesystemBrowser, { type FileEntry } from './FilesystemBrowser.svelte';
+	import FilesystemBrowser, { type FileEntry, type FileBrowserSource } from './FilesystemBrowser.svelte';
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import yaml from 'js-yaml';
 	import { toast } from 'svelte-sonner';
@@ -20,6 +20,7 @@
 		serviceCount?: number;
 		running?: boolean;
 		containerCount?: number;
+		filesystem?: FileBrowserSource;
 	}
 
 	interface Props {
@@ -34,7 +35,7 @@
 	let view = $state<'browse' | 'results'>('browse');
 
 	// Reference to filesystem browser
-	let filesystemBrowser = $state<{ getCurrentPath: () => string | null; addRecentLocation: (path: string) => Promise<void> } | null>(null);
+	let filesystemBrowser = $state<{ getCurrentPath: () => string | null; addRecentLocation: (path: string, source?: FileBrowserSource) => Promise<void> } | null>(null);
 
 	// Scan results state
 	let scanResults = $state<DiscoveredStack[]>([]);
@@ -53,10 +54,10 @@
 	let loadingPreview = $state(false);
 
 	// Use current environment from store
-	const envId = $derived($currentEnvironment?.id ?? null);
+	const envId = $derived($currentEnvironment?.id != null ? Number($currentEnvironment.id) : null);
 	const envName = $derived($currentEnvironment?.name ?? translate('common.states.unknown'));
 	// Look up the icon from the environments list since currentEnvironment doesn't store it
-	const currentEnvData = $derived($environments.find(e => e.id === envId));
+	const currentEnvData = $derived($environments.find(e => Number(e.id) === Number(envId)));
 	const envIcon = $derived(currentEnvData?.icon || 'globe');
 	const usesHawserFilesystem = $derived(
 		currentEnvData?.connectionType === 'hawser-standard' ||
@@ -77,7 +78,7 @@
 		}
 	});
 
-	async function handleFilePreview(entry: FileEntry) {
+	async function handleFilePreview(entry: FileEntry, source: FileBrowserSource = entry.source || 'environment') {
 		previewFile = entry;
 		showPreview = true;
 		loadingPreview = true;
@@ -87,7 +88,7 @@
 
 		try {
 			const params = new URLSearchParams({ path: entry.path });
-			if (envId) params.set('env', String(envId));
+			if (source === 'environment' && envId) params.set('env', String(envId));
 			const res = await fetch(`/api/system/files/content?${params}`);
 			if (res.ok) {
 				const data = await res.json();
@@ -119,14 +120,18 @@
 		}
 	}
 
-	async function handleScanDirectory(path: string) {
+	async function handleScanDirectory(path: string, source: FileBrowserSource = 'environment') {
 		scanning = true;
 
 		try {
 			const res = await fetch('/api/stacks/scan', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ path, env: envId ?? undefined })
+				body: JSON.stringify({
+					path,
+					env: source === 'environment' ? (envId ?? undefined) : undefined,
+					filesystem: source
+				})
 			});
 
 			const data = await res.json();
@@ -136,7 +141,10 @@
 				return;
 			}
 
-			const discovered: DiscoveredStack[] = data.discovered || [];
+			const discovered: DiscoveredStack[] = (data.discovered || []).map((stack: DiscoveredStack) => ({
+				...stack,
+				filesystem: stack.filesystem || source
+			}));
 
 			// Detect running stacks on current environment
 			if (envId && discovered.length > 0) {
@@ -180,7 +188,7 @@
 				view = 'results';
 			}
 
-			await filesystemBrowser?.addRecentLocation(path);
+			await filesystemBrowser?.addRecentLocation(path, source);
 
 		} catch (e) {
 			toast.error(e instanceof Error ? e.message : translate('stacks.import.toasts.scanFailed'));
@@ -208,7 +216,8 @@
 				name: stackName,
 				composePath: entry.path,
 				envPath: envFilePath,
-				sourceDir: parentDir
+				sourceDir: parentDir,
+				filesystem: entry.source || 'environment'
 			};
 
 			const res = await fetch('/api/stacks/adopt', {
@@ -229,7 +238,7 @@
 
 			if (data.adopted?.length > 0) {
 				toast.success(translate('stacks.import.toasts.adoptedStack', { name: data.adopted[0] }));
-				await filesystemBrowser?.addRecentLocation(parentDir);
+				await filesystemBrowser?.addRecentLocation(parentDir, entry.source || 'environment');
 				onAdopted?.();
 				handleClose();
 			} else if (data.failed?.length > 0) {
@@ -339,6 +348,7 @@
 		onFilePreview={handleFilePreview}
 		onScanDirectory={handleScanDirectory}
 		environmentId={envId}
+		usesHawserFilesystem={usesHawserFilesystem}
 		{scanning}
 		onSelect={() => {}}
 		onClose={handleClose}

@@ -9,12 +9,12 @@
 	import { type EnvVar, type ValidationResult } from '$lib/components/StackEnvVarsEditor.svelte';
 	import { Layers, Save, Play, Code, GitGraph, Loader2, AlertCircle, X, Sun, Moon, TriangleAlert, GripVertical, FolderOpen, Copy, Check, XCircle, MapPin, ArrowRight, ArrowDown, Info, Box, FolderSync } from 'lucide-svelte';
 	import type { Component } from 'svelte';
-	import FilesystemBrowser from './FilesystemBrowser.svelte';
+	import FilesystemBrowser, { type FileBrowserSource } from './FilesystemBrowser.svelte';
 	import PathBarItem from './PathBarItem.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Select from '$lib/components/ui/select';
 	import { Badge } from '$lib/components/ui/badge';
-	import { currentEnvironment, appendEnvParam } from '$lib/stores/environment';
+	import { currentEnvironment, environments, appendEnvParam } from '$lib/stores/environment';
 	import { appSettings } from '$lib/stores/settings';
 	import { focusFirstInput } from '$lib/utils';
 	import { copyToClipboard } from '$lib/utils/clipboard';
@@ -81,6 +81,7 @@
 	// Working paths: what we're currently editing (always strings, never null)
 	let workingComposePath = $state('');
 	let workingEnvPath = $state('');
+	let workingComposeSource = $state<FileBrowserSource | null>(null);
 
 	// Original paths: loaded from server (for dirty/change detection in edit mode)
 	let originalComposePath = $state<string | null>(null);
@@ -94,6 +95,7 @@
 
 	// Base directory when user browsed to a directory (without stack name yet)
 	let browsedBaseDirectory = $state<string | null>(null);
+	let browsedBaseSource = $state<FileBrowserSource | null>(null);
 
 
 	// UI state
@@ -101,6 +103,12 @@
 	let envPathCopied = $state<'ok' | 'error' | null>(null);
 	let composeContentCopied = $state<'ok' | 'error' | null>(null);
 	let needsFileLocation = $state(false);
+
+	const currentEnvData = $derived($environments.find(e => Number(e.id) === Number($currentEnvironment?.id)));
+	const usesHawserFilesystem = $derived(
+		currentEnvData?.connectionType === 'hawser-standard' ||
+		currentEnvData?.connectionType === 'hawser-edge'
+	);
 
 	// Container info for untracked stacks
 	let stackContainers = $state<{ name: string; state: string; image: string }[]>([]);
@@ -152,6 +160,7 @@
 	let showBrowseConfirm = $state(false);
 	let pendingBrowsePath = $state<string | null>(null);
 	let pendingBrowseName = $state<string | null>(null);
+	let pendingBrowseSource = $state<FileBrowserSource>('environment');
 
 	// Single file browser with dynamic config
 	let showFileBrowser = $state(false);
@@ -160,7 +169,7 @@
 		icon?: Component<{ class?: string }>;
 		selectFilter?: RegExp;
 		selectMode: 'file' | 'directory' | 'file_or_directory';
-		onSelect: (path: string, name: string) => void;
+		onSelect: (path: string, name: string, source?: FileBrowserSource) => void;
 	}>({
 		title: '',
 		icon: undefined,
@@ -359,13 +368,13 @@
 		envVars = vars;
 	}
 
-	function environmentFileContentUrl(path: string) {
-		const envId = $currentEnvironment?.id ?? null;
+	function environmentFileContentUrl(path: string, source: FileBrowserSource = 'environment') {
+		const envId = source === 'environment' ? ($currentEnvironment?.id ?? null) : null;
 		return appendEnvParam(`/api/system/files/content?path=${encodeURIComponent(path)}`, envId);
 	}
 
 	// Handle compose file selection from browser
-	async function handleComposeSelect(path: string, name: string) {
+	async function handleComposeSelect(path: string, name: string, source: FileBrowserSource = 'environment') {
 		const isDirectory = !path.match(/\.ya?ml$/i);
 
 		// If selecting a file in edit mode with existing content, show confirmation
@@ -375,6 +384,7 @@
 			if (normalizedPath !== workingComposePath) {
 				pendingBrowsePath = path;
 				pendingBrowseName = name;
+				pendingBrowseSource = source;
 				showBrowseConfirm = true;
 				showFileBrowser = false;
 				return;
@@ -382,11 +392,11 @@
 		}
 
 		// Continue with file selection
-		await proceedWithComposeSelect(path, name);
+		await proceedWithComposeSelect(path, name, source);
 	}
 
 	// Proceed with compose file selection (after optional confirmation)
-	async function proceedWithComposeSelect(path: string, name: string) {
+	async function proceedWithComposeSelect(path: string, name: string, source: FileBrowserSource = 'environment') {
 		// Check if it's a directory (no extension or doesn't end with .yml/.yaml)
 		const isDirectory = !path.match(/\.ya?ml$/i);
 		const baseDir = path.endsWith('/') ? path.slice(0, -1) : path;
@@ -396,6 +406,7 @@
 			const stackName = newStackName.trim();
 			// Store the base directory so effect can rebuild path if user changes stack name
 			browsedBaseDirectory = baseDir;
+			browsedBaseSource = source;
 			if (stackName) {
 				// If we have a stack name, build the full path with subfolder
 				finalPath = `${baseDir}/${stackName}/compose.yaml`;
@@ -409,9 +420,10 @@
 			}
 		} else {
 			browsedBaseDirectory = null; // Selected a file, not a directory
+			browsedBaseSource = null;
 		}
 
-		// In CREATE mode, we only want the content - don't store external paths
+		// In CREATE mode, selected files keep their source path; selected directories build a path below that base.
 		// Files will be saved to the directory containing the selected compose file
 		if (mode === 'create') {
 			showFileBrowser = false;
@@ -421,11 +433,13 @@
 				// Build potential env path in same directory as compose file
 				const dir = finalPath.replace(/\/[^/]+$/, '');
 				const potentialEnvPath = `${dir}/.env`;
-				await loadFilesFromLocalFilesystem(finalPath, potentialEnvPath);
-				// Use the selected file's path directly
+				await loadFilesFromLocalFilesystem(finalPath, potentialEnvPath, source);
+				// Use the selected file's path directly, preserving whether it is on Dockhand or the agent.
 				workingComposePath = finalPath;
 				workingEnvPath = `${dir}/.env`;
+				workingComposeSource = source;
 				browsedBaseDirectory = null;
+				browsedBaseSource = null;
 				// 'custom' prevents the path effect from overriding (it only acts on 'browsed')
 				pathSource = 'custom';
 			} else {
@@ -437,6 +451,7 @@
 
 		// EDIT mode - store the selected path
 		workingComposePath = finalPath;
+		workingComposeSource = source;
 		pathSource = 'browsed';
 		showFileBrowser = false;
 
@@ -448,7 +463,7 @@
 
 		// Load compose file content when selecting a file (not directory)
 		if (!isDirectory) {
-			await loadFilesFromLocalFilesystem(finalPath, workingEnvPath || suggestedEnvPath || '');
+			await loadFilesFromLocalFilesystem(finalPath, workingEnvPath || suggestedEnvPath || '', source);
 		}
 		isDirty = true;
 	}
@@ -458,20 +473,22 @@
 		showBrowseConfirm = false;
 		pendingBrowsePath = null;
 		pendingBrowseName = null;
+		pendingBrowseSource = 'environment';
 	}
 
 	// Confirm browse and load the new file
 	async function confirmBrowseAndLoad() {
 		showBrowseConfirm = false;
 		if (pendingBrowsePath && pendingBrowseName) {
-			await proceedWithComposeSelect(pendingBrowsePath, pendingBrowseName);
+			await proceedWithComposeSelect(pendingBrowsePath, pendingBrowseName, pendingBrowseSource);
 		}
 		pendingBrowsePath = null;
 		pendingBrowseName = null;
+		pendingBrowseSource = 'environment';
 	}
 
 	// Handle env file selection from browser
-	async function handleEnvSelect(path: string, name: string) {
+	async function handleEnvSelect(path: string, name: string, source: FileBrowserSource = 'environment') {
 		// Check if it's a directory (no extension or doesn't contain .env)
 		const isDirectory = !path.match(/\.env($|\.)/i);
 		let finalPath = path;
@@ -485,7 +502,7 @@
 		// Load env content when selecting a file (not directory)
 		if (!isDirectory) {
 			try {
-				const envResponse = await fetch(environmentFileContentUrl(finalPath));
+				const envResponse = await fetch(environmentFileContentUrl(finalPath, source));
 				if (envResponse.ok) {
 					const envData = await envResponse.json();
 					rawEnvContent = envData.content || '';
@@ -510,10 +527,10 @@
 	}
 
 	// Load files from the selected environment filesystem (when user selects paths)
-	async function loadFilesFromLocalFilesystem(composeFilePath: string, envFilePath: string) {
+	async function loadFilesFromLocalFilesystem(composeFilePath: string, envFilePath: string, source: FileBrowserSource = 'environment') {
 		try {
 			// Load compose file
-			const composeResponse = await fetch(environmentFileContentUrl(composeFilePath));
+			const composeResponse = await fetch(environmentFileContentUrl(composeFilePath, source));
 			if (composeResponse.ok) {
 				const composeData = await composeResponse.json();
 				composeContent = composeData.content || '';
@@ -531,7 +548,7 @@
 
 			// Try to load .env file (only set workingEnvPath if it exists AND we're in edit mode)
 			if (envFilePath) {
-				const envResponse = await fetch(environmentFileContentUrl(envFilePath));
+				const envResponse = await fetch(environmentFileContentUrl(envFilePath, source));
 				if (envResponse.ok) {
 					const envData = await envResponse.json();
 					rawEnvContent = envData.content || '';
@@ -737,6 +754,7 @@
 					// Initialize paths from response (may have suggested paths)
 					workingComposePath = data.composePath || '';
 					workingEnvPath = data.envPath || '';
+					workingComposeSource = null;
 					// Show empty editors - user can browse for files
 					composeContent = '';
 					rawEnvContent = '';
@@ -769,6 +787,7 @@
 			// Set working paths
 			workingComposePath = data.composePath || '';
 			workingEnvPath = data.envPath || '';
+			workingComposeSource = null;
 			// Track original paths for detecting changes
 			originalComposePath = data.composePath || null;
 			originalEnvPath = data.envPath || null;
@@ -916,6 +935,9 @@
 			// Include custom paths if specified
 			if (workingComposePath.trim()) {
 				requestBody.composePath = workingComposePath.trim();
+				if (workingComposeSource) {
+					requestBody.composeFilesystem = workingComposeSource;
+				}
 			}
 			// Use working env path or suggested path
 			const envPathToSave = workingEnvPath.trim() || suggestedEnvPath || '';
@@ -1034,6 +1056,9 @@
 			// Include compose path if set (either custom path or user selected)
 			if (workingComposePath.trim()) {
 				requestBody.composePath = workingComposePath.trim();
+				if (workingComposeSource) {
+					requestBody.composeFilesystem = workingComposeSource;
+				}
 			}
 
 			// Include env path - empty string means "no env file", null/undefined means "use default"
@@ -1189,11 +1214,13 @@
 		// Reset path state
 		workingComposePath = '';
 		workingEnvPath = '';
+		workingComposeSource = null;
 		originalComposePath = null;
 		originalEnvPath = null;
 		autoComputedComposePath = '';
 		pathSource = null;
 		browsedBaseDirectory = null;
+		browsedBaseSource = null;
 		needsFileLocation = false;
 		stackContainers = [];
 		showFileBrowser = false;
@@ -1206,6 +1233,7 @@
 		showBrowseConfirm = false;
 		pendingBrowsePath = null;
 		pendingBrowseName = null;
+		pendingBrowseSource = 'environment';
 		onClose();
 	}
 
@@ -1295,6 +1323,7 @@
 		if (!name) {
 			workingComposePath = '';
 			workingEnvPath = '';
+			workingComposeSource = null;
 			autoComputedComposePath = '';
 			if (!browsedBaseDirectory) {
 				pathSource = null;
@@ -1306,6 +1335,7 @@
 		if (browsedBaseDirectory) {
 			workingComposePath = `${browsedBaseDirectory}/${name}/compose.yaml`;
 			workingEnvPath = `${browsedBaseDirectory}/${name}/.env`;
+			workingComposeSource = browsedBaseSource;
 			pathSource = 'browsed';
 			return;
 		}
@@ -1316,6 +1346,7 @@
 			autoComputedComposePath = `${dir}/compose.yaml`;
 			workingComposePath = `${dir}/compose.yaml`;
 			workingEnvPath = `${dir}/.env`;
+			workingComposeSource = null;
 			pathSource = 'default';
 		}
 	});
@@ -1862,6 +1893,7 @@
 	selectFilter={fileBrowserConfig.selectFilter}
 	selectMode={fileBrowserConfig.selectMode}
 	environmentId={$currentEnvironment?.id ?? null}
+	usesHawserFilesystem={usesHawserFilesystem}
 	onSelect={fileBrowserConfig.onSelect}
 	onClose={() => showFileBrowser = false}
 />

@@ -8,6 +8,8 @@
 	import RecentLocationsPanel from './RecentLocationsPanel.svelte';
 	import { t, translate } from '$lib/i18n';
 
+	export type FileBrowserSource = 'dockhand' | 'environment';
+
 	export interface FileEntry {
 		name: string;
 		path: string;
@@ -15,6 +17,7 @@
 		size: number;
 		mtime: string;
 		mode: string;
+		source?: FileBrowserSource;
 	}
 
 	interface Props {
@@ -25,17 +28,18 @@
 		description?: string;
 		initialPath?: string;
 		environmentId?: number | null;
+		usesHawserFilesystem?: boolean;
 		selectFilter?: RegExp;
 		selectMode?: 'file' | 'directory' | 'file_or_directory' | 'adopt';
 		/** For adopt mode: filter to highlight (e.g., /\.ya?ml$/i for compose files) */
 		highlightFilter?: RegExp;
 		/** For adopt mode: called when user clicks on a matching file */
-		onFilePreview?: (entry: FileEntry) => void;
+		onFilePreview?: (entry: FileEntry, source?: FileBrowserSource) => void;
 		/** For adopt mode: called when user clicks "Scan this folder" */
-		onScanDirectory?: (path: string) => void;
+		onScanDirectory?: (path: string, source?: FileBrowserSource) => void;
 		/** For adopt mode: show loading state on scan button */
 		scanning?: boolean;
-		onSelect: (path: string, name: string) => void;
+		onSelect: (path: string, name: string, source?: FileBrowserSource) => void;
 		onClose: () => void;
 	}
 
@@ -46,6 +50,7 @@
 		description,
 		initialPath = '/',
 		environmentId = null,
+		usesHawserFilesystem = false,
 		selectFilter,
 		selectMode = 'file',
 		highlightFilter,
@@ -57,6 +62,8 @@
 	}: Props = $props();
 
 	let currentPath = $state<string | null>(null);
+	let parentPath = $state<string | null>(null);
+	let currentSource = $state<FileBrowserSource>('dockhand');
 	let entries = $state<FileEntry[]>([]);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -72,39 +79,49 @@
 	let folderInputEl = $state<HTMLInputElement | null>(null);
 
 	// Reference to recent locations panel
-	let recentLocationsPanel = $state<{ addLocation: (path: string) => Promise<void>; getFirstLocation: () => string | null } | null>(null);
+	let recentLocationsPanel = $state<{
+		addLocation: (path: string, source?: FileBrowserSource) => Promise<void>;
+		getFirstLocation: (source?: FileBrowserSource) => string | null;
+	} | null>(null);
+
+	const defaultSource = $derived(usesHawserFilesystem && environmentId ? 'environment' : 'dockhand');
 
 	// Expose methods for parent to call
 	export function getCurrentPath(): string | null {
 		return currentPath;
 	}
 
-	export function addRecentLocation(path: string): Promise<void> {
-		return recentLocationsPanel?.addLocation(path) ?? Promise.resolve();
+	export function addRecentLocation(path: string, source: FileBrowserSource = currentSource): Promise<void> {
+		return recentLocationsPanel?.addLocation(path, source) ?? Promise.resolve();
 	}
 
 	// Load directory when dialog opens
 	$effect(() => {
 		if (open && !currentPath) {
+			const source = defaultSource;
+			currentSource = source;
 			// Wait a tick for the panel to load, then use first location or initialPath
 			setTimeout(() => {
-				const firstLocation = recentLocationsPanel?.getFirstLocation();
-				loadDirectory(firstLocation || initialPath);
+				const firstLocation = recentLocationsPanel?.getFirstLocation(source);
+				loadDirectory(firstLocation || (source === 'environment' ? '/' : initialPath), source);
 			}, 50);
 		}
 	});
 
-	function handleRecentSelect(path: string) {
-		loadDirectory(path);
+	function handleRecentSelect(path: string, source: FileBrowserSource) {
+		selectedPath = null;
+		selectedName = null;
+		loadDirectory(path, source);
 	}
 
-	async function loadDirectory(path: string) {
+	async function loadDirectory(path: string, source: FileBrowserSource = currentSource) {
 		loading = true;
 		error = null;
+		currentSource = source;
 
 		try {
 			const params = new URLSearchParams({ path });
-			if (environmentId) params.set('env', String(environmentId));
+			if (source === 'environment' && environmentId) params.set('env', String(environmentId));
 			const res = await fetch(`/api/system/files?${params}`);
 			const data = await res.json();
 
@@ -114,7 +131,8 @@
 			}
 
 			currentPath = data.path;
-			entries = data.entries;
+			parentPath = data.parent ?? null;
+			entries = (data.entries || []).map((entry: FileEntry) => ({ ...entry, source }));
 		} catch (e) {
 			error = e instanceof Error ? e.message : translate('stacks.fileBrowser.errors.loadDirectory');
 		} finally {
@@ -126,9 +144,9 @@
 		if (selectMode === 'adopt') {
 			// Adopt mode: click on directory navigates, click on highlighted file triggers preview
 			if (entry.type === 'directory') {
-				loadDirectory(entry.path);
+				loadDirectory(entry.path, entry.source || currentSource);
 			} else if (highlightFilter?.test(entry.name) && onFilePreview) {
-				onFilePreview(entry);
+				onFilePreview(entry, entry.source || currentSource);
 			}
 			return;
 		}
@@ -142,7 +160,7 @@
 				// Double click or other modes - navigate into directory
 				selectedPath = null;
 				selectedName = null;
-				loadDirectory(entry.path);
+				loadDirectory(entry.path, entry.source || currentSource);
 			}
 		} else if (selectMode === 'file' || selectMode === 'file_or_directory') {
 			// Select file
@@ -152,34 +170,34 @@
 	}
 
 	function handleGoUp() {
-		if (!currentPath || currentPath === '/') return;
+		if (!parentPath) return;
 
-		const parent = currentPath.replace(/\/[^/]+$/, '') || '/';
 		selectedPath = null;
 		selectedName = null;
-		loadDirectory(parent);
+		loadDirectory(parentPath, currentSource);
 	}
 
 	function handleConfirm() {
 		if (selectMode === 'directory' && currentPath) {
 			// In directory mode, select the current directory
-			const name = currentPath === '/' ? '/' : currentPath.split('/').pop() || '';
-			onSelect(currentPath, name);
+			const name = currentPath === '/' ? '/' : currentPath.split(/[\\/]/).pop() || '';
+			onSelect(currentPath, name, currentSource);
 			handleClose();
 		} else if (selectedPath && selectedName) {
 			// In file or file_or_directory mode, select the selected item
-			onSelect(selectedPath, selectedName);
+			onSelect(selectedPath, selectedName, currentSource);
 			handleClose();
 		} else if (selectMode === 'file_or_directory' && currentPath) {
 			// In file_or_directory mode with nothing selected, use current directory
-			const name = currentPath === '/' ? '/' : currentPath.split('/').pop() || '';
-			onSelect(currentPath, name);
+			const name = currentPath === '/' ? '/' : currentPath.split(/[\\/]/).pop() || '';
+			onSelect(currentPath, name, currentSource);
 			handleClose();
 		}
 	}
 
 	function handleClose() {
 		currentPath = null;
+		parentPath = null;
 		entries = [];
 		selectedPath = null;
 		selectedName = null;
@@ -213,7 +231,10 @@
 			const res = await fetch('/api/system/files', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ path: newPath, env: environmentId ?? undefined })
+				body: JSON.stringify({
+					path: newPath,
+					env: currentSource === 'environment' ? (environmentId ?? undefined) : undefined
+				})
 			});
 			const data = await res.json();
 
@@ -242,7 +263,7 @@
 
 	function handleScan() {
 		if (currentPath && onScanDirectory) {
-			onScanDirectory(currentPath);
+			onScanDirectory(currentPath, currentSource);
 		}
 	}
 
@@ -278,7 +299,7 @@
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 	}
 
-	const canGoUp = $derived(currentPath && currentPath !== '/');
+	const canGoUp = $derived(!!parentPath);
 
 	// In directory mode, only show directories; otherwise show all
 	const filteredEntries = $derived(
@@ -310,6 +331,9 @@
 			<RecentLocationsPanel
 				bind:this={recentLocationsPanel}
 				{currentPath}
+				{currentSource}
+				{environmentId}
+				{usesHawserFilesystem}
 				onSelect={handleRecentSelect}
 			/>
 

@@ -21,6 +21,7 @@ const SKIP_DIRECTORIES = ['.git', 'node_modules', '.docker', '__pycache__', '.ve
 
 // Maximum recursion depth to prevent runaway scanning
 const MAX_DEPTH = 5;
+type FilesystemSource = 'dockhand' | 'environment';
 
 export interface RunningStackInfo {
 	envId: number;
@@ -35,6 +36,7 @@ export interface DiscoveredStack {
 	sourceDir: string;
 	serviceCount?: number; // Number of services defined in compose file
 	runningOn?: RunningStackInfo[];
+	filesystem?: FilesystemSource;
 }
 
 export interface ScanResult {
@@ -89,13 +91,15 @@ function joinEnvironmentPath(basePath: string, name: string): string {
 
 async function scanPath(
 	basePath: string,
-	envId?: number | null
+	envId?: number | null,
+	filesystem: FilesystemSource = envId ? 'environment' : 'dockhand'
 ): Promise<{ stacks: DiscoveredStack[]; errors: { path: string; error: string }[] }> {
 	const discovered: DiscoveredStack[] = [];
 	const errors: { path: string; error: string }[] = [];
+	const fileEnvId = filesystem === 'environment' ? envId : undefined;
 
 	try {
-		await listEnvironmentDirectory(basePath, envId);
+		await listEnvironmentDirectory(basePath, fileEnvId);
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Cannot access path';
 		errors.push({ path: basePath, error: message });
@@ -111,7 +115,7 @@ async function scanPath(
 
 		let entries: EnvironmentFileEntry[];
 		try {
-			entries = (await listEnvironmentDirectory(currentPath, envId)).entries;
+			entries = (await listEnvironmentDirectory(currentPath, fileEnvId)).entries;
 		} catch (err) {
 			// Skip inaccessible directories
 			return;
@@ -125,7 +129,7 @@ async function scanPath(
 			if (composeEntry && composeEntry.type !== 'directory') {
 				// Found a stack! Use compose name property if defined, otherwise directory name
 				const composePath = composeEntry.path || joinEnvironmentPath(currentPath, pattern);
-				const { name: composeName, serviceCount } = await parseComposeMetadata(composePath, envId);
+				const { name: composeName, serviceCount } = await parseComposeMetadata(composePath, fileEnvId);
 				const stackName = normalizeStackName(composeName || basename(currentPath));
 				if (stackName) {
 					// Check for .env file
@@ -137,7 +141,8 @@ async function scanPath(
 							? envEntry.path || joinEnvironmentPath(currentPath, '.env')
 							: null,
 						sourceDir: currentPath,
-						serviceCount
+						serviceCount,
+						filesystem
 					});
 					foundStackDirs.add(currentPath);
 				}
@@ -168,8 +173,8 @@ async function scanPath(
 				// Check for standalone compose files (e.g., myapp.yml, myapp.yaml)
 				if (lowerName.endsWith('.yml') || lowerName.endsWith('.yaml')) {
 					// Validate it's actually a compose file
-					if (await isComposeFile(entryPath, envId)) {
-						const { name: composeName, serviceCount } = await parseComposeMetadata(entryPath, envId);
+					if (await isComposeFile(entryPath, fileEnvId)) {
+						const { name: composeName, serviceCount } = await parseComposeMetadata(entryPath, fileEnvId);
 						const stackName = normalizeStackName(
 							composeName || entry.name.replace(/\.(yml|yaml)$/i, '')
 						);
@@ -183,7 +188,8 @@ async function scanPath(
 									? envEntry.path || joinEnvironmentPath(currentPath, '.env')
 									: null,
 								sourceDir: currentPath,
-								serviceCount
+								serviceCount,
+								filesystem
 							});
 						}
 					}
@@ -221,8 +227,9 @@ export async function adoptStack(
 	// If the compose file has a top-level `name:` property, prefer it over the passed name.
 	// This ensures Docker's project name (from the label) matches Dockhand's stack name.
 	let stackNameSource = stack.name;
+	const fileEnvId = stack.filesystem === 'dockhand' ? undefined : environmentId;
 	if (stack.composePath) {
-		const { name: composeName } = await parseComposeMetadata(stack.composePath, environmentId);
+		const { name: composeName } = await parseComposeMetadata(stack.composePath, fileEnvId);
 		if (composeName) {
 			stackNameSource = composeName;
 		}
@@ -251,7 +258,7 @@ export async function adoptStack(
 		await upsertStackSource({
 			stackName: finalName,
 			environmentId,
-			sourceType: 'internal' as StackSourceType,
+			sourceType: (stack.filesystem === 'dockhand' ? 'external' : 'internal') as StackSourceType,
 			composePath: stack.composePath,
 			envPath: stack.envPath
 		});
@@ -289,7 +296,7 @@ export async function adoptSelectedStacks(
 /**
  * Scan specific paths and return discovered stacks (without adopting)
  */
-export async function scanPaths(paths: string[], envId?: number | null): Promise<ScanResult> {
+export async function scanPaths(paths: string[], envId?: number | null, filesystem: FilesystemSource = envId ? 'environment' : 'dockhand'): Promise<ScanResult> {
 	if (paths.length === 0) {
 		return { discovered: [], adopted: [], skipped: [], errors: [] };
 	}
@@ -301,7 +308,7 @@ export async function scanPaths(paths: string[], envId?: number | null): Promise
 
 	// Scan all paths
 	for (const path of paths) {
-		const { stacks, errors } = await scanPath(path, envId);
+		const { stacks, errors } = await scanPath(path, envId, filesystem);
 		allDiscovered.push(...stacks);
 		allErrors.push(...errors);
 	}

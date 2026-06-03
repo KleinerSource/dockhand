@@ -56,7 +56,8 @@ export const PUT: RequestHandler = async ({ params, request, url, cookies }) => 
 
 	try {
 		const body = await request.json();
-		const { content, restart = false, composePath, envPath, moveFromDir, oldComposePath, oldEnvPath } = body;
+		const { content, restart = false, composePath, envPath, moveFromDir, oldComposePath, oldEnvPath, composeFilesystem } = body;
+		const filesystem = composeFilesystem === 'dockhand' ? 'dockhand' : composeFilesystem === 'environment' ? 'environment' : undefined;
 
 		if (!content || typeof content !== 'string') {
 			return json({ error: 'Compose file content is required' }, { status: 400 });
@@ -64,7 +65,7 @@ export const PUT: RequestHandler = async ({ params, request, url, cookies }) => 
 
 		// Build options object for custom paths, move operation, and file renames
 		const pathOptions = (composePath || envPath !== undefined || moveFromDir || oldComposePath || oldEnvPath)
-			? { composePath, envPath, moveFromDir, oldComposePath, oldEnvPath }
+			? { composePath, envPath, moveFromDir, oldComposePath, oldEnvPath, filesystem }
 			: undefined;
 
 		if (restart) {
@@ -89,7 +90,8 @@ export const PUT: RequestHandler = async ({ params, request, url, cookies }) => 
 						envId: envIdNum,
 						forceRecreate: true,
 						composePath: composeInfo.composePath || undefined,
-						envPath: composeInfo.envPath || undefined
+						envPath: composeInfo.envPath || undefined,
+						filesystem: filesystem || composeInfo.filesystem
 					});
 
 					if (!result.success) {

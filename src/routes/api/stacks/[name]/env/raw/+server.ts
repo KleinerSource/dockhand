@@ -30,6 +30,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 
 		// Check if this stack has custom paths configured
 		const source = await getStackSource(stackName, envIdNum);
+		const fileEnvId = source?.sourceType === 'external' ? undefined : envIdNum;
 
 		// Determine the env file path based on path resolution rules:
 		// - envPath = '' (empty string) → explicitly no env file
@@ -58,7 +59,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 		let content = '';
 		if (envFilePath) {
 			try {
-				content = (await readEnvironmentFile(envFilePath, envIdNum)).content;
+				content = (await readEnvironmentFile(envFilePath, fileEnvId)).content;
 			} catch {
 				// File read failed
 			}
@@ -101,6 +102,7 @@ export const PUT: RequestHandler = async ({ params, url, cookies, request }) => 
 
 		// Check if this stack has custom paths configured
 		const source = await getStackSource(stackName, envIdNum);
+		const fileEnvId = source?.sourceType === 'external' ? undefined : envIdNum;
 
 		// Determine the env file path based on path resolution rules:
 		// - envPath = '' (empty string) → explicitly no env file, don't write
@@ -135,7 +137,7 @@ export const PUT: RequestHandler = async ({ params, url, cookies, request }) => 
 
 		// If content is empty, delete the .env file instead of writing empty file
 		if (!content || !content.trim()) {
-			await removeEnvironmentFile(envFilePath, envIdNum);
+			await removeEnvironmentFile(envFilePath, fileEnvId);
 			return json({ success: true, deleted: true });
 		}
 
@@ -151,7 +153,7 @@ export const PUT: RequestHandler = async ({ params, url, cookies, request }) => 
 			content += '\n';
 		}
 
-		await writeEnvironmentFile(envFilePath, content, envIdNum);
+		await writeEnvironmentFile(envFilePath, content, fileEnvId);
 
 		return json({ success: true });
 	} catch (error) {

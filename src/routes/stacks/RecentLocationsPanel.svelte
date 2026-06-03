@@ -1,24 +1,41 @@
 <script lang="ts">
-	import { FolderOpen, X, Home } from 'lucide-svelte';
+	import { browser } from '$app/environment';
+	import { FolderOpen, X, Home, Server } from 'lucide-svelte';
 	import { t } from '$lib/i18n';
+
+	type FileBrowserSource = 'dockhand' | 'environment';
 
 	interface Props {
 		currentPath?: string | null;
-		onSelect: (path: string) => void;
+		currentSource?: FileBrowserSource;
+		environmentId?: number | null;
+		usesHawserFilesystem?: boolean;
+		onSelect: (path: string, source: FileBrowserSource) => void;
 	}
 
 	let {
 		currentPath = null,
+		currentSource = 'dockhand',
+		environmentId = null,
+		usesHawserFilesystem = false,
 		onSelect
 	}: Props = $props();
 
-	let locations = $state<string[]>([]);
+	let dockhandLocations = $state<string[]>([]);
+	let environmentLocations = $state<string[]>([]);
 	let defaultBasePath = $state<string | null>(null);
 
-	// Load recent locations and default base path on mount
+	// Load recent locations and default base path on mount or environment change.
 	$effect(() => {
+		const envKey = environmentId;
+		const hasHawser = usesHawserFilesystem;
 		loadLocations();
 		loadDefaultBasePath();
+		if (hasHawser) {
+			loadEnvironmentLocations(envKey);
+		} else {
+			environmentLocations = [];
+		}
 	});
 
 	async function loadDefaultBasePath() {
@@ -38,14 +55,40 @@
 			const response = await fetch('/api/settings/general');
 			if (response.ok) {
 				const settings = await response.json();
-				locations = settings.externalStackPaths || [];
+				dockhandLocations = settings.externalStackPaths || [];
 			}
 		} catch (e) {
 			console.error('Failed to load recent locations:', e);
 		}
 	}
 
-	async function saveLocations(newLocations: string[]) {
+	function getEnvironmentStorageKey(envId: number | null): string | null {
+		return envId ? `dockhand:recent-stack-paths:env:${envId}` : null;
+	}
+
+	function loadEnvironmentLocations(envId: number | null) {
+		if (!browser) return;
+		const key = getEnvironmentStorageKey(envId);
+		if (!key) {
+			environmentLocations = [];
+			return;
+		}
+		try {
+			environmentLocations = JSON.parse(localStorage.getItem(key) || '[]');
+		} catch {
+			environmentLocations = [];
+		}
+	}
+
+	async function saveLocations(newLocations: string[], source: FileBrowserSource) {
+		if (source === 'environment') {
+			const key = getEnvironmentStorageKey(environmentId);
+			if (browser && key) {
+				localStorage.setItem(key, JSON.stringify(newLocations));
+			}
+			return;
+		}
+
 		try {
 			await fetch('/api/settings/general', {
 				method: 'POST',
@@ -57,21 +100,36 @@
 		}
 	}
 
-	async function handleRemove(path: string) {
-		const newLocations = locations.filter(p => p !== path);
-		locations = newLocations;
-		await saveLocations(newLocations);
+	async function handleRemove(path: string, source: FileBrowserSource) {
+		const currentLocations = source === 'environment' ? environmentLocations : dockhandLocations;
+		const newLocations = currentLocations.filter(p => p !== path);
+		if (source === 'environment') {
+			environmentLocations = newLocations;
+		} else {
+			dockhandLocations = newLocations;
+		}
+		await saveLocations(newLocations, source);
 	}
 
-	export async function addLocation(path: string) {
-		if (!path || locations.includes(path)) return;
-		const newLocations = [path, ...locations].slice(0, 10);
-		locations = newLocations;
-		await saveLocations(newLocations);
+	export async function addLocation(path: string, source: FileBrowserSource = currentSource) {
+		if (!path) return;
+		const currentLocations = source === 'environment' ? environmentLocations : dockhandLocations;
+		if (currentLocations.includes(path)) return;
+		const newLocations = [path, ...currentLocations].slice(0, 10);
+		if (source === 'environment') {
+			environmentLocations = newLocations;
+		} else {
+			dockhandLocations = newLocations;
+		}
+		await saveLocations(newLocations, source);
 	}
 
-	export function getFirstLocation(): string | null {
-		return locations[0] || null;
+	export function getFirstLocation(source: FileBrowserSource = currentSource): string | null {
+		return (source === 'environment' ? environmentLocations : dockhandLocations)[0] || null;
+	}
+
+	function getLocationName(location: string): string {
+		return location.split(/[\\/]/).pop() || location;
 	}
 </script>
 
@@ -82,29 +140,40 @@
 		{#if defaultBasePath}
 			<button
 				type="button"
-				class="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left {currentPath === defaultBasePath ? 'bg-muted' : ''}"
-				onclick={() => onSelect(defaultBasePath!)}
+				class="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left {currentSource === 'dockhand' && currentPath === defaultBasePath ? 'bg-muted' : ''}"
+				onclick={() => onSelect(defaultBasePath!, 'dockhand')}
 			>
 				<Home class="w-4 h-4 shrink-0 text-sky-500" />
 				<span class="truncate" title={defaultBasePath}>{$t('stacks.recentLocations.dockhandDefault')}</span>
 			</button>
 		{/if}
 
+		{#if usesHawserFilesystem && environmentId}
+			<button
+				type="button"
+				class="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left {currentSource === 'environment' && currentPath === '/' ? 'bg-muted' : ''}"
+				onclick={() => onSelect('/', 'environment')}
+			>
+				<Server class="w-4 h-4 shrink-0 text-emerald-500" />
+				<span class="truncate" title="/">{$t('stacks.recentLocations.agentRoot')}</span>
+			</button>
+		{/if}
+
 		<!-- Recent locations -->
-		{#each locations.filter(l => l !== defaultBasePath) as location}
+		{#each dockhandLocations.filter(l => l !== defaultBasePath) as location}
 			<div class="group flex items-center gap-1">
 				<button
 					type="button"
-					class="flex-1 flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left truncate {currentPath === location ? 'bg-muted' : ''}"
-					onclick={() => onSelect(location)}
+					class="flex-1 flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left truncate {currentSource === 'dockhand' && currentPath === location ? 'bg-muted' : ''}"
+					onclick={() => onSelect(location, 'dockhand')}
 				>
 					<FolderOpen class="w-4 h-4 shrink-0 text-muted-foreground" />
-					<span class="truncate" title={location}>{location.split('/').pop() || location}</span>
+					<span class="truncate" title={location}>{getLocationName(location)}</span>
 				</button>
 				<button
 					type="button"
 					class="p-1 opacity-0 group-hover:opacity-100 hover:bg-muted rounded transition-opacity"
-					onclick={() => handleRemove(location)}
+					onclick={() => handleRemove(location, 'dockhand')}
 					title={$t('stacks.recentLocations.removeFromRecent')}
 				>
 					<X class="w-3 h-3 text-muted-foreground" />
@@ -112,7 +181,30 @@
 			</div>
 		{/each}
 
-		{#if !defaultBasePath && locations.length === 0}
+		{#if usesHawserFilesystem && environmentId}
+			{#each environmentLocations.filter(l => l !== '/') as location}
+				<div class="group flex items-center gap-1">
+					<button
+						type="button"
+						class="flex-1 flex items-center gap-2 px-2 py-1.5 rounded text-xs hover:bg-muted text-left truncate {currentSource === 'environment' && currentPath === location ? 'bg-muted' : ''}"
+						onclick={() => onSelect(location, 'environment')}
+					>
+						<FolderOpen class="w-4 h-4 shrink-0 text-muted-foreground" />
+						<span class="truncate" title={location}>{getLocationName(location)}</span>
+					</button>
+					<button
+						type="button"
+						class="p-1 opacity-0 group-hover:opacity-100 hover:bg-muted rounded transition-opacity"
+						onclick={() => handleRemove(location, 'environment')}
+						title={$t('stacks.recentLocations.removeFromRecent')}
+					>
+						<X class="w-3 h-3 text-muted-foreground" />
+					</button>
+				</div>
+			{/each}
+		{/if}
+
+		{#if !defaultBasePath && dockhandLocations.length === 0 && environmentLocations.length === 0}
 			<p class="text-xs text-muted-foreground italic px-2">
 				{$t('stacks.recentLocations.empty')}
 			</p>

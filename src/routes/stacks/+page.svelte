@@ -64,7 +64,7 @@
 	let envId = $state<number | null>(null);
 
 	// Derived: current environment details for reactive port URL generation
-	const currentEnvDetails = $derived($environments.find(e => e.id === $currentEnvironment?.id) ?? null);
+	const currentEnvDetails = $derived($environments.find(e => Number(e.id) === Number($currentEnvironment?.id)) ?? null);
 
 	// Polling intervals - module scope for cleanup in onDestroy
 	let stacksInterval: ReturnType<typeof setInterval> | null = null;
@@ -854,7 +854,7 @@
 		// Only fetch for stacks that can have env vars (internal or git)
 		const stacksToFetch = stackNames.filter(name => {
 			const source = sources[name];
-			return source && (source.sourceType === 'internal' || source.sourceType === 'git');
+			return source && (source.sourceType === 'internal' || source.sourceType === 'git' || (source.sourceType === 'external' && source.composePath));
 		});
 
 		if (stacksToFetch.length === 0) {
@@ -1889,7 +1889,7 @@
 									<ScrollText class="w-3 h-3 text-muted-foreground hover:text-blue-500" />
 								</button>
 							{/if}
-							{#if source.sourceType !== 'git' && source.sourceType !== 'external' && $canAccess('stacks', 'start')}
+							{#if source.sourceType !== 'git' && (source.sourceType !== 'external' || source.composePath) && $canAccess('stacks', 'start')}
 								<RedeployPopover
 									stackName={stack.name}
 									{envId}

@@ -57,6 +57,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 
 		// Check if this stack has a custom compose path configured
 		const source = await getStackSource(stackName, envIdNum);
+		const fileEnvId = source?.sourceType === 'external' ? undefined : envIdNum;
 
 		// Determine the env file path based on path resolution rules:
 		// - envPath = '' (empty string) → explicitly no env file
@@ -89,7 +90,7 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 			// Internal/adopted stacks: non-secrets from file, secrets from DB
 			if (envFilePath) {
 				try {
-					const content = (await readEnvironmentFile(envFilePath, envIdNum)).content;
+					const content = (await readEnvironmentFile(envFilePath, fileEnvId)).content;
 					const fileVars = parseEnvFile(content);
 					for (const [key, value] of Object.entries(fileVars)) {
 						variables.push({ key, value, isSecret: false });
