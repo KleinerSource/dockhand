@@ -32,6 +32,12 @@ import { deleteGitStackFiles, parseEnvFileContent } from './git';
 import { cleanPem } from '$lib/utils/pem';
 import { rewriteComposeVolumePaths, getHostDataDir } from './host-path';
 import { getOrderValue } from './container-labels';
+import {
+	createEnvironmentDirectory,
+	listEnvironmentDirectory,
+	readEnvironmentFile,
+	writeEnvironmentFile
+} from './environment-files';
 
 // =============================================================================
 // TYPES
@@ -316,6 +322,23 @@ export function getStacksDir(): string {
 	return _stacksDir;
 }
 
+async function usesHawserFilesystem(envId?: number | null): Promise<boolean> {
+	if (!envId) return false;
+	const env = await getEnvironment(envId);
+	return env?.connectionType === 'hawser-edge' || env?.connectionType === 'hawser-standard';
+}
+
+async function shouldUseRemotePathMode(
+	stackName: string,
+	envId: number | null | undefined,
+	composePath?: string,
+	useOverrideFile?: boolean
+): Promise<boolean> {
+	if (!composePath || useOverrideFile || !(await usesHawserFilesystem(envId))) return false;
+	const source = await getStackSource(stackName, envId);
+	return source?.sourceType !== 'git' && source?.composePath === composePath;
+}
+
 /**
  * Get stack directory path for a specific environment.
  * New stacks use: $DATA_DIR/stacks/<envName>/<stackName>/
@@ -436,16 +459,7 @@ export async function getStackComposeFile(
 	// Case 2: Stack has custom composePath set - use it
 	if (source.composePath) {
 		try {
-			if (!existsSync(source.composePath)) {
-				return {
-					success: false,
-					error: `Compose file no longer accessible at ${source.composePath}. The file may have been moved or deleted.`,
-					composePath: source.composePath,
-					envPath: source.envPath
-				};
-			}
-
-			const content = readFileSync(source.composePath, 'utf-8');
+			const { content } = await readEnvironmentFile(source.composePath, envId);
 			const stackDir = dirname(source.composePath);
 
 			// For custom paths, suggest .env next to compose if envPath not set
@@ -466,7 +480,7 @@ export async function getStackComposeFile(
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			return {
 				success: false,
-				error: `Failed to read compose file: ${message}`,
+				error: `Compose file no longer accessible at ${source.composePath}. ${message}`,
 				composePath: source.composePath,
 				envPath: source.envPath
 			};
@@ -540,10 +554,12 @@ export async function saveStackComposeFile(
 	// Check if this stack has a custom compose path configured, or if one was provided
 	const source = await getStackSource(name, envId);
 	const composePath = options?.composePath || source?.composePath;
+	const hawserFilesystem = await usesHawserFilesystem(envId);
 
 	// Handle compose file move/rename when path changes
 	if (options?.oldComposePath && options?.composePath &&
 		options.oldComposePath !== options.composePath &&
+		!hawserFilesystem &&
 		existsSync(options.oldComposePath)) {
 		const newDir = dirname(options.composePath);
 
@@ -580,6 +596,7 @@ export async function saveStackComposeFile(
 	// Handle env file move/rename when path changes
 	if (options?.oldEnvPath && options?.envPath &&
 		options.oldEnvPath !== options.envPath &&
+		!hawserFilesystem &&
 		existsSync(options.oldEnvPath)) {
 		const newDir = dirname(options.envPath);
 
@@ -617,7 +634,7 @@ export async function saveStackComposeFile(
 	// Get the new directory from composePath
 	const newDir = options?.composePath ? dirname(options.composePath) : null;
 
-	if (options?.moveFromDir && newDir && options.moveFromDir !== newDir && existsSync(options.moveFromDir)) {
+	if (!hawserFilesystem && options?.moveFromDir && newDir && options.moveFromDir !== newDir && existsSync(options.moveFromDir)) {
 		try {
 			// Ensure new directory exists
 			if (!existsSync(newDir)) {
@@ -686,15 +703,21 @@ export async function saveStackComposeFile(
 		// Write directly to the custom compose file path
 		// Ensure parent directory exists for custom paths
 		const parentDir = dirname(composePath);
-		if (!existsSync(parentDir)) {
+		if (!hawserFilesystem && !existsSync(parentDir)) {
 			try {
 				mkdirSync(parentDir, { recursive: true });
 			} catch (err: any) {
 				return { success: false, error: `Failed to create directory for compose file: ${err.message}` };
 			}
+		} else if (hawserFilesystem) {
+			try {
+				await createEnvironmentDirectory(parentDir, envId);
+			} catch {
+				// Directory may already exist; write will surface real failures.
+			}
 		}
 		try {
-			writeFileSync(composePath, content);
+			await writeEnvironmentFile(composePath, content, envId);
 			return { success: true };
 		} catch (err: any) {
 			return { success: false, error: `Failed to save compose file: ${err.message}` };
@@ -830,6 +853,8 @@ interface ComposeCommandOptions {
 	serviceName?: string;
 	/** Compose filename for Hawser (e.g., "docker-compose.prod.yml") - extracted from composePath */
 	composeFileName?: string;
+	/** Execute compose in-place on the Hawser agent host instead of copying files to the agent stack dir. */
+	remotePathMode?: boolean;
 }
 
 /**
@@ -849,6 +874,37 @@ function findComposeOverrideFile(stackDir: string, composeFileName: string): str
 		const fullPath = join(stackDir, name);
 		if (existsSync(fullPath)) return fullPath;
 	}
+	return null;
+}
+
+async function readComposeOverrideFile(
+	stackDir: string,
+	composeFileName: string,
+	envId?: number | null
+): Promise<{ name: string; content: string } | null> {
+	const overrideMap: Record<string, string[]> = {
+		'compose.yaml': ['compose.override.yaml', 'compose.override.yml'],
+		'compose.yml': ['compose.override.yaml', 'compose.override.yml'],
+		'docker-compose.yaml': ['docker-compose.override.yaml', 'docker-compose.override.yml'],
+		'docker-compose.yml': ['docker-compose.override.yaml', 'docker-compose.override.yml'],
+	};
+	const candidates = overrideMap[composeFileName] || [];
+	if (candidates.length === 0) return null;
+
+	try {
+		const listing = await listEnvironmentDirectory(stackDir, envId);
+		const entries = new Map(listing.entries.map((entry) => [entry.name, entry]));
+
+		for (const name of candidates) {
+			const entry = entries.get(name);
+			if (!entry || entry.type === 'directory') continue;
+			const { content } = await readEnvironmentFile(entry.path, envId);
+			return { name, content };
+		}
+	} catch {
+		// Missing or inaccessible override files are optional.
+	}
+
 	return null;
 }
 
@@ -1248,6 +1304,7 @@ async function executeComposeViaHawser(
 	stackFiles?: Record<string, string>,
 	serviceName?: string,
 	composeFileName?: string,
+	remoteWorkingDir?: string,
 	build?: boolean,
 	noBuildCache?: boolean,
 	pullPolicy?: string
@@ -1270,6 +1327,7 @@ async function executeComposeViaHawser(
 	console.log(`${logPrefix} Remove volumes:`, removeVolumes ?? false);
 	console.log(`${logPrefix} Service name:`, serviceName ?? '(all services)');
 	console.log(`${logPrefix} Compose filename:`, composeFileName ?? '(auto-detect)');
+	console.log(`${logPrefix} Remote working dir:`, remoteWorkingDir ?? '(managed files)');
 	console.log(`${logPrefix} Non-secret env vars count:`, envVars ? Object.keys(envVars).length : 0);
 	console.log(`${logPrefix} Secret env vars count:`, secretCount);
 	if (allEnvVars && Object.keys(allEnvVars).length > 0) {
@@ -1317,6 +1375,8 @@ async function executeComposeViaHawser(
 		const body = JSON.stringify({
 			operation,
 			projectName: stackName,
+			executionMode: remoteWorkingDir ? 'remote-path' : 'managed-files',
+			workingDir: remoteWorkingDir,
 			composeFile: composeContent,
 			composeFileName, // Explicit compose filename to use (e.g., "docker-compose.prod.yml")
 			envVars: allEnvVars, // All vars (including secrets) - Hawser injects via shell env
@@ -1396,7 +1456,7 @@ async function executeComposeCommand(
 	envVars?: Record<string, string>,
 	secretVars?: Record<string, string>
 ): Promise<StackOperationResult> {
-	const { stackName, envId, forceRecreate, build, noBuildCache, pullPolicy, removeVolumes, stackFiles, workingDir, composePath, envPath, useOverrideFile, serviceName, composeFileName } = options;
+	const { stackName, envId, forceRecreate, build, noBuildCache, pullPolicy, removeVolumes, stackFiles, workingDir, composePath, envPath, useOverrideFile, serviceName, composeFileName, remotePathMode } = options;
 
 	// Get environment configuration
 	const env = envId ? await getEnvironment(envId) : null;
@@ -1428,13 +1488,20 @@ async function executeComposeCommand(
 	switch (env.connectionType) {
 		case 'hawser-standard':
 		case 'hawser-edge': {
+			const effectiveRemotePathMode = remotePathMode ?? await shouldUseRemotePathMode(
+				stackName,
+				envId,
+				composePath,
+				useOverrideFile
+			);
+
 			// For Hawser deployments, we need to read the .env file and send variables via envVars
 			// because Docker Compose on the remote host may not auto-read the .env file reliably.
 			// Local deployments use --env-file flag, but Hawser needs variables injected via shell env.
 			let hawserEnvVars = envVars;
-			if (envPath && existsSync(envPath)) {
+			if (envPath) {
 				try {
-					const envFileContent = readFileSync(envPath, 'utf-8');
+					const envFileContent = (await readEnvironmentFile(envPath, envId)).content;
 					const envFileVars = parseEnvFileContent(envFileContent, stackName);
 					// Merge: envFileVars (lowest) < envVars (DB overrides)
 					// secretVars are handled separately in executeComposeViaHawser
@@ -1450,15 +1517,10 @@ async function executeComposeCommand(
 			const composeDir = workingDir || (composePath ? dirname(composePath) : null);
 			const composeBaseName = composePath ? basename(composePath) : 'compose.yaml';
 			if (composeDir) {
-				const overridePath = findComposeOverrideFile(composeDir, composeBaseName);
-				if (overridePath) {
-					try {
-						const overrideContent = readFileSync(overridePath, 'utf-8');
-						hawserStackFiles = { ...(hawserStackFiles || {}), [basename(overridePath)]: overrideContent };
-						console.log(`[Stack:${stackName}] Including override file for Hawser: ${basename(overridePath)}`);
-					} catch (err) {
-						console.warn(`[Stack:${stackName}] Failed to read override file at ${overridePath}:`, err);
-					}
+				const overrideFile = await readComposeOverrideFile(composeDir, composeBaseName, envId);
+				if (overrideFile) {
+					hawserStackFiles = { ...(hawserStackFiles || {}), [overrideFile.name]: overrideFile.content };
+					console.log(`[Stack:${stackName}] Including override file for Hawser: ${overrideFile.name}`);
 				}
 			}
 
@@ -1484,6 +1546,7 @@ async function executeComposeCommand(
 				hawserStackFiles,
 				serviceName,
 				composeFileName,
+				effectiveRemotePathMode ? composeDir || undefined : undefined,
 				build,
 				noBuildCache,
 				pullPolicy
@@ -2334,9 +2397,9 @@ export async function deployStack(options: DeployStackOptions): Promise<StackOpe
 			stackFiles[composeFilename] = compose;
 			console.log(`${logPrefix} Added ${composeFilename} to stackFiles for Hawser (${compose.length} chars)`);
 		}
-		if (actualEnvPath && existsSync(actualEnvPath) && !stackFiles['.env']) {
+		if (actualEnvPath && !stackFiles['.env']) {
 			try {
-				const envContent = readFileSync(actualEnvPath, 'utf-8');
+				const envContent = (await readEnvironmentFile(actualEnvPath, envId)).content;
 				stackFiles['.env'] = envContent;
 				console.log(`${logPrefix} Added .env to stackFiles for Hawser (${envContent.length} chars)`);
 			} catch (err) {
@@ -2558,8 +2621,15 @@ export async function writeStackEnvFile(
 
 	// Ensure parent directory exists
 	const dir = dirname(envFilePath);
-	if (!existsSync(dir)) {
+	const hawserFilesystem = await usesHawserFilesystem(envId);
+	if (!hawserFilesystem && !existsSync(dir)) {
 		mkdirSync(dir, { recursive: true });
+	} else if (hawserFilesystem) {
+		try {
+			await createEnvironmentDirectory(dir, envId);
+		} catch {
+			// Directory may already exist; write will surface real failures.
+		}
 	}
 
 	// SECURITY: Only write non-secret variables to .env file
@@ -2569,7 +2639,7 @@ export async function writeStackEnvFile(
 		.map(v => `${v.key.trim()}=${v.value}`)
 		.join('\n') + '\n';
 
-	writeFileSync(envFilePath, rawContent);
+	await writeEnvironmentFile(envFilePath, rawContent, envId);
 }
 
 /**
@@ -2603,11 +2673,18 @@ export async function writeRawStackEnvFile(
 
 	// Ensure parent directory exists
 	const dir = dirname(envFilePath);
-	if (!existsSync(dir)) {
+	const hawserFilesystem = await usesHawserFilesystem(envId);
+	if (!hawserFilesystem && !existsSync(dir)) {
 		mkdirSync(dir, { recursive: true });
+	} else if (hawserFilesystem) {
+		try {
+			await createEnvironmentDirectory(dir, envId);
+		} catch {
+			// Directory may already exist; write will surface real failures.
+		}
 	}
 
-	writeFileSync(envFilePath, rawContent);
+	await writeEnvironmentFile(envFilePath, rawContent, envId);
 }
 
 /**

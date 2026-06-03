@@ -5,12 +5,13 @@
  * Discovered stacks are editable - compose and .env files are modified in their original location.
  */
 
-import { readdirSync, existsSync, statSync, readFileSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { join, basename, dirname, resolve } from 'node:path';
 import yaml from 'js-yaml';
 import { getExternalStackPaths, getStackSources, upsertStackSource, type StackSourceType } from './db';
 import { DockerConnectionError } from './docker';
 import { normalizeStackName } from '$lib/utils/stack-name';
+import { listEnvironmentDirectory, readEnvironmentFile, type EnvironmentFileEntry } from './environment-files';
 
 // Compose file patterns to detect (in order of priority - prefer new style first)
 const COMPOSE_PATTERNS = ['compose.yaml', 'compose.yml', 'docker-compose.yml', 'docker-compose.yaml'];
@@ -49,9 +50,9 @@ export { normalizeStackName } from '$lib/utils/stack-name';
 /**
  * Check if a file looks like a compose file (contains 'services:' key)
  */
-async function isComposeFile(filePath: string): Promise<boolean> {
+async function isComposeFile(filePath: string, envId?: number | null): Promise<boolean> {
 	try {
-		const content = readFileSync(filePath, 'utf-8');
+		const { content } = await readEnvironmentFile(filePath, envId);
 		// Basic check for services key - could be more sophisticated
 		return /^services:/m.test(content) || /\nservices:/m.test(content);
 	} catch {
@@ -64,9 +65,9 @@ async function isComposeFile(filePath: string): Promise<boolean> {
  * The `name` property (if present) should be used as the stack name instead of the directory name,
  * matching Docker Compose's behavior with `com.docker.compose.project`.
  */
-function parseComposeMetadata(filePath: string): { name: string | null; serviceCount: number } {
+async function parseComposeMetadata(filePath: string, envId?: number | null): Promise<{ name: string | null; serviceCount: number }> {
 	try {
-		const content = readFileSync(filePath, 'utf-8');
+		const { content } = await readEnvironmentFile(filePath, envId);
 		const doc = yaml.load(content) as Record<string, unknown> | null;
 		const name = typeof doc?.name === 'string' ? doc.name.trim() : null;
 		const serviceCount = doc?.services && typeof doc.services === 'object'
@@ -80,27 +81,24 @@ function parseComposeMetadata(filePath: string): { name: string | null; serviceC
 /**
  * Scan a single directory path for compose files
  */
-async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; errors: { path: string; error: string }[] }> {
+function joinEnvironmentPath(basePath: string, name: string): string {
+	if (basePath.endsWith('/')) return `${basePath}${name}`;
+	if (basePath.startsWith('/')) return `${basePath}/${name}`;
+	return join(basePath, name);
+}
+
+async function scanPath(
+	basePath: string,
+	envId?: number | null
+): Promise<{ stacks: DiscoveredStack[]; errors: { path: string; error: string }[] }> {
 	const discovered: DiscoveredStack[] = [];
 	const errors: { path: string; error: string }[] = [];
 
-	// Resolve to absolute path
-	const absolutePath = resolve(basePath);
-
-	// Verify path exists and is a directory
-	if (!existsSync(absolutePath)) {
-		errors.push({ path: basePath, error: 'Path does not exist' });
-		return { stacks: discovered, errors };
-	}
-
 	try {
-		const stat = statSync(absolutePath);
-		if (!stat.isDirectory()) {
-			errors.push({ path: basePath, error: 'Path is not a directory' });
-			return { stacks: discovered, errors };
-		}
+		await listEnvironmentDirectory(basePath, envId);
 	} catch (err) {
-		errors.push({ path: basePath, error: 'Cannot access path' });
+		const message = err instanceof Error ? err.message : 'Cannot access path';
+		errors.push({ path: basePath, error: message });
 		return { stacks: discovered, errors };
 	}
 
@@ -111,28 +109,33 @@ async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; 
 		// Limit depth to prevent runaway scanning
 		if (depth > MAX_DEPTH) return;
 
-		let entries;
+		let entries: EnvironmentFileEntry[];
 		try {
-			entries = readdirSync(currentPath, { withFileTypes: true });
+			entries = (await listEnvironmentDirectory(currentPath, envId)).entries;
 		} catch (err) {
 			// Skip inaccessible directories
 			return;
 		}
 
+		const entryByName = new Map(entries.map((entry) => [entry.name, entry]));
+
 		// First pass: check for compose files in this directory
 		for (const pattern of COMPOSE_PATTERNS) {
-			const composePath = join(currentPath, pattern);
-			if (existsSync(composePath)) {
+			const composeEntry = entryByName.get(pattern);
+			if (composeEntry && composeEntry.type !== 'directory') {
 				// Found a stack! Use compose name property if defined, otherwise directory name
-				const { name: composeName, serviceCount } = parseComposeMetadata(composePath);
+				const composePath = composeEntry.path || joinEnvironmentPath(currentPath, pattern);
+				const { name: composeName, serviceCount } = await parseComposeMetadata(composePath, envId);
 				const stackName = normalizeStackName(composeName || basename(currentPath));
 				if (stackName) {
 					// Check for .env file
-					const envPath = join(currentPath, '.env');
+					const envEntry = entryByName.get('.env');
 					discovered.push({
 						name: stackName,
 						composePath,
-						envPath: existsSync(envPath) ? envPath : null,
+						envPath: envEntry && envEntry.type !== 'directory'
+							? envEntry.path || joinEnvironmentPath(currentPath, '.env')
+							: null,
 						sourceDir: currentPath,
 						serviceCount
 					});
@@ -145,9 +148,9 @@ async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; 
 
 		// Second pass: check for standalone compose files (*.yml, *.yaml) and recurse into subdirectories
 		for (const entry of entries) {
-			const entryPath = join(currentPath, entry.name);
+			const entryPath = entry.path || joinEnvironmentPath(currentPath, entry.name);
 
-			if (entry.isDirectory()) {
+			if (entry.type === 'directory') {
 				// Skip excluded directories
 				if (SKIP_DIRECTORIES.includes(entry.name)) continue;
 
@@ -156,7 +159,7 @@ async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; 
 
 				// Recurse into subdirectory
 				await scan(entryPath, depth + 1);
-			} else if (entry.isFile()) {
+			} else if (entry.type === 'file') {
 				const lowerName = entry.name.toLowerCase();
 
 				// Skip standard compose patterns (already handled above)
@@ -165,18 +168,20 @@ async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; 
 				// Check for standalone compose files (e.g., myapp.yml, myapp.yaml)
 				if (lowerName.endsWith('.yml') || lowerName.endsWith('.yaml')) {
 					// Validate it's actually a compose file
-					if (await isComposeFile(entryPath)) {
-						const { name: composeName, serviceCount } = parseComposeMetadata(entryPath);
+					if (await isComposeFile(entryPath, envId)) {
+						const { name: composeName, serviceCount } = await parseComposeMetadata(entryPath, envId);
 						const stackName = normalizeStackName(
 							composeName || entry.name.replace(/\.(yml|yaml)$/i, '')
 						);
 						if (stackName) {
 							// Check for .env file in same directory
-							const envPath = join(currentPath, '.env');
+							const envEntry = entryByName.get('.env');
 							discovered.push({
 								name: stackName,
 								composePath: entryPath,
-								envPath: existsSync(envPath) ? envPath : null,
+								envPath: envEntry && envEntry.type !== 'directory'
+									? envEntry.path || joinEnvironmentPath(currentPath, '.env')
+									: null,
 								sourceDir: currentPath,
 								serviceCount
 							});
@@ -187,7 +192,7 @@ async function scanPath(basePath: string): Promise<{ stacks: DiscoveredStack[]; 
 		}
 	}
 
-	await scan(absolutePath);
+	await scan(basePath);
 	return { stacks: discovered, errors };
 }
 
@@ -216,8 +221,8 @@ export async function adoptStack(
 	// If the compose file has a top-level `name:` property, prefer it over the passed name.
 	// This ensures Docker's project name (from the label) matches Dockhand's stack name.
 	let stackNameSource = stack.name;
-	if (stack.composePath && existsSync(stack.composePath)) {
-		const { name: composeName } = parseComposeMetadata(stack.composePath);
+	if (stack.composePath) {
+		const { name: composeName } = await parseComposeMetadata(stack.composePath, environmentId);
 		if (composeName) {
 			stackNameSource = composeName;
 		}
@@ -284,7 +289,7 @@ export async function adoptSelectedStacks(
 /**
  * Scan specific paths and return discovered stacks (without adopting)
  */
-export async function scanPaths(paths: string[]): Promise<ScanResult> {
+export async function scanPaths(paths: string[], envId?: number | null): Promise<ScanResult> {
 	if (paths.length === 0) {
 		return { discovered: [], adopted: [], skipped: [], errors: [] };
 	}
@@ -296,7 +301,7 @@ export async function scanPaths(paths: string[]): Promise<ScanResult> {
 
 	// Scan all paths
 	for (const path of paths) {
-		const { stacks, errors } = await scanPath(path);
+		const { stacks, errors } = await scanPath(path, envId);
 		allDiscovered.push(...stacks);
 		allErrors.push(...errors);
 	}
@@ -309,7 +314,9 @@ export async function scanPaths(paths: string[]): Promise<ScanResult> {
 	const newStacks: DiscoveredStack[] = [];
 
 	for (const stack of allDiscovered) {
-		const isAdopted = existingSources.some(s => s.composePath === stack.composePath);
+		const isAdopted = existingSources.some(
+			s => s.composePath === stack.composePath && (envId === undefined || s.environmentId === (envId ?? null))
+		);
 		if (isAdopted) {
 			alreadyAdopted.push(stack);
 		} else {

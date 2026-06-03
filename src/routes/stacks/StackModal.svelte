@@ -359,6 +359,11 @@
 		envVars = vars;
 	}
 
+	function environmentFileContentUrl(path: string) {
+		const envId = $currentEnvironment?.id ?? null;
+		return appendEnvParam(`/api/system/files/content?path=${encodeURIComponent(path)}`, envId);
+	}
+
 	// Handle compose file selection from browser
 	async function handleComposeSelect(path: string, name: string) {
 		const isDirectory = !path.match(/\.ya?ml$/i);
@@ -480,7 +485,7 @@
 		// Load env content when selecting a file (not directory)
 		if (!isDirectory) {
 			try {
-				const envResponse = await fetch(`/api/system/files/content?path=${encodeURIComponent(finalPath)}`);
+				const envResponse = await fetch(environmentFileContentUrl(finalPath));
 				if (envResponse.ok) {
 					const envData = await envResponse.json();
 					rawEnvContent = envData.content || '';
@@ -504,11 +509,11 @@
 		isDirty = true;
 	}
 
-	// Load files from local filesystem (when user selects paths)
+	// Load files from the selected environment filesystem (when user selects paths)
 	async function loadFilesFromLocalFilesystem(composeFilePath: string, envFilePath: string) {
 		try {
 			// Load compose file
-			const composeResponse = await fetch(`/api/system/files/content?path=${encodeURIComponent(composeFilePath)}`);
+			const composeResponse = await fetch(environmentFileContentUrl(composeFilePath));
 			if (composeResponse.ok) {
 				const composeData = await composeResponse.json();
 				composeContent = composeData.content || '';
@@ -526,7 +531,7 @@
 
 			// Try to load .env file (only set workingEnvPath if it exists AND we're in edit mode)
 			if (envFilePath) {
-				const envResponse = await fetch(`/api/system/files/content?path=${encodeURIComponent(envFilePath)}`);
+				const envResponse = await fetch(environmentFileContentUrl(envFilePath));
 				if (envResponse.ok) {
 					const envData = await envResponse.json();
 					rawEnvContent = envData.content || '';
@@ -1856,6 +1861,7 @@
 	icon={fileBrowserConfig.icon}
 	selectFilter={fileBrowserConfig.selectFilter}
 	selectMode={fileBrowserConfig.selectMode}
+	environmentId={$currentEnvironment?.id ?? null}
 	onSelect={fileBrowserConfig.onSelect}
 	onClose={() => showFileBrowser = false}
 />

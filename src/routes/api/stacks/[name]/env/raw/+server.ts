@@ -2,9 +2,9 @@ import { json } from '@sveltejs/kit';
 import { findStackDir, getStackDir } from '$lib/server/stacks';
 import { getStackSource } from '$lib/server/db';
 import { authorize } from '$lib/server/authorize';
-import { existsSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import type { RequestHandler } from './$types';
+import { readEnvironmentFile, removeEnvironmentFile, writeEnvironmentFile } from '$lib/server/environment-files';
 
 /**
  * GET /api/stacks/[name]/env/raw?env=X
@@ -56,9 +56,9 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 		}
 
 		let content = '';
-		if (envFilePath && existsSync(envFilePath)) {
+		if (envFilePath) {
 			try {
-				content = readFileSync(envFilePath, 'utf-8');
+				content = (await readEnvironmentFile(envFilePath, envIdNum)).content;
 			} catch {
 				// File read failed
 			}
@@ -135,11 +135,8 @@ export const PUT: RequestHandler = async ({ params, url, cookies, request }) => 
 
 		// If content is empty, delete the .env file instead of writing empty file
 		if (!content || !content.trim()) {
-			if (existsSync(envFilePath)) {
-				rmSync(envFilePath);
-				return json({ success: true, deleted: true });
-			}
-			return json({ success: true });
+			await removeEnvironmentFile(envFilePath, envIdNum);
+			return json({ success: true, deleted: true });
 		}
 
 		// Guard against writing masked secret placeholders (would corrupt the file)
@@ -154,7 +151,7 @@ export const PUT: RequestHandler = async ({ params, url, cookies, request }) => 
 			content += '\n';
 		}
 
-		writeFileSync(envFilePath, content);
+		await writeEnvironmentFile(envFilePath, content, envIdNum);
 
 		return json({ success: true });
 	} catch (error) {

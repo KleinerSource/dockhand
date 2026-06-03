@@ -24,6 +24,7 @@
 		icon?: Component<{ class?: string }>;
 		description?: string;
 		initialPath?: string;
+		environmentId?: number | null;
 		selectFilter?: RegExp;
 		selectMode?: 'file' | 'directory' | 'file_or_directory' | 'adopt';
 		/** For adopt mode: filter to highlight (e.g., /\.ya?ml$/i for compose files) */
@@ -44,6 +45,7 @@
 		icon,
 		description,
 		initialPath = '/',
+		environmentId = null,
 		selectFilter,
 		selectMode = 'file',
 		highlightFilter,
@@ -101,7 +103,9 @@
 		error = null;
 
 		try {
-			const res = await fetch(`/api/system/files?path=${encodeURIComponent(path)}`);
+			const params = new URLSearchParams({ path });
+			if (environmentId) params.set('env', String(environmentId));
+			const res = await fetch(`/api/system/files?${params}`);
 			const data = await res.json();
 
 			if (!res.ok) {
@@ -209,7 +213,7 @@
 			const res = await fetch('/api/system/files', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ path: newPath })
+				body: JSON.stringify({ path: newPath, env: environmentId ?? undefined })
 			});
 			const data = await res.json();
 

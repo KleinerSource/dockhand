@@ -2,9 +2,9 @@ import { json } from '@sveltejs/kit';
 import { getStackEnvVars, setStackEnvVars, getStackSource } from '$lib/server/db';
 import { findStackDir } from '$lib/server/stacks';
 import { authorize } from '$lib/server/authorize';
-import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import type { RequestHandler } from './$types';
+import { readEnvironmentFile } from '$lib/server/environment-files';
 
 /**
  * Parse a .env file content into key-value pairs
@@ -87,9 +87,9 @@ export const GET: RequestHandler = async ({ params, url, cookies }) => {
 			}
 		} else {
 			// Internal/adopted stacks: non-secrets from file, secrets from DB
-			if (envFilePath && existsSync(envFilePath)) {
+			if (envFilePath) {
 				try {
-					const content = readFileSync(envFilePath, 'utf-8');
+					const content = (await readEnvironmentFile(envFilePath, envIdNum)).content;
 					const fileVars = parseEnvFile(content);
 					for (const [key, value] of Object.entries(fileVars)) {
 						variables.push({ key, value, isSecret: false });

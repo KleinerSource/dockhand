@@ -1,8 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { readdirSync, statSync, existsSync, mkdirSync } from 'node:fs';
-import { join, basename, isAbsolute } from 'node:path';
 import { authorize } from '$lib/server/authorize';
+import { createEnvironmentDirectory, listEnvironmentDirectory } from '$lib/server/environment-files';
 
 export interface FileEntry {
 	name: string;
@@ -17,7 +16,7 @@ export interface FileEntry {
  * POST /api/system/files
  * Create a directory
  *
- * Body: { path: string }
+ * Body: { path: string, env?: number }
  */
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const auth = await authorize(cookies);
@@ -29,24 +28,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const body = await request.json();
 		const path = body.path;
+		const envId = body.env ? parseInt(String(body.env)) : undefined;
 
 		if (!path || typeof path !== 'string') {
 			return json({ error: 'Path is required' }, { status: 400 });
 		}
 
-		if (!isAbsolute(path)) {
-			return json({ error: 'Path must be absolute' }, { status: 400 });
+		if (envId && auth.authEnabled && auth.isEnterprise && !await auth.canAccessEnvironment(envId)) {
+			return json({ error: 'Access denied to this environment' }, { status: 403 });
 		}
 
-		if (path.includes('..')) {
-			return json({ error: 'Path must not contain ..' }, { status: 400 });
-		}
-
-		if (existsSync(path)) {
-			return json({ error: 'Path already exists' }, { status: 409 });
-		}
-
-		mkdirSync(path, { recursive: true });
+		await createEnvironmentDirectory(path, envId);
 
 		return json({ success: true, path });
 	} catch (error) {
@@ -58,10 +50,11 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 /**
  * GET /api/system/files
- * Browse Dockhand's local filesystem (for mount browsing)
+ * Browse filesystem for the selected environment.
  *
  * Query params:
  * - path: Directory path to list
+ * - env: Environment ID (optional; Hawser environments browse the agent host)
  */
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const auth = await authorize(cookies);
@@ -71,50 +64,15 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	}
 
 	const path = url.searchParams.get('path') || '/';
+	const envParam = url.searchParams.get('env');
+	const envId = envParam ? parseInt(envParam) : undefined;
 
 	try {
-		if (!existsSync(path)) {
-			return json({ error: `Path not found: ${path}` }, { status: 404 });
+		if (envId && auth.authEnabled && auth.isEnterprise && !await auth.canAccessEnvironment(envId)) {
+			return json({ error: 'Access denied to this environment' }, { status: 403 });
 		}
 
-		const stat = statSync(path);
-		if (!stat.isDirectory()) {
-			return json({ error: `Not a directory: ${path}` }, { status: 400 });
-		}
-
-		const entries: FileEntry[] = [];
-		const dirEntries = readdirSync(path, { withFileTypes: true });
-
-		for (const entry of dirEntries) {
-			try {
-				const fullPath = join(path, entry.name);
-				const entryStat = statSync(fullPath);
-
-				entries.push({
-					name: entry.name,
-					path: fullPath,
-					type: entry.isDirectory() ? 'directory' : entry.isSymbolicLink() ? 'symlink' : 'file',
-					size: entryStat.size,
-					mtime: entryStat.mtime.toISOString(),
-					mode: (entryStat.mode & 0o777).toString(8).padStart(3, '0')
-				});
-			} catch {
-				// Skip entries we can't stat (permission issues, etc.)
-			}
-		}
-
-		// Sort: directories first, then alphabetically
-		entries.sort((a, b) => {
-			if (a.type === 'directory' && b.type !== 'directory') return -1;
-			if (a.type !== 'directory' && b.type === 'directory') return 1;
-			return a.name.localeCompare(b.name);
-		});
-
-		return json({
-			path,
-			parent: path === '/' ? null : join(path, '..'),
-			entries
-		});
+		return json(await listEnvironmentDirectory(path, envId));
 	} catch (error) {
 		console.error('Error listing directory:', error);
 		const message = error instanceof Error ? error.message : 'Unknown error';

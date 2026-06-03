@@ -58,10 +58,9 @@
 	// Look up the icon from the environments list since currentEnvironment doesn't store it
 	const currentEnvData = $derived($environments.find(e => e.id === envId));
 	const envIcon = $derived(currentEnvData?.icon || 'globe');
-	const isRemoteEnv = $derived(
+	const usesHawserFilesystem = $derived(
 		currentEnvData?.connectionType === 'hawser-standard' ||
-		currentEnvData?.connectionType === 'hawser-edge' ||
-		(currentEnvData?.connectionType === 'direct' && !!currentEnvData?.host)
+		currentEnvData?.connectionType === 'hawser-edge'
 	);
 
 	// Reset when modal closes
@@ -87,7 +86,9 @@
 		previewComposeName = null;
 
 		try {
-			const res = await fetch(`/api/system/files/content?path=${encodeURIComponent(entry.path)}`);
+			const params = new URLSearchParams({ path: entry.path });
+			if (envId) params.set('env', String(envId));
+			const res = await fetch(`/api/system/files/content?${params}`);
 			if (res.ok) {
 				const data = await res.json();
 				previewContent = data.content || '';
@@ -125,7 +126,7 @@
 			const res = await fetch('/api/stacks/scan', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ path })
+				body: JSON.stringify({ path, env: envId ?? undefined })
 			});
 
 			const data = await res.json();
@@ -318,7 +319,7 @@
 	});
 
 	const browserDescription = $derived.by(() => {
-		if (isRemoteEnv) {
+		if (usesHawserFilesystem) {
 			return translate('stacks.import.remoteDescription');
 		}
 		return translate('stacks.import.browserDescription');
@@ -337,6 +338,7 @@
 		highlightFilter={/\.ya?ml$/i}
 		onFilePreview={handleFilePreview}
 		onScanDirectory={handleScanDirectory}
+		environmentId={envId}
 		{scanning}
 		onSelect={() => {}}
 		onClose={handleClose}
@@ -402,7 +404,7 @@
 				</div>
 				<!-- Adopt info -->
 				<div class="px-4 py-3 border-t shrink-0 space-y-2">
-					{#if isRemoteEnv}
+					{#if usesHawserFilesystem}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
 							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilesPrefix')} <span class="font-medium">{$t('stacks.import.dockhandHost')}</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFilesSuffix', { environment: envName })}</span>
@@ -502,7 +504,7 @@
 
 				<!-- Adopt info -->
 				<div class="px-5 py-3 border-t shrink-0 space-y-2">
-					{#if isRemoteEnv}
+					{#if usesHawserFilesystem}
 						<div class="flex items-start gap-2.5 text-xs bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2.5">
 							<ServerCog class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
 							<span class="text-blue-700 dark:text-blue-300">{$t('stacks.import.remoteFilePrefix')} <span class="font-medium">{$t('stacks.import.dockhandHost')}</span>, {$t('stacks.import.remoteFilesMiddle', { environment: envName })} {$t('stacks.import.remoteFileSuffix', { environment: envName })}</span>

@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { authorize } from '$lib/server/authorize';
-import { getStackSource, updateStackSource } from '$lib/server/db';
+import { getEnvironment, updateStackSource } from '$lib/server/db';
 import { existsSync, readdirSync, renameSync, readFileSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
@@ -27,6 +27,11 @@ export const POST: RequestHandler = async ({ params, request, url, cookies }) =>
 
 		if (!oldDir || !newComposePath) {
 			return json({ error: 'oldDir and newComposePath are required' }, { status: 400 });
+		}
+
+		const env = envIdNum ? await getEnvironment(envIdNum) : null;
+		if (env?.connectionType === 'hawser-edge' || env?.connectionType === 'hawser-standard') {
+			return json({ error: 'Relocating files on a Hawser agent filesystem is not supported' }, { status: 400 });
 		}
 
 		const newDir = dirname(newComposePath);

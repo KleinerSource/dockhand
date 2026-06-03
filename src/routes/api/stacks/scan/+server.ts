@@ -10,12 +10,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 	try {
 		const body = await request.json().catch(() => ({}));
-		const { path } = body;
+		const { path, env } = body;
+		const envId = env ? parseInt(String(env)) : undefined;
+
+		if (envId && auth.authEnabled && auth.isEnterprise && !await auth.canAccessEnvironment(envId)) {
+			return json({ error: 'Access denied to this environment' }, { status: 403 });
+		}
 
 		let result;
 		if (path) {
 			// Scan a specific path provided by the user
-			result = await scanPaths([path]);
+			result = await scanPaths([path], envId);
 		} else {
 			// Scan all configured external paths (legacy behavior)
 			result = await scanExternalPaths();

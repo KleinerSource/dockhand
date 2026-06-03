@@ -21,6 +21,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ error: 'Environment ID is required' }, { status: 400 });
 		}
 
+		if (auth.authEnabled && auth.isEnterprise && !await auth.canAccessEnvironment(environmentId)) {
+			return json({ error: 'Access denied to this environment' }, { status: 403 });
+		}
+
 		// Validate each stack has required fields
 		for (const stack of stacks) {
 			if (!stack.name || !stack.composePath) {

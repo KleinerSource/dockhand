@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { authorize } from '$lib/server/authorize';
-import { getStackSource } from '$lib/server/db';
+import { getEnvironment, getStackSource } from '$lib/server/db';
 import { findStackDir } from '$lib/server/stacks';
 import { existsSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -54,6 +54,18 @@ export const POST: RequestHandler = async ({ params, request, url, cookies }) =>
 
 		// Determine new directory
 		const newDir = newComposePath ? dirname(newComposePath) : null;
+
+		const env = envIdNum ? await getEnvironment(envIdNum) : null;
+		const hawserFilesystem = env?.connectionType === 'hawser-edge' || env?.connectionType === 'hawser-standard';
+		if (hawserFilesystem) {
+			return json({
+				hasChanges: false,
+				oldDir: currentDir,
+				newDir,
+				fileCount: 0,
+				currentComposePath
+			});
+		}
 
 		// Check if directories are different and old directory exists with files
 		let hasChanges = false;
