@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
+import { getCurrentLocale, getStoredLocalePreference, locale, type Locale } from '$lib/i18n';
 
 export type TimeFormat = '12h' | '24h';
 export type DateFormat = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD' | 'DD.MM.YYYY';
@@ -44,7 +44,7 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
 	confirmDestructive: true,
-	language: DEFAULT_LOCALE,
+	language: getCurrentLocale(),
 	showStoppedContainers: true,
 	highlightUpdates: true,
 	timeFormat: '24h',
@@ -107,7 +107,7 @@ function createSettingsStore() {
 			const response = await fetch('/api/settings/general');
 			if (response.ok) {
 				const settings = await response.json();
-				set({
+				const nextSettings = {
 					confirmDestructive: settings.confirmDestructive ?? DEFAULT_SETTINGS.confirmDestructive,
 					language: settings.language ?? DEFAULT_SETTINGS.language,
 					showStoppedContainers: settings.showStoppedContainers ?? DEFAULT_SETTINGS.showStoppedContainers,
@@ -139,7 +139,12 @@ function createSettingsStore() {
 					defaultTrivyImage: settings.defaultTrivyImage ?? DEFAULT_SETTINGS.defaultTrivyImage,
 					defaultComposeTemplate: settings.defaultComposeTemplate ?? DEFAULT_SETTINGS.defaultComposeTemplate,
 					labelFilterMode: settings.labelFilterMode ?? DEFAULT_SETTINGS.labelFilterMode
-				});
+				};
+				set(nextSettings);
+
+				if (!getStoredLocalePreference()) {
+					locale.set(nextSettings.language);
+				}
 			}
 		} catch {
 			// Silently use defaults if settings can't be loaded
@@ -224,6 +229,7 @@ function createSettingsStore() {
 			});
 		},
 		setLanguage: (value: Locale) => {
+			locale.set(value);
 			update((current) => {
 				const newSettings = { ...current, language: value };
 				saveSettings({ language: value });

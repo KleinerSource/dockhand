@@ -48,6 +48,17 @@ function getInitialLocale(): Locale {
 	return normalizeLocale(navigator.language);
 }
 
+export function getStoredLocalePreference(): Locale | null {
+	if (!browser) return null;
+
+	try {
+		const stored = localStorage.getItem(STORAGE_KEY);
+		return stored ? normalizeLocale(stored) : null;
+	} catch {
+		return null;
+	}
+}
+
 function getValue(locale: Locale, key: string): unknown {
 	let current: unknown = dictionaries[locale];
 

@@ -6,6 +6,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 	import ThemeToggle from '$lib/components/theme-toggle.svelte';
+	import LanguageToggle from '$lib/components/LanguageToggle.svelte';
 	import HostInfo from '$lib/components/host-info.svelte';
 	import MainContent from '$lib/components/main-content.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
@@ -17,8 +18,7 @@
 	import { authStore } from '$lib/stores/auth';
 	import { themeStore, applyTheme } from '$lib/stores/theme';
 	import { gridPreferencesStore } from '$lib/stores/grid-preferences';
-	import { appSettings } from '$lib/stores/settings';
-	import { locale, t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import { shouldShowWhatsNew } from '$lib/utils/version';
 	import { AlertTriangle, Search } from 'lucide-svelte';
 
@@ -54,10 +54,6 @@
 			const userId = $authStore.authEnabled && $authStore.user ? $authStore.user.id : undefined;
 			themeStore.init(userId);
 		}
-	});
-
-	$effect(() => {
-		locale.set($appSettings.language);
 	});
 
 	// Refresh environments when user becomes authenticated
@@ -134,6 +130,10 @@
 
 {#if isLoginPage}
 	<!-- Login page: no sidebar, no header -->
+	<div class="fixed right-4 top-4 z-50 flex items-center gap-2">
+		<LanguageToggle persistToSettings={false} />
+		<ThemeToggle />
+	</div>
 	{@render children?.()}
 	<Toaster richColors position="bottom-right" />
 {:else}
@@ -181,6 +181,7 @@
 							{/if}
 						</a>
 					{/if}
+					<LanguageToggle />
 					<ThemeToggle />
 				</div>
 			</header>

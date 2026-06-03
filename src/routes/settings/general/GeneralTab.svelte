@@ -11,7 +11,7 @@
 	import { Eye, Bell, Database, Calendar, ShieldCheck, FileText, AlertTriangle, HelpCircle, Globe, Activity, Clock, Info, Save, RotateCcw, LayoutDashboard, Tags } from 'lucide-svelte';
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import { appSettings, type DateFormat, type DownloadFormat, type EventCollectionMode, type LabelFilterMode } from '$lib/stores/settings';
-	import { localeOptions, t, type Locale } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import { canAccess, authStore } from '$lib/stores/auth';
 	import { toast } from 'svelte-sonner';
 	import ThemeSelector from '$lib/components/ThemeSelector.svelte';
@@ -19,7 +19,6 @@
 
 	// General settings state - these derive from the store
 	let confirmDestructive = $derived($appSettings.confirmDestructive);
-	let language = $derived($appSettings.language);
 	let showStoppedContainers = $derived($appSettings.showStoppedContainers);
 	let highlightUpdates = $derived($appSettings.highlightUpdates);
 	let compactPorts = $derived($appSettings.compactPorts);
@@ -200,13 +199,6 @@ services:
 		toast.success($t('settings.general.logBufferSizeUpdated'));
 	}
 
-	function handleLanguageChange(value: string | undefined) {
-		if (value === 'en' || value === 'zh-CN') {
-			appSettings.setLanguage(value as Locale);
-			toast.success($t('language.updated'));
-		}
-	}
-
 	function handleEventCollectionModeChange(value: string | undefined) {
 		if (value === 'stream' || value === 'poll') {
 			appSettings.setEventCollectionMode(value);
@@ -339,30 +331,6 @@ services:
 									/>
 								</div>
 								<p class="text-xs text-muted-foreground">{$t('settings.general.timeFormatDescription')}</p>
-							</div>
-							<div class="space-y-1">
-								<div class="flex items-center gap-3">
-									<Label>{$t('language.label')}</Label>
-									<Select.Root
-										type="single"
-										value={language}
-										onValueChange={handleLanguageChange}
-										disabled={!$canAccess('settings', 'edit')}
-									>
-										<Select.Trigger class="w-[180px]">
-											<Globe class="w-4 h-4 mr-2" />
-											<span>{$t(localeOptions.find((option) => option.value === language)?.labelKey ?? 'language.english')}</span>
-										</Select.Trigger>
-										<Select.Content>
-											{#each localeOptions as option}
-												<Select.Item value={option.value}>
-													{$t(option.labelKey)}
-												</Select.Item>
-											{/each}
-										</Select.Content>
-									</Select.Root>
-								</div>
-								<p class="text-xs text-muted-foreground">{$t('language.description')}</p>
 							</div>
 							<div class="space-y-1">
 								<div class="flex items-center gap-3">

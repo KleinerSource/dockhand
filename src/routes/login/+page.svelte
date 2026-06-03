@@ -147,6 +147,10 @@
 		if (type === 'oidc') return KeyRound;
 		return User;
 	}
+
+	function getProviderName(provider: AuthProvider): string {
+		return provider.type === 'local' ? $t('settings.auth.users.list.providerLocal') : provider.name;
+	}
 </script>
 
 <svelte:head>
@@ -201,7 +205,7 @@
 							{:else}
 								<KeyRound class="h-5 w-5" />
 							{/if}
-							<span>{$t('auth.continueWith', { provider: provider.name })}</span>
+							<span>{$t('auth.continueWith', { provider: getProviderName(provider) })}</span>
 						</Button>
 					{/each}
 				</div>
@@ -237,7 +241,7 @@
 										>
 											<Icon class="h-5 w-5 shrink-0" />
 											<div class="flex-1 min-w-0">
-												<div class="font-medium text-sm">{provider.name}</div>
+												<div class="font-medium text-sm">{getProviderName(provider)}</div>
 												<div class="text-xs text-muted-foreground">
 													{#if provider.type === 'local'}
 														{$t('auth.providers.localAccount')}
