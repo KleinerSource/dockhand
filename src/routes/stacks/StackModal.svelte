@@ -787,7 +787,9 @@
 			// Set working paths
 			workingComposePath = data.composePath || '';
 			workingEnvPath = data.envPath || '';
-			workingComposeSource = null;
+			workingComposeSource = data.filesystem === 'dockhand' || data.filesystem === 'environment'
+				? data.filesystem
+				: null;
 			// Track original paths for detecting changes
 			originalComposePath = data.composePath || null;
 			originalEnvPath = data.envPath || null;
