@@ -660,10 +660,12 @@
 
 		<div class="grid grid-cols-2 gap-3">
 			<div class="space-y-1.5">
-				<Label class="text-xs font-medium">{$t('containers.settings.labels.restartPolicy')}</Label>
-				{#if mode === 'edit'}
-					<Badge variant="outline" class="text-2xs w-fit">{$t('containers.settings.badges.liveUpdate')}</Badge>
-				{/if}
+				<div class="flex items-center gap-1.5">
+					<Label class="text-xs font-medium">{$t('containers.settings.labels.restartPolicy')}</Label>
+					{#if mode === 'edit'}
+						<Badge variant="outline" class="text-2xs shrink-0">{$t('containers.settings.badges.liveUpdate')}</Badge>
+					{/if}
+				</div>
 				<Select.Root type="single" bind:value={restartPolicy}>
 					<Select.Trigger id="restartPolicy" tabindex={0} class="w-full h-9">
 						<span class="flex items-center">
