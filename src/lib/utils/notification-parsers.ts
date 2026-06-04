@@ -3,14 +3,9 @@
 
 // --- Telegram ---
 
-// Escape special characters for Telegram legacy Markdown (parse_mode: 'Markdown')
-// Only _ * ` [ need escaping — ] and other chars are not special in legacy mode
+// Escape special characters for Telegram MarkdownV2 (parse_mode: 'MarkdownV2')
 export function escapeTelegramMarkdown(text: string): string {
-	return text
-		.replace(/_/g, '\\_')    // Underscore (italic)
-		.replace(/\*/g, '\\*')   // Asterisk (bold)
-		.replace(/`/g, '\\`')   // Backtick (code)
-		.replace(/\[/g, '\\[');  // Opening bracket (link)
+	return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
 }
 
 export function parseTelegramUrl(url: string): { botToken: string; chatId: string; topicId?: number } | null {

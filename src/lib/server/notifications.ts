@@ -341,6 +341,31 @@ async function sendMattermost(appriseUrl: string, payload: NotificationPayload):
 	}
 }
 
+const TELEGRAM_STATUS_ICONS: Record<NonNullable<NotificationPayload['type']>, string> = {
+	info: 'ℹ️',
+	success: '✅',
+	warning: '⚠️',
+	error: '❌'
+};
+
+function formatTelegramMessage(payload: NotificationPayload, locale: Locale): string {
+	const title = escapeTelegramMarkdown(payload.title);
+	const message = escapeTelegramMarkdown(payload.message);
+	const sentBy = escapeTelegramMarkdown(translateNotification('meta.sentByDockhand', undefined, locale));
+	const lines = [
+		`${TELEGRAM_STATUS_ICONS[payload.type ?? 'info']} *${title}*`
+	];
+
+	if (payload.environmentName) {
+		const environmentLabel = escapeTelegramMarkdown(translateNotification('meta.environment', undefined, locale));
+		const environmentName = escapeTelegramMarkdown(payload.environmentName);
+		lines.push(`_${environmentLabel}: ${environmentName}_`);
+	}
+
+	lines.push('', message, '', `_${sentBy}_`);
+	return lines.join('\n');
+}
+
 // Telegram
 async function sendTelegram(appriseUrl: string, payload: NotificationPayload): Promise<NotificationResult> {
 	const parsed = parseTelegramUrl(appriseUrl);
@@ -350,11 +375,7 @@ async function sendTelegram(appriseUrl: string, payload: NotificationPayload): P
 
 	const { botToken, chatId, topicId } = parsed;
 	const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-	// Escape markdown special characters in title and message
-	const escapedTitle = escapeTelegramMarkdown(payload.title);
-	const escapedMessage = escapeTelegramMarkdown(payload.message);
-	const envTag = payload.environmentName ? ` [${escapeTelegramMarkdown(payload.environmentName)}]` : '';
+	const locale = payload.locale ?? await getNotificationLocale();
 
 	try {
 		const response = await fetch(url, {
@@ -362,9 +383,9 @@ async function sendTelegram(appriseUrl: string, payload: NotificationPayload): P
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				chat_id: chatId,
-				text: `*${escapedTitle}*${envTag}\n${escapedMessage}`,
+				text: formatTelegramMessage(payload, locale),
 				...(topicId ? { message_thread_id: topicId } : {}),
-				parse_mode: 'Markdown',
+				parse_mode: 'MarkdownV2',
 				link_preview_options: {
 					is_disabled: true
 				}
