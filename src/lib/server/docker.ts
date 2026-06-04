@@ -2405,11 +2405,71 @@ export function extractContainerOptions(inspectData: any): CreateContainerOption
 	};
 }
 
+const DOCKER_UPDATE_OPTION_KEYS = new Set([
+	'restartPolicy',
+	'restartMaxRetries',
+	'memory',
+	'memoryReservation',
+	'cpuShares',
+	'nanoCpus',
+	'cpuQuota',
+	'cpuPeriod'
+]);
+
+function buildDockerUpdateOptions(options: Partial<CreateContainerOptions>) {
+	const updateOptions: Record<string, unknown> = {};
+
+	if (options.restartPolicy !== undefined) {
+		const restartPolicy = options.restartPolicy || 'no';
+		updateOptions.RestartPolicy = {
+			Name: restartPolicy,
+			...(restartPolicy === 'on-failure' && options.restartMaxRetries !== undefined
+				? { MaximumRetryCount: options.restartMaxRetries }
+				: {})
+		};
+	}
+
+	if (options.memory !== undefined) updateOptions.Memory = options.memory;
+	if (options.memoryReservation !== undefined) updateOptions.MemoryReservation = options.memoryReservation;
+	if (options.cpuShares !== undefined) updateOptions.CpuShares = options.cpuShares;
+	if (options.nanoCpus !== undefined) updateOptions.NanoCpus = options.nanoCpus;
+	if (options.cpuQuota !== undefined) updateOptions.CpuQuota = options.cpuQuota;
+	if (options.cpuPeriod !== undefined) updateOptions.CpuPeriod = options.cpuPeriod;
+
+	return updateOptions;
+}
+
+function isDockerUpdateOnly(options: Partial<CreateContainerOptions>): boolean {
+	const keys = Object.keys(options).filter((key) => (options as Record<string, unknown>)[key] !== undefined);
+	return keys.length > 0 &&
+		keys.some((key) => key !== 'restartMaxRetries') &&
+		keys.every((key) => DOCKER_UPDATE_OPTION_KEYS.has(key));
+}
+
+export async function updateContainerRuntimeOptions(
+	id: string,
+	options: Partial<CreateContainerOptions>,
+	envId?: number | null
+) {
+	const response = await dockerFetch(`/containers/${id}/update`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(buildDockerUpdateOptions(options))
+	}, envId);
+
+	await assertDockerResponse(response);
+	return { id };
+}
+
 /**
  * Update a container by recreating it with merged options.
  * Preserves ALL existing container settings and merges user-provided options on top.
  */
 export async function updateContainer(id: string, options: Partial<CreateContainerOptions>, startAfterUpdate = false, envId?: number | null) {
+	if (isDockerUpdateOnly(options)) {
+		return updateContainerRuntimeOptions(id, options, envId);
+	}
+
 	const oldContainerInfo = await inspectContainer(id, envId);
 	const wasRunning = oldContainerInfo.State.Running;
 	const name = oldContainerInfo.Name?.replace(/^\//, '') || '';

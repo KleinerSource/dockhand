@@ -1162,7 +1162,8 @@
 			"notSet": "Not set",
 			"advancedHint": "Advanced container options (click to expand)",
 			"badges": {
-				"configured": "configured"
+				"configured": "configured",
+				"liveUpdate": "no-restart update"
 			},
 			"imageSummary": {
 				"pulling": "Pulling...",
@@ -1272,6 +1273,7 @@
 				"unlimitedRetries": "Leave empty for unlimited retries",
 				"additionalNetworks": "Container will be connected to selected networks in addition to the network mode above",
 				"resourceLimits": "Configure memory and CPU limits for this container",
+				"liveUpdateNoRestart": "Saving these changes will not restart or recreate the container",
 				"microsecondsPerPeriod": "Microseconds per period",
 				"periodInMicroseconds": "Period in microseconds",
 				"commonSecurityOptions": "Common options: no-new-privileges, seccomp=unconfined, apparmor=unconfined"

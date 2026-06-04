@@ -661,6 +661,9 @@
 		<div class="grid grid-cols-2 gap-3">
 			<div class="space-y-1.5">
 				<Label class="text-xs font-medium">{$t('containers.settings.labels.restartPolicy')}</Label>
+				{#if mode === 'edit'}
+					<Badge variant="outline" class="text-2xs w-fit">{$t('containers.settings.badges.liveUpdate')}</Badge>
+				{/if}
 				<Select.Root type="single" bind:value={restartPolicy}>
 					<Select.Trigger id="restartPolicy" tabindex={0} class="w-full h-9">
 						<span class="flex items-center">
@@ -715,6 +718,9 @@
 						/>
 						<p class="text-xs text-muted-foreground">{$t('containers.settings.help.unlimitedRetries')}</p>
 					</div>
+				{/if}
+				{#if mode === 'edit'}
+					<p class="text-xs text-muted-foreground">{$t('containers.settings.help.liveUpdateNoRestart')}</p>
 				{/if}
 			</div>
 
@@ -1101,6 +1107,9 @@
 			<div class="flex items-center gap-2">
 				<Cpu class="w-4 h-4 text-muted-foreground" />
 				<span class="text-sm font-medium">{$t('containers.settings.sections.resources')}</span>
+				{#if mode === 'edit'}
+					<Badge variant="outline" class="text-2xs">{$t('containers.settings.badges.liveUpdate')}</Badge>
+				{/if}
 				{#if memoryLimit || nanoCpus || cpuShares}
 					<Badge variant="secondary" class="text-2xs">{$t('containers.settings.badges.configured')}</Badge>
 				{/if}
@@ -1113,7 +1122,9 @@
 		</button>
 		{#if showResources}
 			<div class="px-3 pb-3 space-y-3 border-t">
-				<p class="text-xs text-muted-foreground pt-2">{$t('containers.settings.help.resourceLimits')}</p>
+				<p class="text-xs text-muted-foreground pt-2">
+					{$t('containers.settings.help.resourceLimits')}{#if mode === 'edit'} · {$t('containers.settings.help.liveUpdateNoRestart')}{/if}
+				</p>
 				<div class="grid grid-cols-2 gap-3">
 					<div class="space-y-1.5">
 						<Label for="memoryLimit" class="text-xs font-medium">{$t('containers.settings.labels.memoryLimit')}</Label>

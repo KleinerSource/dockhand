@@ -59,7 +59,7 @@ export const POST: RequestHandler = async (event) => {
 			}
 		}
 
-		console.log(`Updating container ${params.id} with name: ${options.name}`);
+		console.log(`Updating container ${params.id}${options.name ? ` with name: ${options.name}` : ''}`);
 
 		const container = await updateContainer(params.id, options, startAfterUpdate, envIdNum);
 
@@ -71,7 +71,7 @@ export const POST: RequestHandler = async (event) => {
 		}
 
 		// Audit log - include full options to see what was modified
-		await auditContainer(event, 'update', container.id, options.name, envIdNum, { ...options, startAfterUpdate });
+		await auditContainer(event, 'update', container.id, options.name ?? params.id, envIdNum, { ...options, startAfterUpdate });
 
 		return json({ success: true, id: container.id });
 	} catch (error: any) {

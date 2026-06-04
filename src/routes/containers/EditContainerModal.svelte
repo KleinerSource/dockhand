@@ -181,6 +181,7 @@
 		image: string;
 		command: string;
 		restartPolicy: string;
+		restartMaxRetries: number | '';
 		networkMode: string;
 		portMappings: typeof portMappings;
 		volumeMappings: typeof volumeMappings;
@@ -574,6 +575,7 @@
 				image,
 				command,
 				restartPolicy,
+				restartMaxRetries,
 				networkMode,
 				portMappings: JSON.parse(JSON.stringify(portMappings)),
 				volumeMappings: JSON.parse(JSON.stringify(volumeMappings)),
@@ -624,15 +626,73 @@
 		}
 	}
 
-	// Check if container configuration has changed
-	function hasContainerConfigChanged(): boolean {
+	function getRestartMaxRetries(policy: string, retries: number | ''): number | undefined {
+		if (policy !== 'on-failure' || retries === '') return undefined;
+		return Number(retries);
+	}
+
+	function hasRestartPolicyChanged(): boolean {
+		if (!originalConfig) return true;
+		return (
+			restartPolicy !== originalConfig.restartPolicy ||
+			getRestartMaxRetries(restartPolicy, restartMaxRetries) !== getRestartMaxRetries(originalConfig.restartPolicy, originalConfig.restartMaxRetries)
+		);
+	}
+
+	function getMemoryUpdateValue(value: string): number | undefined {
+		if (!value.trim()) return 0;
+		return parseMemory(value);
+	}
+
+	function getNanoCpusUpdateValue(value: string): number | undefined {
+		if (!value.trim()) return 0;
+		return parseNanoCpus(value);
+	}
+
+	function getIntegerUpdateValue(value: string): number | undefined {
+		if (!value.trim()) return 0;
+		const parsed = parseInt(value);
+		return isNaN(parsed) ? undefined : parsed;
+	}
+
+	function buildDockerUpdatePayload(): Record<string, number | string | undefined> {
+		if (!originalConfig) return {};
+
+		const payload: Record<string, number | string | undefined> = {};
+
+		if (hasRestartPolicyChanged()) {
+			payload.restartPolicy = restartPolicy;
+			payload.restartMaxRetries = getRestartMaxRetries(restartPolicy, restartMaxRetries);
+		}
+
+		const resourceFields = [
+			['memory', getMemoryUpdateValue(memoryLimit), getMemoryUpdateValue(originalConfig.memoryLimit)],
+			['memoryReservation', getMemoryUpdateValue(memoryReservation), getMemoryUpdateValue(originalConfig.memoryReservation)],
+			['cpuShares', getIntegerUpdateValue(cpuShares), getIntegerUpdateValue(originalConfig.cpuShares)],
+			['nanoCpus', getNanoCpusUpdateValue(nanoCpus), getNanoCpusUpdateValue(originalConfig.nanoCpus)],
+			['cpuQuota', getIntegerUpdateValue(cpuQuota), getIntegerUpdateValue(originalConfig.cpuQuota)],
+			['cpuPeriod', getIntegerUpdateValue(cpuPeriod), getIntegerUpdateValue(originalConfig.cpuPeriod)]
+		] as const;
+
+		for (const [key, currentValue, originalValue] of resourceFields) {
+			if (currentValue !== undefined && currentValue !== originalValue) {
+				payload[key] = currentValue;
+			}
+		}
+
+		return payload;
+	}
+
+	function hasDockerUpdateConfigChanged(): boolean {
+		return Object.keys(buildDockerUpdatePayload()).length > 0;
+	}
+
+	function hasContainerConfigChangedExceptNameAndDockerUpdate(): boolean {
 		if (!originalConfig) return true;
 
 		// Basic options
-		if (name.trim() !== originalConfig.name) return true;
 		if (image.trim() !== originalConfig.image) return true;
 		if (command.trim() !== originalConfig.command) return true;
-		if (restartPolicy !== originalConfig.restartPolicy) return true;
 		if (networkMode !== originalConfig.networkMode) return true;
 
 		const currentPorts = portMappings.filter(p => p.containerPort && p.hostPort);
@@ -670,14 +730,6 @@
 		if (healthcheckRetries !== originalConfig.healthcheckRetries) return true;
 		if (healthcheckStartPeriod !== originalConfig.healthcheckStartPeriod) return true;
 
-		// Advanced options - Resources
-		if (memoryLimit !== originalConfig.memoryLimit) return true;
-		if (memoryReservation !== originalConfig.memoryReservation) return true;
-		if (cpuShares !== originalConfig.cpuShares) return true;
-		if (nanoCpus !== originalConfig.nanoCpus) return true;
-		if (cpuQuota !== originalConfig.cpuQuota) return true;
-		if (cpuPeriod !== originalConfig.cpuPeriod) return true;
-
 		// Advanced options - Devices
 		const currentDevices = deviceMappings.filter(d => d.hostPath && d.containerPath);
 		const originalDevices = originalConfig.deviceMappings.filter(d => d.hostPath && d.containerPath);
@@ -705,6 +757,28 @@
 		return false;
 	}
 
+	function hasContainerConfigChangedExceptDockerUpdate(): boolean {
+		if (!originalConfig) return true;
+		if (name.trim() !== originalConfig.name) return true;
+		return hasContainerConfigChangedExceptNameAndDockerUpdate();
+	}
+
+	// Check if container configuration has changed
+	function hasContainerConfigChanged(): boolean {
+		return hasDockerUpdateConfigChanged() || hasContainerConfigChangedExceptDockerUpdate();
+	}
+
+	function hasOnlyDockerUpdateConfigChanged(): boolean {
+		return hasDockerUpdateConfigChanged() && !hasContainerConfigChangedExceptDockerUpdate();
+	}
+
+	function hasOnlyNameAndDockerUpdateConfigChanged(): boolean {
+		if (!originalConfig) return false;
+		return name.trim() !== originalConfig.name &&
+			hasDockerUpdateConfigChanged() &&
+			!hasContainerConfigChangedExceptNameAndDockerUpdate();
+	}
+
 	function hasAutoUpdateChanged(): boolean {
 		if (!originalAutoUpdate) return true;
 		return (
@@ -714,51 +788,21 @@
 		);
 	}
 
-	function serializeConfigWithoutName() {
-		return JSON.stringify({
-			image: image.trim(),
-			command: command.trim(),
-			restartPolicy,
-			networkMode,
-			portMappings: portMappings.filter(p => p.containerPort && p.hostPort),
-			volumeMappings: volumeMappings.filter(v => v.hostPath && v.containerPath),
-			envVars: envVars.filter(e => e.key),
-			labels: labels.filter(l => l.key),
-			selectedNetworks: [...selectedNetworks].sort(),
-			networkConfigs,
-			macAddress
-		});
-	}
-
-	function serializeOriginalConfigWithoutName() {
-		if (!originalConfig) return null;
-		return JSON.stringify({
-			image: originalConfig.image,
-			command: originalConfig.command,
-			restartPolicy: originalConfig.restartPolicy,
-			networkMode: originalConfig.networkMode,
-			portMappings: originalConfig.portMappings.filter(p => p.containerPort && p.hostPort),
-			volumeMappings: originalConfig.volumeMappings.filter(v => v.hostPath && v.containerPath),
-			envVars: originalConfig.envVars.filter(e => e.key),
-			labels: originalConfig.labels.filter(l => l.key),
-			selectedNetworks: [...originalConfig.selectedNetworks].sort(),
-			networkConfigs: originalConfig.networkConfigs,
-			macAddress: originalConfig.macAddress
-		});
-	}
-
 	function hasOnlyNameChanged(): boolean {
-		if (!originalConfig) return false;
-		if (name.trim() === originalConfig.name) return false;
-		return serializeConfigWithoutName() === serializeOriginalConfigWithoutName();
+		return hasNameChangedWithoutRecreateConfigChanged() && !hasDockerUpdateConfigChanged();
 	}
 
 	function hasConfigChangedBesidesName(): boolean {
 		if (!originalConfig) return false;
-		return serializeConfigWithoutName() !== serializeOriginalConfigWithoutName();
+		return hasContainerConfigChangedExceptNameAndDockerUpdate();
 	}
 
-	let showComposeRenameWarning = $derived(isComposeContainer && hasOnlyNameChanged());
+	function hasNameChangedWithoutRecreateConfigChanged(): boolean {
+		if (!originalConfig) return false;
+		return name.trim() !== originalConfig.name && !hasContainerConfigChangedExceptNameAndDockerUpdate();
+	}
+
+	let showComposeRenameWarning = $derived(isComposeContainer && hasNameChangedWithoutRecreateConfigChanged());
 	let showComposeConfigWarning = $derived(isComposeContainer && hasConfigChangedBesidesName());
 
 	function parseMemory(value: string): number | undefined {
@@ -781,6 +825,54 @@
 		const num = parseFloat(value);
 		if (isNaN(num)) return undefined;
 		return Math.floor(num * 1e9);
+	}
+
+	async function renameContainerOnly(newName: string, signal: AbortSignal): Promise<boolean> {
+		statusMessage = translate('containers.edit.status.renaming');
+
+		const response = await fetch(appendEnvParam(
+			`/api/containers/${containerId}/rename`,
+			$currentEnvironment?.id
+		), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: newName }),
+			signal
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			error = result.error || translate('containers.edit.errors.renameContainer');
+			return false;
+		}
+
+		statusMessage = translate('containers.edit.toasts.renamed');
+		return true;
+	}
+
+	async function updateDockerRuntimeConfig(payload: Record<string, number | string | undefined>, signal: AbortSignal): Promise<boolean> {
+		statusMessage = translate('containers.edit.status.updating');
+
+		const response = await fetch(appendEnvParam(`/api/containers/${containerId}/update`, $currentEnvironment?.id), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload),
+			signal
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			error = result.error || translate('containers.edit.errors.updateContainer');
+			if (result.details) {
+				error += ': ' + result.details;
+			}
+			return false;
+		}
+
+		statusMessage = translate('containers.edit.toasts.updated');
+		return true;
 	}
 
 	async function handleSubmit(e: Event) {
@@ -820,27 +912,10 @@
 		try {
 			// If only name changed, use the rename endpoint
 			if (hasOnlyNameChanged()) {
-				statusMessage = translate('containers.edit.status.renaming');
-
-				const response = await fetch(appendEnvParam(
-					`/api/containers/${containerId}/rename`,
-					$currentEnvironment?.id
-				), {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ name: name.trim() }),
-					signal
-				});
-
-				const result = await response.json();
-
-				if (!response.ok) {
-					error = result.error || translate('containers.edit.errors.renameContainer');
+				if (!(await renameContainerOnly(name.trim(), signal))) {
 					loading = false;
 					return;
 				}
-
-				statusMessage = translate('containers.edit.toasts.renamed');
 
 				if (autoUpdateChanged) {
 					await saveAutoUpdateSettings(name.trim());
@@ -853,8 +928,22 @@
 				return;
 			}
 
-			// Full update required - recreate container
-			if (containerConfigChanged) {
+			if (hasOnlyNameAndDockerUpdateConfigChanged()) {
+				if (!(await renameContainerOnly(name.trim(), signal))) {
+					return;
+				}
+				const payload = buildDockerUpdatePayload();
+				if (!(await updateDockerRuntimeConfig(payload, signal))) {
+					return;
+				}
+			} else if (hasOnlyDockerUpdateConfigChanged()) {
+				const payload = buildDockerUpdatePayload();
+
+				if (!(await updateDockerRuntimeConfig(payload, signal))) {
+					return;
+				}
+			} else if (containerConfigChanged) {
+				// Full update required - recreate container
 				statusMessage = translate('containers.edit.status.updating');
 
 				const ports: Record<string, { HostIp?: string; HostPort: string }> = {};
