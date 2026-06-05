@@ -21,7 +21,7 @@
 
 import { readFileSync } from 'node:fs';
 import * as http from 'node:http';
-import { resolve } from 'node:path';
+import { posix, resolve } from 'node:path';
 
 // Cache the host data dir to avoid repeated API calls
 let cachedHostDataDir: string | null = null;
@@ -379,24 +379,16 @@ export function extractUidFromSocketPath(socketPath: string): string | null {
  *   ./config.toml:/config.toml  ->  /host/path/to/stack/config.toml:/config.toml
  *
  * @param composeContent - The compose file content
- * @param workingDir - The working directory (container path) where the compose file is located
+ * @param hostWorkingDir - The host working directory where relative bind sources should resolve
  * @returns Modified compose content with absolute host paths, or original if no translation needed
  */
-export function rewriteComposeVolumePaths(composeContent: string, workingDir: string): { content: string; modified: boolean; changes: string[] } {
+export function rewriteComposeVolumePathsWithHostDir(composeContent: string, hostWorkingDir: string): { content: string; modified: boolean; changes: string[] } {
 	const changes: string[] = [];
-
-	// Try to translate workingDir to host path using ANY cached mount
-	// This handles both DATA_DIR mounts and external mounts (e.g., /external-stacks)
-	const hostWorkingDir = translateContainerPathViaMount(workingDir);
-
-	if (!hostWorkingDir) {
-		// Can't translate - workingDir is not under any known mount
-		return { content: composeContent, modified: false, changes };
-	}
 
 	// Parse compose content line by line to find and rewrite volume mounts
 	// We look for patterns like:
 	//   - ./something:/container/path
+	//   - ../something:/container/path
 	//   - "./something:/container/path"
 	//   - './something:/container/path'
 	const lines = composeContent.split('\n');
@@ -404,16 +396,23 @@ export function rewriteComposeVolumePaths(composeContent: string, workingDir: st
 
 	for (const line of lines) {
 		// Match volume mount patterns with relative paths
-		// Handles: - ./path:/dest, - "./path:/dest", - './path:/dest'
-		const volumeMatch = line.match(/^(\s*-\s*)(['"]?)(\.\/[^'":\s]+)(\2)(:.+)$/);
+		// Handles: - ./path:/dest, - ../path:/dest, quoted variants.
+		const volumeMatch = line.match(/^(\s*-\s*)(['"]?)((?:\.{1,2}\/)[^'":\s]+)(\2)(:.+)$/);
+		const sourceMatch = line.match(/^(\s*source:\s*)(['"]?)((?:\.{1,2}\/)[^'"\s]+)(\2)(\s*(?:#.*)?)$/);
 
 		if (volumeMatch) {
-			const [, prefix, quote, relativeSrc, , destPart] = volumeMatch;
+			const [, prefix, , relativeSrc, , destPart] = volumeMatch;
 			// Convert relative path to absolute host path
-			const absoluteHostPath = hostWorkingDir + '/' + relativeSrc.substring(2); // Remove ./
+			const absoluteHostPath = posix.normalize(posix.join(hostWorkingDir, relativeSrc));
 
 			const newLine = `${prefix}${absoluteHostPath}${destPart}`;
 			modifiedLines.push(newLine);
+			changes.push(`  ${relativeSrc} -> ${absoluteHostPath}`);
+		} else if (sourceMatch) {
+			const [, prefix, , relativeSrc, , suffix] = sourceMatch;
+			const absoluteHostPath = posix.normalize(posix.join(hostWorkingDir, relativeSrc));
+
+			modifiedLines.push(`${prefix}${absoluteHostPath}${suffix}`);
 			changes.push(`  ${relativeSrc} -> ${absoluteHostPath}`);
 		} else {
 			modifiedLines.push(line);
@@ -425,4 +424,17 @@ export function rewriteComposeVolumePaths(composeContent: string, workingDir: st
 		modified: changes.length > 0,
 		changes
 	};
+}
+
+export function rewriteComposeVolumePaths(composeContent: string, workingDir: string): { content: string; modified: boolean; changes: string[] } {
+	// Try to translate workingDir to host path using ANY cached mount
+	// This handles both DATA_DIR mounts and external mounts (e.g., /external-stacks)
+	const hostWorkingDir = translateContainerPathViaMount(workingDir);
+
+	if (!hostWorkingDir) {
+		// Can't translate - workingDir is not under any known mount
+		return { content: composeContent, modified: false, changes: [] };
+	}
+
+	return rewriteComposeVolumePathsWithHostDir(composeContent, hostWorkingDir);
 }

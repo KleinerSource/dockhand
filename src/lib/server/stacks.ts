@@ -30,7 +30,7 @@ import {
 import { unregisterSchedule } from './scheduler';
 import { deleteGitStackFiles, parseEnvFileContent } from './git';
 import { cleanPem } from '$lib/utils/pem';
-import { rewriteComposeVolumePaths, getHostDataDir } from './host-path';
+import { rewriteComposeVolumePaths, rewriteComposeVolumePathsWithHostDir, getHostDataDir } from './host-path';
 import { getOrderValue } from './container-labels';
 import {
 	createEnvironmentDirectory,
@@ -341,6 +341,182 @@ async function shouldUseRemotePathMode(
 	if (filesystem === 'dockhand') return false;
 	const source = await getStackSource(stackName, envId);
 	return source?.sourceType === 'internal' && source?.composePath === composePath;
+}
+
+interface DockerMountInfo {
+	Source?: string;
+	Destination?: string;
+	Type?: string;
+}
+
+interface DockerContainerSummary {
+	Id?: string;
+	Names?: string[];
+	Image?: string;
+	Labels?: Record<string, string>;
+	Mounts?: DockerMountInfo[];
+}
+
+interface DockerContainerInspect {
+	Id?: string;
+	Name?: string;
+	Config?: {
+		Hostname?: string;
+		Image?: string;
+		Labels?: Record<string, string>;
+	};
+	Mounts?: DockerMountInfo[];
+}
+
+function normalizeRemotePath(path: string): string {
+	const normalized = path.replace(/\\/g, '/').replace(/\/+$/, '');
+	return normalized || '/';
+}
+
+function isPathWithinRemoteMount(path: string, mountDestination: string): boolean {
+	const normalizedPath = normalizeRemotePath(path);
+	const normalizedMount = normalizeRemotePath(mountDestination);
+	return normalizedPath === normalizedMount || normalizedPath.startsWith(`${normalizedMount}/`);
+}
+
+function joinRemoteHostPath(source: string, relativePath: string): string {
+	const normalizedSource = normalizeRemotePath(source);
+	if (!relativePath) return normalizedSource;
+	return `${normalizedSource}${relativePath.startsWith('/') ? relativePath : `/${relativePath}`}`;
+}
+
+function translatePathFromDockerMounts(containerPath: string, mounts?: DockerMountInfo[]): string | null {
+	if (!mounts || mounts.length === 0) return null;
+
+	const sortedMounts = [...mounts]
+		.filter(m => m.Source && m.Destination)
+		.sort((a, b) => normalizeRemotePath(b.Destination!).length - normalizeRemotePath(a.Destination!).length);
+
+	for (const mount of sortedMounts) {
+		const destination = normalizeRemotePath(mount.Destination!);
+		if (isPathWithinRemoteMount(containerPath, destination)) {
+			const relativePath = normalizeRemotePath(containerPath).substring(destination.length);
+			return joinRemoteHostPath(mount.Source!, relativePath);
+		}
+	}
+
+	return null;
+}
+
+function containerText(container: DockerContainerSummary | DockerContainerInspect): string {
+	const names = 'Names' in container && container.Names ? container.Names.join(' ') : '';
+	const name = 'Name' in container && container.Name ? container.Name : '';
+	const image = 'Image' in container && container.Image
+		? container.Image
+		: 'Config' in container && container.Config?.Image
+			? container.Config.Image
+			: '';
+	const labels = ('Labels' in container && container.Labels)
+		? Object.values(container.Labels).join(' ')
+		: 'Config' in container && container.Config?.Labels
+			? Object.values(container.Config.Labels).join(' ')
+			: '';
+	const hostname = 'Config' in container && container.Config?.Hostname ? container.Config.Hostname : '';
+	return `${names} ${name} ${image} ${labels} ${hostname}`.toLowerCase();
+}
+
+function containerMatchesIdentity(
+	container: DockerContainerSummary | DockerContainerInspect,
+	identities: Set<string>
+): boolean {
+	for (const rawIdentity of identities) {
+		const identity = rawIdentity.trim();
+		if (!identity) continue;
+
+		const id = container.Id || '';
+		if (id === identity || id.startsWith(identity)) return true;
+
+		if ('Names' in container && container.Names?.some(name => normalizeRemotePath(name).replace(/^\//, '') === identity)) {
+			return true;
+		}
+		if ('Name' in container && container.Name && normalizeRemotePath(container.Name).replace(/^\//, '') === identity) {
+			return true;
+		}
+		if ('Config' in container && container.Config?.Hostname === identity) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+async function detectHawserHostWorkingDir(
+	envId: number,
+	remoteWorkingDir: string,
+	logPrefix: string
+): Promise<string | null> {
+	const { dockerJsonRequest, getHawserInfo } = await import('./docker.js');
+	const env = await getEnvironment(envId);
+	const identities = new Set<string>();
+
+	if (env?.hawserAgentId) identities.add(env.hawserAgentId);
+	if (env?.hawserAgentName) identities.add(env.hawserAgentName);
+
+	if (env?.connectionType === 'hawser-standard') {
+		try {
+			const info = await getHawserInfo(envId);
+			if (info?.agentId) identities.add(info.agentId);
+			if (info?.agentName) identities.add(info.agentName);
+		} catch {
+			// Best-effort only. Some older agents may not expose /_hawser/info.
+		}
+	}
+
+	for (const identity of identities) {
+		try {
+			const container = await dockerJsonRequest<DockerContainerInspect>(
+				`/containers/${encodeURIComponent(identity.replace(/^\//, ''))}/json`,
+				{},
+				envId
+			);
+			const hostWorkingDir = translatePathFromDockerMounts(remoteWorkingDir, container.Mounts);
+			if (hostWorkingDir) {
+				console.log(`${logPrefix} [HawserPath] Matched Hawser container by identity "${identity}"`);
+				return hostWorkingDir;
+			}
+		} catch {
+			// Try the next identity, then fall back to container list matching.
+		}
+	}
+
+	try {
+		const containers = await dockerJsonRequest<DockerContainerSummary[]>('/containers/json?all=true', {}, envId);
+		const matches = containers
+			.map(container => ({
+				container,
+				hostWorkingDir: translatePathFromDockerMounts(remoteWorkingDir, container.Mounts),
+				identityMatch: containerMatchesIdentity(container, identities),
+				looksLikeHawser: containerText(container).includes('hawser')
+			}))
+			.filter(match => match.hostWorkingDir);
+
+		const exact = matches.find(match => match.identityMatch);
+		if (exact) {
+			console.log(`${logPrefix} [HawserPath] Matched Hawser container from Docker list by identity`);
+			return exact.hostWorkingDir!;
+		}
+
+		const hawserMatches = matches.filter(match => match.looksLikeHawser);
+		if (hawserMatches.length === 1) {
+			console.log(`${logPrefix} [HawserPath] Matched Hawser container from Docker list by name/image`);
+			return hawserMatches[0].hostWorkingDir!;
+		}
+
+		if (matches.length === 1) {
+			console.log(`${logPrefix} [HawserPath] Matched a single container mount for ${remoteWorkingDir}`);
+			return matches[0].hostWorkingDir!;
+		}
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		console.warn(`${logPrefix} [HawserPath] Failed to inspect remote containers for path mapping: ${message}`);
+	}
+
+	return null;
 }
 
 /**
@@ -1323,7 +1499,8 @@ async function executeComposeViaHawser(
 	remoteWorkingDir?: string,
 	build?: boolean,
 	noBuildCache?: boolean,
-	pullPolicy?: string
+	pullPolicy?: string,
+	sendFiles = true
 ): Promise<StackOperationResult> {
 	const logPrefix = `[Stack:${stackName}]`;
 	// Import dockerFetch dynamically to avoid circular dependency
@@ -1350,27 +1527,31 @@ async function executeComposeViaHawser(
 		console.log(`${logPrefix} All env vars being sent (masked):`, JSON.stringify(redactEnvVarsForLog(allEnvVars), null, 2));
 	}
 	console.log(`${logPrefix} Compose content length:`, composeContent.length, 'chars');
-	console.log(`${logPrefix} Stack files count:`, stackFiles ? Object.keys(stackFiles).length : 0);
-	if (stackFiles && Object.keys(stackFiles).length > 0) {
+	console.log(`${logPrefix} Send stack files:`, sendFiles);
+	console.log(`${logPrefix} Stack files count:`, sendFiles && stackFiles ? Object.keys(stackFiles).length : 0);
+	if (sendFiles && stackFiles && Object.keys(stackFiles).length > 0) {
 		console.log(`${logPrefix} Stack files:`, Object.keys(stackFiles).join(', '));
 	}
 
 	try {
 		// Build files map - include .env file ONLY for non-secret envVars
 		// Secrets are passed separately via allEnvVars and injected via shell env
-		const files: Record<string, string> = { ...(stackFiles || {}) };
-		if (envVars && Object.keys(envVars).length > 0) {
-			if (files['.env']) {
-				// stackFiles already has .env (e.g., from git repo with comments)
-				// Don't overwrite - the envVars are already passed separately for variable substitution
-				console.log(`${logPrefix} Preserving existing .env from stackFiles (${files['.env'].length} chars), envVars passed separately for substitution`);
-			} else {
-				// No .env in stackFiles - generate one from NON-SECRET envVars only
-				const envContent = Object.entries(envVars)
-					.map(([key, value]) => `${key}=${value}`)
-					.join('\n');
-				files['.env'] = envContent;
-				console.log(`${logPrefix} Generated .env file with ${Object.keys(envVars).length} non-secret variables`);
+		let files: Record<string, string> | undefined;
+		if (sendFiles) {
+			files = { ...(stackFiles || {}) };
+			if (envVars && Object.keys(envVars).length > 0) {
+				if (files['.env']) {
+					// stackFiles already has .env (e.g., from git repo with comments)
+					// Don't overwrite - the envVars are already passed separately for variable substitution
+					console.log(`${logPrefix} Preserving existing .env from stackFiles (${files['.env'].length} chars), envVars passed separately for substitution`);
+				} else {
+					// No .env in stackFiles - generate one from NON-SECRET envVars only
+					const envContent = Object.entries(envVars)
+						.map(([key, value]) => `${key}=${value}`)
+						.join('\n');
+					files['.env'] = envContent;
+					console.log(`${logPrefix} Generated .env file with ${Object.keys(envVars).length} non-secret variables`);
+				}
 			}
 		}
 
@@ -1392,6 +1573,7 @@ async function executeComposeViaHawser(
 			operation,
 			projectName: stackName,
 			executionMode: remoteWorkingDir ? 'remote-path' : 'managed-files',
+			workDir: remoteWorkingDir,
 			workingDir: remoteWorkingDir,
 			composeFile: composeContent,
 			composeFileName, // Explicit compose filename to use (e.g., "docker-compose.prod.yml")
@@ -1534,7 +1716,7 @@ async function executeComposeCommand(
 			let hawserStackFiles = stackFiles;
 			const composeDir = workingDir || (composePath ? dirname(composePath) : null);
 			const composeBaseName = composePath ? basename(composePath) : 'compose.yaml';
-			if (composeDir) {
+			if (composeDir && !effectiveRemotePathMode) {
 				const overrideFile = await readComposeOverrideFile(composeDir, composeBaseName, fileEnvId);
 				if (overrideFile) {
 					hawserStackFiles = { ...(hawserStackFiles || {}), [overrideFile.name]: overrideFile.content };
@@ -1552,10 +1734,26 @@ async function executeComposeCommand(
 				console.log(`[Stack:${stackName}] Including .env.dockhand override file for Hawser (${Object.keys(envVars).length} vars)`);
 			}
 
+			const remoteComposeDir = effectiveRemotePathMode ? composeDir || undefined : undefined;
+			let hawserComposeContent = composeContent;
+			if (remoteComposeDir) {
+				const hostWorkingDir = await detectHawserHostWorkingDir(envId!, remoteComposeDir, `[Stack:${stackName}]`);
+				if (hostWorkingDir && normalizeRemotePath(hostWorkingDir) !== normalizeRemotePath(remoteComposeDir)) {
+					const rewriteResult = rewriteComposeVolumePathsWithHostDir(composeContent, hostWorkingDir);
+					if (rewriteResult.modified) {
+						hawserComposeContent = rewriteResult.content;
+						console.log(`[Stack:${stackName}] [HawserPath] Rewriting relative volume paths for Docker host:`);
+						for (const change of rewriteResult.changes) {
+							console.log(`[Stack:${stackName}] [HawserPath]${change}`);
+						}
+					}
+				}
+			}
+
 			return executeComposeViaHawser(
 				operation,
 				stackName,
-				composeContent,
+				hawserComposeContent,
 				envId!,
 				hawserEnvVars,
 				secretVars,
@@ -1564,10 +1762,11 @@ async function executeComposeCommand(
 				hawserStackFiles,
 				serviceName,
 				composeFileName,
-				effectiveRemotePathMode ? composeDir || undefined : undefined,
+				remoteComposeDir,
 				build,
 				noBuildCache,
-				pullPolicy
+				pullPolicy,
+				!effectiveRemotePathMode
 			);
 		}
 
