@@ -184,7 +184,7 @@
 		// Filter by usage
 		if (usageFilter.length > 0) {
 			result = result.filter(vol => {
-				const isInUse = vol.usedBy && vol.usedBy.length > 0;
+				const isInUse = !isVolumeUnused(vol);
 				if (usageFilter.includes('in-use') && usageFilter.includes('unused')) {
 					return true; // Both selected = show all
 				}
@@ -288,6 +288,10 @@
 	function formatDate(dateString: string): string {
 		if (!dateString) return translate('volumes.notAvailable');
 		return formatDateTime(dateString);
+	}
+
+	function isVolumeUnused(volume: VolumeInfo): boolean {
+		return !volume.usedBy || volume.usedBy.length === 0;
 	}
 
 	function inspectVolume(volumeName: string) {
@@ -537,7 +541,14 @@
 			{#snippet cell(column, volume, rowState)}
 				{@const stack = volume.labels['com.docker.compose.project']}
 				{#if column.id === 'name'}
-					<code class="text-xs truncate block" title={volume.name}>{volume.name}</code>
+					<div class="flex items-center gap-1.5 min-w-0">
+						<code class="text-xs truncate block min-w-0" title={volume.name}>{volume.name}</code>
+						{#if isVolumeUnused(volume)}
+							<Badge variant="outline" class="text-2xs px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)] shrink-0">
+								{$t('volumes.usage.unused')}
+							</Badge>
+						{/if}
+					</div>
 				{:else if column.id === 'driver'}
 					<Badge variant="outline" class="text-xs py-0 px-1.5 shadow-sm rounded-sm">{volume.driver}</Badge>
 				{:else if column.id === 'scope'}
@@ -566,7 +577,9 @@
 							{/if}
 						</div>
 					{:else}
-						<span class="text-muted-foreground text-xs">-</span>
+						<Badge variant="outline" class="text-2xs px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400 shadow-[0_0_4px_rgba(245,158,11,0.4)]">
+							{$t('volumes.usage.unused')}
+						</Badge>
 					{/if}
 				{:else if column.id === 'created'}
 					<span class="text-xs text-muted-foreground">{formatDate(volume.created)}</span>
