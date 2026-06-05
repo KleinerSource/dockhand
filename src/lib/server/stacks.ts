@@ -333,9 +333,12 @@ async function shouldUseRemotePathMode(
 	stackName: string,
 	envId: number | null | undefined,
 	composePath?: string,
-	useOverrideFile?: boolean
+	useOverrideFile?: boolean,
+	filesystem?: 'dockhand' | 'environment'
 ): Promise<boolean> {
 	if (!composePath || useOverrideFile || !(await usesHawserFilesystem(envId))) return false;
+	if (filesystem === 'environment') return true;
+	if (filesystem === 'dockhand') return false;
 	const source = await getStackSource(stackName, envId);
 	return source?.sourceType === 'internal' && source?.composePath === composePath;
 }
@@ -1506,7 +1509,8 @@ async function executeComposeCommand(
 				stackName,
 				envId,
 				composePath,
-				useOverrideFile
+				useOverrideFile,
+				filesystem
 			);
 
 			// For Hawser deployments, we need to read the .env file and send variables via envVars
