@@ -13,7 +13,6 @@
 	import PathBarItem from './PathBarItem.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Select from '$lib/components/ui/select';
-	import * as Tabs from '$lib/components/ui/tabs';
 	import { Badge } from '$lib/components/ui/badge';
 	import { currentEnvironment, environments, appendEnvParam } from '$lib/stores/environment';
 	import { appSettings } from '$lib/stores/settings';
@@ -873,15 +872,8 @@
 		localStorage.setItem('dockhand-editor-theme', editorTheme);
 	}
 
-	function handleComposeTabChange(value: string) {
-		activeTab = value === 'graph' ? 'graph' : 'editor';
-	}
-
 	function handleGraphContentChange(newContent: string) {
-		if (newContent === composeContent) return;
 		composeContent = newContent;
-		isDirty = true;
-		debouncedValidate();
 	}
 
 	async function handleCreate(start: boolean = false) {
@@ -1418,18 +1410,22 @@
 
 				<div class="flex items-center gap-2">
 					<!-- View toggle -->
-					<Tabs.Root value={activeTab} onValueChange={handleComposeTabChange} class="gap-0">
-						<Tabs.List class="h-8 rounded-md bg-zinc-200 p-0.5 dark:bg-zinc-700">
-							<Tabs.Trigger value="editor" class="h-7 px-2.5 py-1 text-xs">
-								<Code class="w-3.5 h-3.5" />
-								{$t('stacks.modal.editorTab')}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="graph" class="h-7 px-2.5 py-1 text-xs">
-								<GitGraph class="w-3.5 h-3.5" />
-								{$t('stacks.modal.graphTab')}
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Tabs.Root>
+					<div class="flex items-center gap-0.5 bg-zinc-200 dark:bg-zinc-700 rounded-md p-0.5">
+						<button
+							class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors {activeTab === 'editor' ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
+							onclick={() => activeTab = 'editor'}
+						>
+							<Code class="w-3.5 h-3.5" />
+							{$t('stacks.modal.editorTab')}
+						</button>
+						<button
+							class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors {activeTab === 'graph' ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
+							onclick={() => activeTab = 'graph'}
+						>
+							<GitGraph class="w-3.5 h-3.5" />
+							{$t('stacks.modal.graphTab')}
+						</button>
+					</div>
 
 					<!-- Theme toggle (only in editor mode) -->
 					{#if activeTab === 'editor'}

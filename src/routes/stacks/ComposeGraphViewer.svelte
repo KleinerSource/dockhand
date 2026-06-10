@@ -62,12 +62,8 @@
 
 	// Service edit state
 	let editServiceImage = $state('');
-	let editServiceContainerName = $state('');
-	let editServiceHostname = $state('');
 	let editServiceCommand = $state('');
-	let editServiceNetworkMode = $state('');
 	let editServiceRestart = $state('no');
-	let editServicePrivileged = $state(false);
 	let editServicePorts = $state<{ host: string; container: string; protocol: string }[]>([]);
 	let editServiceVolumes = $state<{ host: string; container: string; mode: string }[]>([]);
 	let editServiceEnvVars = $state<{ key: string; value: string }[]>([]);
@@ -1513,14 +1509,10 @@
 		if (!config) return;
 
 		editServiceImage = config.image || '';
-		editServiceContainerName = config.container_name || '';
-		editServiceHostname = config.hostname || '';
 		editServiceCommand = Array.isArray(config.command)
 			? config.command.join(' ')
 			: (config.command || '');
-		editServiceNetworkMode = config.network_mode || '';
 		editServiceRestart = config.restart || 'no';
-		editServicePrivileged = config.privileged === true || config.privileged === 'true';
 
 		// Parse ports
 		const ports = config.ports || [];
@@ -1625,22 +1617,6 @@
 		// Update image
 		if (editServiceImage.trim()) {
 			config.image = editServiceImage.trim();
-		} else {
-			delete config.image;
-		}
-
-		// Update container name
-		if (editServiceContainerName.trim()) {
-			config.container_name = editServiceContainerName.trim();
-		} else {
-			delete config.container_name;
-		}
-
-		// Update hostname
-		if (editServiceHostname.trim()) {
-			config.hostname = editServiceHostname.trim();
-		} else {
-			delete config.hostname;
 		}
 
 		// Update command
@@ -1650,22 +1626,8 @@
 			delete config.command;
 		}
 
-		// Update network mode
-		if (editServiceNetworkMode.trim()) {
-			config.network_mode = editServiceNetworkMode.trim();
-		} else {
-			delete config.network_mode;
-		}
-
 		// Update restart policy
 		config.restart = editServiceRestart;
-
-		// Update privileged mode
-		if (editServicePrivileged) {
-			config.privileged = true;
-		} else {
-			delete config.privileged;
-		}
 
 		// Update ports
 		const validPorts = editServicePorts.filter(p => p.container);
@@ -2512,27 +2474,6 @@
 									/>
 								</div>
 
-								<div class="grid grid-cols-2 gap-2">
-									<div class="space-y-1.5">
-										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.containerName')}</span>
-										<Input
-											bind:value={editServiceContainerName}
-											oninput={markServiceDirty}
-											placeholder="my-container"
-											class="h-8 text-xs"
-										/>
-									</div>
-									<div class="space-y-1.5">
-										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.hostname')}</span>
-										<Input
-											bind:value={editServiceHostname}
-											oninput={markServiceDirty}
-											placeholder="app.local"
-											class="h-8 text-xs"
-										/>
-									</div>
-								</div>
-
 								<!-- Command -->
 								<div class="space-y-1.5">
 									<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.serviceCommand')}</span>
@@ -2542,22 +2483,6 @@
 										placeholder="/bin/sh -c '...'"
 										class="h-8 text-xs"
 									/>
-								</div>
-
-								<div class="grid grid-cols-2 gap-2">
-									<div class="space-y-1.5">
-										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.networkMode')}</span>
-										<Input
-											bind:value={editServiceNetworkMode}
-											oninput={markServiceDirty}
-											placeholder="bridge"
-											class="h-8 text-xs"
-										/>
-									</div>
-									<label class="flex items-end gap-2 pb-1.5 cursor-pointer">
-										<input type="checkbox" bind:checked={editServicePrivileged} onchange={markServiceDirty} class="rounded border-zinc-300" />
-										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.privilegedMode')}</span>
-									</label>
 								</div>
 
 								<!-- Restart policy -->
@@ -2595,18 +2520,6 @@
 													<span class="absolute -top-2 left-2 text-[9px] text-zinc-400 bg-white dark:bg-zinc-800 px-1 z-10">{$t('stacks.graph.fields.containerPort')}</span>
 													<Input bind:value={port.container} oninput={markServiceDirty} class="h-9 pt-3 text-xs" />
 												</div>
-												<div class="w-16 relative">
-													<span class="absolute -top-2 left-2 text-[9px] text-zinc-400 bg-white dark:bg-zinc-800 px-1 z-10">{$t('stacks.graph.fields.protocol')}</span>
-													<Select.Root type="single" bind:value={port.protocol} onValueChange={() => { serviceEditDirty = true; }}>
-														<Select.Trigger class="h-9 pt-3 text-xs">
-															<span>{port.protocol}</span>
-														</Select.Trigger>
-														<Select.Content>
-															<Select.Item value="tcp" label="TCP" />
-															<Select.Item value="udp" label="UDP" />
-														</Select.Content>
-													</Select.Root>
-												</div>
 												<button
 													onclick={() => removeServicePort(index)}
 													disabled={editServicePorts.length === 1}
@@ -2637,18 +2550,6 @@
 												<div class="flex-1 relative">
 													<span class="absolute -top-2 left-2 text-[9px] text-zinc-400 bg-white dark:bg-zinc-800 px-1 z-10">{$t('stacks.graph.fields.containerPath')}</span>
 													<Input bind:value={vol.container} oninput={markServiceDirty} class="h-9 pt-3 text-xs" />
-												</div>
-												<div class="w-16 relative">
-													<span class="absolute -top-2 left-2 text-[9px] text-zinc-400 bg-white dark:bg-zinc-800 px-1 z-10">{$t('stacks.graph.fields.mode')}</span>
-													<Select.Root type="single" bind:value={vol.mode} onValueChange={() => { serviceEditDirty = true; }}>
-														<Select.Trigger class="h-9 pt-3 text-xs">
-															<span>{vol.mode}</span>
-														</Select.Trigger>
-														<Select.Content>
-															<Select.Item value="rw" label={$t('stacks.graph.fields.readWrite')} />
-															<Select.Item value="ro" label={$t('stacks.graph.fields.readOnly')} />
-														</Select.Content>
-													</Select.Root>
 												</div>
 												<button
 													onclick={() => removeServiceVolume(index)}
