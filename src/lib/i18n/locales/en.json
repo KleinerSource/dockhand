@@ -1133,7 +1133,9 @@
 			"network": {
 				"loadingNetworks": "Loading networks...",
 				"joinPlaceholder": "Join a network...",
-				"noAvailable": "No networks available"
+				"noAvailable": "No networks available",
+				"sharedNamespacePrefix": "Network namespace is shared via",
+				"sharedNamespaceSuffix": "- additional networks cannot be attached."
 			},
 			"processes": {
 				"count": "{count} process(es)"
@@ -1145,6 +1147,16 @@
 			},
 			"rawJson": {
 				"title": "Raw JSON"
+			},
+			"labelList": {
+				"divergenceSummary": "{count} label(s) differ from the image",
+				"divergenceHelp": "Values set by you at create time will stay. To reset to the image's current values, Remove & Deploy.",
+				"filterPlaceholder": "Filter labels...",
+				"count": "{count} label(s)",
+				"filteredCount": "{visible} of {total}",
+				"copyVisible": "Copy visible labels as key=value lines",
+				"copyAll": "Copy all",
+				"noMatch": "No labels match \"{query}\""
 			},
 			"toasts": {
 				"connectedToNetwork": "Connected to {name}",
@@ -1197,6 +1209,8 @@
 				"restartPolicy": "Restart policy",
 				"maxRetryCount": "Max retry count",
 				"networkMode": "Network mode",
+				"additionalNetworks": "Additional networks",
+				"customNetworks": "Custom networks",
 				"pullImageBeforeUpdate": "Pull image before update",
 				"startAfterCreation": "Start container after creation",
 				"startAfterUpdate": "Start container after update",
@@ -1239,11 +1253,16 @@
 			"networkModes": {
 				"bridge": "Bridge",
 				"host": "Host",
-				"none": "None"
+				"none": "None",
+				"container": "Container",
+				"containerWithName": "Container: {name}"
 			},
 			"placeholders": {
 				"unlimited": "Unlimited",
 				"selectNetwork": "Select network to add...",
+				"filterNetworks": "Filter networks...",
+				"selectContainer": "Select a container...",
+				"filterByName": "Filter by name...",
 				"defaultCpuPeriod": "Default: 100000",
 				"selectCapabilityAdd": "Select capability to add...",
 				"selectCapabilityDrop": "Select capability to drop...",
@@ -1272,11 +1291,17 @@
 			"help": {
 				"unlimitedRetries": "Leave empty for unlimited retries",
 				"additionalNetworks": "Container will be connected to selected networks in addition to the network mode above",
+				"selectContainerForNetworkNamespace": "Select a container to share its network namespace",
 				"resourceLimits": "Configure memory and CPU limits for this container",
 				"liveUpdateNoRestart": "Saving these changes will not restart or recreate the container",
 				"microsecondsPerPeriod": "Microseconds per period",
 				"periodInMicroseconds": "Period in microseconds",
 				"commonSecurityOptions": "Common options: no-new-privileges, seccomp=unconfined, apparmor=unconfined"
+			},
+			"empty": {
+				"noNetworksFound": "No networks found.",
+				"noContainersFound": "No containers found.",
+				"allNetworksAttached": "All networks already attached"
 			},
 			"portHelp": {
 				"supportedFormats": "Supported host port formats:",
@@ -2027,6 +2052,9 @@
 			"logBufferSize": "Log buffer size (KB)",
 			"logBufferSizeDescription": "Maximum log buffer per container panel. Older logs are truncated when exceeded.",
 			"logBufferSizeUpdated": "Log buffer size updated",
+			"logMaxLines": "Log buffer size",
+			"logMaxLinesDescription": "Maximum number of log lines kept per container panel. Older lines are dropped when the limit is exceeded.",
+			"logMaxLinesUpdated": "Log buffer size updated",
 			"highLogBufferWarning": "High values may degrade browser performance with verbose containers. Recommended: 250-1000 KB.",
 			"downloadFormat": "Download format",
 			"downloadFormatDescription": "Archive format when downloading files from containers",

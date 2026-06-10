@@ -109,12 +109,6 @@
 	let labels = $state<{ key: string; value: string }[]>([{ key: '', value: '' }]);
 
 	// Networks
-	interface DockerNetwork {
-		id: string;
-		name: string;
-		driver: string;
-	}
-	let availableNetworks = $state<DockerNetwork[]>([]);
 	let selectedNetworks = $state<string[]>([]);
 	let networkConfigs = $state<Record<string, { ipv4Address: string; ipv6Address: string; aliases: string }>>({});
 	let macAddress = $state('');
@@ -248,18 +242,6 @@
 	let editTitleName = $state('');
 	let renamingTitle = $state(false);
 
-	async function fetchNetworks() {
-		try {
-			const envParam = currentEnvId ? `?env=${currentEnvId}` : '';
-			const response = await fetch(`/api/networks${envParam}`);
-			if (response.ok) {
-				availableNetworks = await response.json();
-			}
-		} catch (err) {
-			console.error('Failed to fetch networks:', err);
-		}
-	}
-
 	// Inline title rename functions
 	let titleInputRef: HTMLInputElement | null = null;
 
@@ -360,13 +342,13 @@
 			restartPolicy = data.HostConfig.RestartPolicy?.Name || 'no';
 			restartMaxRetries = data.HostConfig.RestartPolicy?.MaximumRetryCount ?? '';
 
-			// Normalize network mode
+			// Normalize network mode. NetworkMode can be:
+			//   - bridge / host / none / default → built-in modes
+			//   - container:<id|name> → shared namespace
+			//   - <custom-network-name> → primary network is that custom network
+			// We preserve the raw value (except map "default" → "bridge" since they're equivalent).
 			const rawNetworkMode = data.HostConfig.NetworkMode || 'bridge';
-			if (['bridge', 'host', 'none', 'default'].includes(rawNetworkMode)) {
-				networkMode = rawNetworkMode === 'default' ? 'bridge' : rawNetworkMode;
-			} else {
-				networkMode = 'bridge';
-			}
+			networkMode = rawNetworkMode === 'default' ? 'bridge' : rawNetworkMode;
 
 			// Parse port mappings (include HostIp if present)
 			const ports = data.HostConfig.PortBindings || {};
@@ -426,9 +408,10 @@
 				composeStackName = '';
 			}
 
-			// Parse connected networks
+			// Parse connected networks. selectedNetworks holds ADDITIONAL networks only —
+			// the primary lives in networkMode, never in this list (Portainer-style).
 			const networks = data.NetworkSettings?.Networks || {};
-			selectedNetworks = Object.keys(networks);
+			selectedNetworks = Object.keys(networks).filter(n => n !== networkMode);
 
 			// Parse per-network IP/alias config from NetworkSettings
 			const parsedNetConfigs: Record<string, { ipv4Address: string; ipv6Address: string; aliases: string }> = {};
@@ -565,8 +548,7 @@
 			runtime = (data.HostConfig?.Runtime && data.HostConfig.Runtime !== 'runc')
 				? data.HostConfig.Runtime : '';
 
-			// Fetch available networks and auto-update settings
-			await fetchNetworks();
+			// Fetch auto-update settings
 			await fetchAutoUpdateSettings(name);
 
 			// Store original config for change detection
@@ -1034,36 +1016,47 @@
 					image: image.trim(),
 					ports: Object.keys(ports).length > 0 ? ports : null,
 					volumeBinds: volumeBinds.length > 0 ? volumeBinds : null,
-					env: env.length > 0 ? env : undefined,
+					// Fields the form manages: send `null` when the user cleared them
+					// so the server can distinguish "cleared" from "absent" (#1119).
+					// Server's updateContainer merges payload over existing config and
+					// treats explicit null as "clear this field" — undefined would be
+					// dropped by JSON.stringify and the merge would preserve the old value.
+					env: env.length > 0 ? env : null,
 					labels: labelsObj,
 					cmd,
 					restartPolicy,
-					restartMaxRetries: restartPolicy === 'on-failure' && restartMaxRetries !== '' ? Number(restartMaxRetries) : undefined,
+					restartMaxRetries: restartPolicy === 'on-failure' && restartMaxRetries !== '' ? Number(restartMaxRetries) : null,
 					networkMode,
-					networks: selectedNetworks.length > 0 ? selectedNetworks : undefined,
-					networkConfigs: Object.keys(netConfigs).length > 0 ? netConfigs : undefined,
-					macAddress: macAddress.trim() || undefined,
+					// Additional networks only — primary is networkMode. Shared modes
+					// (host/none/container:X) reject extras; UI already hides the section.
+					additionalNetworks: (() => {
+						const isSharedMode = networkMode === 'host' || networkMode === 'none' || networkMode.startsWith('container:');
+						if (isSharedMode) return null;
+						return selectedNetworks.length > 0 ? selectedNetworks : null;
+					})(),
+					networkConfigs: Object.keys(netConfigs).length > 0 ? netConfigs : null,
+					macAddress: macAddress.trim() || null,
 					startAfterUpdate,
 					repullImage,
 					user: containerUser.trim() || null,
 					privileged: privilegedMode,
 					healthcheck,
-					memory: parseMemory(memoryLimit),
-					memoryReservation: parseMemory(memoryReservation),
-					cpuShares: cpuShares ? parseInt(cpuShares) : undefined,
-					nanoCpus: parseNanoCpus(nanoCpus),
-					cpuQuota: cpuQuota ? parseInt(cpuQuota) : undefined,
-					cpuPeriod: cpuPeriod ? parseInt(cpuPeriod) : undefined,
-					capAdd: capAdd.length > 0 ? capAdd : undefined,
-					capDrop: capDrop.length > 0 ? capDrop : undefined,
-					devices: devices.length > 0 ? devices : undefined,
-					deviceRequests,
+					memory: parseMemory(memoryLimit) ?? null,
+					memoryReservation: parseMemory(memoryReservation) ?? null,
+					cpuShares: cpuShares ? parseInt(cpuShares) : null,
+					nanoCpus: parseNanoCpus(nanoCpus) ?? null,
+					cpuQuota: cpuQuota ? parseInt(cpuQuota) : null,
+					cpuPeriod: cpuPeriod ? parseInt(cpuPeriod) : null,
+					capAdd: capAdd.length > 0 ? capAdd : null,
+					capDrop: capDrop.length > 0 ? capDrop : null,
+					devices: devices.length > 0 ? devices : null,
+					deviceRequests: deviceRequests ?? null,
 					runtime: runtime || null,
-					dns: dnsServers.length > 0 ? dnsServers : undefined,
-					dnsSearch: dnsSearch.length > 0 ? dnsSearch : undefined,
-					dnsOptions: dnsOptions.length > 0 ? dnsOptions : undefined,
-					securityOpt: securityOptions.length > 0 ? securityOptions : undefined,
-					ulimits: ulimitsArray.length > 0 ? ulimitsArray : undefined
+					dns: dnsServers.length > 0 ? dnsServers : null,
+					dnsSearch: dnsSearch.length > 0 ? dnsSearch : null,
+					dnsOptions: dnsOptions.length > 0 ? dnsOptions : null,
+					securityOpt: securityOptions.length > 0 ? securityOptions : null,
+					ulimits: ulimitsArray.length > 0 ? ulimitsArray : null
 				};
 
 				const response = await fetch(appendEnvParam(`/api/containers/${containerId}/update`, $currentEnvironment?.id), {
@@ -1219,7 +1212,6 @@
 					bind:volumeMappings
 					bind:envVars
 					bind:labels
-					{availableNetworks}
 					bind:selectedNetworks
 					bind:networkConfigs
 					bind:macAddress

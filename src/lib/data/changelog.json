@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.0.32",
+    "date": "2026-06-06",
+    "changes": [
+      { "type": "feature", "text": "container details tweaks: process count, label filter, copy all labels (#812)" },
+      { "type": "feature", "text": "log improvements (#1130)" },
+      { "type": "fix", "text": "cleared Resources fields not persisted on container edit (#1119)" },
+      { "type": "fix", "text": "long container names overflowed in activity event details dialog (#1129)" },
+      { "type": "fix", "text": "git stack recreate and start operations ignored Dockhand-stored env vars (#1132)" },
+      { "type": "fix", "text": "dashboard stopped count reset to 0 after refresh for gracefully stopped containers (#1133)" },
+      { "type": "fix", "text": "auto-update preserves runtime `-e` env and `-l` label overrides (#1135)" },
+      { "type": "fix", "text": "git stack volume binds resolved to wrong host path when compose was in a subdirectory (#1139)" },
+      { "type": "fix", "text": "git stacks: subdir compose files now find their adjacent env files (#1136)" },
+      { "type": "feature", "text": "env editor doesn't flag Docker/Compose built-in variables as unused (#141)" },
+      { "type": "feature", "text": "container network mode: share another container's network namespace (#161)" }
+    ],
+    "imageTag": "fnsys/dockhand:v1.0.32"
+  },
+  {
     "version": "1.0.31",
     "date": "2026-05-30",
     "changes": [

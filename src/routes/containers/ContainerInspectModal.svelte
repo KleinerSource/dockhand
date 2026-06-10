@@ -39,6 +39,23 @@
 	let loading = $state(true);
 	let error = $state('');
 	let containerData = $state<any>(null);
+	// Peer containers in the current env — used to resolve "container:<sha>" mode to a friendly name
+	let peerContainers = $state<Array<{ id: string; name: string }>>([]);
+
+	const networkModeLabel = $derived.by(() => {
+		const raw = containerData?.HostConfig?.NetworkMode || 'default';
+		if (!raw.startsWith('container:')) return raw;
+		const ref = raw.slice('container:'.length);
+		const match = peerContainers.find(c => c.id === ref || c.id.startsWith(ref));
+		return match ? `container:${match.name}` : raw;
+	});
+
+	// Docker rejects attaching extra networks when the container shares another
+	// namespace (host / none / container:X / service:X). Hide join controls then.
+	const isSharedNetworkMode = $derived.by(() => {
+		const mode = containerData?.HostConfig?.NetworkMode || '';
+		return mode === 'host' || mode === 'none' || mode.startsWith('container:') || mode.startsWith('service:');
+	});
 
 	// Active tab state for layers visibility
 	let activeTab = $state('overview');
@@ -53,12 +70,27 @@
 	// Label copy state
 	let copiedLabel = $state<string | null>(null);
 	let copyLabelFailed = $state(false);
+	let labelFilter = $state('');
+	let copiedAllLabels = $state(false);
 
 	async function copyLabel(key: string, value: string) {
 		const ok = await copyToClipboard(`${key}=${value}`);
 		if (ok) {
 			copiedLabel = key;
 			setTimeout(() => copiedLabel = null, 2000);
+		} else {
+			copyLabelFailed = true;
+			setTimeout(() => copyLabelFailed = false, 2000);
+		}
+	}
+
+	async function copyAllLabels(entries: [string, string][]) {
+		if (entries.length === 0) return;
+		const text = entries.map(([k, v]) => `${k}=${v}`).join('\n');
+		const ok = await copyToClipboard(text);
+		if (ok) {
+			copiedAllLabels = true;
+			setTimeout(() => copiedAllLabels = false, 2000);
 		} else {
 			copyLabelFailed = true;
 			setTimeout(() => copyLabelFailed = false, 2000);
@@ -282,6 +314,9 @@
 	$effect(() => {
 		if (open && containerData?.State?.Running) {
 			startStatsCollection();
+			// One-shot fetch so the Overview's process count tile renders
+			// immediately, even if the user never opens the Processes tab.
+			if (!processesData) fetchProcesses();
 		} else {
 			stopStatsCollection();
 		}
@@ -318,6 +353,7 @@
 			lastFetchedId = '';
 			isLiveConnected = false;
 			lastStatsUpdate = 0;
+			labelFilter = '';
 			displayName = '';
 			isEditing = false;
 			editName = '';
@@ -336,6 +372,19 @@
 				throw new Error(translate('containers.inspect.errors.fetchContainerDetails'));
 			}
 			containerData = await response.json();
+			// Fetch peers only when this container shares another container's namespace —
+			// keeps the dialog snappy when the network mode is bridge/host/none/custom.
+			if (containerData?.HostConfig?.NetworkMode?.startsWith('container:')) {
+				try {
+					const peersRes = await fetch(appendEnvParam('/api/containers', envId));
+					if (peersRes.ok) {
+						const list = await peersRes.json();
+						peerContainers = list.map((c: any) => ({ id: c.id, name: c.name }));
+					}
+				} catch {
+					// Non-fatal — falls back to the raw SHA
+				}
+			}
 		} catch (err: any) {
 			error = err.message || translate('containers.inspect.errors.loadContainerDetails');
 			console.error('Failed to fetch container inspect:', err);
@@ -588,7 +637,7 @@
 						class="ml-auto mr-6"
 					>
 						<Code class="w-4 h-4 mr-1.5" />
-						JSON
+						Inspect
 					</Button>
 				{/if}
 			</Dialog.Title>
@@ -624,7 +673,7 @@
 					<Tabs.Content value="overview" class="space-y-4 overflow-auto">
 						<!-- Real-time Stats (only for running containers) -->
 						{#if containerData.State?.Running}
-							<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+							<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
 								<!-- CPU -->
 								<div class="p-3 border border-border rounded-lg">
 									<div class="flex items-center gap-2 mb-2">
@@ -708,6 +757,30 @@
 											<span class="text-muted-foreground">{$t('containers.fileBrowser.permissions.write')}:</span>
 											<span class="font-mono">{formatBytes(currentStats?.blockWrite ?? 0)}</span>
 										</div>
+									</div>
+								</div>
+								<!-- Processes -->
+								<div class="p-3 border border-border rounded-lg">
+									<div class="flex items-center gap-2 mb-2">
+										<Activity class="w-4 h-4 text-pink-500" />
+										<span class="text-xs font-medium">Processes</span>
+										<button
+											type="button"
+											class="ml-auto text-sm font-bold hover:text-foreground/80 transition-colors"
+											onclick={() => activeTab = 'processes'}
+											title="View process list"
+										>
+											{processesData?.Processes?.length ?? '—'}
+										</button>
+									</div>
+									<div class="h-8 flex items-center justify-center text-2xs text-muted-foreground">
+										{#if processesData?.Processes?.length}
+											running in container
+										{:else if processesLoading}
+											<Loader2 class="w-3 h-3 animate-spin" />
+										{:else}
+											—
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -866,7 +939,7 @@
 						<!-- Network Mode -->
 						<div class="space-y-2">
 							<h3 class="text-sm font-semibold">{$t('containers.settings.labels.networkMode')}</h3>
-							<Badge variant="outline">{containerData.HostConfig?.NetworkMode || 'default'}</Badge>
+							<Badge variant="outline">{networkModeLabel}</Badge>
 						</div>
 
 						<!-- DNS Settings -->
@@ -919,7 +992,13 @@
 						<!-- Networks -->
 						<div class="space-y-2">
 							<h3 class="text-sm font-semibold">{$t('containers.inspect.sections.connectedNetworks')}</h3>
-							{#if containerData.NetworkSettings?.Networks && Object.keys(containerData.NetworkSettings.Networks).length > 0}
+							{#if isSharedNetworkMode}
+								<p class="text-xs text-muted-foreground">
+									{$t('containers.inspect.network.sharedNamespacePrefix')}
+									<code class="px-1 py-0.5 rounded bg-muted">{containerData.HostConfig?.NetworkMode}</code>
+									{$t('containers.inspect.network.sharedNamespaceSuffix')}
+								</p>
+							{:else if containerData.NetworkSettings?.Networks && Object.keys(containerData.NetworkSettings.Networks).length > 0}
 								<div class="space-y-2">
 									{#each Object.entries(containerData.NetworkSettings.Networks) as [networkName, networkData]}
 									{@const netData = networkData as any}
@@ -986,7 +1065,7 @@
 							{/if}
 
 							<!-- Join network dropdown -->
-							{#if containerData.State?.Running}
+							{#if containerData.State?.Running && !isSharedNetworkMode}
 								<div class="flex items-center gap-2 pt-1">
 									<Select.Root type="single" bind:value={selectedNetwork}>
 										<Select.Trigger class="flex-1 h-8 text-xs">
@@ -1153,12 +1232,23 @@
 
 					<!-- Environment Tab -->
 					<Tabs.Content value="env" class="space-y-4 overflow-auto">
+						{#if containerData.divergence?.env?.length > 0}
+							<div class="flex items-start gap-2 text-xs p-2.5 rounded border border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-300">
+								<Info class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+								<div class="min-w-0">
+									{containerData.divergence.env.length} env var{containerData.divergence.env.length === 1 ? '' : 's'} differ from the image:
+									<span class="font-mono">{containerData.divergence.env.join(', ')}</span>.
+									Values set by you at create time will stay. To reset to the image's current values, Remove &amp; Deploy.
+								</div>
+							</div>
+						{/if}
 						{#if containerData.Config?.Env && containerData.Config.Env.length > 0}
 							<div class="space-y-1">
 								{#each [...containerData.Config.Env].sort((a, b) => a.split('=')[0].localeCompare(b.split('=')[0])) as envVar}
 									{@const [key, ...valueParts] = envVar.split('=')}
 									{@const value = valueParts.join('=')}
-									<div class="text-xs p-2 bg-muted rounded">
+									{@const diverges = containerData.divergence?.env?.includes(key)}
+									<div class="text-xs p-2 rounded {diverges ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-muted'}">
 										<code class="text-muted-foreground font-medium">{key}</code>
 										<code class="text-muted-foreground">=</code>
 										<code class="break-all">{value}</code>
@@ -1171,31 +1261,79 @@
 					</Tabs.Content>
 
 					<!-- Labels Tab -->
-					<Tabs.Content value="labels" class="space-y-4 overflow-auto">
-						{#if containerData.Config?.Labels && Object.keys(containerData.Config.Labels).length > 0}
-							<div class="space-y-1">
-								{#each Object.entries(containerData.Config.Labels).sort((a, b) => a[0].localeCompare(b[0])) as [key, value]}
-									<div class="text-xs p-2 bg-muted rounded flex items-start gap-2 group">
-										<div class="flex-1 min-w-0">
-											<code class="text-muted-foreground font-medium">{key}</code>
-											<code class="text-muted-foreground">=</code>
-											<code class="break-all">{value}</code>
-										</div>
-										<button
-											type="button"
-											onclick={() => copyLabel(key, value)}
-											class="shrink-0 p-1 rounded hover:bg-background/50 transition-colors opacity-0 group-hover:opacity-100 {copiedLabel === key ? '!opacity-100' : ''}"
-											title={copiedLabel === key ? $t('containers.inspect.copy.copied') : $t('containers.inspect.copy.copyLabel')}
-										>
-											{#if copiedLabel === key}
-												<Check class="w-3 h-3 text-green-500" />
-											{:else}
-												<Copy class="w-3 h-3 text-muted-foreground" />
-											{/if}
-										</button>
-									</div>
-								{/each}
+					<Tabs.Content value="labels" class="space-y-3 overflow-auto">
+						{#if containerData.divergence?.labels?.length > 0}
+							<div class="flex items-start gap-2 text-xs p-2.5 rounded border border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-300">
+								<Info class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+								<div class="min-w-0">
+									{$t('containers.inspect.labelList.divergenceSummary', { count: containerData.divergence.labels.length })}:
+									<span class="font-mono">{containerData.divergence.labels.join(', ')}</span>.
+									{$t('containers.inspect.labelList.divergenceHelp')}
+								</div>
 							</div>
+						{/if}
+						{#if containerData.Config?.Labels && Object.keys(containerData.Config.Labels).length > 0}
+							{@const allLabels = Object.entries(containerData.Config.Labels).sort((a, b) => a[0].localeCompare(b[0]))}
+							{@const filter = labelFilter.trim().toLowerCase()}
+							{@const visibleLabels = filter
+								? allLabels.filter(([k, v]) => k.toLowerCase().includes(filter) || String(v).toLowerCase().includes(filter))
+								: allLabels}
+							<div class="flex items-center gap-2">
+								<Input
+									type="search"
+									placeholder={$t('containers.inspect.labelList.filterPlaceholder')}
+									bind:value={labelFilter}
+									class="h-8 text-xs flex-1"
+								/>
+								<span class="text-xs text-muted-foreground shrink-0">
+									{visibleLabels.length === allLabels.length
+										? $t('containers.inspect.labelList.count', { count: allLabels.length })
+										: $t('containers.inspect.labelList.filteredCount', { visible: visibleLabels.length, total: allLabels.length })}
+								</span>
+								<Button
+									variant="outline"
+									size="sm"
+									onclick={() => copyAllLabels(visibleLabels)}
+									disabled={visibleLabels.length === 0}
+									title={copiedAllLabels ? $t('containers.inspect.copy.copied') : $t('containers.inspect.labelList.copyVisible')}
+								>
+									{#if copiedAllLabels}
+										<Check class="w-3 h-3 mr-1.5 text-green-500" />
+										{$t('containers.inspect.copy.copied')}
+									{:else}
+										<Copy class="w-3 h-3 mr-1.5" />
+										{$t('containers.inspect.labelList.copyAll')}
+									{/if}
+								</Button>
+							</div>
+							{#if visibleLabels.length > 0}
+								<div class="space-y-1">
+									{#each visibleLabels as [key, value]}
+										{@const diverges = containerData.divergence?.labels?.includes(key)}
+										<div class="text-xs p-2 rounded flex items-start gap-2 group {diverges ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-muted'}">
+											<div class="flex-1 min-w-0">
+												<code class="text-muted-foreground font-medium">{key}</code>
+												<code class="text-muted-foreground">=</code>
+												<code class="break-all">{value}</code>
+											</div>
+											<button
+												type="button"
+												onclick={() => copyLabel(key, value)}
+												class="shrink-0 p-1 rounded hover:bg-background/50 transition-colors opacity-0 group-hover:opacity-100 {copiedLabel === key ? '!opacity-100' : ''}"
+												title={copiedLabel === key ? $t('containers.inspect.copy.copied') : $t('containers.inspect.copy.copyLabel')}
+											>
+												{#if copiedLabel === key}
+													<Check class="w-3 h-3 text-green-500" />
+												{:else}
+													<Copy class="w-3 h-3 text-muted-foreground" />
+												{/if}
+											</button>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<p class="text-sm text-muted-foreground">{$t('containers.inspect.labelList.noMatch', { query: labelFilter })}</p>
+							{/if}
 						{:else}
 							<p class="text-sm text-muted-foreground">{$t('containers.inspect.empty.noLabels')}</p>
 						{/if}
@@ -1533,7 +1671,7 @@
 	</Dialog.Content>
 </Dialog.Root>
 
-<!-- Raw JSON Modal -->
+<!-- Inspect (raw) modal -->
 <Dialog.Root bind:open={showRawJson}>
 	<Dialog.Content class="max-w-4xl max-h-[90vh] sm:max-h-[80vh] flex flex-col">
 		<Dialog.Header class="shrink-0">

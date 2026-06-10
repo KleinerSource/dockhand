@@ -385,12 +385,12 @@ export function extractUidFromSocketPath(socketPath: string): string | null {
 export function rewriteComposeVolumePathsWithHostDir(composeContent: string, hostWorkingDir: string): { content: string; modified: boolean; changes: string[] } {
 	const changes: string[] = [];
 
-	// Parse compose content line by line to find and rewrite volume mounts
+	// Parse compose content line by line to find and rewrite volume mounts.
 	// We look for patterns like:
 	//   - ./something:/container/path
 	//   - ../something:/container/path
 	//   - "./something:/container/path"
-	//   - './something:/container/path'
+	//   - '../something:/container/path'
 	const lines = composeContent.split('\n');
 	const modifiedLines: string[] = [];
 
@@ -427,14 +427,48 @@ export function rewriteComposeVolumePathsWithHostDir(composeContent: string, hos
 }
 
 export function rewriteComposeVolumePaths(composeContent: string, workingDir: string): { content: string; modified: boolean; changes: string[] } {
-	// Try to translate workingDir to host path using ANY cached mount
-	// This handles both DATA_DIR mounts and external mounts (e.g., /external-stacks)
-	const hostWorkingDir = translateContainerPathViaMount(workingDir);
+	const changes: string[] = [];
 
-	if (!hostWorkingDir) {
-		// Can't translate - workingDir is not under any known mount
-		return { content: composeContent, modified: false, changes: [] };
+	// Parse compose content line by line to find and rewrite volume mounts.
+	// Resolve each relative source against the compose file directory before
+	// translating it via the matching mount, so ../ paths can cross mount roots.
+	const lines = composeContent.split('\n');
+	const modifiedLines: string[] = [];
+
+	for (const line of lines) {
+		const volumeMatch = line.match(/^(\s*-\s*)(['"]?)((?:\.{1,2}\/)[^'":\s]+)(\2)(:.+)$/);
+		const sourceMatch = line.match(/^(\s*source:\s*)(['"]?)((?:\.{1,2}\/)[^'"\s]+)(\2)(\s*(?:#.*)?)$/);
+
+		if (volumeMatch) {
+			const [, prefix, , relativeSrc, , destPart] = volumeMatch;
+			const absoluteContainerPath = resolve(workingDir, relativeSrc);
+			const absoluteHostPath = translateContainerPathViaMount(absoluteContainerPath);
+
+			if (absoluteHostPath) {
+				modifiedLines.push(`${prefix}${absoluteHostPath}${destPart}`);
+				changes.push(`  ${relativeSrc} -> ${absoluteHostPath}`);
+			} else {
+				modifiedLines.push(line);
+			}
+		} else if (sourceMatch) {
+			const [, prefix, , relativeSrc, , suffix] = sourceMatch;
+			const absoluteContainerPath = resolve(workingDir, relativeSrc);
+			const absoluteHostPath = translateContainerPathViaMount(absoluteContainerPath);
+
+			if (absoluteHostPath) {
+				modifiedLines.push(`${prefix}${absoluteHostPath}${suffix}`);
+				changes.push(`  ${relativeSrc} -> ${absoluteHostPath}`);
+			} else {
+				modifiedLines.push(line);
+			}
+		} else {
+			modifiedLines.push(line);
+		}
 	}
 
-	return rewriteComposeVolumePathsWithHostDir(composeContent, hostWorkingDir);
+	return {
+		content: modifiedLines.join('\n'),
+		modified: changes.length > 0,
+		changes
+	};
 }

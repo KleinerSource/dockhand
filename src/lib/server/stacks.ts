@@ -1103,6 +1103,16 @@ async function readComposeOverrideFile(
 /**
  * Execute a docker compose command locally via child_process.spawn.
  *
+ * Heads up on paths: `stackDir` is the cpSync target / fallback working
+ * directory, but it's not always where the compose file lives — git stacks
+ * with a contextDir can put the compose file in a subdirectory. Anything
+ * compose-adjacent (spawn cwd, .env discovery, compose.override.yaml
+ * lookup, .env.dockhand write, volume-path rewriter) anchors on
+ * `composeFileDir = dirname(composeFile)`. The two are equal for the
+ * common case and the change is transparent; only the subdir case is
+ * affected. If you add anything new that touches a compose-adjacent file,
+ * use `composeFileDir`, not `stackDir`.
+ *
  * @param tlsConfig - TLS configuration for remote Docker connections (certs written to temp files)
  * @param envVars - Non-secret environment variables (from .env file, passed for backward compat)
  * @param secretVars - Secret environment variables (injected via shell env, NEVER written to disk)
@@ -1155,13 +1165,22 @@ async function executeLocalCompose(
 		writeFileSync(composeFile, composeContent);
 	}
 
+	// Anchor for everything compose-adjacent: the directory the compose file
+	// itself lives in. Equal to stackDir for the common case (compose at
+	// stack root), but different when a git stack puts the compose file in
+	// a subdirectory of the context dir. Bugs #1136 and #1139 both stemmed
+	// from anchoring on stackDir instead of this.
+	const composeFileDir = dirname(composeFile);
+
 	// Rewrite relative volume paths for host path translation (in memory only, not saved to disk)
 	// This is needed when Dockhand runs inside Docker - the Docker daemon on the host
 	// can't see container paths like /app/data/..., so we translate them to host paths
 	// Only do this for local Docker (no dockerHost) - for remote Docker the paths wouldn't make sense
+	// Resolve relative paths against the COMPOSE FILE'S directory, not stackDir, so
+	// subdir compose files with ./ and ../ binds resolve correctly (#1139).
 	let finalComposeContent = composeContent;
 	if (!dockerHost && getHostDataDir()) {
-		const rewriteResult = rewriteComposeVolumePaths(composeContent, stackDir);
+		const rewriteResult = rewriteComposeVolumePaths(composeContent, composeFileDir);
 		if (rewriteResult.modified) {
 			finalComposeContent = rewriteResult.content;
 			console.log(`${logPrefix} [HostPath] Translating relative volume paths for Docker host:`);
@@ -1199,8 +1218,24 @@ async function executeLocalCompose(
 	}
 
 	// Check if .env file exists on disk (for legacy support decision)
-	const defaultEnvPath = join(stackDir, '.env');
+	const defaultEnvPath = join(composeFileDir, '.env');
 	const hasEnvFile = existsSync(defaultEnvPath) || (customEnvPath && existsSync(customEnvPath));
+
+	// One-line audit of all path notions used below. Next time something is
+	// off (compose can't find a file, volume bind points at the wrong
+	// place, env vars don't reach the container), grep for "[PathAudit]"
+	// in the log — the mismatch is usually obvious. The "subdir=yes" flag
+	// is the canary for the case where stackDir and composeFileDir diverge.
+	console.log(
+		`${logPrefix} [PathAudit] ` +
+		`stackDir=${stackDir} ` +
+		`composeFile=${composeFile} ` +
+		`composeFileDir=${composeFileDir} ` +
+		`subdir=${composeFileDir !== stackDir ? 'yes' : 'no'} ` +
+		`defaultEnvPath=${defaultEnvPath} (exists=${existsSync(defaultEnvPath)}) ` +
+		`customEnvPath=${customEnvPath ?? '(none)'}` +
+		(customEnvPath ? ` (exists=${existsSync(customEnvPath)})` : '')
+	);
 
 	// LEGACY SUPPORT: Only inject envVars via shell if NO .env file exists
 	// This is for stacks created with older Dockhand versions that stored env vars
@@ -1263,14 +1298,14 @@ async function executeLocalCompose(
 		// Host path translation: must pipe modified content via stdin
 		args.push('-f', '-');
 		// Also include override file if it exists (needs path translation too)
-		const overrideFile = findComposeOverrideFile(stackDir, basename(composeFile));
+		const overrideFile = findComposeOverrideFile(composeFileDir, basename(composeFile));
 		if (overrideFile) {
 			let overrideContent = readFileSync(overrideFile, 'utf-8');
 			if (getHostDataDir()) {
-				const rewrite = rewriteComposeVolumePaths(overrideContent, stackDir);
+				const rewrite = rewriteComposeVolumePaths(overrideContent, composeFileDir);
 				if (rewrite.modified) overrideContent = rewrite.content;
 			}
-			tempOverridePath = join(stackDir, '.compose.override.translated.yaml');
+			tempOverridePath = join(composeFileDir, '.compose.override.translated.yaml');
 			writeFileSync(tempOverridePath, overrideContent);
 			args.push('-f', tempOverridePath);
 			console.log(`${logPrefix} Including override file (path-translated): ${basename(overrideFile)}`);
@@ -1278,7 +1313,7 @@ async function executeLocalCompose(
 	} else if (customComposePath) {
 		// Custom path (imported/adopted stacks): must use -f to point to non-standard location
 		args.push('-f', composeFile);
-		const overrideFile = findComposeOverrideFile(stackDir, basename(composeFile));
+		const overrideFile = findComposeOverrideFile(composeFileDir, basename(composeFile));
 		if (overrideFile) {
 			args.push('-f', overrideFile);
 			console.log(`${logPrefix} Including override file: ${basename(overrideFile)}`);
@@ -1304,7 +1339,7 @@ async function executeLocalCompose(
 	// Only written when useOverrideFile is true (git stacks). Internal/adopted stacks
 	// already have their non-secrets in the .env file written by the UI.
 	if (useOverrideFile && envVars && Object.keys(envVars).length > 0) {
-		const overrideEnvPath = join(stackDir, '.env.dockhand');
+		const overrideEnvPath = join(composeFileDir, '.env.dockhand');
 		const header = '# Auto-generated by Dockhand. Do not edit - changes will be overwritten on next deploy.\n';
 		const lines = Object.entries(envVars).map(([k, v]) => `${k}=${v}`);
 		writeFileSync(overrideEnvPath, header + lines.join('\n') + '\n');
@@ -1374,9 +1409,9 @@ async function executeLocalCompose(
 	}
 
 	try {
-		console.log(`${logPrefix} Spawning docker compose process...`);
+		console.log(`${logPrefix} Spawning docker compose process from ${composeFileDir}: ${args.join(' ')}`);
 		const proc = nodeSpawn(args[0], args.slice(1), {
-			cwd: stackDir,
+			cwd: composeFileDir,
 			env: spawnEnv,
 			stdio: [useStdin ? 'pipe' : 'inherit', 'pipe', 'pipe']
 		});
@@ -2188,7 +2223,19 @@ export async function startStack(
 		return withContainerFallback(stackName, envId, 'start');
 	}
 
-	const opts = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem };
+	// Check if this is a git stack - git stacks need useOverrideFile to write .env.dockhand
+	const source = await getStackSource(stackName, envId);
+	const isGitStack = source?.sourceType === 'git';
+
+	const opts: ComposeCommandOptions = {
+		stackName,
+		envId,
+		workingDir: result.stackDir,
+		composePath: result.composePath,
+		envPath: result.envPath,
+		useOverrideFile: isGitStack,
+		filesystem: result.filesystem
+	};
 
 	// Check if containers exist for this stack. If they do, use 'start' to resume
 	// them (preserves container IDs, avoids Traefik race conditions from recreation).
@@ -2256,7 +2303,21 @@ export async function restartStack(
 		return withContainerFallback(stackName, envId, 'restart');
 	}
 
-	const opts: ComposeCommandOptions = { stackName, envId, workingDir: result.stackDir, composePath: result.composePath, envPath: result.envPath, filesystem: result.filesystem };
+	// Git stacks need useOverrideFile to write .env.dockhand with DB overrides.
+	// Non-git stacks still pass nonSecretVars for legacy support (stacks without
+	// .env files on disk get vars injected via shell env at executeLocalCompose).
+	const source = await getStackSource(stackName, envId);
+	const isGitStack = source?.sourceType === 'git';
+
+	const opts: ComposeCommandOptions = {
+		stackName,
+		envId,
+		workingDir: result.stackDir,
+		composePath: result.composePath,
+		envPath: result.envPath,
+		useOverrideFile: isGitStack,
+		filesystem: result.filesystem
+	};
 
 	let composeResult: StackOperationResult;
 

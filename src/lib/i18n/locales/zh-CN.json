@@ -1133,7 +1133,9 @@
 			"network": {
 				"loadingNetworks": "正在加载网络...",
 				"joinPlaceholder": "加入网络...",
-				"noAvailable": "无可用网络"
+				"noAvailable": "无可用网络",
+				"sharedNamespacePrefix": "网络命名空间通过",
+				"sharedNamespaceSuffix": "共享，无法附加额外网络。"
 			},
 			"processes": {
 				"count": "{count} 个进程"
@@ -1145,6 +1147,16 @@
 			},
 			"rawJson": {
 				"title": "原始 JSON"
+			},
+			"labelList": {
+				"divergenceSummary": "{count} 个标签与镜像不同",
+				"divergenceHelp": "创建时设置的值会保留。若要重置为镜像当前值，请执行移除并部署。",
+				"filterPlaceholder": "筛选标签...",
+				"count": "{count} 个标签",
+				"filteredCount": "{visible} / {total}",
+				"copyVisible": "以 key=value 行复制可见标签",
+				"copyAll": "复制全部",
+				"noMatch": "没有标签匹配“{query}”"
 			},
 			"toasts": {
 				"connectedToNetwork": "已连接到 {name}",
@@ -1197,6 +1209,8 @@
 				"restartPolicy": "重启策略",
 				"maxRetryCount": "最大重试次数",
 				"networkMode": "网络模式",
+				"additionalNetworks": "附加网络",
+				"customNetworks": "自定义网络",
 				"pullImageBeforeUpdate": "更新前拉取镜像",
 				"startAfterCreation": "创建后启动容器",
 				"startAfterUpdate": "更新后启动容器",
@@ -1239,11 +1253,16 @@
 			"networkModes": {
 				"bridge": "Bridge（桥接）",
 				"host": "Host（主机）",
-				"none": "None（无）"
+				"none": "None（无）",
+				"container": "容器",
+				"containerWithName": "容器：{name}"
 			},
 			"placeholders": {
 				"unlimited": "无限制",
 				"selectNetwork": "选择要添加的网络...",
+				"filterNetworks": "筛选网络...",
+				"selectContainer": "选择容器...",
+				"filterByName": "按名称筛选...",
 				"defaultCpuPeriod": "默认：100000",
 				"selectCapabilityAdd": "选择要添加的 capability...",
 				"selectCapabilityDrop": "选择要移除的 capability...",
@@ -1272,11 +1291,17 @@
 			"help": {
 				"unlimitedRetries": "留空表示无限重试",
 				"additionalNetworks": "容器会连接到选中的网络，同时保留上方网络模式",
+				"selectContainerForNetworkNamespace": "选择要共享其网络命名空间的容器",
 				"resourceLimits": "配置此容器的内存和 CPU 限制",
 				"liveUpdateNoRestart": "保存时不会重启或重新创建容器",
 				"microsecondsPerPeriod": "每个周期的微秒数",
 				"periodInMicroseconds": "周期长度，单位为微秒",
 				"commonSecurityOptions": "常用选项：no-new-privileges、seccomp=unconfined、apparmor=unconfined"
+			},
+			"empty": {
+				"noNetworksFound": "未找到网络。",
+				"noContainersFound": "未找到容器。",
+				"allNetworksAttached": "所有网络都已附加"
 			},
 			"portHelp": {
 				"supportedFormats": "支持的主机端口格式：",
@@ -2027,6 +2052,9 @@
 			"logBufferSize": "日志缓冲大小（KB）",
 			"logBufferSizeDescription": "每个容器面板的最大日志缓冲。超出后会截断较早日志。",
 			"logBufferSizeUpdated": "日志缓冲大小已更新",
+			"logMaxLines": "日志缓冲大小",
+			"logMaxLinesDescription": "每个容器面板保留的最大日志行数。超出限制后会丢弃较早日志。",
+			"logMaxLinesUpdated": "日志缓冲大小已更新",
 			"highLogBufferWarning": "较高数值可能降低浏览器处理高频日志容器时的性能。建议：250-1000 KB。",
 			"downloadFormat": "下载格式",
 			"downloadFormatDescription": "从容器下载文件时使用的归档格式",

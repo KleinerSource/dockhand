@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { X, GripHorizontal, RefreshCw, Copy, Download, WrapText, ArrowDownToLine, Search, ChevronUp, ChevronDown, Sun, Moon, Wifi, WifiOff, Pause, Play, Eraser, Filter, Clock, Tag, Hash } from 'lucide-svelte';
-	import { wrapHtmlLines } from '$lib/utils/log-lines';
 	import LogTimeRangeFilter from './LogTimeRangeFilter.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import * as Select from '$lib/components/ui/select';
@@ -9,9 +8,7 @@
 	import { themeStore } from '$lib/stores/theme';
 	import { getMonospaceFont } from '$lib/themes';
 	import { t, translate } from '$lib/i18n';
-	import { AnsiUp } from 'ansi_up';
-	const ansiUp = new AnsiUp();
-	ansiUp.use_classes = true;
+	import { parseLines, renderLineHtml, type LogEntry } from '$lib/utils/log-entry';
 
 	interface Props {
 		containerId: string;
@@ -25,7 +22,7 @@
 
 	let { containerId, containerName, visible, envId, fillHeight = false, showCloseButton = true, onClose }: Props = $props();
 
-	let logs = $state('');
+	let logs = $state<LogEntry[]>([]);
 	let loading = $state(false);
 	let logsRef: HTMLDivElement;
 	let panelRef: HTMLDivElement;
@@ -35,6 +32,14 @@
 	let showTimestamps = $state(typeof localStorage !== 'undefined' ? localStorage.getItem('dockhand-log-timestamps') !== 'false' : true);
 	let showContainerName = $state(typeof localStorage !== 'undefined' ? localStorage.getItem('dockhand-log-container-name') !== 'false' : true);
 	let showLineNumbers = $state(false);
+
+	function renderTimestamp(ts: string | undefined): string {
+		if (!ts) return '';
+		if ($appSettings.formatLogTimestamps) {
+			return formatLogTimestamps(ts + ' ').trimEnd();
+		}
+		return ts;
+	}
 
 	// SSE Streaming state
 	let streamingEnabled = $state(true);
@@ -48,10 +53,13 @@
 	const OFFLINE_POLL_INTERVAL = 5000; // Check every 5 seconds when offline
 	let offlinePollingInterval: ReturnType<typeof setInterval> | null = null;
 
-	// SSE batching - buffer incoming text and flush to state periodically
-	let pendingText = '';
-	let flushTimer: ReturnType<typeof setTimeout> | null = null;
-	const FLUSH_INTERVAL = 100; // ms
+	// SSE batching — collect parsed entries (and a carryover for split-across-chunk
+	// lines) and flush via microtask to coalesce a burst of "log" events into one
+	// state update. Compaction (slice to last MAX_LINES) runs at 2x cap.
+	let pendingEntries: LogEntry[] = [];
+	let streamCarryover = '';
+	let flushScheduled = false;
+	const COMPACT_FACTOR = 2;
 
 	// RAF-based auto-scroll
 	let scrollRafPending = false;
@@ -68,11 +76,9 @@
 	const tailOptions: Array<{ value: string; label?: string; labelKey?: string }> = [
 		{ value: '100', label: '100' },
 		{ value: '500', label: '500' },
-		{ value: '1000', label: '1K' },
-		{ value: '5000', label: '5K' },
-		{ value: '10000', label: '10K' },
-		{ value: 'all', labelKey: 'logs.tail.all' }
+		{ value: '1000', label: '1K' }
 	];
+	const VALID_TAIL_VALUES = new Set(tailOptions.map(o => o.value));
 
 	// Tail count and time range filter
 	let tailCount = $state('500');
@@ -96,8 +102,9 @@
 	}
 
 	function reloadLogs() {
-		logs = '';
-		pendingText = '';
+		logs = [];
+		pendingEntries = [];
+		streamCarryover = '';
 		if (streamingEnabled && containerId && visible) {
 			loading = true;
 			startStreaming();
@@ -145,7 +152,10 @@
 					if (settings.autoScroll !== undefined) autoScroll = settings.autoScroll;
 					if (settings.streamingEnabled !== undefined) streamingEnabled = settings.streamingEnabled;
 					if (settings.logSearchFilterMode !== undefined) logSearchFilterMode = settings.logSearchFilterMode;
-					if (settings.tailCount !== undefined) tailCount = settings.tailCount;
+					// Old saved value may be '5000'/'10000'/'all' — snap down to a supported option.
+				if (settings.tailCount !== undefined) {
+					tailCount = VALID_TAIL_VALUES.has(settings.tailCount) ? settings.tailCount : '1000';
+				}
 					if (settings.showLineNumbers !== undefined) showLineNumbers = settings.showLineNumbers;
 				} catch {
 					// Ignore parse errors
@@ -210,35 +220,72 @@
 		return `${url}${separator}env=${envId}`;
 	}
 
-	// Flush buffered text to state
+	// Schedule a microtask flush — coalesces multiple SSE log events arriving in
+	// the same tick. queueMicrotask is preferred over setTimeout(0) because it
+	// runs before the next paint, so autoscroll lands in the same frame.
+	function scheduleFlush() {
+		if (flushScheduled) return;
+		flushScheduled = true;
+		queueMicrotask(flushLogs);
+	}
+
 	function flushLogs() {
-		if (flushTimer) {
-			clearTimeout(flushTimer);
-			flushTimer = null;
-		}
-		if (!pendingText) return;
-
-		logs += pendingText;
-		pendingText = '';
-
-		// Apply log buffer size limit (convert KB to characters, roughly 1 char = 1 byte)
-		const maxSize = $appSettings.logBufferSizeKb * 1024;
-		if (logs.length > maxSize) {
-			logs = logs.substring(logs.length - Math.floor(maxSize * 0.8));
-		}
-
+		flushScheduled = false;
+		if (pendingEntries.length === 0) return;
+		const maxLines = $appSettings.logMaxLines;
+		// If the incoming batch alone exceeds the cap (initial tail replay with
+		// a big `tail=` value), trim it BEFORE concatenating. Otherwise we'd
+		// briefly grow the buffer to logs.length + pendingEntries.length entries
+		// — for tail=5000 that means 5000 DOM nodes appear in one frame.
+		const incoming = pendingEntries.length > maxLines
+			? pendingEntries.slice(pendingEntries.length - maxLines)
+			: pendingEntries;
+		// 2x soft cap on the retained buffer to amortize slice cost across flushes.
+		const next = logs.length + incoming.length <= maxLines * COMPACT_FACTOR
+			? [...logs, ...incoming]
+			: [...logs.slice(Math.max(0, logs.length + incoming.length - maxLines)), ...incoming];
+		logs = next;
+		pendingEntries = [];
 		scrollToBottom();
 	}
 
-	// RAF-based scroll to bottom (coalesces multiple calls into one frame)
+	// Threshold (px) for "still at the bottom". Wheel events and momentum scrolling
+	// can land a few px off — keep it generous enough to feel sticky.
+	const BOTTOM_STICKINESS_PX = 40;
+	// Suppress the scroll listener while WE are writing scrollTop. Without this,
+	// our own programmatic scroll fires the handler, sees distanceFromBottom≈0,
+	// and re-enables autoScroll the moment the user paused it.
+	let programmaticScroll = false;
+
 	async function scrollToBottom() {
 		if (!autoScroll || !logsRef || scrollRafPending) return;
 		scrollRafPending = true;
 		await tick();
 		requestAnimationFrame(() => {
-			if (logsRef) logsRef.scrollTop = logsRef.scrollHeight;
+			if (logsRef) {
+				programmaticScroll = true;
+				logsRef.scrollTop = logsRef.scrollHeight;
+				// Clear the flag on the next frame so user-initiated scroll after
+				// our write is treated as user input.
+				requestAnimationFrame(() => { programmaticScroll = false; });
+			}
 			scrollRafPending = false;
 		});
+	}
+
+	// Auto-disable auto-scroll when the user scrolls up; re-enable when they
+	// return to the bottom. Lets the user read history without fighting the stream.
+	function handleLogsScroll() {
+		if (programmaticScroll || !logsRef) return;
+		const distance = logsRef.scrollHeight - logsRef.scrollTop - logsRef.clientHeight;
+		const atBottom = distance < BOTTOM_STICKINESS_PX;
+		if (atBottom && !autoScroll) {
+			autoScroll = true;
+			saveSettings();
+		} else if (!atBottom && autoScroll) {
+			autoScroll = false;
+			saveSettings();
+		}
 	}
 
 	// Start SSE streaming for logs
@@ -267,20 +314,14 @@
 				try {
 					const data = JSON.parse(event.data);
 					if (data.text) {
-						// Add container name prefix to each line if available and enabled
-						let text = data.text;
-						if (data.containerName && showContainerName) {
-							const lines = text.split('\n');
-							text = lines.map((line: string, i: number) => {
-								if (line === '' && i === lines.length - 1) return line;
-								if (line === '') return line;
-								return `[${data.containerName}] ${line}`;
-							}).join('\n');
-						}
-						// Buffer text and schedule flush
-						pendingText += text;
-						if (!flushTimer) {
-							flushTimer = setTimeout(flushLogs, FLUSH_INTERVAL);
+						// Parse incoming text into discrete LogEntry items. A streaming chunk
+						// may begin/end mid-line; streamCarryover preserves the partial tail
+						// across chunks so we don't split a line in the middle.
+						const { entries, carryover } = parseLines(data.text, streamCarryover);
+						streamCarryover = carryover;
+						if (entries.length > 0) {
+							pendingEntries.push(...entries);
+							scheduleFlush();
 						}
 					}
 				} catch {
@@ -371,7 +412,8 @@
 	function retryConnection() {
 		reconnectAttempts = 0;
 		connectionError = null;
-		logs = '';
+		logs = [];
+		streamCarryover = '';
 		loading = true;
 		startStreaming();
 	}
@@ -423,7 +465,8 @@
 		streamingEnabled = !streamingEnabled;
 		saveSettings();
 		if (streamingEnabled && containerId && visible) {
-			logs = ''; // Clear logs and start fresh stream
+			logs = [];
+			streamCarryover = '';
 			reconnectAttempts = 0;
 			connectionError = null;
 			loading = true;
@@ -456,7 +499,8 @@
 		}
 	}
 
-	// Fallback fetch logs (for manual refresh or when streaming unavailable)
+	// Errors aren't log content — surface them via connectionError so the panel
+	// can show them outside the LogEntry stream.
 	async function fetchLogs() {
 		if (!containerId) return;
 		loading = true;
@@ -467,14 +511,17 @@
 			const response = await fetch(appendEnvParam(`/api/containers/${containerId}/logs?tail=${tailCount}${since ? `&since=${since}` : ''}${until ? `&until=${until}` : ''}`, envId));
 			const data = await response.json();
 			if (!response.ok) {
-				logs = translate('logs.errors.fetchWithMessage', { error: data.error || response.statusText });
+				connectionError = translate('logs.errors.fetchWithMessage', { error: data.error || response.statusText });
+				logs = [];
 				return;
 			}
-			logs = data.logs || '';
+			const { entries } = parseLines(data.logs || '');
+			logs = entries;
 			scrollToBottom();
 		} catch (error) {
 			console.error('Failed to fetch logs:', error);
-			logs = translate('logs.errors.fetchWithMessage', { error: error instanceof Error ? error.message : translate('common.errors.unknown') });
+			connectionError = translate('logs.errors.fetchWithMessage', { error: error instanceof Error ? error.message : translate('common.errors.unknown') });
+			logs = [];
 		} finally {
 			loading = false;
 		}
@@ -482,7 +529,8 @@
 
 	function handleClose() {
 		stopStreaming();
-		logs = '';
+		logs = [];
+		streamCarryover = '';
 		onClose();
 	}
 
@@ -504,17 +552,23 @@
 		saveSettings();
 	}
 
-	// Copy logs to clipboard
+	// Serialize the current buffer to plain text. Honors the timestamp toggle so
+	// users get what they see on screen.
+	function logsToText(): string {
+		return logs
+			.map(e => (showTimestamps && e.timestamp ? `${e.timestamp} ${e.text}` : e.text))
+			.join('\n');
+	}
+
 	async function copyLogs() {
-		if (logs) {
-			await copyToClipboard(logs);
+		if (logs.length > 0) {
+			await copyToClipboard(logsToText());
 		}
 	}
 
-	// Download logs as txt file
 	function downloadLogs() {
-		if (logs && containerName) {
-			const blob = new Blob([logs], { type: 'text/plain' });
+		if (logs.length > 0 && containerName) {
+			const blob = new Blob([logsToText()], { type: 'text/plain' });
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
@@ -528,8 +582,9 @@
 
 	// Clear logs buffer
 	function clearLogs() {
-		logs = '';
-		pendingText = '';
+		logs = [];
+		pendingEntries = [];
+		streamCarryover = '';
 	}
 
 	// Search functions
@@ -591,47 +646,19 @@
 		}
 	}
 
-	// Highlighted logs with search matches and ANSI color support
-	let highlightedLogs = $derived(() => {
-		let text = logs || '';
-		if (!showTimestamps) {
-			// Strip ISO 8601 timestamps from start of each line (Docker log format)
-			text = text.replace(/^(\[.*?\] )?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z /gm, '$1');
-		} else if ($appSettings.formatLogTimestamps) {
-			text = formatLogTimestamps(text);
-		}
-
+	// Filter pass — array op, not regex over a string. Empty query short-circuits.
+	let filteredLogs = $derived.by(() => {
 		const query = logSearchQuery.trim();
-
-		// Filter lines before ANSI conversion (plain text matching)
-		if (logSearchFilterMode && query) {
-			const escapedForRegex = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-			const filterRegex = new RegExp(escapedForRegex, 'i');
-			const lines = text.split('\n');
-			text = lines.filter(line => filterRegex.test(line)).join('\n');
-		}
-
-		const withAnsi = ansiUp.ansi_to_html(text);
-		if (!query) return withAnsi;
-
-		const escapedForRegex = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-		const escapedQuery = escapedForRegex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-		// Split by HTML tags and only process text parts
-		const parts = withAnsi.split(/(<[^>]*>)/);
-		const highlighted = parts.map(part => {
-			if (part.startsWith('<')) return part;
-			const regex = new RegExp(`(${escapedQuery})`, 'gi');
-			return part.replace(regex, '<mark class="search-match">$1</mark>');
-		}).join('');
-
-		return highlighted;
+		if (!logSearchFilterMode || !query) return logs;
+		const q = query.toLowerCase();
+		return logs.filter(e => e.text.toLowerCase().includes(q));
 	});
 
-	// Update match count after render
+	// Update match count after render. Track filteredLogs + query so this re-runs
+	// when the displayed buffer or the search input changes.
 	$effect(() => {
-		const html = highlightedLogs();
-
+		filteredLogs;
+		logSearchQuery;
 		if (logSearchQuery && logsRef) {
 			setTimeout(() => {
 				const matches = logsRef.querySelectorAll('.search-match');
@@ -651,7 +678,8 @@
 	// Start streaming when container changes and is visible
 	$effect(() => {
 		if (containerId && visible && streamingEnabled) {
-			logs = ''; // Clear previous logs
+			logs = [];
+			streamCarryover = '';
 			loading = true;
 			reconnectAttempts = 0;
 			connectionError = null;
@@ -933,9 +961,9 @@
 	</div>
 
 	<!-- Logs content -->
-	<div bind:this={logsRef} class="flex-1 overflow-auto p-3">
-		{#if logs}
-			<pre class="logs-fade-in {wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'} {showLineNumbers ? 'show-line-numbers' : ''} {darkMode ? 'text-zinc-50' : 'text-gray-900'}" style="font-size: {fontSize}px; font-family: {terminalFontFamily()};">{@html wrapHtmlLines(highlightedLogs())}</pre>
+	<div bind:this={logsRef} onscroll={handleLogsScroll} class="flex-1 overflow-auto p-3">
+		{#if logs.length > 0}
+			<pre class="logs-fade-in {wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'} {showLineNumbers ? 'show-line-numbers' : ''} {darkMode ? 'text-zinc-50' : 'text-gray-900'}" style="font-size: {fontSize}px; font-family: {terminalFontFamily()};">{#each filteredLogs as e (e.id)}<div class="log-line">{#if showTimestamps && e.timestamp}<span class="log-ts">{renderTimestamp(e.timestamp)}</span>{' '}{/if}{#if showContainerName && containerName}<span class="log-cname">[{containerName}]</span>{' '}{/if}<span>{@html renderLineHtml(e, logSearchQuery.trim())}</span></div>{/each}</pre>
 		{:else if loading}
 			<p class="text-xs {darkMode ? 'text-zinc-500' : 'text-gray-500'}">{$t('logs.stream.connectingToStream')}</p>
 		{:else}
@@ -945,6 +973,12 @@
 </div>
 
 <style>
+	:global(.log-ts) {
+		color: rgb(113, 113, 122);
+	}
+	:global(.log-cname) {
+		color: rgb(161, 161, 170);
+	}
 	:global(.search-match) {
 		background-color: rgba(234, 179, 8, 0.4);
 		color: #fef3c7;

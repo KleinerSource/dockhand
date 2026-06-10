@@ -1,11 +1,14 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select';
+	import * as Popover from '$lib/components/ui/popover';
+	import * as Command from '$lib/components/ui/command';
+	import { tick } from 'svelte';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { TogglePill, ToggleGroup } from '$lib/components/ui/toggle-pill';
-	import { Plus, Trash2, Settings2, RefreshCw, Network, X, Ban, RotateCw, AlertTriangle, PauseCircle, Share2, Server, CircleOff, ChevronDown, ChevronRight, Cpu, Shield, HeartPulse, Wifi, HardDrive, Lock, Loader2, CheckCircle2, Package, Gpu, Search, CircleHelp } from 'lucide-svelte';
+	import { Plus, Trash2, Settings2, RefreshCw, Network, X, Ban, RotateCw, AlertTriangle, PauseCircle, Share2, Server, CircleOff, Box, ChevronDown, ChevronsUpDown, Check, ChevronRight, Cpu, Shield, HeartPulse, Wifi, HardDrive, Lock, Loader2, CheckCircle2, Package, Gpu, Search, CircleHelp } from 'lucide-svelte';
 	import { parseHostPort, validatePort, validateIp, formatHostPort, expandPortBindings } from '$lib/utils/port-parse';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { currentEnvironment } from '$lib/stores/environment';
@@ -64,6 +67,13 @@
 		driver: string;
 	}
 
+	interface ContainerItem {
+		id: string;
+		name: string;
+		image: string;
+		state: string;
+	}
+
 	interface NetworkEndpointConfig {
 		ipv4Address: string;
 		ipv6Address: string;
@@ -90,7 +100,6 @@
 		// Labels
 		labels: { key: string; value: string }[];
 		// Networks
-		availableNetworks: DockerNetwork[];
 		selectedNetworks: string[];
 		networkConfigs: Record<string, NetworkEndpointConfig>;
 		macAddress: string;
@@ -167,7 +176,6 @@
 		volumeMappings = $bindable(),
 		envVars = $bindable(),
 		labels = $bindable(),
-		availableNetworks,
 		selectedNetworks = $bindable(),
 		networkConfigs = $bindable(),
 		macAddress = $bindable(),
@@ -208,6 +216,117 @@
 		errors = $bindable(),
 		imageSummary
 	}: Props = $props();
+
+	// Fetch networks and containers from current environment
+	let availableNetworks = $state<DockerNetwork[]>([]);
+	let availableContainers = $state<ContainerItem[]>([]);
+
+	// Container picker (Popover + Command combobox)
+	let containerPickerOpen = $state(false);
+	let containerPickerTriggerRef = $state<HTMLButtonElement>(null!);
+
+	function closeAndFocusContainerPicker() {
+		containerPickerOpen = false;
+		tick().then(() => containerPickerTriggerRef?.focus());
+	}
+
+	// Networks picker (Popover + Command combobox)
+	let networkPickerOpen = $state(false);
+	let networkPickerTriggerRef = $state<HTMLButtonElement>(null!);
+
+	function closeAndFocusNetworkPicker() {
+		networkPickerOpen = false;
+		tick().then(() => networkPickerTriggerRef?.focus());
+	}
+
+	async function fetchNetworks() {
+		try {
+			const envParam = $currentEnvironment ? `?env=${$currentEnvironment.id}` : '';
+			const response = await fetch(`/api/networks${envParam}`);
+			if (response.ok) {
+				availableNetworks = await response.json();
+			}
+		} catch (err) {
+			console.error('Failed to fetch networks:', err);
+		}
+	}
+
+	async function fetchContainers() {
+		try {
+			const envParam = $currentEnvironment ? `?env=${$currentEnvironment.id}` : '';
+			const response = await fetch(`/api/containers${envParam}`);
+			if (response.ok) {
+				const containers: any[] = await response.json();
+				availableContainers = containers
+					.map(c => ({
+						id: c.id,
+						name: c.name,
+						image: c.image,
+						state: c.state
+					}))
+					.filter(c => c.name && c.name !== name);
+			}
+		} catch (err) {
+			console.error('Failed to fetch containers:', err);
+		}
+	}
+
+	// Fetch both on mount so the dropdowns are ready when the user opens them
+	fetchNetworks();
+	fetchContainers();
+
+	// Container network mode helpers
+	// `networkModeType` reduces the raw NetworkMode to a logical group for branching:
+	//   bridge | host | none | container | custom
+	const networkModeType = $derived.by(() => {
+		if (networkMode.startsWith('container:')) return 'container';
+		if (['bridge', 'host', 'none'].includes(networkMode)) return networkMode;
+		return 'custom';
+	});
+	// Raw value from networkMode — Docker stores either a name or a 64-char container ID
+	const containerRefRaw = $derived(networkMode.startsWith('container:') ? networkMode.slice('container:'.length) : '');
+	// Resolve ID → name when possible so the trigger shows "container:redis" not "container:<sha>"
+	const containerRef = $derived.by(() => {
+		if (!containerRefRaw) return '';
+		const match = availableContainers.find(c => c.id === containerRefRaw || c.id.startsWith(containerRefRaw));
+		return match ? match.name : containerRefRaw;
+	});
+
+	// Network mode picker (Popover + Command combobox) — flat list of bridge/host/none/Container + custom networks
+	let networkModePickerOpen = $state(false);
+	let networkModePickerTriggerRef = $state<HTMLButtonElement>(null!);
+
+	function closeAndFocusNetworkModePicker() {
+		networkModePickerOpen = false;
+		tick().then(() => networkModePickerTriggerRef?.focus());
+	}
+
+	// Additional networks: custom networks NOT used as the primary mode and NOT already attached
+	const selectableNetworks = $derived(
+		availableNetworks.filter(n =>
+			!selectedNetworks.includes(n.name) &&
+			!['bridge', 'host', 'none'].includes(n.name) &&
+			n.name !== networkMode  // exclude the primary
+		)
+	);
+
+	// Custom networks available for the primary mode picker
+	const customNetworks = $derived(
+		availableNetworks.filter(n => !['bridge', 'host', 'none'].includes(n.name))
+	);
+
+	// Display label for the current network mode in the trigger
+	const networkModeLabel = $derived.by(() => {
+		if (networkModeType === 'bridge') return $t('containers.settings.networkModes.bridge');
+		if (networkModeType === 'host') return $t('containers.settings.networkModes.host');
+		if (networkModeType === 'none') return $t('containers.settings.networkModes.none');
+		if (networkModeType === 'container') {
+			return containerRef
+				? $t('containers.settings.networkModes.containerWithName', { name: containerRef })
+				: $t('containers.settings.networkModes.container');
+		}
+		return networkMode;  // custom network name
+	});
 
 	// Expanded network config rows
 	let expandedNetworks = $state<Set<string>>(new Set());
@@ -728,40 +847,120 @@
 
 			<div class="space-y-1.5">
 				<Label class="text-xs font-medium">{$t('containers.settings.labels.networkMode')}</Label>
-				<Select.Root type="single" bind:value={networkMode}>
-					<Select.Trigger id="networkMode" tabindex={0} class="w-full h-9">
-						<span class="flex items-center">
-							{#if networkMode === 'bridge'}
-								<Share2 class="w-3.5 h-3.5 mr-2 text-emerald-500" />
-							{:else if networkMode === 'host'}
-								<Server class="w-3.5 h-3.5 mr-2 text-sky-500" />
-							{:else}
-								<CircleOff class="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-							{/if}
-							{networkMode === 'bridge' ? $t('containers.settings.networkModes.bridge') : networkMode === 'host' ? $t('containers.settings.networkModes.host') : $t('containers.settings.networkModes.none')}
-						</span>
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="bridge">
-							{#snippet children()}
-								<Share2 class="w-3.5 h-3.5 mr-2 text-emerald-500" />
-								{$t('containers.settings.networkModes.bridge')}
+				<Popover.Root bind:open={networkModePickerOpen}>
+					<Popover.Trigger bind:ref={networkModePickerTriggerRef}>
+						{#snippet child({ props })}
+							<Button
+								{...props}
+								variant="outline"
+								class="w-full justify-between font-normal"
+								role="combobox"
+								aria-expanded={networkModePickerOpen}
+							>
+								<span class="flex items-center min-w-0 flex-1">
+									{#if networkModeType === 'bridge'}
+										<Share2 class="w-3.5 h-3.5 mr-2 shrink-0 text-emerald-500" />
+									{:else if networkModeType === 'host'}
+										<Server class="w-3.5 h-3.5 mr-2 shrink-0 text-sky-500" />
+									{:else if networkModeType === 'none'}
+										<CircleOff class="w-3.5 h-3.5 mr-2 shrink-0 text-muted-foreground" />
+									{:else if networkModeType === 'container'}
+										<Box class="w-3.5 h-3.5 mr-2 shrink-0 text-violet-500" />
+									{:else}
+										<Network class="w-3.5 h-3.5 mr-2 shrink-0 text-orange-500" />
+									{/if}
+									<span class="truncate">{networkModeLabel}</span>
+								</span>
+								<ChevronsUpDown class="w-4 h-4 shrink-0 opacity-50" />
+							</Button>
+						{/snippet}
+					</Popover.Trigger>
+					<Popover.Content class="w-[var(--bits-popover-anchor-width)] p-0" align="start">
+						<Command.Root>
+							<Command.Input placeholder={$t('containers.settings.placeholders.filterNetworks')} />
+							<Command.List class="max-h-64">
+								<Command.Empty>{$t('containers.settings.empty.noNetworksFound')}</Command.Empty>
+								<Command.Group>
+									<Command.Item value="bridge" onSelect={() => { networkMode = 'bridge'; closeAndFocusNetworkModePicker(); }}>
+										<Share2 class="text-emerald-500" />
+										<span>{$t('containers.settings.networkModes.bridge')}</span>
+									</Command.Item>
+									<Command.Item value="host" onSelect={() => { networkMode = 'host'; closeAndFocusNetworkModePicker(); }}>
+										<Server class="text-sky-500" />
+										<span>{$t('containers.settings.networkModes.host')}</span>
+									</Command.Item>
+									<Command.Item value="none" onSelect={() => { networkMode = 'none'; closeAndFocusNetworkModePicker(); }}>
+										<CircleOff class="text-muted-foreground" />
+										<span>{$t('containers.settings.networkModes.none')}</span>
+									</Command.Item>
+									<Command.Item value="container" onSelect={() => { if (!networkMode.startsWith('container:')) networkMode = 'container:'; closeAndFocusNetworkModePicker(); }}>
+										<Box class="text-violet-500" />
+										<span>{$t('containers.settings.networkModes.container')}</span>
+									</Command.Item>
+								</Command.Group>
+								{#if customNetworks.length > 0}
+									<Command.Separator />
+									<Command.Group heading={$t('containers.settings.labels.customNetworks')}>
+										{#each customNetworks as n (n.name)}
+											<Command.Item value={n.name} onSelect={() => { networkMode = n.name; closeAndFocusNetworkModePicker(); }}>
+												<Network class="text-orange-500" />
+												<span class="font-medium">{n.name}</span>
+												<span class="{getDriverBadgeClasses(n.driver)} ml-auto">{n.driver}</span>
+											</Command.Item>
+										{/each}
+									</Command.Group>
+								{/if}
+							</Command.List>
+						</Command.Root>
+					</Popover.Content>
+				</Popover.Root>
+				{#if networkModeType === 'container'}
+					<Popover.Root bind:open={containerPickerOpen}>
+						<Popover.Trigger bind:ref={containerPickerTriggerRef}>
+							{#snippet child({ props })}
+								<Button
+									{...props}
+									variant="outline"
+									class="w-full mt-2 justify-between font-normal"
+									role="combobox"
+									aria-expanded={containerPickerOpen}
+								>
+									<span class="truncate min-w-0 flex-1 text-left {containerRef ? '' : 'text-muted-foreground'}">
+										{containerRef || $t('containers.settings.placeholders.selectContainer')}
+									</span>
+									<ChevronsUpDown class="w-4 h-4 shrink-0 opacity-50" />
+								</Button>
 							{/snippet}
-						</Select.Item>
-						<Select.Item value="host">
-							{#snippet children()}
-								<Server class="w-3.5 h-3.5 mr-2 text-sky-500" />
-								{$t('containers.settings.networkModes.host')}
-							{/snippet}
-						</Select.Item>
-						<Select.Item value="none">
-							{#snippet children()}
-								<CircleOff class="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-								{$t('containers.settings.networkModes.none')}
-							{/snippet}
-						</Select.Item>
-					</Select.Content>
-				</Select.Root>
+						</Popover.Trigger>
+						<Popover.Content class="w-[var(--bits-popover-anchor-width)] p-0" align="start">
+							<Command.Root>
+								<Command.Input placeholder={$t('containers.settings.placeholders.filterByName')} />
+								<Command.List class="max-h-64">
+									<Command.Empty>{$t('containers.settings.empty.noContainersFound')}</Command.Empty>
+									<Command.Group>
+										{#each availableContainers as c (c.id)}
+											<Command.Item
+												value={c.name}
+												onSelect={() => {
+													networkMode = `container:${c.name}`;
+													closeAndFocusContainerPicker();
+												}}
+											>
+												<Check class={containerRef !== c.name ? 'text-transparent' : ''} />
+												<span class="w-1.5 h-1.5 shrink-0 rounded-full {c.state === 'running' ? 'bg-green-500' : 'bg-muted-foreground/40'}"></span>
+												<span class="font-medium">{c.name}</span>
+												<span class="text-muted-foreground text-xs ml-auto truncate">{c.image}</span>
+											</Command.Item>
+										{/each}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
+					{#if !containerRef}
+						<p class="text-xs text-amber-600 mt-1">{$t('containers.settings.help.selectContainerForNetworkNamespace')}</p>
+					{/if}
+				{/if}
 			</div>
 		</div>
 
@@ -776,38 +975,65 @@
 		</div>
 	</div>
 
-	<!-- Networks -->
-	{#if availableNetworks.length > 0}
+	<!-- Additional networks (hidden for host/none/container:X modes — Docker rejects extras) -->
+	{#if availableNetworks.length > 0 && networkModeType !== 'host' && networkModeType !== 'none' && networkModeType !== 'container'}
 		<div class="space-y-2">
 			<div class="flex justify-between items-center pb-2 border-b">
 				<div class="flex items-center gap-2">
 					<Network class="w-4 h-4 text-muted-foreground" />
-					<h3 class="text-sm font-semibold text-foreground">{$t('common.labels.networks')}</h3>
+					<h3 class="text-sm font-semibold text-foreground">{$t('containers.settings.labels.additionalNetworks')}</h3>
 				</div>
 			</div>
 
 			<div class="space-y-2">
-				<Select.Root type="single" value="" onValueChange={addNetwork}>
-					<Select.Trigger tabindex={0} class="w-full h-9">
-						<span class="text-muted-foreground">{$t('containers.settings.placeholders.selectNetwork')}</span>
-					</Select.Trigger>
-					<Select.Content>
-						{#each availableNetworks.filter(n => !selectedNetworks.includes(n.name) && !['bridge', 'host', 'none'].includes(n.name)) as network}
-							<Select.Item value={network.name}>
-								{#snippet children()}
-									<div class="flex items-center justify-between w-full">
-										<span>{network.name}</span>
-										<span class={getDriverBadgeClasses(network.driver)}>{network.driver}</span>
-									</div>
-								{/snippet}
-							</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
+				{#if selectableNetworks.length === 0}
+					<Button variant="outline" disabled class="w-full justify-start font-normal text-muted-foreground">
+						{$t('containers.settings.empty.allNetworksAttached')}
+					</Button>
+				{:else}
+					<Popover.Root bind:open={networkPickerOpen}>
+						<Popover.Trigger bind:ref={networkPickerTriggerRef}>
+							{#snippet child({ props })}
+								<Button
+									{...props}
+									variant="outline"
+									class="w-full justify-between font-normal"
+									role="combobox"
+									aria-expanded={networkPickerOpen}
+								>
+									<span class="text-muted-foreground">{$t('containers.settings.placeholders.selectNetwork')}</span>
+									<ChevronsUpDown class="w-4 h-4 opacity-50" />
+								</Button>
+							{/snippet}
+						</Popover.Trigger>
+						<Popover.Content class="w-[var(--bits-popover-anchor-width)] p-0" align="start">
+							<Command.Root>
+								<Command.Input placeholder={$t('containers.settings.placeholders.filterNetworks')} />
+								<Command.List class="max-h-64">
+									<Command.Empty>{$t('containers.settings.empty.noNetworksFound')}</Command.Empty>
+									<Command.Group>
+										{#each selectableNetworks as network (network.name)}
+											<Command.Item
+												value={network.name}
+												onSelect={() => {
+													addNetwork(network.name);
+													closeAndFocusNetworkPicker();
+												}}
+											>
+												<span class="font-medium">{network.name}</span>
+												<span class="{getDriverBadgeClasses(network.driver)} ml-auto">{network.driver}</span>
+											</Command.Item>
+										{/each}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
+				{/if}
 
-				{#if selectedNetworks.length > 0}
+				{#if selectedNetworks.filter(n => n !== networkMode).length > 0}
 					<div class="space-y-1 pt-1">
-						{#each selectedNetworks as networkName}
+						{#each selectedNetworks.filter(n => n !== networkMode) as networkName}
 							{@const network = availableNetworks.find(n => n.name === networkName)}
 							{@const isExpanded = expandedNetworks.has(networkName)}
 							<div class="border rounded-md">

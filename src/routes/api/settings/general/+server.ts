@@ -60,7 +60,8 @@ export interface GeneralSettings {
 	eventCleanupEnabled: boolean;
 	scannerCleanupCron: string;
 	scannerCleanupEnabled: boolean;
-	logBufferSizeKb: number;
+	logBufferSizeKb: number;  // legacy
+	logMaxLines: number;       // line-count cap for log buffer
 	defaultTimezone: string;
 	// Background monitoring settings
 	eventCollectionMode: EventCollectionMode;
@@ -104,6 +105,7 @@ const DEFAULT_SETTINGS: Omit<GeneralSettings, 'scheduleRetentionDays' | 'eventRe
 	defaultGrypeArgs: '-o json -v {image}',
 	defaultTrivyArgs: 'image --format json {image}',
 	logBufferSizeKb: 500,
+	logMaxLines: 2000,
 	defaultTimezone: 'UTC',
 	eventCollectionMode: 'stream',
 	eventPollInterval: 60000,
@@ -182,6 +184,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			scannerCleanupCron,
 			scannerCleanupEnabled,
 			logBufferSizeKb,
+			logMaxLines,
 			defaultTimezone,
 			eventCollectionMode,
 			eventPollInterval,
@@ -221,6 +224,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			getScannerCleanupCron(),
 			getScannerCleanupEnabled(),
 			getSetting('log_buffer_size_kb'),
+			getSetting('log_max_lines'),
 			getDefaultTimezone(),
 			getEventCollectionMode(),
 			getEventPollInterval(),
@@ -262,6 +266,9 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			scannerCleanupCron,
 			scannerCleanupEnabled,
 			logBufferSizeKb: logBufferSizeKb ?? DEFAULT_SETTINGS.logBufferSizeKb,
+			logMaxLines: (typeof logMaxLines === 'number' && logMaxLines > 0)
+				? Math.min(2000, Math.max(100, logMaxLines))
+				: Math.min(2000, Math.max(100, Math.round((logBufferSizeKb ?? DEFAULT_SETTINGS.logBufferSizeKb) * 8))),
 			defaultTimezone: defaultTimezone ?? DEFAULT_SETTINGS.defaultTimezone,
 			eventCollectionMode: (eventCollectionMode ?? DEFAULT_SETTINGS.eventCollectionMode) as EventCollectionMode,
 			eventPollInterval: eventPollInterval ?? DEFAULT_SETTINGS.eventPollInterval,
@@ -299,7 +306,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 	try {
 		const body = await request.json();
-		const { confirmDestructive, language, showStoppedContainers, highlightUpdates, timeFormat, dateFormat, downloadFormat, defaultGrypeArgs, defaultTrivyArgs, scheduleRetentionDays, eventRetentionDays, scheduleCleanupCron, eventCleanupCron, scheduleCleanupEnabled, eventCleanupEnabled, scannerCleanupCron, scannerCleanupEnabled, logBufferSizeKb, defaultTimezone, eventCollectionMode, eventPollInterval, metricsCollectionInterval, lightTheme, darkTheme, font, fontSize, gridFontSize, terminalFont, editorFont, compactPorts, showExposedPorts, formatLogTimestamps, externalStackPaths, primaryStackLocation, defaultGrypeImage, defaultTrivyImage, defaultComposeTemplate, labelFilterMode } = body;
+		const { confirmDestructive, language, showStoppedContainers, highlightUpdates, timeFormat, dateFormat, downloadFormat, defaultGrypeArgs, defaultTrivyArgs, scheduleRetentionDays, eventRetentionDays, scheduleCleanupCron, eventCleanupCron, scheduleCleanupEnabled, eventCleanupEnabled, scannerCleanupCron, scannerCleanupEnabled, logBufferSizeKb, logMaxLines, defaultTimezone, eventCollectionMode, eventPollInterval, metricsCollectionInterval, lightTheme, darkTheme, font, fontSize, gridFontSize, terminalFont, editorFont, compactPorts, showExposedPorts, formatLogTimestamps, externalStackPaths, primaryStackLocation, defaultGrypeImage, defaultTrivyImage, defaultComposeTemplate, labelFilterMode } = body;
 
 		if (confirmDestructive !== undefined) {
 			await setSetting('confirm_destructive', confirmDestructive);
@@ -355,8 +362,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			await refreshSystemJobs();
 		}
 		if (logBufferSizeKb !== undefined && typeof logBufferSizeKb === 'number') {
-			// Clamp to reasonable range: 100KB - 5000KB (5MB)
+			// Legacy: clamp to 100KB-5MB range.
 			await setSetting('log_buffer_size_kb', Math.max(100, Math.min(5000, logBufferSizeKb)));
+		}
+		if (logMaxLines !== undefined && typeof logMaxLines === 'number') {
+			// Clamp to 100 - 50000 lines.
+			await setSetting('log_max_lines', Math.max(100, Math.min(2000, logMaxLines)));
 		}
 		if (defaultTimezone !== undefined && typeof defaultTimezone === 'string') {
 			await setDefaultTimezone(defaultTimezone);
@@ -459,6 +470,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			scannerCleanupCronVal,
 			scannerCleanupEnabledVal,
 			logBufferSizeKbVal,
+			logMaxLinesVal,
 			defaultTimezoneVal,
 			eventCollectionModeVal,
 			eventPollIntervalVal,
@@ -498,6 +510,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			getScannerCleanupCron(),
 			getScannerCleanupEnabled(),
 			getSetting('log_buffer_size_kb'),
+			getSetting('log_max_lines'),
 			getDefaultTimezone(),
 			getEventCollectionMode(),
 			getEventPollInterval(),
@@ -539,6 +552,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			scannerCleanupCron: scannerCleanupCronVal,
 			scannerCleanupEnabled: scannerCleanupEnabledVal,
 			logBufferSizeKb: logBufferSizeKbVal ?? DEFAULT_SETTINGS.logBufferSizeKb,
+			logMaxLines: (typeof logMaxLinesVal === 'number' && logMaxLinesVal > 0)
+				? Math.min(2000, Math.max(100, logMaxLinesVal))
+				: Math.min(2000, Math.max(100, Math.round((logBufferSizeKbVal ?? DEFAULT_SETTINGS.logBufferSizeKb) * 8))),
 			defaultTimezone: defaultTimezoneVal ?? DEFAULT_SETTINGS.defaultTimezone,
 			eventCollectionMode: (eventCollectionModeVal ?? DEFAULT_SETTINGS.eventCollectionMode) as EventCollectionMode,
 			eventPollInterval: eventPollIntervalVal ?? DEFAULT_SETTINGS.eventPollInterval,
