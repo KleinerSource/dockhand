@@ -4183,6 +4183,8 @@
 			},
 			"edgeLabels": {
 				"dependsOn": "依赖于",
+				"waitHealthy": "等待健康",
+				"waitCompleted": "等待完成",
 				"links": "链接"
 			},
 			"panel": {
@@ -4190,12 +4192,19 @@
 				"deleteNode": "删除节点",
 				"closePanel": "关闭面板",
 				"removeConnection": "移除连接",
-				"removeDependency": "移除依赖"
+				"removeDependency": "移除依赖",
+				"addHealthcheck": "添加检查"
 			},
 			"fields": {
 				"serviceImage": "服务镜像",
 				"serviceCommand": "服务命令",
 				"restartPolicy": "重启策略",
+				"healthcheck": "健康检查",
+				"healthcheckCommand": "健康检查命令",
+				"interval": "间隔",
+				"timeout": "超时",
+				"retries": "重试次数",
+				"startPeriod": "启动宽限期",
 				"portMappings": "端口映射",
 				"hostPort": "主机端口",
 				"containerPort": "容器端口",
@@ -4207,6 +4216,7 @@
 				"key": "键",
 				"value": "值",
 				"dependsOn": "服务依赖",
+				"startupCondition": "启动条件",
 				"networkDriver": "网络驱动",
 				"ipamConfiguration": "IPAM 配置",
 				"subnet": "子网",
@@ -4226,6 +4236,11 @@
 				"always": "始终",
 				"onFailure": "失败时",
 				"unlessStopped": "除非手动停止"
+			},
+			"dependencyConditions": {
+				"serviceStarted": "已启动",
+				"serviceHealthy": "健康",
+				"serviceCompleted": "成功完成"
 			},
 			"networkDrivers": {
 				"bridge": "Bridge（桥接）",

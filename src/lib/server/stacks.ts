@@ -9,6 +9,7 @@ import { existsSync, mkdirSync, rmSync, readdirSync, cpSync, statSync, unlinkSyn
 import { join, resolve, dirname, basename } from 'node:path';
 import { spawn as nodeSpawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
+import yaml from 'js-yaml';
 import {
 	getEnvironment,
 	getSecretEnvVarsAsRecord,
@@ -1049,6 +1050,33 @@ interface ComposeCommandOptions {
 	filesystem?: 'dockhand' | 'environment';
 }
 
+type ComposeDependencyCondition = 'service_started' | 'service_healthy' | 'service_completed_successfully';
+
+function isStartupWaitCondition(condition: unknown): condition is ComposeDependencyCondition {
+	return condition === 'service_healthy' || condition === 'service_completed_successfully';
+}
+
+function composeHasStartupWaitConditions(composeContent: string): boolean {
+	try {
+		const parsed = yaml.load(composeContent) as { services?: Record<string, any> } | null;
+		const services = parsed?.services;
+		if (!services || typeof services !== 'object') return false;
+
+		return Object.values(services).some((service) => {
+			const dependsOn = service?.depends_on;
+			if (!dependsOn || Array.isArray(dependsOn) || typeof dependsOn !== 'object') return false;
+
+			return Object.values(dependsOn).some((dependency) =>
+				dependency &&
+				typeof dependency === 'object' &&
+				isStartupWaitCondition((dependency as { condition?: unknown }).condition)
+			);
+		});
+	} catch {
+		return /\bcondition\s*:\s*(service_healthy|service_completed_successfully)\b/.test(composeContent);
+	}
+}
+
 /**
  * Find a Docker Compose override file alongside the main compose file.
  * Docker Compose auto-discovers these when no -f flag is used, but when -f is required
@@ -1357,6 +1385,9 @@ async function executeLocalCompose(
 			if (build) args.push('--build');
 			if (build && noBuildCache) args.push('--no-cache');
 			if (pullPolicy) args.push('--pull', pullPolicy);
+			if (!serviceName && composeHasStartupWaitConditions(composeContent)) {
+				args.push('--wait', '--wait-timeout', String(Math.ceil(COMPOSE_TIMEOUT_MS / 1000)));
+			}
 			// If targeting a specific service, only update that service
 			if (serviceName) {
 				args.push(serviceName);
@@ -2241,7 +2272,9 @@ export async function startStack(
 	// them (preserves container IDs, avoids Traefik race conditions from recreation).
 	// If no containers exist (stack was removed/down), use 'up' to create them.
 	const containers = await getStackContainers(stackName, envId);
-	const operation = containers.length > 0 ? 'start' : 'up';
+	const operation = containers.length > 0 && !composeHasStartupWaitConditions(result.content!)
+		? 'start'
+		: 'up';
 
 	return executeComposeCommand(
 		operation,

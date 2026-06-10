@@ -64,6 +64,12 @@
 	let editServiceImage = $state('');
 	let editServiceCommand = $state('');
 	let editServiceRestart = $state('no');
+	let editServiceHealthcheckEnabled = $state(false);
+	let editServiceHealthcheckTest = $state('');
+	let editServiceHealthcheckInterval = $state('10s');
+	let editServiceHealthcheckTimeout = $state('5s');
+	let editServiceHealthcheckRetries = $state('5');
+	let editServiceHealthcheckStartPeriod = $state('30s');
 	let editServicePorts = $state<{ host: string; container: string; protocol: string }[]>([]);
 	let editServiceVolumes = $state<{ host: string; container: string; mode: string }[]>([]);
 	let editServiceEnvVars = $state<{ key: string; value: string }[]>([]);
@@ -113,6 +119,14 @@
 		volumes?: Record<string, any>;
 		configs?: Record<string, any>;
 		secrets?: Record<string, any>;
+	}
+
+	type DependencyCondition = 'service_started' | 'service_healthy' | 'service_completed_successfully';
+
+	interface DependencyInfo {
+		name: string;
+		condition: DependencyCondition;
+		hasHealthcheck: boolean;
 	}
 
 	function parseCompose(content: string): ComposeFile | null {
@@ -198,6 +212,173 @@
 		}
 	}
 
+	function getDependencyCondition(value: any): DependencyCondition {
+		const condition = value?.condition;
+		if (condition === 'service_healthy' || condition === 'service_completed_successfully') {
+			return condition;
+		}
+		return 'service_started';
+	}
+
+	function serviceHasHealthcheck(service: any): boolean {
+		const healthcheck = service?.healthcheck;
+		return !!healthcheck &&
+			healthcheck.disable !== true &&
+			!(Array.isArray(healthcheck.test) && healthcheck.test[0] === 'NONE');
+	}
+
+	function getServiceDependencies(config: any, services: Record<string, any>): DependencyInfo[] {
+		const dependsOn = config?.depends_on;
+		if (!dependsOn) return [];
+
+		if (Array.isArray(dependsOn)) {
+			return dependsOn.map((name: string) => ({
+				name,
+				condition: 'service_started',
+				hasHealthcheck: serviceHasHealthcheck(services[name])
+			}));
+		}
+
+		if (typeof dependsOn === 'object') {
+			return Object.entries(dependsOn).map(([name, value]) => ({
+				name,
+				condition: getDependencyCondition(value),
+				hasHealthcheck: serviceHasHealthcheck(services[name])
+			}));
+		}
+
+		return [];
+	}
+
+	function dependsOnToObject(dependsOn: any): Record<string, any> {
+		if (!dependsOn) return {};
+		if (Array.isArray(dependsOn)) {
+			return Object.fromEntries(dependsOn.map((name: string) => [name, { condition: 'service_started' }]));
+		}
+		if (typeof dependsOn === 'object') {
+			return Object.fromEntries(
+				Object.entries(dependsOn).map(([name, value]) => [
+					name,
+					value && typeof value === 'object'
+						? { ...(value as Record<string, any>), condition: getDependencyCondition(value) }
+						: { condition: 'service_started' }
+				])
+			);
+		}
+		return {};
+	}
+
+	function removeDependencyFromConfig(config: any, dependencyName: string) {
+		const dependsOn = config?.depends_on;
+		if (!dependsOn) return;
+
+		if (Array.isArray(dependsOn)) {
+			const idx = dependsOn.indexOf(dependencyName);
+			if (idx > -1) dependsOn.splice(idx, 1);
+			if (dependsOn.length === 0) delete config.depends_on;
+			return;
+		}
+
+		if (typeof dependsOn === 'object') {
+			delete dependsOn[dependencyName];
+			if (Object.keys(dependsOn).length === 0) delete config.depends_on;
+		}
+	}
+
+	function refreshGraphForService(serviceName?: string) {
+		if (!composeData) return;
+		composeData = { ...composeData };
+		emitChange();
+		createGraph(true, true);
+		if (serviceName && cy) {
+			selectedNode = cy.$(`#service-${serviceName}`).data();
+		}
+	}
+
+	function getFirstContainerPort(service: any): string | null {
+		for (const port of service?.ports || []) {
+			if (typeof port === 'string') {
+				const withoutProtocol = port.replace(/\/[a-z]+$/i, '');
+				const parts = withoutProtocol.split(':');
+				const containerPort = parts[parts.length - 1];
+				if (/^\d+$/.test(containerPort)) return containerPort;
+			} else if (port?.target) {
+				return String(port.target);
+			}
+		}
+		return null;
+	}
+
+	function inferHealthcheckCommand(service: any): string {
+		const image = String(service?.image || '').toLowerCase();
+		if (image.includes('postgres')) {
+			return 'pg_isready -U $${POSTGRES_USER:-postgres}';
+		}
+		if (image.includes('mysql') || image.includes('mariadb')) {
+			return 'mysqladmin ping -h 127.0.0.1 --silent';
+		}
+		if (image.includes('redis')) {
+			return 'redis-cli ping';
+		}
+		if (image.includes('mongo')) {
+			return 'mongosh --quiet --eval "db.adminCommand({ ping: 1 }).ok" || mongo --quiet --eval "db.adminCommand({ ping: 1 }).ok"';
+		}
+
+		const port = getFirstContainerPort(service);
+		if (port) {
+			return `wget -q --spider http://localhost:${port} || curl -f http://localhost:${port} || exit 1`;
+		}
+
+		return 'true';
+	}
+
+	function healthcheckTestToString(test: any): string {
+		if (Array.isArray(test)) {
+			if (test[0] === 'CMD-SHELL') return test.slice(1).join(' ');
+			if (test[0] === 'CMD') return test.slice(1).join(' ');
+			return test.join(' ');
+		}
+		return typeof test === 'string' ? test : '';
+	}
+
+	function enableServiceHealthcheck(serviceName: string) {
+		const service = composeData?.services?.[serviceName];
+		if (!service) return;
+
+		service.healthcheck = {
+			test: ['CMD-SHELL', inferHealthcheckCommand(service)],
+			interval: '10s',
+			timeout: '5s',
+			retries: 5,
+			start_period: '30s'
+		};
+	}
+
+	function setDependencyCondition(sourceService: string, targetService: string, condition: DependencyCondition) {
+		if (!composeData?.services?.[targetService]) return;
+
+		const service = composeData.services[targetService];
+		const deps = dependsOnToObject(service.depends_on);
+		const current = deps[sourceService] || {};
+		deps[sourceService] = { ...current, condition };
+		service.depends_on = deps;
+
+		if (condition === 'service_healthy' && !serviceHasHealthcheck(composeData.services[sourceService])) {
+			enableServiceHealthcheck(sourceService);
+		}
+
+		selectedEdge = null;
+		refreshGraphForService(targetService);
+	}
+
+	function getDependencyConditionLabelKey(condition: DependencyCondition) {
+		switch (condition) {
+			case 'service_healthy': return 'stacks.graph.dependencyConditions.serviceHealthy';
+			case 'service_completed_successfully': return 'stacks.graph.dependencyConditions.serviceCompleted';
+			default: return 'stacks.graph.dependencyConditions.serviceStarted';
+		}
+	}
+
 	function buildGraphElements(compose: ComposeFile) {
 		const elements: cytoscape.ElementDefinition[] = [];
 		const services = compose.services || {};
@@ -211,9 +392,8 @@
 			const ports = config.ports || [];
 			const envVars = config.environment || {};
 			const envCount = Array.isArray(envVars) ? envVars.length : Object.keys(envVars).length;
-			const dependsOn = config.depends_on
-				? (Array.isArray(config.depends_on) ? config.depends_on : Object.keys(config.depends_on))
-				: [];
+			const dependencies = getServiceDependencies(config, services);
+			const dependsOn = dependencies.map(dep => dep.name);
 			const imageStr = config.image || (config.build ? translate('stacks.graph.nodeCaptions.build') : translate('stacks.graph.nodeCaptions.custom'));
 			// Truncate long image names
 			const shortImage = imageStr.length > 25 ? imageStr.substring(0, 22) + '...' : imageStr;
@@ -229,24 +409,31 @@
 					envCount,
 					replicas: config.deploy?.replicas || 1,
 					restart: config.restart || 'no',
-					healthcheck: !!config.healthcheck,
+					healthcheck: serviceHasHealthcheck(config),
 					dependsOn,
+					dependencyDetails: dependencies,
 					config: config
 				}
 			});
 
 			// Add depends_on edges (with error detection for missing services)
-			dependsOn.forEach((dep: string) => {
-				const depExists = services[dep] !== undefined;
+			dependencies.forEach((dep) => {
+				const depExists = services[dep.name] !== undefined;
 				elements.push({
 					data: {
-						id: `dep-${name}-${dep}`,
-						source: `service-${dep}`,
+						id: `dep-${name}-${dep.name}`,
+						source: `service-${dep.name}`,
 						target: `service-${name}`,
 						type: 'dependency',
-						label: translate('stacks.graph.edgeLabels.dependsOn'),
+						label: dep.condition === 'service_healthy'
+							? translate('stacks.graph.edgeLabels.waitHealthy')
+							: dep.condition === 'service_completed_successfully'
+								? translate('stacks.graph.edgeLabels.waitCompleted')
+								: translate('stacks.graph.edgeLabels.dependsOn'),
+						condition: dep.condition,
+						hasHealthcheck: dep.hasHealthcheck,
 						isError: !depExists,
-						missingTarget: !depExists ? dep : undefined
+						missingTarget: !depExists ? dep.name : undefined
 					}
 				});
 			});
@@ -271,16 +458,14 @@
 		// Add ghost nodes for missing dependencies
 		const missingServices = new Set<string>();
 		Object.entries(services).forEach(([name, config]) => {
-			const dependsOn = config.depends_on
-				? (Array.isArray(config.depends_on) ? config.depends_on : Object.keys(config.depends_on))
-				: [];
-			dependsOn.forEach((dep: string) => {
-				if (!services[dep] && !missingServices.has(dep)) {
-					missingServices.add(dep);
+			const dependencies = getServiceDependencies(config, services);
+			dependencies.forEach((dep) => {
+				if (!services[dep.name] && !missingServices.has(dep.name)) {
+					missingServices.add(dep.name);
 					elements.push({
 						data: {
-							id: `service-${dep}`,
-							label: dep,
+							id: `service-${dep.name}`,
+							label: dep.name,
 							caption: translate('stacks.graph.nodeCaptions.missing'),
 							type: 'service',
 							isMissing: true,
@@ -291,6 +476,7 @@
 							restart: 'no',
 							healthcheck: false,
 							dependsOn: [],
+							dependencyDetails: [],
 							config: {}
 						}
 					});
@@ -1055,31 +1241,19 @@
 		const deps = composeData.services[targetService].depends_on;
 		if (Array.isArray(deps) && !deps.includes(sourceService)) {
 			deps.push(sourceService);
-			// Force reactivity by reassigning composeData
-			composeData = { ...composeData };
-			emitChange();
-			createGraph(true, true); // Refresh graph using local data
+			refreshGraphForService(targetService);
+		} else if (!Array.isArray(deps) && typeof deps === 'object' && !deps[sourceService]) {
+			deps[sourceService] = { condition: 'service_started' };
+			refreshGraphForService(targetService);
 		}
 	}
 
 	function removeDependency(sourceService: string, targetService: string) {
 		if (!composeData?.services?.[targetService]?.depends_on) return;
 
-		const deps = composeData.services[targetService].depends_on;
-		if (Array.isArray(deps)) {
-			const idx = deps.indexOf(sourceService);
-			if (idx > -1) {
-				deps.splice(idx, 1);
-				if (deps.length === 0) {
-					delete composeData.services[targetService].depends_on;
-				}
-				// Force reactivity by reassigning composeData
-				composeData = { ...composeData };
-				emitChange();
-				createGraph(true, true);
-				selectedEdge = null;
-			}
-		}
+		removeDependencyFromConfig(composeData.services[targetService], sourceService);
+		refreshGraphForService(targetService);
+		selectedEdge = null;
 	}
 
 	function openAddDialog(type: 'service' | 'network' | 'volume' | 'config' | 'secret') {
@@ -1148,11 +1322,7 @@
 					delete composeData.services[label];
 					// Also remove this service from other services' depends_on
 					Object.values(composeData.services).forEach((svc: any) => {
-						if (svc.depends_on && Array.isArray(svc.depends_on)) {
-							const idx = svc.depends_on.indexOf(label);
-							if (idx > -1) svc.depends_on.splice(idx, 1);
-							if (svc.depends_on.length === 0) delete svc.depends_on;
-						}
+						removeDependencyFromConfig(svc, label);
 					});
 				}
 				break;
@@ -1513,6 +1683,14 @@
 			? config.command.join(' ')
 			: (config.command || '');
 		editServiceRestart = config.restart || 'no';
+		editServiceHealthcheckEnabled = serviceHasHealthcheck(config);
+		editServiceHealthcheckTest = editServiceHealthcheckEnabled
+			? healthcheckTestToString(config.healthcheck?.test)
+			: inferHealthcheckCommand(config);
+		editServiceHealthcheckInterval = config.healthcheck?.interval || '10s';
+		editServiceHealthcheckTimeout = config.healthcheck?.timeout || '5s';
+		editServiceHealthcheckRetries = String(config.healthcheck?.retries ?? 5);
+		editServiceHealthcheckStartPeriod = config.healthcheck?.start_period || '30s';
 
 		// Parse ports
 		const ports = config.ports || [];
@@ -1628,6 +1806,19 @@
 
 		// Update restart policy
 		config.restart = editServiceRestart;
+
+		// Update healthcheck
+		if (editServiceHealthcheckEnabled && editServiceHealthcheckTest.trim()) {
+			config.healthcheck = {
+				test: ['CMD-SHELL', editServiceHealthcheckTest.trim()],
+				interval: editServiceHealthcheckInterval.trim() || '10s',
+				timeout: editServiceHealthcheckTimeout.trim() || '5s',
+				retries: Number.parseInt(editServiceHealthcheckRetries, 10) || 5,
+				start_period: editServiceHealthcheckStartPeriod.trim() || '30s'
+			};
+		} else {
+			delete config.healthcheck;
+		}
 
 		// Update ports
 		const validPorts = editServicePorts.filter(p => p.container);
@@ -2501,6 +2692,44 @@
 									</Select.Root>
 								</div>
 
+								<!-- Healthcheck -->
+								<div class="space-y-2 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/30 p-2.5">
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input type="checkbox" bind:checked={editServiceHealthcheckEnabled} onchange={markServiceDirty} class="rounded border-zinc-300" />
+										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.healthcheck')}</span>
+									</label>
+
+									{#if editServiceHealthcheckEnabled}
+										<div class="space-y-1.5">
+											<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.healthcheckCommand')}</span>
+											<Input
+												bind:value={editServiceHealthcheckTest}
+												oninput={markServiceDirty}
+												placeholder="curl -f http://localhost:80 || exit 1"
+												class="h-8 text-xs font-mono"
+											/>
+										</div>
+										<div class="grid grid-cols-2 gap-2">
+											<div class="space-y-1.5">
+												<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.interval')}</span>
+												<Input bind:value={editServiceHealthcheckInterval} oninput={markServiceDirty} class="h-8 text-xs" />
+											</div>
+											<div class="space-y-1.5">
+												<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.timeout')}</span>
+												<Input bind:value={editServiceHealthcheckTimeout} oninput={markServiceDirty} class="h-8 text-xs" />
+											</div>
+											<div class="space-y-1.5">
+												<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.retries')}</span>
+												<Input bind:value={editServiceHealthcheckRetries} oninput={markServiceDirty} class="h-8 text-xs" />
+											</div>
+											<div class="space-y-1.5">
+												<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.startPeriod')}</span>
+												<Input bind:value={editServiceHealthcheckStartPeriod} oninput={markServiceDirty} class="h-8 text-xs" />
+											</div>
+										</div>
+									{/if}
+								</div>
+
 								<!-- Port mappings -->
 								<div class="space-y-1.5">
 									<div class="flex items-center justify-between">
@@ -2626,12 +2855,61 @@
 								</div>
 
 								<!-- Dependencies -->
-								{#if selectedNode.dependsOn?.length > 0}
+								{#if selectedNode.dependencyDetails?.length > 0}
+									<div class="space-y-1.5">
+										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.dependsOn')}</span>
+										<div class="space-y-1">
+											{#each selectedNode.dependencyDetails as dep}
+												<div class="space-y-1.5 text-zinc-700 text-xs bg-zinc-100 dark:bg-zinc-900/40 px-2 py-1.5 rounded">
+													<div class="flex items-center justify-between gap-2">
+														<span class="font-mono truncate">{dep.name}</span>
+														<button
+															class="text-zinc-400 hover:text-red-500"
+															onclick={() => removeDependency(dep.name, selectedNode.label)}
+															title={$t('stacks.graph.panel.removeDependency')}
+														>
+															<X class="w-3 h-3" />
+														</button>
+													</div>
+													<div class="flex items-center gap-1.5">
+														<Select.Root
+															type="single"
+															value={dep.condition}
+															onValueChange={(value) => setDependencyCondition(dep.name, selectedNode.label, value as DependencyCondition)}
+														>
+															<Select.Trigger class="h-7 flex-1 text-xs bg-white dark:bg-zinc-800">
+																<span>{$t(getDependencyConditionLabelKey(dep.condition))}</span>
+															</Select.Trigger>
+															<Select.Content>
+																<Select.Item value="service_started" label={$t('stacks.graph.dependencyConditions.serviceStarted')} />
+																<Select.Item value="service_healthy" label={$t('stacks.graph.dependencyConditions.serviceHealthy')} />
+																<Select.Item value="service_completed_successfully" label={$t('stacks.graph.dependencyConditions.serviceCompleted')} />
+															</Select.Content>
+														</Select.Root>
+														{#if dep.condition === 'service_healthy' && !dep.hasHealthcheck}
+															<button
+																class="px-2 h-7 rounded border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+																onclick={() => {
+																	enableServiceHealthcheck(dep.name);
+																	refreshGraphForService(selectedNode.label);
+																}}
+															>
+																{$t('stacks.graph.panel.addHealthcheck')}
+															</button>
+														{/if}
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/if}
+
+								{#if selectedNode.dependsOn?.length > 0 && !selectedNode.dependencyDetails?.length}
 									<div class="space-y-1.5">
 										<span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">{$t('stacks.graph.fields.dependsOn')}</span>
 										<div class="space-y-1">
 											{#each selectedNode.dependsOn as dep}
-												<div class="flex items-center justify-between text-zinc-700 text-xs bg-zinc-100 px-2 py-1.5 rounded">
+												<div class="flex items-center justify-between text-zinc-700 text-xs bg-zinc-100 dark:bg-zinc-900/40 px-2 py-1.5 rounded">
 													<span class="font-mono">{dep}</span>
 													<button
 														class="text-zinc-400 hover:text-red-500"
@@ -2955,9 +3233,15 @@
 						{/if}
 					{:else if selectedEdge}
 						{#if selectedEdge.type === 'dependency'}
-							<p class="text-xs text-zinc-500 dark:text-zinc-400">
-								{$t('stacks.graph.edges.dependencyDescription', { source: selectedEdge.source.replace('service-', '') })}
-							</p>
+							<div class="space-y-2">
+								<p class="text-xs text-zinc-500 dark:text-zinc-400">
+									{$t('stacks.graph.edges.dependencyDescription', { source: selectedEdge.source.replace('service-', '') })}
+								</p>
+								<p class="text-xs text-zinc-500 dark:text-zinc-400">
+									<span class="font-medium text-zinc-700 dark:text-zinc-200">{$t('stacks.graph.fields.startupCondition')}</span>
+									{$t(getDependencyConditionLabelKey(selectedEdge.condition || 'service_started'))}
+								</p>
+							</div>
 						{:else if selectedEdge.type === 'volume-mount'}
 							<p class="text-xs text-zinc-500 dark:text-zinc-400">
 								{$t('stacks.graph.edges.volumeMountDescription')}

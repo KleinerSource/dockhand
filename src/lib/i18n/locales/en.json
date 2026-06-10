@@ -4183,6 +4183,8 @@
 			},
 			"edgeLabels": {
 				"dependsOn": "depends on",
+				"waitHealthy": "waits for healthy",
+				"waitCompleted": "waits for completion",
 				"links": "links"
 			},
 			"panel": {
@@ -4190,12 +4192,19 @@
 				"deleteNode": "Delete node",
 				"closePanel": "Close panel",
 				"removeConnection": "Remove connection",
-				"removeDependency": "Remove dependency"
+				"removeDependency": "Remove dependency",
+				"addHealthcheck": "Add check"
 			},
 			"fields": {
 				"serviceImage": "Service image",
 				"serviceCommand": "Service command",
 				"restartPolicy": "Restart policy",
+				"healthcheck": "Healthcheck",
+				"healthcheckCommand": "Healthcheck command",
+				"interval": "Interval",
+				"timeout": "Timeout",
+				"retries": "Retries",
+				"startPeriod": "Start period",
 				"portMappings": "Port mappings",
 				"hostPort": "Host",
 				"containerPort": "Container",
@@ -4207,6 +4216,7 @@
 				"key": "Key",
 				"value": "Value",
 				"dependsOn": "Dependencies",
+				"startupCondition": "Startup condition",
 				"networkDriver": "Network driver",
 				"ipamConfiguration": "IPAM configuration",
 				"subnet": "Subnet",
@@ -4226,6 +4236,11 @@
 				"always": "Always",
 				"onFailure": "On failure",
 				"unlessStopped": "Unless stopped"
+			},
+			"dependencyConditions": {
+				"serviceStarted": "Started",
+				"serviceHealthy": "Healthy",
+				"serviceCompleted": "Completed successfully"
 			},
 			"networkDrivers": {
 				"bridge": "Bridge",
