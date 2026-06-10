@@ -13,6 +13,7 @@
 	import PathBarItem from './PathBarItem.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Select from '$lib/components/ui/select';
+	import * as Tabs from '$lib/components/ui/tabs';
 	import { Badge } from '$lib/components/ui/badge';
 	import { currentEnvironment, environments, appendEnvParam } from '$lib/stores/environment';
 	import { appSettings } from '$lib/stores/settings';
@@ -727,6 +728,9 @@
 			const rect = containerRef.getBoundingClientRect();
 			const newRatio = ((e.clientX - rect.left) / rect.width) * 100;
 			splitRatio = Math.max(30, Math.min(80, newRatio));
+			if (activeTab === 'graph') {
+				requestAnimationFrame(() => graphViewerRef?.resize());
+			}
 		}
 	}
 
@@ -872,8 +876,18 @@
 		localStorage.setItem('dockhand-editor-theme', editorTheme);
 	}
 
+	function handleComposeTabChange(value: string) {
+		activeTab = value === 'graph' ? 'graph' : 'editor';
+		if (value === 'graph') {
+			tick().then(() => graphViewerRef?.resize());
+		}
+	}
+
 	function handleGraphContentChange(newContent: string) {
+		if (newContent === composeContent) return;
 		composeContent = newContent;
+		isDirty = true;
+		debouncedValidate();
 	}
 
 	async function handleCreate(start: boolean = false) {
@@ -1409,24 +1423,6 @@
 				</div>
 
 				<div class="flex items-center gap-2">
-					<!-- View toggle -->
-					<div class="flex items-center gap-0.5 bg-zinc-200 dark:bg-zinc-700 rounded-md p-0.5">
-						<button
-							class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors {activeTab === 'editor' ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
-							onclick={() => activeTab = 'editor'}
-						>
-							<Code class="w-3.5 h-3.5" />
-							{$t('stacks.modal.editorTab')}
-						</button>
-						<button
-							class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors {activeTab === 'graph' ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}"
-							onclick={() => activeTab = 'graph'}
-						>
-							<GitGraph class="w-3.5 h-3.5" />
-							{$t('stacks.modal.graphTab')}
-						</button>
-					</div>
-
 					<!-- Theme toggle (only in editor mode) -->
 					{#if activeTab === 'editor'}
 						<button
@@ -1519,8 +1515,7 @@
 
 				<!-- Content area -->
 				<div bind:this={containerRef} class="flex-1 min-h-0 flex flex-col {isDraggingSplit ? 'select-none' : ''}">
-					{#if activeTab === 'editor'}
-						<!-- Path bars row -->
+					<!-- Path bars row -->
 						<div class="flex border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/30">
 							<!-- Compose path -->
 							<div class="flex-shrink-0 px-4 py-2" style="width: {splitRatio}%">
@@ -1584,43 +1579,65 @@
 												</div>
 											</div>
 										{:else}
-											<div class="h-full flex flex-col">
-												<!-- Copy button row -->
-												<div class="flex justify-end mb-1">
-													<Button
-														variant="ghost"
-														size="sm"
-														class="h-6 px-2 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-														onclick={() => copyText(composeContent, (v) => composeContentCopied = v)}
-														disabled={!composeContent}
-													>
-														{#if composeContentCopied === 'error'}
-															<Tooltip.Root open>
-																<Tooltip.Trigger>
-																	<XCircle class="w-3 h-3 text-red-500" />
-																</Tooltip.Trigger>
-																<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
-															</Tooltip.Root>
-															{$t('common.states.failed')}
-														{:else if composeContentCopied === 'ok'}
-															<Check class="w-3 h-3 text-green-500" />
-															{$t('stacks.modal.copied')}
-														{:else}
-															<Copy class="w-3 h-3" />
-															{$t('common.actions.copy')}
-														{/if}
-													</Button>
+											<Tabs.Root value={activeTab} onValueChange={handleComposeTabChange} class="h-full min-h-0 gap-2">
+												<div class="flex items-center justify-between gap-2">
+													<Tabs.List class="h-8 rounded-md bg-zinc-200 p-0.5 dark:bg-zinc-700">
+														<Tabs.Trigger value="editor" class="h-7 px-2.5 py-1 text-xs">
+															<Code class="w-3.5 h-3.5" />
+															{$t('stacks.modal.editorTab')}
+														</Tabs.Trigger>
+														<Tabs.Trigger value="graph" class="h-7 px-2.5 py-1 text-xs">
+															<GitGraph class="w-3.5 h-3.5" />
+															{$t('stacks.modal.graphTab')}
+														</Tabs.Trigger>
+													</Tabs.List>
+
+													{#if activeTab === 'editor'}
+														<Button
+															variant="ghost"
+															size="sm"
+															class="h-6 px-2 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+															onclick={() => copyText(composeContent, (v) => composeContentCopied = v)}
+															disabled={!composeContent}
+														>
+															{#if composeContentCopied === 'error'}
+																<Tooltip.Root open>
+																	<Tooltip.Trigger>
+																		<XCircle class="w-3 h-3 text-red-500" />
+																	</Tooltip.Trigger>
+																	<Tooltip.Content>{$t('stacks.pathBar.copyRequiresHttps')}</Tooltip.Content>
+																</Tooltip.Root>
+																{$t('common.states.failed')}
+															{:else if composeContentCopied === 'ok'}
+																<Check class="w-3 h-3 text-green-500" />
+																{$t('stacks.modal.copied')}
+															{:else}
+																<Copy class="w-3 h-3" />
+																{$t('common.actions.copy')}
+															{/if}
+														</Button>
+													{/if}
 												</div>
-												<CodeEditor
-													bind:this={codeEditorRef}
-													value={composeContent}
-													language="yaml"
-													theme={editorTheme}
-													onchange={handleComposeChange}
-													variableMarkers={variableMarkers}
-													class="flex-1 rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-700"
-												/>
-											</div>
+
+												{#if activeTab === 'editor'}
+													<CodeEditor
+														bind:this={codeEditorRef}
+														value={composeContent}
+														language="yaml"
+														theme={editorTheme}
+														onchange={handleComposeChange}
+														variableMarkers={variableMarkers}
+														class="flex-1 rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-700"
+													/>
+												{:else}
+													<ComposeGraphViewer
+														bind:this={graphViewerRef}
+														composeContent={composeContent || defaultCompose}
+														class="flex-1 min-h-0 rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-700"
+														onContentChange={handleGraphContentChange}
+													/>
+												{/if}
+											</Tabs.Root>
 										{/if}
 									</div>
 								{/if}
@@ -1651,15 +1668,6 @@
 								/>
 							</div>
 						</div>
-					{:else if activeTab === 'graph'}
-						<!-- Graph tab: Full width -->
-						<ComposeGraphViewer
-							bind:this={graphViewerRef}
-							composeContent={composeContent || defaultCompose}
-							class="h-full flex-1"
-							onContentChange={handleGraphContentChange}
-						/>
-					{/if}
 				</div>
 			{/if}
 		</div>
